@@ -8,7 +8,7 @@ class GuiDefaults:
         "ROI_OPACITY": 50,
         "SELECTED_ROI_OPACITY": 255,
         "MIN_PLOT_RANGE": 30,
-        "MIN_WINDOW_WIDTH": 600,
+        "MIN_WINDOW_WIDTH": 200,
         "MIN_WINDOW_HEIGHT": 400,
         "MIN_CANVAS_WIDTH": 400,
         "MIN_CANVAS_HEIGHT": 300
@@ -57,6 +57,10 @@ class AppSettings:
     @classmethod
     def getKeyFunctionMap(cls) -> Dict[int, Tuple[str, Any]]:
         return getattr(KeyFunctionMap, cls.current_app, {})
+
+    @classmethod
+    def getGuiDefaults(cls) -> Dict[str, int]:
+        return getattr(GuiDefaults, cls.current_app)
 
     @classmethod
     def setCurrentApp(cls, app_name: str):

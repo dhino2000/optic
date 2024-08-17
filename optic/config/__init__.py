@@ -1,2 +1,2 @@
-from .constants import FileFilters, GUIDefaults, ProcessingDefaults, Colors
+from .constants import FileFilters, ProcessingDefaults, Colors
 from .app_config import AppSettings
