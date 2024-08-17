@@ -1,4 +1,6 @@
 # アプリ間で共有する定数
+
+# ファイル選択時の拡張子
 class FileFilters:
     MAT = "mat Files (*.mat);;All Files (*)"
     TIFF = "tiff Files (*.tif *.tiff);;All Files (*)"
@@ -7,8 +9,31 @@ class FileFilters:
 class ProcessingDefaults:
     RESPONSE_THRESHOLD = 30
 
-class Colors:
+# プロットの色
+class PlotColors:
     F = 'cyan'
     FNEU = 'red'
     SPKS = 'gray'
     EVENT = 'green'
+
+# widget管理の総合key
+class AppKeys:
+    PRI = "pri"
+    SEC = "sec"
+    TER = "ter"
+    QUA = "qua"
+    QUI = "qui"
+    SEN = "sen"
+    SEP = "sep"
+
+# canvasのchannel key
+class ChannelKeys:
+    RED = "R"
+    GREEN = "G"
+    BLUE = "B"
+
+# canvasのplot位置のkey
+class AxisKeys:
+    TOP = "top"
+    MID = "mid"
+    BOT = "bot"
