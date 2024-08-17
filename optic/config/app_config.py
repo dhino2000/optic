@@ -8,10 +8,11 @@ class GuiDefaults:
         "ROI_OPACITY": 50,
         "SELECTED_ROI_OPACITY": 255,
         "MIN_PLOT_RANGE": 30,
-        "MIN_WINDOW_WIDTH": 200,
-        "MIN_WINDOW_HEIGHT": 400,
-        "MIN_CANVAS_WIDTH": 400,
-        "MIN_CANVAS_HEIGHT": 300
+        "INIT_POSITION_X": 100, 
+        "INIT_POSITION_Y": 100,
+        "WIDTH": 1200,
+        "HEIGHT": 200,
+        "TITLE": "Suite2pROICheckGUI",
     }
 
 # Tableに設定する列名とそのプロパティ
