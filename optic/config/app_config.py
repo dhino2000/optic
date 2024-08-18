@@ -1,6 +1,7 @@
 # アプリごとに変わるconfig
 from typing import Dict, Any, Tuple
 from PyQt5.QtCore import Qt
+from .constants import FileFilters, ProcessingDefaults, PlotColors, AppKeys, ChannelKeys, AxisKeys
 
 # GUIに関する定数
 class GuiDefaults:
@@ -13,6 +14,7 @@ class GuiDefaults:
         "WIDTH": 1200,
         "HEIGHT": 200,
         "TITLE": "Suite2pROICheckGUI",
+        "APP_KEYS": AppKeys.PRI
     }
 
 # Tableに設定する列名とそのプロパティ

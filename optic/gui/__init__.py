@@ -1,2 +1,3 @@
 from .widget_manager import WidgetManager
 from .base_layouts import makeLayoutLineEditLabel, makeLayoutButtonGroup, makeLayoutSliderLabel
+from .io_layouts import makeLayoutLoadFileWidget
