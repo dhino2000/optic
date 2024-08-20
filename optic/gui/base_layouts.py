@@ -13,7 +13,7 @@ def makeLayoutLineEditLabel(widget_manager, key_label, key_lineedit, label, text
     return layout
 
 # QButtonGroup Layout
-def makeLayoutButtonGroup(widget_manager, key, list_label, set_exclusive=True):
+def makeLayoutButtonGroup(widget_manager, key_buttongroup, list_label, set_exclusive=True):
     layout = QHBoxLayout()
     button_group = QButtonGroup(widget_manager)
     button_group.setExclusive(set_exclusive)
@@ -25,7 +25,7 @@ def makeLayoutButtonGroup(widget_manager, key, list_label, set_exclusive=True):
         layout.addWidget(radio_button)
         button_group.addButton(radio_button, i)
 
-    widget_manager.dict_buttongroup[key] = button_group
+    widget_manager.dict_buttongroup[key_buttongroup] = button_group
     return layout
 
 # QSlider Layout label付き
