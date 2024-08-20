@@ -1,6 +1,8 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 
 # Widget作成関数
 """
@@ -46,7 +48,20 @@ def makeWidgetButton(label, func_=None):
         widget.clicked.connect(func_)
     return widget
 
+# Figure Widget
+def makeWidgetFigure():
+    widget = Figure()
+    return widget
 
+# FiugreCanvasQTAgg Widget
+def makeWidgetFigureCanvas(figure):
+    widget = FigureCanvasQTAgg(figure)
+    return widget
+
+# figureのaxisに追加, 位置を指定
+def addWidgetAxisOnFigure(figure, num_row, num_col, position):
+    figure = figure.add_subplot(num_row, num_col, position)
+    return figure
 
 """
 GUI Widget管理用クラス
@@ -87,3 +102,15 @@ class WidgetManager:
     def makeWidgetButton(self, key, label, func_=None):
         self.dict_button[key] = makeWidgetButton(label, func_)
         return self.dict_button[key]
+
+    def makeWidgetFigure(self, key):
+        self.dict_figure[key] = Figure()
+        return self.dict_figure[key]
+
+    def makeWidgetFigureCanvas(self, key, figure):
+        self.dict_canvas[key] = FigureCanvasQTAgg(figure)
+        return self.dict_canvas[key]
+
+    def addWidgetAxisOnFigure(self, key, figure, num_row, num_col, position):
+        self.dict_ax[key] = figure.add_subplot(num_row, num_col, position)
+        return self.dict_ax[key]
