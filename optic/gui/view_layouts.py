@@ -14,27 +14,26 @@ def makeLayoutROIThresholds(widget_manager, key_label, key_lineedit, key_checkbo
     return layout
 
 # 表示するROIの種類を選択するbuttongroup
-def makeLayoutROITypeDisplay(widget_manager, key_buttongroup, func_buttongroup=None):
+def makeLayoutROITypeDisplay(widget_manager, key_buttongroup):
     # ROIの表示切り替え All, Cell, Not Cell
     roidisp_options = ["All ROI"]
     # Table colをもとに作成
     roidisp_options.extend([key for key, value in widget_manager.dict_tablecol.items() if value['type'] == 'radio'])
     roidisp_options.append("None")
     layout = makeLayoutButtonGroup(widget_manager, key_buttongroup=key_buttongroup, list_label_buttongroup=roidisp_options)
-    widget_manager.dict_buttongroup[key_buttongroup].buttonClicked.connect(func_buttongroup) # 関数紐づけ
     return layout
 
 # 表示するbackgroundを選択するbuttongroup
-def makeLayoutBGImageTypeDisplay(widget_manager, key_buttongroup, func_buttongroup=None):
+def makeLayoutBGImageTypeDisplay(widget_manager, key_buttongroup):
     # 背景画像の切り替え meanImg, meanImgE, max_proj, Vcorr, RefImg
-    layout = widget_manager.makeLayoutButtonGroup(widget_manager, key_buttongroup=key_buttongroup, ["meanImg", "meanImgE", "max_proj", "Vcorr"])
-    widget_manager.dict_buttongroup[key_buttongroup].buttonClicked.connect(func_buttongroup) # 関数紐づけ
+    bg_types = ["meanImg", "meanImgE", "max_proj", "Vcorr"]
+    layout = widget_manager.makeLayoutButtonGroup(widget_manager, key_buttongroup=key_buttongroup, list_label_buttongroup=bg_types)
     return layout
 
 # 画面クリック時 Astrocyte, Neuron, Not Cell, Check, TrackingのROIをスキップするか
 def makeLayoutROIChooseSkip(widget_manager, key_checkbox):
     layout = QHBoxLayout()
-    skip_items = [key for key, value in swidget_managerelf.dict_tablecol.items() if value['type'] in ['radio', 'checkbox']]
+    skip_items = [key for key, value in widget_manager.dict_tablecol.items() if value['type'] in ['radio', 'checkbox']]
     for item in skip_items:
         key_checkbox_item = f"skip_{item}"
         label_checkbox_item = f"Skip {item} ROI"
