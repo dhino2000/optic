@@ -1,3 +1,4 @@
+# canvasのplot用
 from PyQt5.QtWidgets import QVBoxLayout
 
 # F, Fneu, spks, eventのプロットプロット用のcanvas Layout
