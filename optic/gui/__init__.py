@@ -4,4 +4,4 @@ from .io_layouts import makeLayoutLoadFileWidget
 from .plot_layouts import makeLayoutCanvasTracePlot
 from .slider_layouts import makeLayoutContrastSlider, makeLayoutOpacitySlider
 from .info_layouts import makeLayoutROIProperty
-from .view_layouts import makeLayoutROIThresholds
+from .view_layouts import makeLayoutROIThresholds, makeLayoutROITypeDisplay, makeLayoutBGImageTypeDisplay, makeLayoutROIChooseSkip

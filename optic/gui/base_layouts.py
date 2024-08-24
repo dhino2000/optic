@@ -18,14 +18,14 @@ def makeLayoutLineEditLabel(widget_manager, key_label, key_lineedit, label, axis
     return layout
 
 # QButtonGroup Layout
-def makeLayoutButtonGroup(widget_manager, key_buttongroup, list_label, set_exclusive=True):
+def makeLayoutButtonGroup(widget_manager, key_buttongroup, list_label_buttongroup, set_exclusive=True, idx_check=0):
     layout = QHBoxLayout()
     button_group = QButtonGroup(widget_manager)
     button_group.setExclusive(set_exclusive)
 
-    for i, label in enumerate(list_label):
-        radio_button = QRadioButton(label)
-        if i == 0:  # 1番目にチェック
+    for i, label_buttongroup in enumerate(list_label_buttongroup):
+        radio_button = QRadioButton(label_buttongroup)
+        if i == idx_check:  # idx_check番目にチェック
             radio_button.setChecked(True)
         layout.addWidget(radio_button)
         button_group.addButton(radio_button, i)
