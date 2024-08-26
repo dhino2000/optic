@@ -1,6 +1,7 @@
 # viewに関係するlayout
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout
 from .base_layouts import makeLayoutLineEditLabel, makeLayoutButtonGroup
+from ..config.constants import BGImageTypeList
 
 # 表示するROIのThreshold checkbox, lineedit
 def makeLayoutROIThresholds(widget_manager, key_label, key_lineedit, key_checkbox, label_checkbox, list_threshold_param=["npix", "compact"]):
@@ -26,8 +27,8 @@ def makeLayoutROITypeDisplay(widget_manager, key_buttongroup):
 # 表示するbackgroundを選択するbuttongroup
 def makeLayoutBGImageTypeDisplay(widget_manager, key_buttongroup):
     # 背景画像の切り替え meanImg, meanImgE, max_proj, Vcorr, RefImg
-    bg_types = ["meanImg", "meanImgE", "max_proj", "Vcorr"]
-    layout = widget_manager.makeLayoutButtonGroup(widget_manager, key_buttongroup=key_buttongroup, list_label_buttongroup=bg_types)
+    bg_types = BGImageTypeList.FALL
+    layout = makeLayoutButtonGroup(widget_manager, key_buttongroup=key_buttongroup, list_label_buttongroup=bg_types)
     return layout
 
 # 画面クリック時 Astrocyte, Neuron, Not Cell, Check, TrackingのROIをスキップするか

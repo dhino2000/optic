@@ -6,6 +6,11 @@ class FileFilters:
     TIFF = "tiff Files (*.tif *.tiff);;All Files (*)"
     NPY = "npy Files (*.npy);;All Files (*)"
 
+# BackGroungImage Type
+# FALL: Suite2p
+class BGImageTypeList:
+    FALL = ["meanImg", "meanImgE", "max_proj", "Vcorr"]
+
 class ProcessingDefaults:
     RESPONSE_THRESHOLD = 30
 
