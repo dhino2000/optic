@@ -48,6 +48,11 @@ def makeWidgetButton(label, func_=None):
         widget.clicked.connect(func_)
     return widget
 
+# QTable Widget
+def makeWidgetTable():
+    widget = QTableWidget()
+    return widget
+
 # Figure Widget
 def makeWidgetFigure():
     widget = Figure()
@@ -124,6 +129,9 @@ class WidgetManager:
     def makeWidgetButton(self, key, label, func_=None):
         self.dict_button[key] = makeWidgetButton(label, func_)
         return self.dict_button[key]
+
+    def makeWidgetTable(self, key):
+        self.dict_table[key] = makeWidgetTable()
 
     def makeWidgetFigure(self, key):
         self.dict_figure[key] = Figure()
