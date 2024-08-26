@@ -14,7 +14,8 @@ class GuiDefaults:
         "WIDTH": 1200,
         "HEIGHT": 200,
         "TITLE": "Suite2pROICheckGUI",
-        "APP_KEYS": AppKeys.PRI
+        "APP_KEYS": AppKeys.PRI,
+        "CHANNELS": [ChannelKeys.CHAN1, ChannelKeys.CHAN2]
     }
 
 # Tableに設定する列名とそのプロパティ
