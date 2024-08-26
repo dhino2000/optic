@@ -15,7 +15,15 @@ class GuiDefaults:
         "HEIGHT": 200,
         "TITLE": "Suite2pROICheckGUI",
         "APP_KEYS": AppKeys.PRI,
-        "CHANNELS": [ChannelKeys.CHAN1, ChannelKeys.CHAN2]
+        "CHANNELS": [ChannelKeys.CHAN1, ChannelKeys.CHAN2],
+        "ROI_THRESHOLDS": {
+            "npix": "(50, 200)",
+            "radius": "(3, 12)",
+            "aspect_ratio": "(0, 1.5)",
+            "compact": "(0, 1.5)",
+            "skew": "(1, 100)",
+            "std": "(0, 100)",
+        }
     }
 
 # Tableに設定する列名とそのプロパティ
