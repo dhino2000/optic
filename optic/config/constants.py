@@ -33,8 +33,8 @@ class AppKeys:
 
 # canvasのchannel key
 class ChannelKeys:
-    CHAN1 = "Red"
-    CHAN2 = "Green"
+    CHAN1 = "Green"
+    CHAN2 = "Red"
     CHAN3 = "Blue"
 
 # canvasのplot位置のkey

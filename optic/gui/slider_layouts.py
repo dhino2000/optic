@@ -13,8 +13,8 @@ def makeLayoutContrastSlider(widget_manager, key_label, key_checkbox, key_slider
         layout.addLayout(makeLayoutSliderLabel
                             (
                             widget_manager,
-                            key_label=f"{key_label}_{m}", 
-                            key_slider=key_slider, 
+                            key_label=f"{key_label}_contrast_{m}", 
+                            key_slider=f"{key_slider}_contrast_{m}", 
                             label=f"{m} {label_label}", 
                             value_set=value_set, 
                             )
