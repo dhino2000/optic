@@ -9,7 +9,7 @@ def makeLayoutTableROICountLabel(widget_manager, key_label, key_table, dict_tabl
     layout = QVBoxLayout()
     # table
     q_table = widget_manager.makeWidgetTable(key=key_table)
-
+    
     # label
     layout_label = makeLayoutROICount(widget_manager, key_label, dict_tablecol)
 

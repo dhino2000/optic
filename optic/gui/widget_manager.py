@@ -132,6 +132,7 @@ class WidgetManager:
 
     def makeWidgetTable(self, key):
         self.dict_table[key] = makeWidgetTable()
+        return self.dict_table[key]
 
     def makeWidgetFigure(self, key):
         self.dict_figure[key] = Figure()
