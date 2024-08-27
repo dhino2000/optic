@@ -6,7 +6,7 @@ from .base_layouts import makeLayoutSliderLabel
 def makeLayoutContrastSlider(widget_manager, key_label, key_checkbox, key_slider, label_checkbox, label_label, checked=True):
     layout = QVBoxLayout()
     # チェックボックスの設定
-    layout.addWidget(widget_manager.makeWidgetCheckBox(key=key_checkbox, label=label_checkbox, checked=checked))
+    layout.addWidget(widget_manager.makeWidgetCheckBox(key=f"{key_checkbox}_show", label=label_checkbox, checked=checked))
 
     # Min, Max Valueスライダーの設定
     for m, value_set in zip(["min", "max"], [0, 255]):
