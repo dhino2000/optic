@@ -1,3 +1,3 @@
 # QMainWindowを終了
-def exitApp(window):
-    window.close() 
+def exitApp(q_window):
+    q_window.close() 
