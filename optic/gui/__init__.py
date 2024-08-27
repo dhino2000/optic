@@ -1,6 +1,6 @@
 from .widget_manager import WidgetManager
 from .base_layouts import makeLayoutLineEditLabel, makeLayoutButtonGroup, makeLayoutSliderLabel
-from .io_layouts import makeLayoutLoadFileWidget, makeLayoutROICheckIO
+from .io_layouts import makeLayoutLoadFileWidget, makeLayoutROICheckIO, makeLayoutLoadFileExitHelp
 from .plot_layouts import makeLayoutCanvasTracePlot
 from .slider_layouts import makeLayoutContrastSlider, makeLayoutOpacitySlider
 from .info_layouts import makeLayoutROIProperty
