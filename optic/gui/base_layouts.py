@@ -18,9 +18,9 @@ def makeLayoutLineEditLabel(widget_manager, key_label, key_lineedit, label, axis
     return layout
 
 # QButtonGroup Layout
-def makeLayoutButtonGroup(widget_manager, key_buttongroup, list_label_buttongroup, set_exclusive=True, idx_check=0):
+def makeLayoutButtonGroup(q_widget, widget_manager, key_buttongroup, list_label_buttongroup, set_exclusive=True, idx_check=0):
     layout = QHBoxLayout()
-    button_group = QButtonGroup(widget_manager)
+    button_group = QButtonGroup(q_widget)
     button_group.setExclusive(set_exclusive)
 
     for i, label_buttongroup in enumerate(list_label_buttongroup):

@@ -13,10 +13,10 @@ def makeLayoutROIProperty(widget_manager, key_label):
     return layout
 
 # Cell ROI, Not Cell ROI, All ROIの数を表示するlabel用Layout
-def makeLayoutROICount(widget_manager, key_label):
+def makeLayoutROICount(widget_manager, key_label, dict_tablecol):
     layout = QHBoxLayout()
     # ROI number label
-    list_celltype = [key for key in widget_manager.dict_tablecol.keys() if widget_manager.dict_tablecol[key].get("group") == "celltype"]
+    list_celltype = [key for key in dict_tablecol.keys() if dict_tablecol[key].get("group") == "celltype"]
     list_celltype += ["All"]
     for celltype in list_celltype:
         text = f"{celltype}: 0"

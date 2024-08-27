@@ -15,26 +15,26 @@ def makeLayoutROIThresholds(widget_manager, key_label, key_lineedit, key_checkbo
     return layout
 
 # 表示するROIの種類を選択するbuttongroup
-def makeLayoutROITypeDisplay(widget_manager, key_buttongroup):
+def makeLayoutROITypeDisplay(q_widget, widget_manager, key_buttongroup, dict_tablecol):
     # ROIの表示切り替え All, Cell, Not Cell
     roidisp_options = ["All ROI"]
     # Table colをもとに作成
-    roidisp_options.extend([key for key, value in widget_manager.dict_tablecol.items() if value['type'] == 'radio'])
+    roidisp_options.extend([key for key, value in dict_tablecol.items() if value['type'] == 'radio'])
     roidisp_options.append("None")
-    layout = makeLayoutButtonGroup(widget_manager, key_buttongroup=key_buttongroup, list_label_buttongroup=roidisp_options)
+    layout = makeLayoutButtonGroup(q_widget, widget_manager, key_buttongroup=key_buttongroup, list_label_buttongroup=roidisp_options)
     return layout
 
 # 表示するbackgroundを選択するbuttongroup
-def makeLayoutBGImageTypeDisplay(widget_manager, key_buttongroup):
+def makeLayoutBGImageTypeDisplay(q_widget, widget_manager, key_buttongroup):
     # 背景画像の切り替え meanImg, meanImgE, max_proj, Vcorr, RefImg
     bg_types = BGImageTypeList.FALL
-    layout = makeLayoutButtonGroup(widget_manager, key_buttongroup=key_buttongroup, list_label_buttongroup=bg_types)
+    layout = makeLayoutButtonGroup(q_widget, widget_manager, key_buttongroup=key_buttongroup, list_label_buttongroup=bg_types)
     return layout
 
 # 画面クリック時 Astrocyte, Neuron, Not Cell, Check, TrackingのROIをスキップするか
-def makeLayoutROIChooseSkip(widget_manager, key_checkbox):
+def makeLayoutROIChooseSkip(widget_manager, key_checkbox, dict_tablecol):
     layout = QHBoxLayout()
-    skip_items = [key for key, value in widget_manager.dict_tablecol.items() if value['type'] in ['radio', 'checkbox']]
+    skip_items = [key for key, value in dict_tablecol.items() if value['type'] in ['radio', 'checkbox']]
     for item in skip_items:
         key_checkbox_item = f"skip_{item}"
         label_checkbox_item = f"Skip {item} ROI"
