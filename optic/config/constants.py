@@ -6,6 +6,12 @@ class FileFilters:
     TIFF = "tiff Files (*.tif *.tiff);;All Files (*)"
     NPY = "npy Files (*.npy);;All Files (*)"
 
+FILE_FILTERS = {
+    "mat": "mat Files (*.mat);;All Files (*)",
+    "tiff": "tiff Files (*.tif *.tiff);;All Files (*)",
+    "npy": "npy Files (*.npy);;All Files (*)"
+}
+
 # BackGroungImage Type
 # FALL: Suite2p
 class BGImageTypeList:

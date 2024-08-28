@@ -1,11 +1,6 @@
 # データの読み込み、書き込み用関数
 from PyQt5.QtWidgets import QFileDialog, QLineEdit
-
-FILE_FILTERS = {
-    "mat": "mat Files (*.mat);;All Files (*)",
-    "tiff": "tiff Files (*.tif *.tiff);;All Files (*)",
-    "npy": "npy Files (*.npy);;All Files (*)"
-}
+from ..config.constants import FILE_FILTERS
 
 # 開くファイルのファイルパスを返す
 def openFileDialog(q_widget, file_type, title="Open File", initial_dir="", multiple=False):

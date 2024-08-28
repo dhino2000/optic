@@ -71,23 +71,17 @@ def generateSavePath(path_src, prefix="", suffix="", new_extension=None, remove_
     return path_dst
 
 # Tableの内容をROICheckとして保存
-def saveROICheck(q_window, q_table, data_manager, dict_tablecol, path_roicheck, local_var=True):
-
-
-    options = QFileDialog.Options()
-    path_Fall = self.dict_lineedit[f"path_fall_{key}"].text()
-    dir_project = os.path.dirname(path_Fall)
-    name_Fall = os.path.basename(path_Fall).replace('Fall_', '')
-    path_roicheck_init = os.path.join(dir_project, f"ROIcheck_{name_Fall}")
-    path_roicheck, _ = QFileDialog.getSaveFileName(self, "Save ROI Check", path_roicheck_init, "mat Files (*.mat);;All Files (*)", options=options)
-    if path_roicheck:
-        try:
-            dict_roicheck = convertTableDataToDictROICheck(q_table, dict_tablecol, local_var)
-            mat_roicheck = convertDictROICheckToMatROICheck(dict_roicheck)
-            savemat(path_roicheck, mat_roicheck)
-            QMessageBox.information(q_window, "File save", "ROICheck file saved!")
-        except Exception as e:
-            QMessageBox.warning(q_window, "File save failed", f"Error saving ROICheck file: {e}")
+def saveROICheck(q_window, q_lineedit, q_table, data_manager, dict_tablecol, path_roicheck, local_var=True):
+    path_src = q_lineedit.text()
+    path_dst = generateSavePath(path_src, prefix="ROIcheck_", remove_strings="Fall")
+    path_dst = saveFileDialog(q_widget, file_type, title="Save ROIcheck mat File", initial_dir=os.path.dirname(path_dst))
+    try:
+        dict_roicheck = convertTableDataToDictROICheck(q_table, dict_tablecol, local_var)
+        mat_roicheck = convertDictROICheckToMatROICheck(dict_roicheck)
+        savemat(path_roicheck, mat_roicheck)
+        QMessageBox.information(q_window, "File save", "ROICheck file saved!")
+    except Exception as e:
+        QMessageBox.warning(q_window, "File save failed", f"Error saving ROICheck file: {e}")
 
 
 
