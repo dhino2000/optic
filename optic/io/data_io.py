@@ -4,9 +4,10 @@ from PyQt5.QtWidgets import QMessageBox
 from scipy.io import loadmat, savemat
 import tifffile
 import datetime
+from ..gui.table_setup import applyDictROICheckToTable
 from ..preprocessing.preprocessing_fall import convertMatToDictFall, convertMatToDictROICheck
 from ..preprocessing.preprocessing_image import convertImageDtypeToINT, resizeImageShape
-from ..preprocessing.preprocessing_table import convertTableDataToDictROICheck, convertDictROICheckToMatROICheck
+from ..preprocessing.preprocessing_table import convertTableDataToDictROICheck, convertDictROICheckToMatROICheck, convertMatROICheckToDictROICheck
 from .file_dialog import openFileDialog, saveFileDialog
 
 # Fallの読み込み, メッセージ付き
@@ -73,7 +74,7 @@ def generateSavePath(path_src, prefix="", suffix="", new_extension=None, remove_
 # Tableの内容をROICheckとして保存
 def saveROICheck(q_window, q_lineedit, q_table, dict_tablecol, local_var=True):
     path_src = q_lineedit.text()
-    path_dst = generateSavePath(path_src, prefix="ROIcheck_", remove_strings="Fall")
+    path_dst = generateSavePath(path_src, prefix="ROIcheck_", remove_strings="Fall_")
     path_dst = saveFileDialog(q_widget=q_window, file_type="mat", title="Save ROIcheck mat File", initial_dir=path_dst)
     try:
         dict_roicheck = convertTableDataToDictROICheck(q_table, dict_tablecol, local_var)
@@ -86,71 +87,11 @@ def saveROICheck(q_window, q_lineedit, q_table, dict_tablecol, local_var=True):
 
 
 # ROICheckを読み込んでTableを更新
-def loadROICheck(self, key):
-    options = QFileDialog.Options()
-    path_Fall = self.dict_lineedit[f"path_fall_{key}"].text()
-    dir_project = os.path.dirname(path_Fall)
-    path_roicheck = openFileDialog(self, file_type="mat", title="Open Fall.mat File", initial_dir=dir_project)
-    if path_roicheck:
-        try:
-            mat_roicheck = loadmat(path_roicheck)
-            mat_roicheck = mat_roicheck["manualROIcheck"]
-            dict_roicheck = convertMatToDictROICheck(mat_roicheck)
-
-            tableWidget = self.dict_table[key]
-            roi_count = tableWidget.rowCount()
-
-            cell_type_keys = {
-                "rows_selected_neuron": "Neuron",
-                "rows_selected_astro": "Astrocyte",
-                "rows_selected_noise": "Not Cell"
-            }
-
-            # ラジオボタンの設定
-            for col_name, col_info in self.dict_tablecol.items():
-                if col_info['type'] == 'radio':
-                    if col_name in dict_roicheck:
-                        selected_rows = dict_roicheck[col_name]
-                        for row in range(roi_count):
-                            radio_button = tableWidget.cellWidget(row, col_info['order'])
-                            if radio_button:
-                                radio_button.setChecked(any(row == sr[0] for sr in selected_rows))
-                    elif col_name in cell_type_keys.values():
-                        corresponding_key = [k for k, v in cell_type_keys.items() if v == col_name][0]
-                        if corresponding_key in dict_roicheck:
-                            selected_rows = dict_roicheck[corresponding_key]
-                            for row in range(roi_count):
-                                radio_button = tableWidget.cellWidget(row, col_info['order'])
-                                if radio_button:
-                                    radio_button.setChecked(any(row == sr[0] for sr in selected_rows))
-
-            # チェックボックスと文字列の設定
-            for col_name, col_info in self.dict_tablecol.items():
-                if col_info['type'] in ['checkbox', 'string']:
-                    if col_name in dict_roicheck:
-                        data = dict_roicheck[col_name]
-                        for row in range(min(roi_count, len(data))):
-                            item = tableWidget.item(row, col_info['order'])
-                            if item:
-                                if col_info['type'] == 'checkbox':
-                                    item.setCheckState(Qt.Checked if data[row][0] else Qt.Unchecked)
-                                else:  # string
-                                    # 空のリストや空の文字列を空白として処理
-                                    value = str(data[row][0])
-                                    if value == '[]' or value == '':
-                                        value = ''
-                                    item.setText(value)
-
-            # threshold_roi の設定
-            if 'threshold_roi' in dict_roicheck:
-                threshold_roi_dict = convertMatToDictFall(dict_roicheck["threshold_roi"])
-                for param in ["npix", "radius", "aspect_ratio", "compact", "skew", "std"]:
-                    if param in threshold_roi_dict:
-                        self.dict_lineedit[f"threshold_{param}"].setText(str(threshold_roi_dict[param][0]))
-
-            self.updateView(key)
-            self.displayROINumber(key)
-            print("ROICheck file loaded!")
-        except Exception as e:
-            print(f"Error loading ROICheck file: {e}")
-            raise  # This will re-raise the exception for debugging purposes
+def loadROICheck(q_window, q_table, dict_tablecol):
+    path_roicheck = openFileDialog(q_widget=q_window, file_type="mat", title="Open ROIcheck mat File")
+    # try:
+    dict_roicheck = convertMatROICheckToDictROICheck(loadmat(path_roicheck))
+    applyDictROICheckToTable(q_table, dict_tablecol, dict_roicheck)
+    QMessageBox.information(q_window, "File load", "ROICheck file loaded!")
+    # except Exception as e:
+        # QMessageBox.warning(q_window, "File load failed", f"Error loading ROICheck file: {e}")

@@ -53,5 +53,11 @@ def convertDictROICheckToMatROICheck(dict_roicheck):
 
 # mat_roicheck -> dict_roicheck
 def convertMatROICheckToDictROICheck(mat_roicheck):
-    dict_roicheck = mat_roicheck["manualROIcheck"]
+    mat_roicheck = mat_roicheck["manualROIcheck"]
+    mat_dtype = list(mat_roicheck[0].dtype.fields)
+    dict_roicheck = {}
+    for key_, value_ in zip(mat_dtype, list(mat_roicheck[0][0])):
+        if value_.dtype=="object":
+            value_ = np.array([[x[0].item() if x[0].size > 0 else ""] for x in value_])
+        dict_roicheck[key_] = value_
     return dict_roicheck
