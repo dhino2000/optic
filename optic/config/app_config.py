@@ -29,13 +29,13 @@ class GuiDefaults:
 # Tableに設定する列名とそのプロパティ
 class TableColumns:
     SUITE2P_ROI_CHECK: Dict[str, Dict[str, Any]] = {
-        "Cell ID": {"order": 0, "type": "id", "editable": False},
-        "Astrocyte": {"order": 1, "type": "radio", "group": "celltype"},
-        "Neuron": {"order": 2, "type": "radio", "group": "celltype", "default": True},
-        "Not Cell": {"order": 3, "type": "radio", "group": "celltype"},
-        "Check": {"order": 4, "type": "checkbox"},
-        "Tracking": {"order": 5, "type": "checkbox"},
-        "Memo": {"order": 6, "type": "string", "editable": True}
+        "Cell ID"   : {"order": 0, "type": "id",       "width": 100, "editable": False},
+        "Astrocyte" : {"order": 1, "type": "radio",    "width": 100, "group": "celltype", "default": False},
+        "Neuron"    : {"order": 2, "type": "radio",    "width": 100, "group": "celltype", "default": True},
+        "Not Cell"  : {"order": 3, "type": "radio",    "width": 100, "group": "celltype", "default": False},
+        "Check"     : {"order": 4, "type": "checkbox", "width": 100, "default": False},
+        "Tracking"  : {"order": 5, "type": "checkbox", "width": 100, "default": False},
+        "Memo"      : {"order": 6, "type": "string",   "width": 200, "editable": True}
     }
 
 

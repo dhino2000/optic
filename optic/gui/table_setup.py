@@ -2,7 +2,7 @@
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QAbstractItemView, QTableWidgetItem, QRadioButton, QButtonGroup
 
-def setupWidgetROITable(q_table, len_row, dict_tablecol, width_col=80):
+def setupWidgetROITable(q_table, len_row, dict_tablecol):
     q_table.clearSelection() # テーブルの選択初期化
 
     q_table.setRowCount(len_row)
@@ -16,52 +16,36 @@ def setupWidgetROITable(q_table, len_row, dict_tablecol, width_col=80):
     q_table.setSelectionMode(QAbstractItemView.SingleSelection)
 
     # セルの横幅指定
-    for i in range(q_table.columnCount()):
-        q_table.setColumnWidth(i, width_col)
+    for col_name, col_info in col_sorted:
+        q_table.setColumnWidth(col_info['order'], col_info['width'])
 
+    radio_groups = {}
     # セルの設定
     for cellid in range(len_row):
         for col_name, col_info in col_sorted:
-            col_index = col_info['order']
-            # Cell ID
-            if col_info["type"] == "id":
-                cellItem = QTableWidgetItem(f"{cellid}")
-                cellItem.setFlags(cellItem.flags() & ~Qt.ItemIsEditable)
-                q_table.setItem(cellid, col_index, cellItem)
-            # radiobutton
-            elif col_info["type"] == "radio":
-                radioButton = QRadioButton()
-                if col_info.get("default", False):
-                    radioButton.setChecked(True)
-                q_table.setCellWidget(cellid, col_index, radioButton)
-            # checkbox
-            elif col_info["type"] == "checkbox":
-                checkBox = QTableWidgetItem()
-                checkBox.setCheckState(Qt.Unchecked)
-                q_table.setItem(cellid, col_index, checkBox)
-            # String
-            elif col_info["type"] == "string":
-                stringItem = QTableWidgetItem()
-                # 編集可能か
-                if not col_info.get("editable", True):
-                    stringItem.setFlags(stringItem.flags() & ~Qt.ItemIsEditable)
-                q_table.setItem(cellid, col_index, stringItem)
-
-    # ラジオボタンのグループ化
-    groups = {}
-    for col_name, col_info in dict_tablecol.items():
-        if col_info["type"] == "radio":
-            group_name = col_info.get("group", "default")
-            if group_name not in groups:
-                groups[group_name] = []
-            groups[group_name].append(col_info['order'])
-
-    for row in range(q_table.rowCount()):
-        for group_name, columns in groups.items():
-            buttonGroup = QButtonGroup(q_table)
-            for col in columns:
-                radioButton = q_table.cellWidget(row, col)
-                if radioButton:
-                    buttonGroup.addButton(radioButton)
+            cell_type = col_info["type"]
+            
+            if cell_type == "id":
+                cell = QTableWidgetItem(str(cellid))
+                cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)
+                q_table.setItem(cellid, col_info['order'], cell)
+            elif cell_type == "radio":
+                cell = QRadioButton()
+                if col_info["default"]:
+                    cell.setChecked(True)
+                group = col_info["group"]
+                if not radio_groups.get(cellid):
+                    radio_groups[cellid] = QButtonGroup(q_table)
+                radio_groups[cellid].addButton(cell)
+                q_table.setCellWidget(cellid, col_info['order'], cell)
+            elif cell_type == "checkbox":
+                cell = QTableWidgetItem()
+                cell.setCheckState(Qt.Checked if col_info["default"] else Qt.Unchecked)
+                q_table.setItem(cellid, col_info['order'], cell)
+            elif cell_type == "string":
+                cell = QTableWidgetItem()
+                if not col_info["editable"]:
+                    cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)
+                q_table.setItem(cellid, col_info['order'], cell)
 
     return q_table
