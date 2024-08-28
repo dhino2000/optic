@@ -1,7 +1,7 @@
 # データの読み込み用関数
 import os
 from PyQt5.QtWidgets import QMessageBox
-from scipy.io import loadmat
+from scipy.io import loadmat, savemat
 import tifffile
 import datetime
 from ..preprocessing.preprocessing_fall import convertMatToDictFall, convertMatToDictROICheck
@@ -71,14 +71,14 @@ def generateSavePath(path_src, prefix="", suffix="", new_extension=None, remove_
     return path_dst
 
 # Tableの内容をROICheckとして保存
-def saveROICheck(q_window, q_lineedit, q_table, data_manager, dict_tablecol, path_roicheck, local_var=True):
+def saveROICheck(q_window, q_lineedit, q_table, dict_tablecol, local_var=True):
     path_src = q_lineedit.text()
     path_dst = generateSavePath(path_src, prefix="ROIcheck_", remove_strings="Fall")
-    path_dst = saveFileDialog(q_widget, file_type, title="Save ROIcheck mat File", initial_dir=os.path.dirname(path_dst))
+    path_dst = saveFileDialog(q_widget=q_window, file_type="mat", title="Save ROIcheck mat File", initial_dir=path_dst)
     try:
         dict_roicheck = convertTableDataToDictROICheck(q_table, dict_tablecol, local_var)
         mat_roicheck = convertDictROICheckToMatROICheck(dict_roicheck)
-        savemat(path_roicheck, mat_roicheck)
+        savemat(path_dst, mat_roicheck)
         QMessageBox.information(q_window, "File save", "ROICheck file saved!")
     except Exception as e:
         QMessageBox.warning(q_window, "File save failed", f"Error saving ROICheck file: {e}")

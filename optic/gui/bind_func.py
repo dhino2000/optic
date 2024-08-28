@@ -1,6 +1,7 @@
 # 配置した後のwidgetに関数を紐づけ
 # makeLayout <- -> bindFunc
 from ..io.file_dialog import openFileDialogAndSetLineEdit
+from ..io.data_io import saveROICheck
 from ..utils import *
 
 # -> makeLayoutLoadFileWidget
@@ -10,6 +11,10 @@ def bindFuncLoadFileWidget(q_widget, q_button, q_lineedit, filetype=None):
 # -> widget_manager.dict_button["exit"]
 def bindFuncExit(q_window, q_button):
     q_button.clicked.connect(lambda: exitApp(q_window))
+
+# -> makeLayoutROICheckIO
+def bindFuncROICheckIO(q_window, q_lineedit, q_table, q_button_save, q_button_load, dict_tablecol, local_var=True):
+    q_button_save.clicked.connect(lambda: saveROICheck(q_window, q_lineedit, q_table, dict_tablecol, local_var))
 
 # -> makeLayoutContrastSlider
 def bindFuncContrastSlider(q_slider):
