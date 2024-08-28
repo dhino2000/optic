@@ -50,3 +50,8 @@ def convertDictROICheckToMatROICheck(dict_roicheck):
     }
 }
     return mat_roicheck
+
+# mat_roicheck -> dict_roicheck
+def convertMatROICheckToDictROICheck(mat_roicheck):
+    dict_roicheck = mat_roicheck["manualROIcheck"]
+    return dict_roicheck
