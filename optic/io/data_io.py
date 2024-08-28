@@ -6,8 +6,6 @@ import datetime
 from ..preprocessing.preprocessing_fall import convertMatToDictFall, convertMatToDictROICheck
 from ..preprocessing.preprocessing_image import convertImageDtypeToINT, resizeImageShape
 
-from ..config.constants import ROICheckMatKeysLocal
-
 # Fallの読み込み, メッセージ付き
 def loadFallMAT(q_window, data_manager, key_dict_Fall, path_fall, preprocessing=True):
     try:
@@ -37,19 +35,7 @@ def clearEventFileNPY(widget_manager):
     pass
 
 
-# Tableの内容をdict_roicheckに保管
-def convertTableDataToDictROICheck(q_table, dict_roicheck):
-    today = datetime.datetime.today().strftime('%y%m%d')
-    cell_type_keys = ROICheckMatKeysLocal.cell_type_keys
-    
-    dict_roicheck = {}
-    row_count = tableWidget.rowCount()
-    # 列ごとに処理
-    for col_name, col_info in self.dict_tablecol.items():
-        for row in range(row_count):
-            
 
-    return dict_roicheck
 
 # Tableの内容をROICheckとして保存
 def saveROICheck(data_manager):
