@@ -40,7 +40,14 @@ class TableControls:
             direction = action[2] # 1, -1
             if move_type == 'cell_type':
                 self.moveToSameCellType(self.selected_row, direction)
+            elif move_type == 'skip_checked':
+                self.moveSkippingChecked(self.selected_row, direction, True)
+            elif move_type == 'skip_checked':
+                self.moveSkippingChecked(self.selected_row, direction, False)
 
+    """
+    Function of executeAction
+    """
 
     # select radiobutton
     def selectRadioButton(self, row, column):
@@ -60,21 +67,6 @@ class TableControls:
                     check_box_item.setCheckState(Qt.Unchecked if check_box_item.checkState() == Qt.Checked else Qt.Checked)
                 break
 
-    def getCurrentCellType(self, row):
-        for col_name, col_info in self.dict_tablecol.items():
-            if col_info['type'] == 'radio':
-                radio_button = self.q_table.cellWidget(row, col_info['order'])
-                if radio_button and radio_button.isChecked():
-                    return col_name
-        return None
-
-    def isRowChecked(self, row):
-        for col_name, col_info in self.dict_tablecol.items():
-            if col_info['type'] == 'checkbox' and col_name == 'Check':
-                check_box_item = self.q_table.item(row, col_info['order'])
-                return check_box_item.checkState() == Qt.Checked if check_box_item else False
-        return False
-
     # move Neuron->Neuron, Astrocyte->Astrocyte
     def moveToSameCellType(self, start_row, direction):
         current_cell_type = self.getCurrentCellType(start_row)
@@ -88,3 +80,37 @@ class TableControls:
             if self.getCurrentCellType(new_row) == current_cell_type:
                 self.selected_row = new_row
                 return
+            
+    # move row with skipping "Check checked" or "Check unchecked"
+    def moveSkippingChecked(self, start_row, direction, skip_checked):
+        total_rows = self.q_table.rowCount()
+        new_row = start_row
+
+        while True:
+            new_row = (new_row + direction) % total_rows
+            if new_row == start_row:
+                break
+            if self.getRowChecked(new_row) != skip_checked:
+                self.selected_row = new_row
+                return
+            
+    """
+    Sub Function
+    """
+            
+    # get celltype of current row, Neruon/Astrocyte/...
+    def getCurrentCellType(self, row):
+        for col_name, col_info in self.dict_tablecol.items():
+            if col_info['type'] == 'radio':
+                radio_button = self.q_table.cellWidget(row, col_info['order'])
+                if radio_button and radio_button.isChecked():
+                    return col_name
+        return None
+
+    # detect "Check" is checked or not
+    def getRowChecked(self, row):
+        for col_name, col_info in self.dict_tablecol.items():
+            if col_info['type'] == 'checkbox' and col_name == 'Check':
+                check_box_item = self.q_table.item(row, col_info['order'])
+                return check_box_item.checkState() == Qt.Checked if check_box_item else False
+        return False
