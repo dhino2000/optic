@@ -42,6 +42,10 @@ class TableColumns:
 # キーボードに対応する操作
 class KeyFunctionMap:
     SUITE2P_ROI_CHECK: Dict[int, Tuple[str, Any]] = {
+        Qt.Key_Up: ('move', 'up', 1),
+        Qt.Key_Down: ('move', 'down', 1),
+        Qt.Key_Left: ('move', 'left', 1),
+        Qt.Key_Right: ('move', 'right', 1),
         Qt.Key_Z: ('radio', 1),
         Qt.Key_X: ('radio', 2),
         Qt.Key_C: ('radio', 3),
