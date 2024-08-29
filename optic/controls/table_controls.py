@@ -11,7 +11,15 @@ class TableControls:
         """
         self.q_table = q_table
         self.dict_tablecol = dict_tablecol
-        self.selected_row = None
+        self.selected_row = 0
+        self.selected_column = 0
         self.key_function_map = key_function_map
+        # 選択を変更したときの関数
+        self.q_table.selectionModel().selectionChanged.connect(self.onSelectionChanged)
 
+
+    def onSelectionChanged(self, selected, deselected):
+        if selected.indexes():
+            self.selected_row = selected.indexes()[0].row()
+            self.selected_column = selected.indexes()[0].column()
     
