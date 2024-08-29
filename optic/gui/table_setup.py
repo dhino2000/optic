@@ -1,9 +1,14 @@
 # TableWidget Setup
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QAbstractItemView, QTableWidgetItem, QRadioButton, QButtonGroup
-from ..controls.event_filters import RadioButtonEventFilter
+from types import MethodType
 
 # radiobuttonのキーイベント無効化用
+def keyPressEventIgnore(self, event):
+    if event.key() == event.KeyPress:
+        event.ignore()
+    else:
+        super(QRadioButton, self).keyPressEvent(event)
 
 def setupWidgetROITable(q_table, len_row, dict_tablecol, key_event_ignore=True):
     q_table.clearSelection() # テーブルの選択初期化
@@ -23,7 +28,6 @@ def setupWidgetROITable(q_table, len_row, dict_tablecol, key_event_ignore=True):
         q_table.setColumnWidth(col_info['order'], col_info['width'])
 
     radio_groups = {}
-    radio_button_filter = RadioButtonEventFilter()
     # セルの設定
     for cellid in range(len_row):
         for col_name, col_info in col_sorted:
@@ -39,10 +43,12 @@ def setupWidgetROITable(q_table, len_row, dict_tablecol, key_event_ignore=True):
                     cell.setChecked(True)
                 if not radio_groups.get(cellid):
                     radio_groups[cellid] = QButtonGroup(q_table)
-                radio_groups[cellid].addButton(cell)
+
                 # radiobuttonのキーイベント無効化
                 if key_event_ignore:
-                    cell.installEventFilter(radio_button_filter)
+                    cell.keyPressEvent = MethodType(keyPressEventIgnore, cell)
+
+                radio_groups[cellid].addButton(cell)
                 q_table.setCellWidget(cellid, col_info['order'], cell)
             elif cell_type == "checkbox":
                 cell = QTableWidgetItem()
