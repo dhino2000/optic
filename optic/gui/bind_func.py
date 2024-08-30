@@ -34,8 +34,9 @@ def bindFuncTableSelectionChanged(q_table, data_manager, key):
     )
 
 # -> view_layouts.makeLayoutBGImageTypeDisplay
-def bindFuncRadiobuttonBGImageTypeChanged(q_buttongroup, data_manager, key):
+def bindFuncRadiobuttonBGImageTypeChanged(q_buttongroup, data_manager, view_controls, key):
     def _onBGImageTypeChanged(button_id):
         bg_image_type = q_buttongroup.button(button_id).text()
         onBGImageTypeChanged(data_manager, key, bg_image_type)
+        view_controls.updateView(key)
     q_buttongroup.buttonClicked[int].connect(_onBGImageTypeChanged)
