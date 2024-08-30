@@ -1,5 +1,5 @@
 # アプリのconfigをまとめたManagerクラス
-from .app_config import AppSettings
+from ..config.app_config import AppSettings
 
 class ConfigManager:
     def __init__(self):
