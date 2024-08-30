@@ -1,4 +1,5 @@
 from .widget_manager import WidgetManager
+from .app_setup import setupMainWindow
 from .base_layouts import makeLayoutLineEditLabel, makeLayoutButtonGroup, makeLayoutSliderLabel
 from .io_layouts import makeLayoutLoadFileWidget, makeLayoutROICheckIO, makeLayoutLoadFileExitHelp
 from .plot_layouts import makeLayoutCanvasTracePlot
