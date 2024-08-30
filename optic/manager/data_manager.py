@@ -4,4 +4,11 @@ class DataManager:
         self.dict_im        = {}
         self.dict_eventfile = {}
         self.dict_roicheck  = {}
+        self.dict_selected_roi = {}
+
+    def setSelectedROI(self, key, roi_id):
+        self.dict_selected_roi[key] = roi_id
+
+    def getSelectedROI(self, key):
+        return self.dict_selected_roi.get(key)
         
