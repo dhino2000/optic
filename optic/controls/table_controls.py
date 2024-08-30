@@ -23,13 +23,11 @@ class TableControls:
             self.executeAction(action)
             self.q_table.setCurrentCell(self.selected_row, self.selected_column)
             self.q_table.scrollToItem(self.q_table.item(self.selected_row, self.selected_column))
-            print("keyPressEvent", self.selected_column)
 
     def onSelectionChanged(self, selected, deselected):
         if selected.indexes():
             self.selected_row = self.q_table.currentRow()
             self.selected_column = self.q_table.currentColumn()
-            print("onSelectionChanged", self.selected_column)
 
     def executeAction(self, action):
         action_type = action[0] # radio, checkbox, move
@@ -53,10 +51,10 @@ class TableControls:
             self.selected_row = max(0, self.selected_row - step)
         elif move_type == 'down':
             self.selected_row = min(self.q_table.rowCount() - 1, self.selected_row + step)
-        # elif move_type == 'left':
-        #     self.selected_column = max(0, self.selected_column - step)
-        # elif move_type == 'right':
-        #     self.selected_column = min(self.q_table.columnCount() - 1, self.selected_column + step)
+        elif move_type == 'left':
+            self.selected_column = max(0, self.selected_column - step)
+        elif move_type == 'right':
+            self.selected_column = min(self.q_table.columnCount() - 1, self.selected_column + step)
         elif move_type == 'cell_type':
             self.moveToSameCellType(self.selected_row, step)
         elif move_type == 'skip_checked':

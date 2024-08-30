@@ -1,14 +1,7 @@
 # TableWidget Setup
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QAbstractItemView, QTableWidgetItem, QRadioButton, QButtonGroup
-from types import MethodType
-
-# radiobuttonのキーイベント無効化用
-def keyPressEventIgnore(self, event):
-    if event.key() == event.KeyPress:
-        event.ignore()
-    else:
-        super(QRadioButton, self).keyPressEvent(event)
+from ..controls.event_filters import applyKeyPressEventIgnore
 
 def setupWidgetROITable(q_table, len_row, dict_tablecol, key_event_ignore=True):
     q_table.clearSelection() # テーブルの選択初期化
@@ -46,7 +39,7 @@ def setupWidgetROITable(q_table, len_row, dict_tablecol, key_event_ignore=True):
 
                 # radiobuttonのキーイベント無効化
                 if key_event_ignore:
-                    cell.keyPressEvent = MethodType(keyPressEventIgnore, cell)
+                    cell = applyKeyPressEventIgnore(cell)
 
                 radio_groups[cellid].addButton(cell)
                 q_table.setCellWidget(cellid, col_info['order'], cell)
