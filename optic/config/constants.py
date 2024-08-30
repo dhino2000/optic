@@ -1,4 +1,5 @@
 # アプリ間で共有する定数
+from enum import Enum
 
 # ファイル選択時の拡張子
 class FileFilters:
@@ -13,9 +14,15 @@ FILE_FILTERS = {
 }
 
 # BackGroungImage Type
+class BGImageType:
+    MEAN_IMG = "meanImg"
+    MEAN_IMG_E = "meanImgE"
+    MAX_PROJ = "max_proj"
+    VCORR = "Vcorr"
+
 # FALL: Suite2p
 class BGImageTypeList:
-    FALL = ["meanImg", "meanImgE", "max_proj", "Vcorr"]
+    FALL = [BGImageType.MEAN_IMG, BGImageType.MEAN_IMG_E, BGImageType.MAX_PROJ, BGImageType.VCORR]
 
 class ProcessingDefaults:
     RESPONSE_THRESHOLD = 30

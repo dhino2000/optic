@@ -22,3 +22,12 @@ def resizeImageShape(img, shape_tgt):
     # 小さい画像を中央に配置
     new_img[start_y:start_y+img.shape[0], start_x:start_x+img.shape[1]] = img
     return new_img
+
+# Fallからbackground image取得
+def getBGImageFromFall(data_manager, key_dict_Fall, key_dict_im_bg, dtype="uint8"):
+    # まず、meanImgのサイズを基準サイズとして取得
+    base_shape = data_manager.dict_Fall[key_dict_Fall]["ops"]["meanImg"].shape
+    for key_im in ["meanImg", "meanImgE", "max_proj", "Vcorr"]:
+        img = convertImageDtypeToINT(data_manager.dict_Fall[key_dict_Fall]["ops"][key_im], dtype=dtype)
+        img = resizeImageShape(img, base_shape)
+        data_manager.dict_im_bg[key_dict_im_bg][key_im] = img
