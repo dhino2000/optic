@@ -3,6 +3,7 @@
 from ..io.file_dialog import openFileDialogAndSetLineEdit
 from ..io.data_io import saveROICheck, loadROICheck
 from ..controls.table_controls import onTableSelectionChanged
+from ..controls.view_controls import onBGImageTypeChanged
 from ..utils import *
 
 # -> io_layouts.makeLayoutLoadFileWidget
@@ -26,8 +27,15 @@ def bindFuncContrastSlider(q_slider):
 def bindFuncOpacitySlider(q_slider):
     q_slider.valueChanged.connect(lambda value: func_(value))
 
-# ->table_layouts.makeLayoutTableROICountLabel
+# -> table_layouts.makeLayoutTableROICountLabel
 def bindFuncTableSelectionChanged(q_table, data_manager, key):
     q_table.selectionModel().selectionChanged.connect(
         lambda selected, deselected: onTableSelectionChanged(data_manager, key, selected, deselected)
     )
+
+# -> view_layouts.makeLayoutBGImageTypeDisplay
+def bindFuncRadiobuttonBGImageTypeChanged(q_buttongroup, data_manager, key):
+    def _onBGImageTypeChanged(button_id):
+        bg_image_type = q_buttongroup.button(button_id).text()
+        onBGImageTypeChanged(data_manager, key, bg_image_type)
+    q_buttongroup.buttonClicked[int].connect(_onBGImageTypeChanged)

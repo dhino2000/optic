@@ -17,8 +17,8 @@ class DataManager:
         return self.dict_selected_roi.get(key)
         
     # Background image type
-    def setBGImageType(self, key, im_bg_type):
-        self.dict_im_bg_current_type[key] = im_bg_type
+    def setBGImageCurrentType(self, key_im_bg_current_type, im_bg_type):
+        self.dict_im_bg_current_type[key_im_bg_current_type] = im_bg_type
     
     def getBGImage(self, key):
         return self.dict_im_bg[key][self.dict_im_bg_current_type[key]]
