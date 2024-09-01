@@ -3,6 +3,7 @@ import random
 
 class ViewControls:
     def __init__(self, key_app, q_view, q_scene, data_manager, widget_manager, config_manager):
+        self.key_app = key_app
         self.q_view = q_view
         self.q_scene = q_scene
         self.data_manager = data_manager
@@ -12,13 +13,13 @@ class ViewControls:
         self.roi_colors = {}
         self.roi_opacity = config_manager.gui_defaults["ROI_VISUAL_SETTINGS"]["DEFAULT_ROI_OPACITY"]
         self.highlight_opacity = config_manager.gui_defaults["ROI_VISUAL_SETTINGS"]["DEFAULT_HIGHLIGHT_OPACITY"]
-        self.initializeROIColors(key_app)
+        self.initializeROIColors()
 
-    def updateView(self, key_app):
-        updateView(self, self.q_scene, self.q_view, self.data_manager, key_app)
+    def updateView(self):
+        updateView(self, self.q_scene, self.q_view, self.data_manager, self.key_app)
 
-    def initializeROIColors(self, key_app):
-        for roi_id in self.data_manager.dict_Fall[key_app]["stat"].keys():
+    def initializeROIColors(self):
+        for roi_id in self.data_manager.dict_Fall[self.key_app]["stat"].keys():
             self.roi_colors[roi_id] = self.generateRandomColor()
 
     def generateRandomColor(self):

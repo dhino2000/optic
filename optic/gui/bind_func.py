@@ -38,5 +38,5 @@ def bindFuncRadiobuttonBGImageTypeChanged(q_buttongroup, data_manager, view_cont
     def _onBGImageTypeChanged(button_id):
         bg_image_type = q_buttongroup.button(button_id).text()
         onBGImageTypeChanged(data_manager, key, bg_image_type)
-        view_controls.updateView(key)
+        view_controls.updateView()
     q_buttongroup.buttonClicked[int].connect(_onBGImageTypeChanged)
