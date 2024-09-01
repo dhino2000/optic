@@ -24,7 +24,7 @@ def loadFallMAT(q_window, data_manager, key_dict_Fall, key_dict_im_bg, path_fall
         return data_manager.dict_Fall[key_dict_Fall]
     except FileNotFoundError as e:
         QMessageBox.warning(q_window, "File Not Found", str(e))
-        return False
+        raise  # エラーを再スローする
 
 # tif imageの読み込み
 def loadTIFImage(data_manager, key_dict_im_chan2, path_image, preprocessing=True):
