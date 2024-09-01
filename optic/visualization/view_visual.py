@@ -13,7 +13,7 @@ def updateView(q_scene, q_view, data_manager, key):
     qimage = QImage(bg_image.data, width, height, width * 3, QImage.Format_RGB888)
     pixmap = QPixmap.fromImage(qimage)
 
-    # drawAllROIs(pixmap, dataManager, widgetManager, key)
+    drawAllROIs(pixmap, data_manager, widgetManager, key)
 
     q_scene.clear()
     q_scene.addPixmap(pixmap)
@@ -28,7 +28,7 @@ def drawAllROIs(pixmap, dataManager, widgetManager, key):
         if shouldDisplayROI(dataManager, widgetManager, key, roiId):
             drawROI(painter, roiStat, roiId, widgetManager, key)
     
-    highlightSelectedROI(painter, dataManager, widgetManager, key)
+    # highlightSelectedROI(painter, dataManager, widgetManager, key)
     painter.end()
 
 def drawROI(painter, roiStat, roiId, widgetManager, key):
@@ -42,7 +42,7 @@ def drawROI(painter, roiStat, roiId, widgetManager, key):
     for x, y in zip(xpix, ypix):
         painter.drawPoint(int(x), int(y))
 
-def highlightSelectedROI(painter, dataManager, widgetManager, key):
+def highlightSelectedROI(painter, dataManager, key):
     selectedRoiId = dataManager.getSelectedROI(key)
     if selectedRoiId is not None:
         roiStat = dataManager.dict_Fall[key]["stat"][selectedRoiId]

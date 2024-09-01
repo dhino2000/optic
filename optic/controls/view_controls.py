@@ -25,6 +25,21 @@ class ViewControls:
 
     def generateRandomColor(self):
         return (random.randint(100, 255), random.randint(100, 255), random.randint(100, 255))
+    
+    def getROIColor(self, roi_id):
+        return self.roi_colors[roi_id]
+
+    def getROIOpacity(self):
+        return self.roi_opacity
+
+    def getHighlightOpacity(self):
+        return self.highlight_opacity
+
+    def setROIOpacity(self, opacity):
+        self.roi_opacity = opacity
+
+    def setHighlightOpacity(self, opacity):
+        self.highlight_opacity = opacity
 
 def onBGImageTypeChanged(data_manager, key_im_bg_current_type, bg_image_type):
     data_manager.setBGImageCurrentType(key_im_bg_current_type, bg_image_type)
