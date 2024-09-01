@@ -2,6 +2,7 @@
 from typing import Dict, Any, Tuple
 from PyQt5.QtCore import Qt
 from .constants import FileFilters, ProcessingDefaults, PlotColors, AppKeys, ChannelKeys, AxisKeys
+import random
 
 # GUIに関する定数
 class GuiDefaults:
@@ -23,8 +24,27 @@ class GuiDefaults:
             "compact": "(0, 1.5)",
             "skew": "(1, 100)",
             "std": "(0, 100)",
+        },
+        "ROI_VISUAL_SETTINGS": {
+            "COLOR_MIN": 100,
+            "COLOR_MAX": 255,
+            "DEFAULT_ROI_OPACITY": 128,
+            "DEFAULT_HIGHLIGHT_OPACITY": 255,
         }
     }
+
+    @classmethod
+    def generateRandomColor(cls, app_name="SUITE2P_ROI_CHECK"):
+        if not hasattr(cls, app_name):
+            raise ValueError(f"Invalid app name: {app_name}")
+        
+        settings = getattr(cls, app_name).get("ROI_VISUAL_SETTINGS")
+        if not settings:
+            raise ValueError(f"ROI_VISUAL_SETTINGS not found for app: {app_name}")
+        
+        return (random.randint(settings["COLOR_MIN"], settings["COLOR_MAX"]),
+                random.randint(settings["COLOR_MIN"], settings["COLOR_MAX"]),
+                random.randint(settings["COLOR_MIN"], settings["COLOR_MAX"]))
 
 # Tableに設定する列名とそのプロパティ
 class TableColumns:
