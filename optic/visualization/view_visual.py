@@ -23,10 +23,10 @@ def drawAllROIs(view_control, pixmap, data_manager, key_app):
     painter.setRenderHint(QPainter.Antialiasing)
     
     for roiId, roiStat in data_manager.dict_Fall[key_app]["stat"].items():
-        if shouldDisplayROI(view_control, data_manager, key_app, roiId):
+        if view_control.getROIDisplay(roiId):
             drawROI(view_control, painter, roiStat, roiId)
     
-    # highlightSelectedROI(painter, dataManager, widgetManager, key_app)
+    highlightSelectedROI(view_control, painter, data_manager, key_app)
     painter.end()
 
 def drawROI(view_control, painter, roiStat, roiId):
@@ -53,7 +53,3 @@ def highlightSelectedROI(view_control, painter, data_manager, key_app):
         
         for x, y in zip(xpix, ypix):
             painter.drawPoint(int(x), int(y))
-
-def shouldDisplayROI(view_control, data_manager, key_app, roiId):
-    # This is a placeholder. You should implement the logic to determine if an ROI should be displayed.
-    return True
