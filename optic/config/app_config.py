@@ -17,6 +17,8 @@ class GuiDefaults:
         "TITLE": "Suite2pROICheckGUI",
         "APP_KEYS": AppKeys.PRI,
         "CHANNELS": [ChannelKeys.CHAN1, ChannelKeys.CHAN2],
+        "DEFAULT_CONTRAST_MIN": 0,
+        "DEFAULT_CONTRAST_MAX": 255,
         "ROI_THRESHOLDS": {
             "npix": "(50, 200)",
             "radius": "(3, 12)",

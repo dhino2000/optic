@@ -1,4 +1,5 @@
 from ..visualization.view_visual import updateView
+from ..config.constants import ChannelKeys
 import random
 
 class ViewControls:
@@ -22,10 +23,17 @@ class ViewControls:
         self.widget_manager = widget_manager
         self.config_manager = config_manager
         self.last_click_position = None
+        self.bg_contrast = {}
+        for channel in config_manager.gui_defaults["CHANNELS"]:
+            self.bg_contrast[channel] = {
+                'min': config_manager.gui_defaults["DEFAULT_CONTRAST_MIN"],
+                'max': config_manager.gui_defaults["DEFAULT_CONTRAST_MAX"]
+            }
         self.roi_colors = {}
         self.roi_opacity = config_manager.gui_defaults["ROI_VISUAL_SETTINGS"]["DEFAULT_ROI_OPACITY"]
         self.highlight_opacity = config_manager.gui_defaults["ROI_VISUAL_SETTINGS"]["DEFAULT_HIGHLIGHT_OPACITY"]
         self.roi_display = {}
+    
         self.initializeROIColors()
         self.initializeROIDisplay()
 
@@ -52,6 +60,11 @@ class ViewControls:
     def getHighlightOpacity(self):
         return self.highlight_opacity
     
+    def getBackgroundContrastValue(self, channel, min_or_max):
+        if channel in self.bg_contrast and min_or_max in ['min', 'max']:
+            return self.bg_contrast[channel][min_or_max]
+        return None
+    
     def getROIDisplay(self, roi_id):
         return self.roi_display[roi_id]
 
@@ -60,6 +73,10 @@ class ViewControls:
 
     def setHighlightOpacity(self, opacity):
         self.highlight_opacity = opacity
+
+    def setBackgroundContrastValue(self, channel, min_or_max, value):
+        if channel in self.bg_contrast and min_or_max in ['min', 'max']:
+            self.bg_contrast[channel][min_or_max] = value
 
 def onBGImageTypeChanged(data_manager, key_im_bg_current_type, bg_image_type):
     data_manager.setBGImageCurrentType(key_im_bg_current_type, bg_image_type)

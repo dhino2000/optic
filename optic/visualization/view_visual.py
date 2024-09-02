@@ -1,5 +1,6 @@
 from PyQt5.QtGui import QPainter, QPen, QColor, QImage, QPixmap
 from PyQt5.QtCore import Qt
+import numpy as np
 from ..preprocessing.preprocessing_image import convertMonoImageToRGBImage
 
 # q_view widget visualization
@@ -55,3 +56,6 @@ def highlightSelectedROI(view_control, painter, data_manager, key_app):
         
         for x, y in zip(xpix, ypix):
             painter.drawPoint(int(x), int(y))
+
+def adjustChannelContrast(self, image, min_val, max_val, dtype=np.uint8):
+    return np.clip(((image - min_val) / (max_val - min_val) * 255), 0, 255).astype(dtype)
