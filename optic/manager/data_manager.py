@@ -24,6 +24,7 @@ class DataManager:
                 self.dict_im_bg_current_type[key_app] = "meanImg"  # デフォルト設定
             else:
                 self.dict_Fall[key_app] = Fall
+            return True
         except FileNotFoundError as e:
             return False
         
