@@ -47,3 +47,16 @@ def bindFuncRadiobuttonBGImageTypeChanged(q_buttongroup, data_manager, view_cont
     # 初期状態を設定し、即座に_onBGImageTypeChangedを呼び出す
     checked_button = q_buttongroup.checkedButton()
     _onBGImageTypeChanged(q_buttongroup.id(checked_button))
+
+# -> slider_layouts.makeLayoutOpacitySlider
+def bindFuncOpacitySlider(q_slider, view_controls):
+    def onOpacityChanged(value):
+        view_controls.setROIOpacity(value)
+        view_controls.updateView()
+    q_slider.valueChanged.connect(onOpacityChanged)
+
+def bindFuncHighlightOpacitySlider(q_slider, view_controls):
+    def onOpacityChanged(value):
+        view_controls.setHighlightOpacity(value)
+        view_controls.updateView()
+    q_slider.valueChanged.connect(onOpacityChanged)
