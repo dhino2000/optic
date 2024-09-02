@@ -5,6 +5,7 @@ from ..io.data_io import saveROICheck, loadROICheck
 from ..controls.table_controls import onTableSelectionChanged
 from ..controls.view_controls import onBGImageTypeChanged
 from ..utils import *
+from PyQt5.QtCore import Qt
 
 # -> io_layouts.makeLayoutLoadFileWidget
 def bindFuncLoadFileWidget(q_widget, q_button, q_lineedit, filetype=None):
@@ -62,7 +63,7 @@ def bindFuncHighlightOpacitySlider(q_slider, view_controls):
     q_slider.valueChanged.connect(onOpacityChanged)
 
 # -> slider_layouts.makeLayoutContrastSlider
-def bindFuncContrastSlider(q_slider_min, q_slider_max, view_controls, channel):
+def bindFuncBackgroundContrastSlider(q_slider_min, q_slider_max, view_controls, channel):
     def onContrastMinChanged(value):
         view_controls.setBackgroundContrastValue(channel, 'min', value)
         view_controls.updateView()
@@ -71,3 +72,10 @@ def bindFuncContrastSlider(q_slider_min, q_slider_max, view_controls, channel):
         view_controls.updateView()
     q_slider_min.valueChanged.connect(onContrastMinChanged)
     q_slider_max.valueChanged.connect(onContrastMaxChanged)
+
+def bindFuncBackgroundVisibilityCheckbox(q_checkbox, view_controls, channel):
+    def onVisibilityChanged(state):
+        is_visible = (state == Qt.Checked)
+        view_controls.setBackgroundVisibility(channel, is_visible)
+        view_controls.updateView()
+    q_checkbox.stateChanged.connect(onVisibilityChanged)

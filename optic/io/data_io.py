@@ -11,20 +11,14 @@ from ..preprocessing.preprocessing_table import convertTableDataToDictROICheck, 
 from .file_dialog import openFileDialog, saveFileDialog
 
 # Fallの読み込み, メッセージ付き
-def loadFallMAT(q_window, data_manager, key_dict_Fall, key_dict_im_bg, path_fall, preprocessing=True):
-    try:
-        Fall = loadmat(path_fall)
-        if preprocessing:
-            dict_Fall = convertMatToDictFall(Fall)
-            data_manager.dict_Fall[key_dict_Fall] = dict_Fall
-            dict_im_bg = getBGImageFromFall(data_manager, key_dict_Fall, key_dict_im_bg)
-        else:
-            data_manager.dict_Fall[key_dict_Fall] = Fall
-        QMessageBox.information(q_window, "File load", "File loaded!")
-        return data_manager.dict_Fall[key_dict_Fall]
-    except FileNotFoundError as e:
-        QMessageBox.warning(q_window, "File Not Found", str(e))
-        raise  # エラーを再スローする
+def loadFallMATWithGUI(q_window, data_manager, key_app, path_fall):
+    success = data_manager.loadFallMAT(key_app, path_fall)
+    if success:
+        QMessageBox.information(q_window, "File load", "File loaded successfully!")
+        return True
+    else:
+        QMessageBox.warning(q_window, "File Load Error", "Failed to load the file.")
+        return False
 
 # tif imageの読み込み
 def loadTIFImage(data_manager, key_dict_im_chan2, path_image, preprocessing=True):

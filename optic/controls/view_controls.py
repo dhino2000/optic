@@ -24,11 +24,14 @@ class ViewControls:
         self.config_manager = config_manager
         self.last_click_position = None
         self.bg_contrast = {}
+        self.bg_visibility = {}
         for channel in config_manager.gui_defaults["CHANNELS"]:
             self.bg_contrast[channel] = {
                 'min': config_manager.gui_defaults["DEFAULT_CONTRAST_MIN"],
                 'max': config_manager.gui_defaults["DEFAULT_CONTRAST_MAX"]
             }
+            self.bg_visibility[channel] = True
+
         self.roi_colors = {}
         self.roi_opacity = config_manager.gui_defaults["ROI_VISUAL_SETTINGS"]["DEFAULT_ROI_OPACITY"]
         self.highlight_opacity = config_manager.gui_defaults["ROI_VISUAL_SETTINGS"]["DEFAULT_HIGHLIGHT_OPACITY"]
@@ -67,6 +70,9 @@ class ViewControls:
     
     def getROIDisplay(self, roi_id):
         return self.roi_display[roi_id]
+    
+    def getBackgroundVisibility(self, channel):
+        return self.bg_visibility[channel]
 
     def setROIOpacity(self, opacity):
         self.roi_opacity = opacity
@@ -77,6 +83,10 @@ class ViewControls:
     def setBackgroundContrastValue(self, channel, min_or_max, value):
         if channel in self.bg_contrast and min_or_max in ['min', 'max']:
             self.bg_contrast[channel][min_or_max] = value
+
+    def setBackgroundVisibility(self, channel, is_visible):
+        if channel in self.bg_visibility:
+            self.bg_visibility[channel] = is_visible
 
 def onBGImageTypeChanged(data_manager, key_im_bg_current_type, bg_image_type):
     data_manager.setBGImageCurrentType(key_im_bg_current_type, bg_image_type)

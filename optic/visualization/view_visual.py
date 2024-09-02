@@ -6,16 +6,21 @@ from ..config.constants import ChannelKeys
 
 # q_view widget visualization
 def updateView(view_control, q_scene, q_view, data_manager, key_app):
-    bg_image_chan1 = adjustChannelContrast(
-        image=data_manager.getBGImage(key_app),
-        min_val=view_control.getBackgroundContrastValue(ChannelKeys.CHAN1, 'min'),
-        max_val=view_control.getBackgroundContrastValue(ChannelKeys.CHAN1, 'max'),
-        )
-    bg_image_chan2 = adjustChannelContrast(
-        image=data_manager.getBGChan2Image(key_app),
-        min_val=view_control.getBackgroundContrastValue(ChannelKeys.CHAN2, 'min'),
-        max_val=view_control.getBackgroundContrastValue(ChannelKeys.CHAN2, 'max'),
-        )
+    bg_image_chan1 = None
+    bg_image_chan2 = None
+
+    if view_control.getBackgroundVisibility(ChannelKeys.CHAN1):
+        bg_image_chan1 = adjustChannelContrast(
+            image=data_manager.getBGImage(key_app),
+            min_val=view_control.getBackgroundContrastValue(ChannelKeys.CHAN1, 'min'),
+            max_val=view_control.getBackgroundContrastValue(ChannelKeys.CHAN1, 'max'),
+            )
+    if view_control.getBackgroundVisibility(ChannelKeys.CHAN2):
+        bg_image_chan2 = adjustChannelContrast(
+            image=data_manager.getBGChan2Image(key_app),
+            min_val=view_control.getBackgroundContrastValue(ChannelKeys.CHAN2, 'min'),
+            max_val=view_control.getBackgroundContrastValue(ChannelKeys.CHAN2, 'max'),
+            )
 
     bg_image = convertMonoImageToRGBImage(image_g=bg_image_chan1, image_r=bg_image_chan2)
 
@@ -33,7 +38,9 @@ def updateView(view_control, q_scene, q_view, data_manager, key_app):
 # 白黒画像からカラー画像作成
 def convertMonoImageToRGBImage(image_r: Optional[np.ndarray] = None, 
                                image_g: Optional[np.ndarray] = None, 
-                               image_b: Optional[np.ndarray] = None) -> np.ndarray:
+                               image_b: Optional[np.ndarray] = None,
+                               width = 512, 
+                               height = 512) -> np.ndarray:
     """
     1~3チャンネルの画像を組み合わせてRGB画像を生成する。
 
@@ -46,13 +53,13 @@ def convertMonoImageToRGBImage(image_r: Optional[np.ndarray] = None,
     np.ndarray: 生成されたRGB画像
 
     Raises:
-    ValueError: どのチャンネルにも画像が提供されていない場合
+    ValueError: 提供された画像のサイズが異なる場合
     """
-    # 少なくとも1つのチャンネルに画像があることを確認
-    if image_r is None and image_g is None and image_b is None:
-        raise ValueError("At least one channel image must be provided")
     # 非Noneの画像のリストを作成
     images = [img for img in [image_r, image_g, image_b] if img is not None]
+    if not images:
+        # 全てのチャンネルがNoneの場合、デフォルトサイズの黒い画像を返す
+        return np.zeros((height, width, 3), dtype=np.uint8)
     # すべての画像のサイズが同じであることを確認
     if len(set(img.shape for img in images)) != 1:
         raise ValueError("All provided images must have the same dimensions")
