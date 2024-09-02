@@ -60,3 +60,14 @@ def bindFuncHighlightOpacitySlider(q_slider, view_controls):
         view_controls.setHighlightOpacity(value)
         view_controls.updateView()
     q_slider.valueChanged.connect(onOpacityChanged)
+
+# -> slider_layouts.makeLayoutContrastSlider
+def bindFuncContrastSlider(q_slider_min, q_slider_max, view_controls, channel):
+    def onContrastMinChanged(value):
+        view_controls.setBackgroundContrastValue(channel, 'min', value)
+        view_controls.updateView()
+    def onContrastMaxChanged(value):
+        view_controls.setBackgroundContrastValue(channel, 'max', value)
+        view_controls.updateView()
+    q_slider_min.valueChanged.connect(onContrastMinChanged)
+    q_slider_max.valueChanged.connect(onContrastMaxChanged)
