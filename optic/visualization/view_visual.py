@@ -22,6 +22,7 @@ def updateView(view_control, q_scene, q_view, data_manager, key_app):
             max_val=view_control.getBackgroundContrastValue(ChannelKeys.CHAN2, 'max'),
             )
 
+    (width, height) = view_control.getImageSize()
     bg_image = convertMonoImageToRGBImage(image_g=bg_image_chan1, image_r=bg_image_chan2)
 
     height, width = bg_image.shape[:2]

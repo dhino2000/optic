@@ -40,6 +40,7 @@ class ViewControls:
     
         self.initializeROIColors()
         self.initializeROIDisplay()
+        self.setImageSize()
 
     def updateView(self):
         updateView(self, self.q_scene, self.q_view, self.data_manager, self.key_app)
@@ -74,6 +75,9 @@ class ViewControls:
     
     def getBackgroundVisibility(self, channel):
         return self.bg_visibility[channel]
+    
+    def getImageSize(self):
+        return self.image_sizes
 
     def setROIOpacity(self, opacity):
         self.roi_opacity = opacity
@@ -88,6 +92,9 @@ class ViewControls:
     def setBackgroundVisibility(self, channel, is_visible):
         if channel in self.bg_visibility:
             self.bg_visibility[channel] = is_visible
+
+    def setImageSize(self):
+        self.image_sizes = self.data_manager.getImageSize(self.key_app)
 
 def onBGImageTypeChanged(data_manager, key_im_bg_current_type, bg_image_type):
     data_manager.setBGImageCurrentType(key_im_bg_current_type, bg_image_type)

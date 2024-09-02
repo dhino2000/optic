@@ -29,7 +29,7 @@ class DataManager:
             return False
         
     def getImageSize(self, key_app):
-        return self.dict_Fall[key_app]["ops"]["Lx"].item(), self.dict_Fall[key_app]["ops"]["Ly"].item()
+        return (self.dict_Fall[key_app]["ops"]["Lx"].item(), self.dict_Fall[key_app]["ops"]["Ly"].item())
 
     # 選択中のROIの番号
     def setSelectedROI(self, key_app, roi_id):
