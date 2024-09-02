@@ -37,7 +37,7 @@ class ViewControls:
             self.roi_colors[roi_id] = self.generateRandomColor()
 
     def initializeROIDisplay(self):
-        for roi_id in self.getRoiIDs():
+        for roi_id in self.data_manager.dict_Fall[self.key_app]["stat"].keys():
             self.roi_display[roi_id] = True
 
     def generateRandomColor(self):

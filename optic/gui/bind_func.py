@@ -28,10 +28,11 @@ def bindFuncOpacitySlider(q_slider):
     q_slider.valueChanged.connect(lambda value: func_(value))
 
 # -> table_layouts.makeLayoutTableROICountLabel
-def bindFuncTableSelectionChanged(q_table, data_manager, key):
+def bindFuncTableSelectionChanged(q_table, data_manager, view_controls, key):
     q_table.selectionModel().selectionChanged.connect(
         lambda selected, deselected: onTableSelectionChanged(data_manager, key, selected, deselected)
     )
+    view_controls.updateView()
 
 # -> view_layouts.makeLayoutBGImageTypeDisplay
 def bindFuncRadiobuttonBGImageTypeChanged(q_buttongroup, data_manager, view_controls, key):

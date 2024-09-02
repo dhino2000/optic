@@ -10,6 +10,8 @@ class DataManager:
         self.dict_roicheck             = {}
         self.dict_selected_roi         = {}
 
+        self.initializeDataManager()
+
     # 選択中のROIの番号
     def setSelectedROI(self, key, roi_id):
         self.dict_selected_roi[key] = roi_id
