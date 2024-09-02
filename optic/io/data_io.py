@@ -6,7 +6,7 @@ import tifffile
 import datetime
 from ..gui.table_setup import applyDictROICheckToTable
 from ..preprocessing.preprocessing_fall import convertMatToDictFall, convertMatToDictROICheck
-from ..preprocessing.preprocessing_image import getBGImageFromFall
+from ..preprocessing.preprocessing_image import getBGImageFromFall, convertImageDtypeToINT
 from ..preprocessing.preprocessing_table import convertTableDataToDictROICheck, convertDictROICheckToMatROICheck, convertMatROICheckToDictROICheck
 from .file_dialog import openFileDialog, saveFileDialog
 
@@ -29,8 +29,9 @@ def loadFallMAT(q_window, data_manager, key_dict_Fall, key_dict_im_bg, path_fall
 # tif imageの読み込み
 def loadTIFImage(data_manager, key_dict_im_chan2, path_image, preprocessing=True):
     im = tifffile.imread(path_image)
-    data_manager.dict_im_chan2[key_dict_im_chan2] = im
-    return data_manager.dict_im_chan2[key_dict_im_chan2]
+    im = convertImageDtypeToINT(im)
+    data_manager.dict_im_bg_chan2[key_dict_im_chan2] = im
+    return data_manager.dict_im_bg_chan2[key_dict_im_chan2]
 
 # EventFile npyの読み込み, 初期化
 def loadEventFileNPY(widget_manager, path_npy):

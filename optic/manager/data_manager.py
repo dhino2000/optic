@@ -4,7 +4,7 @@ class DataManager:
     def __init__(self):
         self.dict_Fall                 = {}
         self.dict_im_bg                = defaultdict(dict)
-        self.dict_im_chan2             = {}
+        self.dict_im_bg_chan2          = {}
         self.dict_im_bg_current_type   = {}
         self.dict_eventfile            = {}
         self.dict_roicheck             = {}
