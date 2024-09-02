@@ -5,7 +5,9 @@ from ..preprocessing.preprocessing_image import convertMonoImageToRGBImage
 # q_view widget visualization
 def updateView(view_control, q_scene, q_view, data_manager, key_app):
     bg_image_g = data_manager.getBGImage(key_app)
-    bg_image = convertMonoImageToRGBImage(image_g=bg_image_g)
+    bg_image_r = data_manager.getBGChan2Image(key_app)
+
+    bg_image = convertMonoImageToRGBImage(image_g=bg_image_g, image_r=bg_image_r)
 
     height, width = bg_image.shape[:2]
     qimage = QImage(bg_image.data, width, height, width * 3, QImage.Format_RGB888)

@@ -23,3 +23,6 @@ class DataManager:
     
     def getBGImage(self, key_app):
         return self.dict_im_bg[key_app][self.dict_im_bg_current_type[key_app]]
+    
+    def getBGChan2Image(self, key_app):
+        return self.dict_im_bg_chan2.get(key_app)
