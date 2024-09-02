@@ -15,14 +15,17 @@ class DataManager:
 
     # Fall.matの読み込み
     def loadFallMAT(self, key_app, path_fall, preprocessing=True):
-        Fall = loadmat(path_fall)
-        if preprocessing:
-            dict_Fall = convertMatToDictFall(Fall)
-            self.dict_Fall[key_app] = dict_Fall
-            getBGImageFromFall(self, key_app, key_app)
-            self.dict_im_bg_current_type[key_app] = "meanImg"  # デフォルト設定
-        else:
-            self.dict_Fall[key_app] = Fall
+        try:
+            Fall = loadmat(path_fall)
+            if preprocessing:
+                dict_Fall = convertMatToDictFall(Fall)
+                self.dict_Fall[key_app] = dict_Fall
+                getBGImageFromFall(self, key_app, key_app)
+                self.dict_im_bg_current_type[key_app] = "meanImg"  # デフォルト設定
+            else:
+                self.dict_Fall[key_app] = Fall
+        except FileNotFoundError as e:
+            return False
         
     def getImageSize(self, key_app):
         return self.dict_Fall[key_app]["ops"]["Lx"].item(), self.dict_Fall[key_app]["ops"]["Ly"].item()

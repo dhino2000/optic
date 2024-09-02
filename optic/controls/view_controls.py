@@ -23,6 +23,7 @@ class ViewControls:
         self.widget_manager = widget_manager
         self.config_manager = config_manager
         self.last_click_position = None
+        self.image_sizes = ()
         self.bg_contrast = {}
         self.bg_visibility = {}
         for channel in config_manager.gui_defaults["CHANNELS"]:
