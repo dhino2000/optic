@@ -41,3 +41,6 @@ def bindFuncRadiobuttonBGImageTypeChanged(q_buttongroup, data_manager, view_cont
         onBGImageTypeChanged(data_manager, key, bg_image_type)
         view_controls.updateView()
     q_buttongroup.buttonClicked[int].connect(_onBGImageTypeChanged)
+    # 初期状態を設定し、即座に_onBGImageTypeChangedを呼び出す
+    checked_button = q_buttongroup.checkedButton()
+    _onBGImageTypeChanged(q_buttongroup.id(checked_button))
