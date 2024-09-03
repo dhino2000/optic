@@ -3,8 +3,9 @@ from PyQt5.QtWidgets import QRadioButton
 from PyQt5.QtCore import Qt
 
 class TableControls:
-    def __init__(self, q_table, dict_tablecol, key_function_map):
+    def __init__(self, key_app, q_table, dict_tablecol, key_function_map):
         """
+        key_app          : str
         q_table          : QTableWidget 
         dict_tablecol    : config.app_config.TableColumns
         key_function_map : config.app_config.KeyFunctionMap
