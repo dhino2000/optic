@@ -19,6 +19,5 @@ class ConfigManager:
         AppSettings.setCurrentApp(app_name)
         self.loadDefaultAppSettings()
 
-    def setDictTableColumns(self, key_dict_tablecol):
-        self.dict_tablecol[key_dict_tablecol] = AppSettings.getTableColumns()
-        return self.dict_tablecol[key_dict_tablecol]
+    def setDictTableColumns(self, key_app):
+        self.dict_tablecol[key_app] = AppSettings.getTableColumns()
