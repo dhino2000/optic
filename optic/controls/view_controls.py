@@ -1,6 +1,8 @@
 from ..visualization.view_visual import updateView
+from ..gui.view_setup import setViewSize
 from ..config.constants import ChannelKeys
 import random
+import numpy as np
 
 class ViewControls:
     def __init__(self, key_app, q_view, q_scene, data_manager, widget_manager, config_manager):
@@ -43,8 +45,14 @@ class ViewControls:
         self.initializeROIDisplay()
         self.setImageSize()
 
+
     def updateView(self):
         updateView(self, self.q_scene, self.q_view, self.data_manager, self.key_app)
+
+    def setViewSize(self, use_self_size=True):
+        if use_self_size:
+            width_min, height_min = self.getImageSize()
+            setViewSize(self.q_view, width_min=width_min, height_min=height_min)
 
     def initializeROIColors(self):
         for roi_id in self.data_manager.dict_Fall[self.key_app]["stat"].keys():
@@ -56,15 +64,6 @@ class ViewControls:
 
     def generateRandomColor(self):
         return (random.randint(100, 255), random.randint(100, 255), random.randint(100, 255))
-    
-    def onViewClicked(self, event):
-        scene_pos = self.q_view.mapToScene(event.pos())
-        clicked_x, clicked_y = scene_pos.x(), scene_pos.y()
-
-        closest_roi_id = self.findClosestROI(clicked_x, clicked_y)
-
-        if closest_roi_id is not None:
-            self.widget_manager.dict_table[self.key_app].selectRow(closest_roi_id)
     
     def getROIColor(self, roi_id):
         return self.roi_colors[roi_id]
@@ -106,6 +105,6 @@ class ViewControls:
     def setImageSize(self):
         self.image_sizes = self.data_manager.getImageSize(self.key_app)
 
-def onBGImageTypeChanged(data_manager, key_im_bg_current_type, bg_image_type):
-    data_manager.setBGImageCurrentType(key_im_bg_current_type, bg_image_type)
+    def onBGImageTypeChanged(self, key_im_bg_current_type, bg_image_type):
+        self.data_manager.setBGImageCurrentType(key_im_bg_current_type, bg_image_type)
 

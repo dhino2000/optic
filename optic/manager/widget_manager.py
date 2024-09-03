@@ -63,24 +63,24 @@ def makeWidgetFigureCanvas(figure):
     widget = FigureCanvasQTAgg(figure)
     return widget
 
-# ROI, イメージング画像を表示するscene, view
+# QGraphicsScene Widget
 def makeWidgetScene():
     widget = QGraphicsScene()
     return widget
 
-def makeWidgetView(scene, width_min=530, height_min=530, color="black", anti_aliasing=True, smooth_pixmap_transform=True, func_click=None):
+# QGraphicsView Widget
+def makeWidgetView(scene, width_min=None, height_min=None, color="black", anti_aliasing=True, smooth_pixmap_transform=True):
     widget = QGraphicsView(scene)
-    widget.setMinimumHeight(width_min)
-    widget.setMinimumWidth(height_min)
+    if width_min:
+        widget.setMinimumHeight(width_min)
+    if height_min:
+        widget.setMinimumWidth(height_min)
     widget.setStyleSheet(f"background-color: {color};")  # 背景色を黒に設定
     widget.setViewportUpdateMode(QGraphicsView.FullViewportUpdate)
     if anti_aliasing:
         widget.setRenderHint(QPainter.Antialiasing)  # アンチエイリアシングを有効化
     if smooth_pixmap_transform:
         widget.setRenderHint(QPainter.SmoothPixmapTransform)  # スムーズなピクセルマップ変換を有効化
-    # Event with mouse click
-    if func_click:
-        widget.mousePressEvent = func_click
     return widget
 
 # figureのaxisに追加, 位置を指定
@@ -146,9 +146,9 @@ class WidgetManager:
         self.dict_scene[key] = makeWidgetScene()
         return self.dict_scene[key]
 
-    def makeWidgetView(self, key, width_min=530, height_min=530, color="black", anti_aliasing=True, smooth_pixmap_transform=True, func_click=None):
+    def makeWidgetView(self, key, width_min=None, height_min=None, color="black", anti_aliasing=True, smooth_pixmap_transform=True):
         scene = self.makeWidgetScene(key)
-        self.dict_view[key] = makeWidgetView(scene, width_min, height_min, color, anti_aliasing, smooth_pixmap_transform, func_click)
+        self.dict_view[key] = makeWidgetView(scene, width_min, height_min, color, anti_aliasing, smooth_pixmap_transform)
         return self.dict_view[key]
 
     def addWidgetAxisOnFigure(self, key, figure, num_row, num_col, position):
