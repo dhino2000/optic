@@ -22,6 +22,7 @@ class ViewControls:
         self.data_manager = data_manager
         self.widget_manager = widget_manager
         self.config_manager = config_manager
+
         self.last_click_position = None
         self.image_sizes = ()
         self.bg_contrast = {}
@@ -55,6 +56,15 @@ class ViewControls:
 
     def generateRandomColor(self):
         return (random.randint(100, 255), random.randint(100, 255), random.randint(100, 255))
+    
+    def onViewClicked(self, event):
+        scene_pos = self.q_view.mapToScene(event.pos())
+        clicked_x, clicked_y = scene_pos.x(), scene_pos.y()
+
+        closest_roi_id = self.findClosestROI(clicked_x, clicked_y)
+
+        if closest_roi_id is not None:
+            self.widget_manager.dict_table[self.key_app].selectRow(closest_roi_id)
     
     def getROIColor(self, roi_id):
         return self.roi_colors[roi_id]
