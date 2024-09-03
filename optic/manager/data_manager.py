@@ -11,7 +11,6 @@ class DataManager:
         self.dict_im_bg_current_type   = {}
         self.dict_eventfile            = {}
         self.dict_roicheck             = {}
-        self.dict_selected_roi         = {}
 
     # Fall.matの読み込み
     def loadFallMAT(self, key_app, path_fall, preprocessing=True):
@@ -30,12 +29,6 @@ class DataManager:
         
     def getImageSize(self, key_app):
         return (self.dict_Fall[key_app]["ops"]["Lx"].item(), self.dict_Fall[key_app]["ops"]["Ly"].item())
-
-    # 選択中のROIの番号
-    def setSelectedROI(self, key_app, roi_id):
-        self.dict_selected_roi[key_app] = roi_id
-    def getSelectedROI(self, key_app):
-        return self.dict_selected_roi.get(key_app)
         
     # Background image type
     def setBGImageCurrentType(self, key_app, im_bg_type):

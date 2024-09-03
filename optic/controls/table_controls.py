@@ -110,6 +110,11 @@ class TableControls:
                 self.selected_row = new_row
                 return
             
+    def onSelectionChanged(self, selected, deselected):
+        if selected.indexes():
+            self.selected_row = self.q_table.currentRow()
+            self.selected_column = self.q_table.currentColumn()
+            
     """
     Sub Function
     """
@@ -130,8 +135,3 @@ class TableControls:
                 check_box_item = self.q_table.item(row, col_info['order'])
                 return check_box_item.checkState() == Qt.Checked if check_box_item else False
         return False
-    
-def onTableSelectionChanged(data_manager, key_dict_selected_roi , selected, deselected):
-    if selected.indexes():
-        roi_id = selected.indexes()[0].row()
-        data_manager.setSelectedROI(key_dict_selected_roi, roi_id) # 選択した行番号を保存
