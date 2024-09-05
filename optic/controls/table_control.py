@@ -32,6 +32,7 @@ class TableControl:
         if selected.indexes():
             self.setSelectedRow(self.q_table.currentRow())
             self.setSelectedColumn(self.q_table.currentColumn())
+            self.setSharedAttr_SelectedROI(self.getSelectedRow())
 
     """
     get Functions
@@ -59,6 +60,15 @@ class TableControl:
 
     def setKeyPressEvent(self):
         self.q_table.keyPressEvent = self.keyPressEvent
+
+    """
+    shared_attr Functions
+    """
+    def setSharedAttr_SelectedROI(self, roi_id):
+        self.control_manager.setSharedAttr(self.key_app, 'selected_roi_id', roi_id)
+
+    def getSharedAttr_SelectedROI(self):
+        return self.control_manager.getSharedAttr(self.key_app, 'selected_roi_id')
 
     def keyPressEvent(self, event):
         if self.selected_row is not None and event.key() in self.key_function_map:

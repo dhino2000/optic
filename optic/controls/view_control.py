@@ -50,6 +50,8 @@ class ViewControl:
     # def updateView(self):
     #     updateView(self, self.q_scene, self.q_view, self.data_manager, self.key_app)
 
+
+
     def setViewSize(self, use_self_size=True):
         if use_self_size:
             width_min, height_min = self.getImageSize()
@@ -65,6 +67,10 @@ class ViewControl:
 
     def generateRandomColor(self):
         return (random.randint(100, 255), random.randint(100, 255), random.randint(100, 255))
+    
+    """
+    get Functions
+    """
     
     def getROIColor(self, roi_id):
         return self.roi_colors[roi_id]
@@ -88,6 +94,10 @@ class ViewControl:
     
     def getImageSize(self):
         return self.image_sizes
+    
+    """
+    set Functions
+    """
 
     def setROIOpacity(self, opacity):
         self.roi_opacity = opacity
@@ -109,3 +119,11 @@ class ViewControl:
     # def onBGImageTypeChanged(self, key_im_bg_current_type, bg_image_type):
         # self.data_manager.setBGImageCurrentType(key_im_bg_current_type, bg_image_type)
 
+    """
+    shared_attr Functions
+    """
+    def setSharedAttr_SelectedROI(self, roi_id):
+        self.control_manager.setSharedAttr(self.key_app, 'selected_roi_id', roi_id)
+
+    def getSharedAttr_SelectedROI(self):
+        return self.control_manager.getSharedAttr(self.key_app, 'selected_roi_id')
