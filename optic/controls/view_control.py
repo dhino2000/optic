@@ -5,7 +5,7 @@ import random
 import numpy as np
 
 class ViewControl:
-    def __init__(self, key_app, q_view, q_scene, data_manager, widget_manager, config_manager):
+    def __init__(self, key_app, q_view, q_scene, data_manager, widget_manager, config_manager, control_manager):
         """
         Initializes the ViewControl object.
 
@@ -24,6 +24,7 @@ class ViewControl:
         self.data_manager = data_manager
         self.widget_manager = widget_manager
         self.config_manager = config_manager
+        self.control_manager = control_manager
 
         self.last_click_position = None
         self.image_sizes = ()
