@@ -3,14 +3,18 @@ from PyQt5.QtWidgets import QRadioButton
 from PyQt5.QtCore import Qt
 
 class TableControls:
-    def __init__(self, key_app, q_table, dict_tablecol, key_function_map):
+    def __init__(self, key_app, q_table, data_manager, widget_manager, config_manager, dict_tablecol, key_function_map):
         """
         key_app          : str
         q_table          : QTableWidget 
         dict_tablecol    : config.app_config.TableColumns
         key_function_map : config.app_config.KeyFunctionMap
         """
+        self.key_app = key_app
         self.q_table = q_table
+        self.data_manager = data_manager
+        self.widget_manager = widget_manager
+        self.config_manager = config_manager
         self.dict_tablecol = dict_tablecol
         self.selected_row = 0
         self.selected_column = 0
@@ -18,17 +22,32 @@ class TableControls:
         # 選択を変更したときの関数
         self.q_table.selectionModel().selectionChanged.connect(self.onSelectionChanged)
 
+    def getSelectedRow(self):
+        return self.selected_row
+
+    def getSelectedColumn(self):
+        return self.selected_column
+
+    def setSelectedRow(self, row):
+        self.selected_row = row
+        self.q_table.selectRow(row)
+
+    def setSelectedColumn(self, column):
+        self.selected_column = column
+        self.q_table.setCurrentCell(self.selected_row, column)
+
+    def onSelectionChanged(self, selected, deselected):
+        if selected.indexes():
+            self.selected_row = self.q_table.currentRow()
+            self.selected_column = self.q_table.currentColumn()
+            self.view_controls.updateView()
+
     def keyPressEvent(self, event):
         if self.selected_row is not None and event.key() in self.key_function_map:
             action = self.key_function_map[event.key()]
             self.executeAction(action)
             self.q_table.setCurrentCell(self.selected_row, self.selected_column)
             self.q_table.scrollToItem(self.q_table.item(self.selected_row, self.selected_column))
-
-    def onSelectionChanged(self, selected, deselected):
-        if selected.indexes():
-            self.selected_row = self.q_table.currentRow()
-            self.selected_column = self.q_table.currentColumn()
 
     def executeAction(self, action):
         action_type = action[0] # radio, checkbox, move
@@ -109,11 +128,6 @@ class TableControls:
             if self.getRowChecked(new_row) != skip_checked:
                 self.selected_row = new_row
                 return
-            
-    def onSelectionChanged(self, selected, deselected):
-        if selected.indexes():
-            self.selected_row = self.q_table.currentRow()
-            self.selected_column = self.q_table.currentColumn()
             
     """
     Sub Function

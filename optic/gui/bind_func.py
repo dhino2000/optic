@@ -2,7 +2,6 @@
 # makeLayout <- -> bindFunc
 from ..io.file_dialog import openFileDialogAndSetLineEdit
 from ..io.data_io import saveROICheck, loadROICheck
-from ..controls.table_controls import onTableSelectionChanged
 from ..utils import *
 from PyQt5.QtCore import Qt
 
@@ -20,13 +19,8 @@ def bindFuncROICheckIO(q_window, q_lineedit, q_table, q_button_save, q_button_lo
     q_button_load.clicked.connect(lambda: loadROICheck(q_window, q_table, dict_tablecol))
 
 # -> table_layouts.makeLayoutTableROICountLabel
-def bindFuncTableSelectionChanged(q_table, data_manager, view_controls, key_app):
-    q_table.selectionModel().selectionChanged.connect(
-        lambda selected, deselected: (
-            onTableSelectionChanged(data_manager, key_app, selected, deselected),
-            view_controls.updateView() if view_controls else None,
-        )
-    )
+def bindFuncTableSelectionChanged(q_table, table_controls):
+    q_table.selectionModel().selectionChanged.connect(table_controls.onSelectionChanged)
     
 
 # -> view_layouts.makeLayoutBGImageTypeDisplay
