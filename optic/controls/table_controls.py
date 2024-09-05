@@ -40,7 +40,6 @@ class TableControls:
         if selected.indexes():
             self.selected_row = self.q_table.currentRow()
             self.selected_column = self.q_table.currentColumn()
-            self.view_controls.updateView()
 
     def keyPressEvent(self, event):
         if self.selected_row is not None and event.key() in self.key_function_map:

@@ -46,8 +46,8 @@ class ViewControls:
         self.setImageSize()
 
 
-    def updateView(self):
-        updateView(self, self.q_scene, self.q_view, self.data_manager, self.key_app)
+    # def updateView(self):
+    #     updateView(self, self.q_scene, self.q_view, self.data_manager, self.key_app)
 
     def setViewSize(self, use_self_size=True):
         if use_self_size:
@@ -105,6 +105,6 @@ class ViewControls:
     def setImageSize(self):
         self.image_sizes = self.data_manager.getImageSize(self.key_app)
 
-    def onBGImageTypeChanged(self, key_im_bg_current_type, bg_image_type):
-        self.data_manager.setBGImageCurrentType(key_im_bg_current_type, bg_image_type)
+    # def onBGImageTypeChanged(self, key_im_bg_current_type, bg_image_type):
+        # self.data_manager.setBGImageCurrentType(key_im_bg_current_type, bg_image_type)
 
