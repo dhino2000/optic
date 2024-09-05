@@ -1,8 +1,9 @@
 # キーボードでtableを操作
 from PyQt5.QtWidgets import QRadioButton
 from PyQt5.QtCore import Qt
+from ..gui.table_setup import setupWidgetROITable
 
-class TableControls:
+class TableControl:
     def __init__(self, key_app, q_table, data_manager, widget_manager, config_manager, dict_tablecol, key_function_map):
         """
         key_app          : str
@@ -18,28 +19,45 @@ class TableControls:
         self.dict_tablecol = dict_tablecol
         self.selected_row = 0
         self.selected_column = 0
+        self.len_row = 0
         self.key_function_map = key_function_map
-        # 選択を変更したときの関数
-        self.q_table.selectionModel().selectionChanged.connect(self.onSelectionChanged)
 
+    def setupWidgetROITable(self, key_app):
+        self.setLenRow(len(self.data_manager.dict_Fall[key_app]["stat"])) # for Suite2p
+        self.q_table = setupWidgetROITable(self.q_table, self.len_row, self.dict_tablecol, key_event_ignore=True)
+        self.setKeyPressEvent()
+
+    def onSelectionChanged(self, selected, deselected):
+        if selected.indexes():
+            self.setSelectedRow(self.q_table.currentRow())
+            self.setSelectedColumn(self.q_table.currentColumn())
+
+    """
+    get Functions
+    """
     def getSelectedRow(self):
         return self.selected_row
 
     def getSelectedColumn(self):
         return self.selected_column
+    
+    def getLenRow(self):
+        return self.len_row
 
+    """
+    set Functions
+    """
     def setSelectedRow(self, row):
         self.selected_row = row
-        self.q_table.selectRow(row)
 
     def setSelectedColumn(self, column):
         self.selected_column = column
-        self.q_table.setCurrentCell(self.selected_row, column)
 
-    def onSelectionChanged(self, selected, deselected):
-        if selected.indexes():
-            self.selected_row = self.q_table.currentRow()
-            self.selected_column = self.q_table.currentColumn()
+    def setLenRow(self, len_row):
+        self.len_row = len_row
+
+    def setKeyPressEvent(self):
+        self.q_table.keyPressEvent = self.keyPressEvent
 
     def keyPressEvent(self, event):
         if self.selected_row is not None and event.key() in self.key_function_map:

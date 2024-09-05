@@ -4,10 +4,10 @@ from ..config.constants import ChannelKeys
 import random
 import numpy as np
 
-class ViewControls:
+class ViewControl:
     def __init__(self, key_app, q_view, q_scene, data_manager, widget_manager, config_manager):
         """
-        Initializes the ViewControls object.
+        Initializes the ViewControl object.
 
         Args:
             key_app (str): The key for the application.
