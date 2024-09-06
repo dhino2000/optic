@@ -32,6 +32,15 @@ class GuiDefaults:
             "COLOR_MAX": 255,
             "DEFAULT_ROI_OPACITY": 128,
             "DEFAULT_HIGHLIGHT_OPACITY": 255,
+        },
+        "TABLE_COLUMNS": {
+            "Cell ID"   : {"order": 0, "type": "id",       "width": 100, "editable": False},
+            "Astrocyte" : {"order": 1, "type": "radio",    "width": 100, "group": "celltype", "default": False},
+            "Neuron"    : {"order": 2, "type": "radio",    "width": 100, "group": "celltype", "default": True},
+            "Not Cell"  : {"order": 3, "type": "radio",    "width": 100, "group": "celltype", "default": False},
+            "Check"     : {"order": 4, "type": "checkbox", "width": 100, "default": False},
+            "Tracking"  : {"order": 5, "type": "checkbox", "width": 100, "default": False},
+            "Memo"      : {"order": 6, "type": "string",   "width": 200, "editable": True}
         }
     }
 
@@ -47,6 +56,15 @@ class GuiDefaults:
         return (random.randint(settings["COLOR_MIN"], settings["COLOR_MAX"]),
                 random.randint(settings["COLOR_MIN"], settings["COLOR_MAX"]),
                 random.randint(settings["COLOR_MIN"], settings["COLOR_MAX"]))
+    
+    @classmethod
+    def getROIDisplayOptions(cls, app_name, dict_tablecol):
+        if not hasattr(cls, app_name):
+            raise ValueError(f"Invalid app name: {app_name}")
+        
+        options = getattr(cls, app_name).get("ROI_DISPLAY_OPTIONS", {})
+        cell_types = [key for key, value in dict_tablecol.items() if value['type'] == options.get("CELL_TYPES_COLUMN_TYPE", "radio")]
+        return [options.get("ALL", "All ROI")] + cell_types + [options.get("NONE", "None")]
 
 # Tableに設定する列名とそのプロパティ
 class TableColumns:
