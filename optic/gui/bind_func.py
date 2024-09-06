@@ -19,10 +19,10 @@ def bindFuncROICheckIO(q_window, q_lineedit, q_table, q_button_save, q_button_lo
     q_button_load.clicked.connect(lambda: loadROICheck(q_window, q_table, dict_tablecol))
 
 # -> table_layouts.makeLayoutTableROICountLabel
-def bindFuncTableSelectionChanged(q_table, table_controls):
+def bindFuncTableSelectionChanged(q_table, table_controls, view_controls):
     q_table.selectionModel().selectionChanged.connect(table_controls.onSelectionChanged)
+    view_controls.updateView()
     
-
 # -> view_layouts.makeLayoutBGImageTypeDisplay
 def bindFuncRadiobuttonBGImageTypeChanged(q_buttongroup, view_controls):
     def _onBGImageTypeChanged(button_id):
@@ -54,12 +54,14 @@ def bindFuncBackgroundContrastSlider(q_slider_min, q_slider_max, view_controls, 
             q_slider_max.setValue(value)
         view_controls.setBackgroundContrastValue(channel, 'min', value)
         view_controls.setBackgroundContrastValue(channel, 'max', max(value, current_max))
+        view_controls.updateView()
     def onContrastMaxChanged(value):
         current_min = q_slider_min.value()
         if value < current_min:
             q_slider_min.setValue(value)
         view_controls.setBackgroundContrastValue(channel, 'max', value)
         view_controls.setBackgroundContrastValue(channel, 'min', min(value, current_min))
+        view_controls.updateView()
     q_slider_min.valueChanged.connect(onContrastMinChanged)
     q_slider_max.valueChanged.connect(onContrastMaxChanged)
 
@@ -67,4 +69,6 @@ def bindFuncBackgroundVisibilityCheckbox(q_checkbox, view_controls, channel):
     def onVisibilityChanged(state):
         is_visible = (state == Qt.Checked)
         view_controls.setBackgroundVisibility(channel, is_visible)
+        view_controls.updateView()
     q_checkbox.stateChanged.connect(onVisibilityChanged)
+    
