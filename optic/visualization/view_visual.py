@@ -5,19 +5,20 @@ from typing import Optional
 from ..config.constants import ChannelKeys
 
 # q_view widget visualization
-def updateView(view_control, table_control, q_scene, q_view, data_manager, key_app):
+def updateView(q_scene, q_view, view_control, data_manager, key_app):
     bg_image_chan1 = None
     bg_image_chan2 = None
 
     if view_control.getBackgroundVisibility(ChannelKeys.CHAN1):
+        image_type = view_control.getBackgroundImageType()
         bg_image_chan1 = adjustChannelContrast(
-            image=data_manager.getBGImage(key_app),
+            image=data_manager.getDictBackgroundImage(key_app).get(image_type),
             min_val=view_control.getBackgroundContrastValue(ChannelKeys.CHAN1, 'min'),
             max_val=view_control.getBackgroundContrastValue(ChannelKeys.CHAN1, 'max'),
             )
     if view_control.getBackgroundVisibility(ChannelKeys.CHAN2):
         bg_image_chan2 = adjustChannelContrast(
-            image=data_manager.getBGChan2Image(key_app),
+            image=data_manager.getBackgroundChan2Image(key_app),
             min_val=view_control.getBackgroundContrastValue(ChannelKeys.CHAN2, 'min'),
             max_val=view_control.getBackgroundContrastValue(ChannelKeys.CHAN2, 'max'),
             )
@@ -29,7 +30,7 @@ def updateView(view_control, table_control, q_scene, q_view, data_manager, key_a
     qimage = QImage(bg_image.data, width, height, width * 3, QImage.Format_RGB888)
     pixmap = QPixmap.fromImage(qimage)
 
-    drawAllROIs(view_control, table_control, pixmap, data_manager, key_app)
+    # drawAllROIs(view_control, table_control, pixmap, data_manager, key_app)
 
     q_scene.clear()
     q_scene.addPixmap(pixmap)

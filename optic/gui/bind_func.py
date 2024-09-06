@@ -24,12 +24,12 @@ def bindFuncTableSelectionChanged(q_table, table_controls):
     
 
 # -> view_layouts.makeLayoutBGImageTypeDisplay
-def bindFuncRadiobuttonBGImageTypeChanged(q_buttongroup, view_controls, key_app):
+def bindFuncRadiobuttonBGImageTypeChanged(q_buttongroup, view_controls):
     def _onBGImageTypeChanged(button_id):
         bg_image_type = q_buttongroup.button(button_id).text()
-        # view_controls.onBGImageTypeChanged(key_app, bg_image_type)
+        view_controls.setBackgroundImageType(bg_image_type)
+        view_controls.updateView()
     q_buttongroup.buttonClicked[int].connect(_onBGImageTypeChanged)
-    # 初期状態を設定し、即座に_onBGImageTypeChangedを呼び出す
     checked_button = q_buttongroup.checkedButton()
     _onBGImageTypeChanged(q_buttongroup.id(checked_button))
 
@@ -43,6 +43,7 @@ def bindFuncOpacitySlider(q_slider, view_controls):
 def bindFuncHighlightOpacitySlider(q_slider, view_controls):
     def onOpacityChanged(value):
         view_controls.setHighlightOpacity(value)
+        view_controls.updateView()
     q_slider.valueChanged.connect(onOpacityChanged)
 
 # -> slider_layouts.makeLayoutContrastSlider

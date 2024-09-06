@@ -1,6 +1,6 @@
 from ..visualization.view_visual import updateView
 from ..gui.view_setup import setViewSize
-from ..config.constants import ChannelKeys
+from ..config.constants import BGImageTypeList
 import random
 import numpy as np
 from typing import List, Tuple, Dict, Optional, Callable
@@ -29,6 +29,7 @@ class ViewControl:
 
         self.last_click_position:   Tuple[int, int]             = ()
         self.image_sizes:           Tuple[int, int]             = ()
+        self.bg_image_type:         str                         = BGImageTypeList.FALL[0]
         self.bg_contrast:           Dict[str, Dict[str, int]]   = {}
         self.bg_visibility:         Dict[str, bool]             = {}
         for channel in config_manager.gui_defaults["CHANNELS"]:
@@ -49,7 +50,7 @@ class ViewControl:
 
 
     def updateView(self):
-        updateView(self, self.q_scene, self.q_view, self.data_manager, self.key_app)
+        updateView(self.q_scene, self.q_view, self, self.data_manager, self.key_app)
 
     """
     initialize Functions
@@ -83,6 +84,9 @@ class ViewControl:
     def getHighlightOpacity(self):
         return self.highlight_opacity
     
+    def getBackgroundImageType(self) -> str:
+        return self.bg_image_type
+    
     def getBackgroundContrastValue(self, channel, min_or_max):
         if channel in self.bg_contrast and min_or_max in ['min', 'max']:
             return self.bg_contrast[channel][min_or_max]
@@ -107,6 +111,9 @@ class ViewControl:
     def setHighlightOpacity(self, opacity):
         self.highlight_opacity = opacity
 
+    def setBackgroundImageType(self, bg_type: str):
+        self.bg_image_type = bg_type
+
     def setBackgroundContrastValue(self, channel, min_or_max, value):
         if channel in self.bg_contrast and min_or_max in ['min', 'max']:
             self.bg_contrast[channel][min_or_max] = value
@@ -117,9 +124,6 @@ class ViewControl:
 
     def setImageSize(self):
         self.image_sizes = self.data_manager.getImageSize(self.key_app)
-
-    # def onBGImageTypeChanged(self, key_im_bg_current_type, bg_image_type):
-        # self.data_manager.setBGImageCurrentType(key_im_bg_current_type, bg_image_type)
 
     """
     shared_attr Functions
