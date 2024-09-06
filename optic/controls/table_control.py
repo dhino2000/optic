@@ -11,17 +11,17 @@ class TableControl:
         dict_tablecol    : config.app_config.TableColumns
         key_function_map : config.app_config.KeyFunctionMap
         """
-        self.key_app = key_app
-        self.q_table = q_table
-        self.data_manager = data_manager
-        self.widget_manager = widget_manager
-        self.config_manager = config_manager
-        self.control_manager = control_manager
-        self.dict_tablecol = dict_tablecol
-        self.selected_row = 0
-        self.selected_column = 0
-        self.len_row = 0
-        self.key_function_map = key_function_map
+        self.key_app:           str = key_app
+        self.q_table                = q_table
+        self.data_manager           = data_manager
+        self.widget_manager         = widget_manager
+        self.config_manager         = config_manager
+        self.control_manager        = control_manager
+        self.dict_tablecol          = dict_tablecol
+        self.selected_row:      int = 0
+        self.selected_column:   int = 0
+        self.len_row:           int = 0
+        self.key_function_map       = key_function_map
 
     def setupWidgetROITable(self, key_app):
         self.setLenRow(len(self.data_manager.dict_Fall[key_app]["stat"])) # for Suite2p
@@ -69,6 +69,7 @@ class TableControl:
 
     def getSharedAttr_SelectedROI(self):
         return self.control_manager.getSharedAttr(self.key_app, 'selected_roi_id')
+    
 
     def keyPressEvent(self, event):
         if self.selected_row is not None and event.key() in self.key_function_map:

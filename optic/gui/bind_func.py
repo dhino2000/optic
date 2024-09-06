@@ -37,6 +37,7 @@ def bindFuncRadiobuttonBGImageTypeChanged(q_buttongroup, view_controls, key_app)
 def bindFuncOpacitySlider(q_slider, view_controls):
     def onOpacityChanged(value):
         view_controls.setROIOpacity(value)
+        view_controls.updateView()
     q_slider.valueChanged.connect(onOpacityChanged)
 
 def bindFuncHighlightOpacitySlider(q_slider, view_controls):

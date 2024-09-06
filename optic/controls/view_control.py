@@ -3,6 +3,7 @@ from ..gui.view_setup import setViewSize
 from ..config.constants import ChannelKeys
 import random
 import numpy as np
+from typing import List, Tuple, Dict, Optional, Callable
 
 class ViewControl:
     def __init__(self, key_app, q_view, q_scene, data_manager, widget_manager, config_manager, control_manager):
@@ -18,18 +19,18 @@ class ViewControl:
             config_manager (ConfigManager): The ConfigManager object.
         """
         # Rest of the code...
-        self.key_app = key_app
-        self.q_view = q_view
-        self.q_scene = q_scene
-        self.data_manager = data_manager
-        self.widget_manager = widget_manager
-        self.config_manager = config_manager
+        self.key_app         = key_app
+        self.q_view          = q_view
+        self.q_scene         = q_scene
+        self.data_manager    = data_manager
+        self.widget_manager  = widget_manager
+        self.config_manager  = config_manager
         self.control_manager = control_manager
 
-        self.last_click_position = None
-        self.image_sizes = ()
-        self.bg_contrast = {}
-        self.bg_visibility = {}
+        self.last_click_position:   Tuple[int, int]             = ()
+        self.image_sizes:           Tuple[int, int]             = ()
+        self.bg_contrast:           Dict[str, Dict[str, int]]   = {}
+        self.bg_visibility:         Dict[str, bool]             = {}
         for channel in config_manager.gui_defaults["CHANNELS"]:
             self.bg_contrast[channel] = {
                 'min': config_manager.gui_defaults["DEFAULT_CONTRAST_MIN"],
@@ -37,21 +38,22 @@ class ViewControl:
             }
             self.bg_visibility[channel] = True
 
-        self.roi_colors = {}
-        self.roi_opacity = config_manager.gui_defaults["ROI_VISUAL_SETTINGS"]["DEFAULT_ROI_OPACITY"]
-        self.highlight_opacity = config_manager.gui_defaults["ROI_VISUAL_SETTINGS"]["DEFAULT_HIGHLIGHT_OPACITY"]
-        self.roi_display = {}
+        self.roi_colors:        Dict[int, Tuple[int, int, int]] = {}
+        self.roi_opacity:       int                             = int(config_manager.gui_defaults["ROI_VISUAL_SETTINGS"]["DEFAULT_ROI_OPACITY"])
+        self.highlight_opacity: int                             = int(config_manager.gui_defaults["ROI_VISUAL_SETTINGS"]["DEFAULT_HIGHLIGHT_OPACITY"])
+        self.roi_display:       Dict[int, bool]                 = {}
     
         self.initializeROIColors()
         self.initializeROIDisplay()
         self.setImageSize()
 
 
-    # def updateView(self):
-    #     updateView(self, self.q_scene, self.q_view, self.data_manager, self.key_app)
+    def updateView(self):
+        updateView(self, self.q_scene, self.q_view, self.data_manager, self.key_app)
 
-
-
+    """
+    initialize Functions
+    """
     def setViewSize(self, use_self_size=True):
         if use_self_size:
             width_min, height_min = self.getImageSize()
