@@ -28,12 +28,6 @@ class TableControl:
         self.q_table = setupWidgetROITable(self.q_table, self.len_row, self.dict_tablecol, key_event_ignore=True)
         self.setKeyPressEvent()
 
-    def onSelectionChanged(self, selected, deselected):
-        if selected.indexes():
-            self.setSelectedRow(self.q_table.currentRow())
-            self.setSelectedColumn(self.q_table.currentColumn())
-            self.setSharedAttr_SelectedROI(self.getSelectedRow())
-
     """
     get Functions
     """

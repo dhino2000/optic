@@ -50,7 +50,7 @@ class ViewControl:
 
 
     def updateView(self):
-        updateView(self.q_scene, self.q_view, self, self.data_manager, self.key_app)
+        updateView(self.q_scene, self.q_view, self, self.data_manager, self.control_manager, self.key_app)
 
     """
     initialize Functions

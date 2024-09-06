@@ -5,7 +5,7 @@ from typing import Optional
 from ..config.constants import ChannelKeys
 
 # q_view widget visualization
-def updateView(q_scene, q_view, view_control, data_manager, key_app):
+def updateView(q_scene, q_view, view_control, data_manager, control_manager, key_app):
     bg_image_chan1 = None
     bg_image_chan2 = None
 
@@ -30,7 +30,7 @@ def updateView(q_scene, q_view, view_control, data_manager, key_app):
     qimage = QImage(bg_image.data, width, height, width * 3, QImage.Format_RGB888)
     pixmap = QPixmap.fromImage(qimage)
 
-    # drawAllROIs(view_control, table_control, pixmap, data_manager, key_app)
+    drawAllROIs(view_control, pixmap, data_manager, control_manager, key_app)
 
     q_scene.clear()
     q_scene.addPixmap(pixmap)
@@ -91,7 +91,7 @@ def adjustChannelContrast(image, min_val, max_val, dtype=np.uint8):
         image_adjusted = None
     return image_adjusted
 
-def drawAllROIs(view_control, table_control, pixmap, data_manager, key_app):
+def drawAllROIs(view_control, pixmap, data_manager, control_manager, key_app):
     painter = QPainter(pixmap)
     painter.setRenderHint(QPainter.Antialiasing)
     
@@ -99,7 +99,7 @@ def drawAllROIs(view_control, table_control, pixmap, data_manager, key_app):
         if view_control.getROIDisplay(roiId):
             drawROI(view_control, painter, roiStat, roiId)
     
-    highlightSelectedROI(view_control, table_control, painter, data_manager, key_app)
+    highlightSelectedROI(view_control, painter, data_manager, control_manager, key_app)
     painter.end()
 
 def drawROI(view_control, painter, roiStat, roiId):
@@ -113,8 +113,8 @@ def drawROI(view_control, painter, roiStat, roiId):
     for x, y in zip(xpix, ypix):
         painter.drawPoint(int(x), int(y))
 
-def highlightSelectedROI(view_control, table_control, painter, data_manager, key_app):
-    selectedRoiId = table_control.getSelectedRow()
+def highlightSelectedROI(view_control, painter, data_manager, control_manager, key_app):
+    selectedRoiId = control_manager.getSharedAttr(key_app, "selected_roi_id")
     if selectedRoiId is not None:
         roiStat = data_manager.dict_Fall[key_app]["stat"][selectedRoiId]
         xpix, ypix = roiStat["xpix"], roiStat["ypix"]
