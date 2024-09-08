@@ -4,7 +4,7 @@ from PyQt5.QtCore import Qt
 from ..gui.table_setup import setupWidgetROITable
 
 class TableControl:
-    def __init__(self, key_app, q_table, data_manager, widget_manager, config_manager, control_manager, dict_tablecol, key_function_map):
+    def __init__(self, key_app, q_table, data_manager, widget_manager, config_manager, control_manager):
         """
         key_app          : str
         q_table          : QTableWidget 
@@ -17,11 +17,11 @@ class TableControl:
         self.widget_manager         = widget_manager
         self.config_manager         = config_manager
         self.control_manager        = control_manager
-        self.dict_tablecol          = dict_tablecol
+        self.dict_tablecol          = self.config_manager.getTableColumns(self.key_app).getColumns()
+        self.key_function_map       = self.config_manager.getKeyFunctionMap(self.key_app).getAllMappings()
         self.selected_row:      int = 0
         self.selected_column:   int = 0
         self.len_row:           int = 0
-        self.key_function_map       = key_function_map
 
     def setupWidgetROITable(self, key_app):
         self.setLenRow(len(self.data_manager.dict_Fall[key_app]["stat"])) # for Suite2p
