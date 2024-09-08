@@ -2,6 +2,8 @@
 from typing import Dict, Any, Tuple
 from PyQt5.QtCore import Qt
 from .constants import FileFilters, ProcessingDefaults, PlotColors, AppKeys, ChannelKeys, AxisKeys
+from .table_columns import TableColumns
+from .key_function_map import KeyFunctionMap
 import random
 
 # GUIに関する定数
@@ -41,6 +43,25 @@ class GuiDefaults:
             "Check"     : {"order": 4, "type": "checkbox", "width": 100, "default": False},
             "Tracking"  : {"order": 5, "type": "checkbox", "width": 100, "default": False},
             "Memo"      : {"order": 6, "type": "string",   "width": 200, "editable": True}
+        },
+        "KEY_FUNCTION_MAP": {
+        Qt.Key_Up: ('move', 'up', 1),
+        Qt.Key_Down: ('move', 'down', 1),
+        Qt.Key_Left: ('move', 'left', 1),
+        Qt.Key_Right: ('move', 'right', 1),
+        Qt.Key_Z: ('radio', 1),
+        Qt.Key_X: ('radio', 2),
+        Qt.Key_C: ('radio', 3),
+        Qt.Key_V: ('checkbox', 4),
+        Qt.Key_B: ('checkbox', 5),
+        Qt.Key_U: ('move', 'cell_type', -1),
+        Qt.Key_I: ('move', 'skip_checked', -1),
+        Qt.Key_O: ('move', 'skip_unchecked', -1),
+        Qt.Key_J: ('move', 'cell_type', 1),
+        Qt.Key_K: ('move', 'skip_checked', 1),
+        Qt.Key_L: ('move', 'skip_unchecked', 1),
+        Qt.Key_H: ('move', 'selected_type', 1),
+        Qt.Key_Y: ('move', 'selected_type', -1),
         }
     }
 
@@ -66,61 +87,32 @@ class GuiDefaults:
         cell_types = [key for key, value in dict_tablecol.items() if value['type'] == options.get("CELL_TYPES_COLUMN_TYPE", "radio")]
         return [options.get("ALL", "All ROI")] + cell_types + [options.get("NONE", "None")]
 
-# Tableに設定する列名とそのプロパティ
-class TableColumns:
-    SUITE2P_ROI_CHECK: Dict[str, Dict[str, Any]] = {
-        "Cell ID"   : {"order": 0, "type": "id",       "width": 100, "editable": False},
-        "Astrocyte" : {"order": 1, "type": "radio",    "width": 100, "group": "celltype", "default": False},
-        "Neuron"    : {"order": 2, "type": "radio",    "width": 100, "group": "celltype", "default": True},
-        "Not Cell"  : {"order": 3, "type": "radio",    "width": 100, "group": "celltype", "default": False},
-        "Check"     : {"order": 4, "type": "checkbox", "width": 100, "default": False},
-        "Tracking"  : {"order": 5, "type": "checkbox", "width": 100, "default": False},
-        "Memo"      : {"order": 6, "type": "string",   "width": 200, "editable": True}
-    }
-
-
-# キーボードに対応する操作
-class KeyFunctionMap:
-    SUITE2P_ROI_CHECK: Dict[int, Tuple[str, Any]] = {
-        Qt.Key_Up: ('move', 'up', 1),
-        Qt.Key_Down: ('move', 'down', 1),
-        Qt.Key_Left: ('move', 'left', 1),
-        Qt.Key_Right: ('move', 'right', 1),
-        Qt.Key_Z: ('radio', 1),
-        Qt.Key_X: ('radio', 2),
-        Qt.Key_C: ('radio', 3),
-        Qt.Key_V: ('checkbox', 4),
-        Qt.Key_B: ('checkbox', 5),
-        Qt.Key_U: ('move', 'cell_type', -1),
-        Qt.Key_I: ('move', 'skip_checked', -1),
-        Qt.Key_O: ('move', 'skip_unchecked', -1),
-        Qt.Key_J: ('move', 'cell_type', 1),
-        Qt.Key_K: ('move', 'skip_checked', 1),
-        Qt.Key_L: ('move', 'skip_unchecked', 1),
-        Qt.Key_H: ('move', 'selected_type', 1),
-        Qt.Key_Y: ('move', 'selected_type', -1),
-    }
-
-
 # 上記のconfigをアプリ名で設定
 class AppSettings:
     CURRENT_APP = "SUITE2P_ROI_CHECK"
 
     @classmethod
-    def getTableColumns(cls) -> Dict[str, Dict[str, Any]]:
-        return getattr(TableColumns, cls.current_app, {})
+    def getTableColumns(cls, app_name=None):
+        app_name = app_name or cls.CURRENT_APP
+        columns_config = getattr(GuiDefaults, app_name)["TABLE_COLUMNS"]
+        return TableColumns(columns_config)
 
     @classmethod
-    def getKeyFunctionMap(cls) -> Dict[int, Tuple[str, Any]]:
-        return getattr(KeyFunctionMap, cls.current_app, {})
+    def getKeyFunctionMap(cls, app_name=None):
+        app_name = app_name or cls.CURRENT_APP
+        key_function_config = getattr(GuiDefaults, app_name)["KEY_FUNCTION_MAP"]
+        return KeyFunctionMap(key_function_config)
 
     @classmethod
-    def getGuiDefaults(cls) -> Dict[str, int]:
-        return getattr(GuiDefaults, cls.current_app)
+    def getGuiDefaults(cls, app_name=None):
+        app_name = app_name or cls.CURRENT_APP
+        return getattr(GuiDefaults, app_name)
 
     @classmethod
-    def setCurrentApp(cls, app_name: str):
-        if hasattr(TableColumns, app_name) and hasattr(KeyFunctionMap, app_name):
-            cls.current_app = app_name
+    def setCurrentApp(cls, app_name):
+        if hasattr(GuiDefaults, app_name):
+            cls.CURRENT_APP = app_name
         else:
             raise ValueError(f"Invalid app name: {app_name}")
+
+
