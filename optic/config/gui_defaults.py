@@ -15,8 +15,8 @@ class GuiDefaults:
             "INIT_POSITION_Y": 100,
             "WIDTH": 1200,
             "HEIGHT": 200,
-            "MAX_WIDTH": 1920,
-            "MAX_HEIGHT": 1080,
+            # "MAX_WIDTH": 1920,
+            # "MAX_HEIGHT": 1080,
         },
         "TITLE": "Suite2pROICheckGUI",
         "APP_KEYS": [AppKeys.PRI],
@@ -72,7 +72,7 @@ class GuiDefaults:
             },
         },
     }
-    
+
     SUITE2P_ROI_TRACKING = {
         "MIN_PLOT_RANGE": 30,
         "WINDOW_SETTINGS": {
@@ -80,8 +80,8 @@ class GuiDefaults:
             "INIT_POSITION_Y": 100,
             "WIDTH": 1200,
             "HEIGHT": 200,
-            "MAX_WIDTH": 1920,
-            "MAX_HEIGHT": 1080,
+            # "MAX_WIDTH": 1920,
+            # "MAX_HEIGHT": 1080,
         },
         "TITLE": "Suite2pROITrackingGUI",
         "APP_KEYS": [AppKeys.PRI, AppKeys.SEC],
