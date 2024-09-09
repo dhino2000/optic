@@ -6,25 +6,21 @@ class AppSettings:
     CURRENT_APP = "SUITE2P_ROI_CHECK"
 
     @classmethod
-    def getTableColumns(cls, app_name=None, app_key=None):
+    def getTableColumns(cls, app_name=None):
         app_name = app_name or cls.CURRENT_APP
-        columns_config = getattr(GuiDefaults, app_name)["TABLE_COLUMNS"]
-        if app_key:
-            return TableColumns(columns_config.get(app_key, {}))
+        columns_config = getattr(GuiDefaults, app_name)[0]["TABLE_COLUMNS"]
         return {k: TableColumns(v) for k, v in columns_config.items()}
 
     @classmethod
-    def getKeyFunctionMap(cls, app_name=None, app_key=None):
+    def getKeyFunctionMap(cls, app_name=None):
         app_name = app_name or cls.CURRENT_APP
-        key_function_config = getattr(GuiDefaults, app_name)["KEY_FUNCTION_MAP"]
-        if app_key:
-            return KeyFunctionMap(key_function_config.get(app_key, {}))
+        key_function_config = getattr(GuiDefaults, app_name)[0]["KEY_FUNCTION_MAP"]
         return {k: KeyFunctionMap(v) for k, v in key_function_config.items()}
 
     @classmethod
     def getGuiDefaults(cls, app_name=None):
         app_name = app_name or cls.CURRENT_APP
-        return getattr(GuiDefaults, app_name)
+        return getattr(GuiDefaults, app_name)[0]
 
     @classmethod
     def setCurrentApp(cls, app_name):

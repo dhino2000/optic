@@ -34,8 +34,8 @@ class ViewControl:
         self.bg_visibility:         Dict[str, bool]             = {}
         for channel in config_manager.gui_defaults["CHANNELS"]:
             self.bg_contrast[channel] = {
-                'min': config_manager.gui_defaults["DEFAULT_CONTRAST_MIN"],
-                'max': config_manager.gui_defaults["DEFAULT_CONTRAST_MAX"]
+                'min': config_manager.gui_defaults["VIEW_SETTINGS"]["DEFAULT_CONTRAST_MIN"],
+                'max': config_manager.gui_defaults["VIEW_SETTINGS"]["DEFAULT_CONTRAST_MAX"]
             }
             self.bg_visibility[channel] = True
 

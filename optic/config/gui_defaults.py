@@ -9,18 +9,18 @@ import random
 # GUIに関する定数
 class GuiDefaults:
     SUITE2P_ROI_CHECK = {
-        "ROI_OPACITY": 50,
-        "SELECTED_ROI_OPACITY": 255,
         "MIN_PLOT_RANGE": 30,
-        "INIT_POSITION_X": 100, 
-        "INIT_POSITION_Y": 100,
-        "WIDTH": 1200,
-        "HEIGHT": 200,
+        "WINDOW_SETTINGS": {
+            "INIT_POSITION_X": 100, 
+            "INIT_POSITION_Y": 100,
+            "WIDTH": 1200,
+            "HEIGHT": 200,
+            "MAX_WIDTH": 1920,
+            "MAX_HEIGHT": 1080,
+        },
         "TITLE": "Suite2pROICheckGUI",
         "APP_KEYS": [AppKeys.PRI],
         "CHANNELS": [ChannelKeys.CHAN1, ChannelKeys.CHAN2],
-        "DEFAULT_CONTRAST_MIN": 0,
-        "DEFAULT_CONTRAST_MAX": 255,
         "ROI_THRESHOLDS": {
             "npix": "(50, 200)",
             "radius": "(3, 12)",
@@ -28,6 +28,10 @@ class GuiDefaults:
             "compact": "(0, 1.5)",
             "skew": "(1, 100)",
             "std": "(0, 100)",
+        },
+        "VIEW_SETTINGS": {
+            "DEFAULT_CONTRAST_MIN": 0,
+            "DEFAULT_CONTRAST_MAX": 255,
         },
         "ROI_VISUAL_SETTINGS": {
             "COLOR_MIN": 100,
@@ -70,13 +74,15 @@ class GuiDefaults:
     },
 
     SUITE2P_ROI_TRACKING = {
-        "ROI_OPACITY": 50,
-        "SELECTED_ROI_OPACITY": 255,
         "MIN_PLOT_RANGE": 30,
-        "INIT_POSITION_X": 100, 
-        "INIT_POSITION_Y": 100,
-        "WIDTH": 1200,
-        "HEIGHT": 200,
+        "WINDOW_SETTINGS": {
+            "INIT_POSITION_X": 100, 
+            "INIT_POSITION_Y": 100,
+            "WIDTH": 1200,
+            "HEIGHT": 200,
+            "MAX_WIDTH": 1920,
+            "MAX_HEIGHT": 1080,
+        },
         "TITLE": "Suite2pROICheckGUI",
         "APP_KEYS": [AppKeys.PRI, AppKeys.SEC],
         "CHANNELS": [ChannelKeys.CHAN1, ChannelKeys.CHAN2, ChannelKeys.CHAN3],
