@@ -86,8 +86,10 @@ class GuiDefaults:
         "TITLE": "Suite2pROICheckGUI",
         "APP_KEYS": [AppKeys.PRI, AppKeys.SEC],
         "CHANNELS": [ChannelKeys.CHAN1, ChannelKeys.CHAN2, ChannelKeys.CHAN3],
-        "DEFAULT_CONTRAST_MIN": 0,
-        "DEFAULT_CONTRAST_MAX": 255,
+        "VIEW_SETTINGS": {
+            "DEFAULT_CONTRAST_MIN": 0,
+            "DEFAULT_CONTRAST_MAX": 255,
+        },
         "ROI_THRESHOLDS": {
             "npix": "(50, 200)",
             "radius": "(3, 12)",
@@ -163,19 +165,6 @@ class GuiDefaults:
             },
         },
     }
-
-    @classmethod
-    def generateRandomColor(cls, app_name="SUITE2P_ROI_CHECK"):
-        if not hasattr(cls, app_name):
-            raise ValueError(f"Invalid app name: {app_name}")
-        
-        settings = getattr(cls, app_name).get("ROI_VISUAL_SETTINGS")
-        if not settings:
-            raise ValueError(f"ROI_VISUAL_SETTINGS not found for app: {app_name}")
-        
-        return (random.randint(settings["COLOR_MIN"], settings["COLOR_MAX"]),
-                random.randint(settings["COLOR_MIN"], settings["COLOR_MAX"]),
-                random.randint(settings["COLOR_MIN"], settings["COLOR_MAX"]))
     
     @classmethod
     def getROIDisplayOptions(cls, app_name, dict_tablecol):
