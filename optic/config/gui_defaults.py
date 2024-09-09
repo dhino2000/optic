@@ -71,8 +71,8 @@ class GuiDefaults:
                 Qt.Key_Y: ('move', 'selected_type', -1),
             },
         },
-    },
-
+    }
+    
     SUITE2P_ROI_TRACKING = {
         "MIN_PLOT_RANGE": 30,
         "WINDOW_SETTINGS": {
@@ -83,7 +83,7 @@ class GuiDefaults:
             "MAX_WIDTH": 1920,
             "MAX_HEIGHT": 1080,
         },
-        "TITLE": "Suite2pROICheckGUI",
+        "TITLE": "Suite2pROITrackingGUI",
         "APP_KEYS": [AppKeys.PRI, AppKeys.SEC],
         "CHANNELS": [ChannelKeys.CHAN1, ChannelKeys.CHAN2, ChannelKeys.CHAN3],
         "VIEW_SETTINGS": {
