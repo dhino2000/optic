@@ -25,6 +25,11 @@ def saveFileDialog(q_widget, file_type, title="Save File", initial_dir=""):
     file_path, _ = QFileDialog.getSaveFileName(q_widget, title, initial_dir, file_filter, options=options)
     return file_path
 
+def openFolderDialog(q_widget, title="Select Folder", initial_dir=""):
+    options = QFileDialog.Options()
+    folder_path = QFileDialog.getExistingDirectory(q_widget, title, initial_dir, options=options)
+    return folder_path
+
 # 選択したファイルのパスをQLineEditに表示
 def openFileDialogAndSetLineEdit(q_widget, file_type, line_edit, title="Open File", initial_dir=""):
     if not isinstance(line_edit, QLineEdit):

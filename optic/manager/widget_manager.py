@@ -53,6 +53,38 @@ def makeWidgetTable():
     widget = QTableWidget()
     return widget
 
+# QTable ListWidget
+def makeWidgetListbox(parent=None, 
+                      items=None, 
+                      selection_mode=QListWidget.SingleSelection,
+                      editable=False,
+                      drag_drop_mode=QListWidget.NoDragDrop):
+    """
+    QListWidgetを作成し、設定する関数
+
+    :param parent: 親ウィジェット
+    :param items: リストに追加するアイテムのリスト
+    :param selection_mode: 選択モード
+    :param editable: アイテムを編集可能にするかどうか
+    :param drag_drop_mode: ドラッグ＆ドロップモード
+    :return: 設定されたQListWidget
+    """
+    widget = QListWidget(parent)
+    
+    if items:
+        widget.addItems(items)
+    
+    widget.setSelectionMode(selection_mode)
+    
+    # 編集可能設定
+    if editable:
+        widget.setEditTriggers(QAbstractItemView.DoubleClicked)
+    
+    # ドラッグ＆ドロップモード設定
+    widget.setDragDropMode(drag_drop_mode)
+    
+    return widget
+
 # Figure Widget
 def makeWidgetFigure():
     widget = Figure()
@@ -102,7 +134,7 @@ class WidgetManager:
         self.dict_checkbox    = {} # checkboxの保管
         self.dict_slider      = {} # sliderの保管
         self.dict_combobox    = {} # pulldownの保管
-        self.dict_list        = {} # ListWidgetの保管
+        self.dict_listbox     = {} # ListWidgetの保管
         self.dict_buttongroup = {}
         self.dict_scene       = {}
         self.dict_view        = {}
@@ -133,6 +165,10 @@ class WidgetManager:
     def makeWidgetTable(self, key):
         self.dict_table[key] = makeWidgetTable()
         return self.dict_table[key]
+    
+    def makeWidgetListbox(self, key, parent=None, items=None, selection_mode=QListWidget.SingleSelection, editable=False, drag_drop_mode=QListWidget.NoDragDrop):
+        self.dict_listbox[key] = makeWidgetListbox(parent, items, selection_mode, editable, drag_drop_mode)
+        return self.dict_listbox[key]
 
     def makeWidgetFigure(self, key):
         self.dict_figure[key] = Figure()
