@@ -40,9 +40,7 @@ def updateView(q_scene, q_view, view_control, data_manager, control_manager, key
 # 白黒画像からカラー画像作成
 def convertMonoImageToRGBImage(image_r: Optional[np.ndarray] = None, 
                                image_g: Optional[np.ndarray] = None, 
-                               image_b: Optional[np.ndarray] = None,
-                               width = 512, 
-                               height = 512) -> np.ndarray:
+                               image_b: Optional[np.ndarray] = None) -> np.ndarray:
     """
     1~3チャンネルの画像を組み合わせてRGB画像を生成する。
 
