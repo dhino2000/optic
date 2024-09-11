@@ -104,6 +104,7 @@ class GuiDefaults:
             "DEFAULT_ROI_OPACITY": 128,
             "DEFAULT_HIGHLIGHT_OPACITY": 255,
         },
+        "ROI_MATCHING_METHOD": ["None", "affine", "bspline"],
         "TABLE_COLUMNS": {
             AppKeys.PRI: {
                 "Cell ID"   : {"order": 0, "type": "id",       "width": 100, "editable": False},
