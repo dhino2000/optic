@@ -1,15 +1,15 @@
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QFont
 
-def setAppStyle(app: QApplication, font_name: str = "MS UI Gothic", font_size: int = 9, widget_height: int = 25, widget_margin: int = 2):
+def setAppStyle(app: QApplication, font_name: str = "MS UI Gothic", font_size: int = 12, widget_height: int = 20, widget_margin: int = 2):
     """
     アプリケーション全体のスタイルを設定する。
 
     :param app: QApplicationインスタンス
     :param font_name: フォント名（デフォルトは "MS UI Gothic"）
-    :param font_size: フォントサイズ（デフォルトは 9）
-    :param widget_height: ウィジェットの高さ（デフォルトは 25）
-    :param widget_margin: ウィジェットの余白（デフォルトは 2）
+    :param font_size: フォントサイズ
+    :param widget_height: ウィジェットの高さ
+    :param widget_margin: ウィジェットの余白
     """
     # フォントの設定
     font = QFont(font_name, font_size)
