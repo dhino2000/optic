@@ -174,8 +174,8 @@ class WidgetManager:
         return self.dict_table[key]
     
     def makeWidgetListWidget(self, key, parent=None, items=None, selection_mode=QListWidget.SingleSelection, editable=False, drag_drop_mode=QListWidget.NoDragDrop):
-        self.dict_listbox[key] = makeWidgetListWidget(parent, items, selection_mode, editable, drag_drop_mode)
-        return self.dict_listbox[key]
+        self.dict_listwidget[key] = makeWidgetListWidget(parent, items, selection_mode, editable, drag_drop_mode)
+        return self.dict_listwidget[key]
     
     def makeWidgetComboBox(self, key, items=None):
         self.dict_combobox[key] = makeWidgetComboBox(items)
