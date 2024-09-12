@@ -2,9 +2,6 @@
 from typing import Dict, Any, Tuple
 from PyQt5.QtCore import Qt
 from .constants import FileFilters, ProcessingDefaults, PlotColors, AppKeys, ChannelKeys, AxisKeys
-from .table_columns import TableColumns
-from .key_function_map import KeyFunctionMap
-import random
 
 # GUIに関する定数
 class GuiDefaults:
@@ -15,6 +12,14 @@ class GuiDefaults:
             "INIT_POSITION_Y": 100,
             "WIDTH": 1200,
             "HEIGHT": 200,
+            # "MAX_WIDTH": 1920,
+            # "MAX_HEIGHT": 1080,
+        },
+        "WINDOW_SETTINGS_TABLE_COLUMNS_CONFIG": {
+            "INIT_POSITION_X": 100, 
+            "INIT_POSITION_Y": 100,
+            "WIDTH": 600,
+            "HEIGHT": 400,
             # "MAX_WIDTH": 1920,
             # "MAX_HEIGHT": 1080,
         },

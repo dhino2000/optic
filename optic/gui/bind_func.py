@@ -14,8 +14,8 @@ def bindFuncExit(q_window, q_button):
     q_button.clicked.connect(lambda: exitApp(q_window))
 
 # -> widget_manager.dict_button["table_config"]
-def bindFuncTableColumnsConfig(q_button, table_columns):
-    q_button.clicked.connect(lambda: table_columns.openConfigWindow())
+def bindFuncTableColumnsConfig(q_window, q_button, table_columns, gui_defaults):
+    q_button.clicked.connect(lambda: table_columns.openConfigWindow(q_window, gui_defaults))
 
 # -> io_layouts.makeLayoutROICheckIO
 def bindFuncROICheckIO(q_window, q_lineedit, q_table, q_button_save, q_button_load, table_columns, local_var=True):
