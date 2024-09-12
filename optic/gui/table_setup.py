@@ -3,12 +3,12 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QAbstractItemView, QTableWidgetItem, QRadioButton, QButtonGroup
 from ..controls.event_filters import applyKeyPressEventIgnore
 
-def setupWidgetROITable(q_table, len_row, dict_tablecol, key_event_ignore=True):
+def setupWidgetROITable(q_table, len_row, table_columns, key_event_ignore=True):
     q_table.clearSelection() # テーブルの選択初期化
 
     q_table.setRowCount(len_row)
     # 列を順序に基づいてソート
-    col_sorted = sorted(dict_tablecol.items(), key=lambda x: x[1]['order'])
+    col_sorted = sorted(table_columns.items(), key=lambda x: x[1]['order'])
     q_table.setColumnCount(len(col_sorted))
 
     # ヘッダーの設定
@@ -56,11 +56,11 @@ def setupWidgetROITable(q_table, len_row, dict_tablecol, key_event_ignore=True):
     return q_table
 
 # dict_roicheckの内容をtableに反映
-def applyDictROICheckToTable(q_table, dict_tablecol, dict_roicheck):
+def applyDictROICheckToTable(q_table, table_columns, dict_roicheck):
     row_count = q_table.rowCount()
 
     # ラジオボタンの設定
-    for col_name, col_info in dict_tablecol.items():
+    for col_name, col_info in table_columns.items():
         if col_info['type'] == 'radio':
             if col_name in dict_roicheck:
                 selected_rows = dict_roicheck[col_name]
@@ -78,7 +78,7 @@ def applyDictROICheckToTable(q_table, dict_tablecol, dict_roicheck):
                             radio_button.setChecked(any(row == sr[0] for sr in selected_rows))
 
     # チェックボックスと文字列の設定
-    for col_name, col_info in dict_tablecol.items():
+    for col_name, col_info in table_columns.items():
         if col_info['type'] in ['checkbox', 'string']:
             if col_name in dict_roicheck:
                 data = dict_roicheck[col_name]

@@ -168,12 +168,12 @@ class GuiDefaults:
     }
     
     @classmethod
-    def getROIDisplayOptions(cls, app_name, dict_tablecol):
+    def getROIDisplayOptions(cls, app_name, table_columns):
         if not hasattr(cls, app_name):
             raise ValueError(f"Invalid app name: {app_name}")
         
         options = getattr(cls, app_name).get("ROI_DISPLAY_OPTIONS", {})
-        cell_types = [key for key, value in dict_tablecol.items() if value['type'] == options.get("CELL_TYPES_COLUMN_TYPE", "radio")]
+        cell_types = [key for key, value in table_columns.items() if value['type'] == options.get("CELL_TYPES_COLUMN_TYPE", "radio")]
         return [options.get("ALL", "All ROI")] + cell_types + [options.get("NONE", "None")]
 
 

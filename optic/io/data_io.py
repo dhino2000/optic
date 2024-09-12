@@ -68,12 +68,12 @@ def generateSavePath(path_src, prefix="", suffix="", new_extension=None, remove_
     return path_dst
 
 # Tableの内容をROICheckとして保存
-def saveROICheck(q_window, q_lineedit, q_table, dict_tablecol, local_var=True):
+def saveROICheck(q_window, q_lineedit, q_table, table_columns, local_var=True):
     path_src = q_lineedit.text()
     path_dst = generateSavePath(path_src, prefix="ROIcheck_", remove_strings="Fall_")
     path_dst = saveFileDialog(q_widget=q_window, file_type="mat", title="Save ROIcheck mat File", initial_dir=path_dst)
     try:
-        dict_roicheck = convertTableDataToDictROICheck(q_table, dict_tablecol, local_var)
+        dict_roicheck = convertTableDataToDictROICheck(q_table, table_columns, local_var)
         mat_roicheck = convertDictROICheckToMatROICheck(dict_roicheck)
         savemat(path_dst, mat_roicheck)
         QMessageBox.information(q_window, "File save", "ROICheck file saved!")
@@ -83,11 +83,11 @@ def saveROICheck(q_window, q_lineedit, q_table, dict_tablecol, local_var=True):
 
 
 # ROICheckを読み込んでTableを更新
-def loadROICheck(q_window, q_table, dict_tablecol):
+def loadROICheck(q_window, q_table, table_columns):
     path_roicheck = openFileDialog(q_widget=q_window, file_type="mat", title="Open ROIcheck mat File")
     # try:
     dict_roicheck = convertMatROICheckToDictROICheck(loadmat(path_roicheck))
-    applyDictROICheckToTable(q_table, dict_tablecol, dict_roicheck)
+    applyDictROICheckToTable(q_table, table_columns, dict_roicheck)
     QMessageBox.information(q_window, "File load", "ROICheck file loaded!")
     # except Exception as e:
         # QMessageBox.warning(q_window, "File load failed", f"Error loading ROICheck file: {e}")

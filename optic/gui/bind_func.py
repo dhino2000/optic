@@ -14,9 +14,9 @@ def bindFuncExit(q_window, q_button):
     q_button.clicked.connect(lambda: exitApp(q_window))
 
 # -> io_layouts.makeLayoutROICheckIO
-def bindFuncROICheckIO(q_window, q_lineedit, q_table, q_button_save, q_button_load, dict_tablecol, local_var=True):
-    q_button_save.clicked.connect(lambda: saveROICheck(q_window, q_lineedit, q_table, dict_tablecol, local_var))
-    q_button_load.clicked.connect(lambda: loadROICheck(q_window, q_table, dict_tablecol))
+def bindFuncROICheckIO(q_window, q_lineedit, q_table, q_button_save, q_button_load, table_columns, local_var=True):
+    q_button_save.clicked.connect(lambda: saveROICheck(q_window, q_lineedit, q_table, table_columns, local_var))
+    q_button_load.clicked.connect(lambda: loadROICheck(q_window, q_table, table_columns))
 
 # -> table_layouts.makeLayoutTableROICountLabel
 def bindFuncTableSelectionChanged(q_table, table_controls, view_controls):

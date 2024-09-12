@@ -8,7 +8,7 @@ class TableControl:
         """
         key_app          : str
         q_table          : QTableWidget 
-        dict_tablecol    : config.app_config.TableColumns
+        table_columns    : config.app_config.TableColumns
         key_function_map : config.app_config.KeyFunctionMap
         """
         self.key_app:           str = key_app
@@ -17,7 +17,7 @@ class TableControl:
         self.widget_manager         = widget_manager
         self.config_manager         = config_manager
         self.control_manager        = control_manager
-        self.dict_tablecol          = self.config_manager.getTableColumns(self.key_app).getColumns()
+        self.table_columns          = self.config_manager.getTableColumns(self.key_app).getColumns()
         self.key_function_map       = self.config_manager.getKeyFunctionMap(self.key_app).getAllMappings()
         self.selected_row:      int = 0
         self.selected_column:   int = 0
@@ -25,7 +25,7 @@ class TableControl:
 
     def setupWidgetROITable(self, key_app):
         self.setLenRow(len(self.data_manager.dict_Fall[key_app]["stat"])) # for Suite2p
-        self.q_table = setupWidgetROITable(self.q_table, self.len_row, self.dict_tablecol, key_event_ignore=True)
+        self.q_table = setupWidgetROITable(self.q_table, self.len_row, self.table_columns, key_event_ignore=True)
         self.setKeyPressEvent()
 
     """
@@ -109,7 +109,7 @@ class TableControl:
 
     # select radiobutton
     def selectRadioButton(self, row, column):
-        for col_name, col_info in self.dict_tablecol.items():
+        for col_name, col_info in self.table_columns.items():
             if col_info['type'] == 'radio' and col_info['order'] == column:
                 radio_button = self.q_table.cellWidget(row, column)
                 if isinstance(radio_button, QRadioButton):
@@ -118,7 +118,7 @@ class TableControl:
     
     # check/uncheck checkbox
     def toggleCheckBox(self, row, column):
-        for col_name, col_info in self.dict_tablecol.items():
+        for col_name, col_info in self.table_columns.items():
             if col_info['type'] == 'checkbox' and col_info['order'] == column:
                 check_box_item = self.q_table.item(row, column)
                 if check_box_item:
@@ -158,7 +158,7 @@ class TableControl:
             
     # get celltype of current row, Neruon/Astrocyte/...
     def getCurrentCellType(self, row):
-        for col_name, col_info in self.dict_tablecol.items():
+        for col_name, col_info in self.table_columns.items():
             if col_info['type'] == 'radio':
                 radio_button = self.q_table.cellWidget(row, col_info['order'])
                 if radio_button and radio_button.isChecked():
@@ -167,7 +167,7 @@ class TableControl:
 
     # detect "Check" is checked or not
     def getRowChecked(self, row):
-        for col_name, col_info in self.dict_tablecol.items():
+        for col_name, col_info in self.table_columns.items():
             if col_info['type'] == 'checkbox' and col_name == 'Check':
                 check_box_item = self.q_table.item(row, col_info['order'])
                 return check_box_item.checkState() == Qt.Checked if check_box_item else False

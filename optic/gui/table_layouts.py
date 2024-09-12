@@ -5,23 +5,23 @@ from .info_layouts import makeLayoutROICount
 from .table_setup import setupWidgetROITable
 
 # TableWidgetとROI数のラベル
-def makeLayoutTableROICountLabel(widget_manager, key_label, key_table, dict_tablecol):
+def makeLayoutTableROICountLabel(widget_manager, key_label, key_table, table_columns):
     layout = QVBoxLayout()
     # table
     q_table = widget_manager.makeWidgetTable(key=key_table)
     
     # label
-    layout_label = makeLayoutROICount(widget_manager, key_label, dict_tablecol)
+    layout_label = makeLayoutROICount(widget_manager, key_label, table_columns)
 
     layout.addWidget(q_table)
     layout.addLayout(layout_label)
     return layout
 
 # 全てのROIを同じcelltypeにそろえる
-def makeLayoutAllROISetSameCelltype(widget_manager, key_button, dict_tablecol):
+def makeLayoutAllROISetSameCelltype(widget_manager, key_button, table_columns):
     layout = QHBoxLayout()
 
-    list_celltype = [key for key in dict_tablecol.keys() if dict_tablecol[key].get("group") == "celltype"]
+    list_celltype = [key for key in table_columns.keys() if table_columns[key].get("group") == "celltype"]
     for celltype in list_celltype:
         layout.addWidget(widget_manager.makeWidgetButton(key=f"{key_button}_roi_set_{celltype}", label=f"Set {celltype}"))
     return layout

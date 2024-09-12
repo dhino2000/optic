@@ -4,14 +4,14 @@ import numpy as np
 from PyQt5.QtCore import Qt
 
 # Tableの内容をdict_roicheckに保管
-def convertTableDataToDictROICheck(q_table, dict_tablecol, local_var=True):
+def convertTableDataToDictROICheck(q_table, table_columns, local_var=True):
     if local_var:
         cell_type_keys = ROICheckMatKeysLocal.cell_type_keys # ローカル変数
     
     dict_roicheck = {}
     row_count = q_table.rowCount()
     # 列ごとに処理
-    for col_name, col_info in dict_tablecol.items():
+    for col_name, col_info in table_columns.items():
         if col_info['type'] == 'radio':
             selected_rows = []
             for row in range(row_count):
