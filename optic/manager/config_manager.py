@@ -22,7 +22,7 @@ class ConfigManager:
             self.key_function_maps[key_app] = KeyFunctionMap(key_map)
 
     def getTableColumns(self, key_app):
-        return self.table_columns.get(key_app)
+        return self.table_columns[key_app]
 
     def getKeyFunctionMap(self, key_app):
         return self.key_function_maps.get(key_app)
