@@ -29,6 +29,7 @@ class TableControl:
         self.setKeyPressEvent()
 
     def updateWidgetROITable(self):
+        self.q_table.clear()
         self.q_table = setupWidgetROITable(self.q_table, self.len_row, self.table_columns.getColumns(), key_event_ignore=True)
 
     """
