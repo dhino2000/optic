@@ -81,7 +81,40 @@ class TableColumnConfigWindow(QDialog):
         self.widget_manager.makeWidgetLineEdit(key=f"width_{row}", text_set=TableColumnConfigWindow_Config.DEFAULT_PARAMS[2])
         self.widget_manager.dict_table["table_columns"].setCellWidget(row, 2, self.widget_manager.dict_lineedit[f"width_{row}"])
 
+    def convertTableToTableColumns(self):
+        table_columns = {}
+        table = self.widget_manager.dict_table["table_columns"]
+        celltype_found = False  # celltypeの最初の要素を追跡
+
+        for row in range(table.rowCount()):
+            col_name = table.cellWidget(row, 0).text()
+            col_type = table.cellWidget(row, 1).currentText()
+            col_width = int(table.cellWidget(row, 2).text())
+
+            column_info = {
+                "order": row,
+                "type": col_type,
+                "width": col_width
+            }
+
+            if col_type == "celltype":
+                if not celltype_found:
+                    column_info["default"] = True
+                    celltype_found = True
+                else:
+                    column_info["default"] = False
+            elif col_type == "checkbox":
+                column_info["default"] = False
+
+            table_columns[col_name] = column_info
+        return table_columns
+        
+    def updateTableColumns(self):
+        table_columns = self.convertTableToTableColumns()
+        self.table_columns.setColumns(table_columns)
+
     def bindFuncAllWidget(self):
+        self.widget_manager.dict_button["update"].clicked.connect(self.updateTableColumns)
         self.widget_manager.dict_button["exit"].clicked.connect(self.close)
         self.widget_manager.dict_button["del_col"].clicked.connect(self.deleteSelectedColumns)
         self.widget_manager.dict_button["add_col"].clicked.connect(self.addNewColumn)

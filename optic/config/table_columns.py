@@ -9,6 +9,10 @@ class TableColumns:
     def getColumns(self) -> Dict[str, Dict[str, Any]]:
         return deepcopy(self._columns)
     
+    def setColumns(self, new_columns: Dict[str, Dict[str, Any]]):
+        self._columns = new_columns
+        self._column_order = sorted(self._columns.keys(), key=lambda x: self._columns[x]['order'])
+    
     def openConfigWindow(self, parent, gui_defaults):
         from .table_columns_config import TableColumnConfigWindow
         config_window = TableColumnConfigWindow(parent, self, gui_defaults)
