@@ -17,10 +17,9 @@ def makeLayoutROIThresholds(widget_manager, key_label, key_lineedit, key_checkbo
 # 表示するROIの種類を選択するbuttongroup
 def makeLayoutROITypeDisplay(q_widget, widget_manager, key_buttongroup, table_columns):
     # ROIの表示切り替え All, Cell, Not Cell
-    roidisp_options = ["All ROI"]
+    roidisp_options = ["All ROI", "None"]
     # Table colをもとに作成
-    roidisp_options.extend([key for key, value in table_columns.items() if value['type'] == 'radio'])
-    roidisp_options.append("None")
+    roidisp_options.extend([key for key, value in table_columns.items() if value['type'] == 'celltype'])
     layout = makeLayoutButtonGroup(q_widget, widget_manager, key_buttongroup=key_buttongroup, list_label_buttongroup=roidisp_options)
     return layout
 
@@ -34,7 +33,7 @@ def makeLayoutBGImageTypeDisplay(q_widget, widget_manager, key_buttongroup):
 # 画面クリック時 Astrocyte, Neuron, Not Cell, Check, TrackingのROIをスキップするか
 def makeLayoutROIChooseSkip(widget_manager, key_checkbox, table_columns):
     layout = QHBoxLayout()
-    skip_items = [key for key, value in table_columns.items() if value['type'] in ['radio', 'checkbox']]
+    skip_items = [key for key, value in table_columns.items() if value['type'] in ['celltype', 'checkbox']]
     for item in skip_items:
         key_checkbox_item = f"skip_{item}"
         label_checkbox_item = f"Skip {item} ROI"

@@ -21,7 +21,7 @@ def makeLayoutTableROICountLabel(widget_manager, key_label, key_table, table_col
 def makeLayoutAllROISetSameCelltype(widget_manager, key_button, table_columns):
     layout = QHBoxLayout()
 
-    list_celltype = [key for key in table_columns.keys() if table_columns[key].get("group") == "celltype"]
+    list_celltype = [key for key, value in table_columns.items() if value['type'] == 'celltype']
     for celltype in list_celltype:
         layout.addWidget(widget_manager.makeWidgetButton(key=f"{key_button}_roi_set_{celltype}", label=f"Set {celltype}"))
     return layout
