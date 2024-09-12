@@ -3,6 +3,7 @@ from PyQt5.QtCore import Qt
 from ..manager.widget_manager import WidgetManager
 from ..manager.init_managers import initManagers
 from ..config.constants import TableColumnConfigWindow_Config
+from ..utils.table_utils import deleteSelectedRows, addRow
 
 # Table Columns Config
 class TableColumnConfigWindow(QDialog):
@@ -27,7 +28,7 @@ class TableColumnConfigWindow(QDialog):
         layout.addWidget(self.widget_manager.makeWidgetTable(key="table_columns"))
         self.widget_manager.dict_table["table_columns"].setColumnCount(3)
         self.widget_manager.dict_table["table_columns"].setHorizontalHeaderLabels(TableColumnConfigWindow_Config.COLUMNS)
-        self.populateConfigTable()
+        self.setupConfigTable()
 
         layout_column = QHBoxLayout()
         layout_column.addWidget(self.widget_manager.makeWidgetButton(key="add_col", label="Add column"))
@@ -43,24 +44,44 @@ class TableColumnConfigWindow(QDialog):
 
         self.bindFuncAllWidget()
 
-    def populateConfigTable(self):
+    def setupConfigTable(self):
         columns = self.table_columns.getColumns()
         self.widget_manager.dict_table["table_columns"].setRowCount(len(columns))
         
         for i, (col_name, col_info) in enumerate(columns.items()):
             # Column Name
-            self.widget_manager.makeWidgetLineEdit(key="col_name", text_set=col_name)
-            self.widget_manager.dict_table["table_columns"].setCellWidget(i, 0, self.widget_manager.dict_lineedit["col_name"])
+            self.widget_manager.makeWidgetLineEdit(key=f"col_name_{i}", text_set=col_name)
+            self.widget_manager.dict_table["table_columns"].setCellWidget(i, 0, self.widget_manager.dict_lineedit[f"col_name_{i}"])
             
             # Type
-            self.widget_manager.makeWidgetComboBox(key="type")
-            self.widget_manager.dict_combobox["type"].addItems(TableColumnConfigWindow_Config.COMBO_ITEMS)
-            self.widget_manager.dict_combobox["type"].setCurrentText(col_info['type'])
-            self.widget_manager.dict_table["table_columns"].setCellWidget(i, 1, self.widget_manager.dict_combobox["type"])
+            self.widget_manager.makeWidgetComboBox(key=f"type_{i}")
+            self.widget_manager.dict_combobox[f"type_{i}"].addItems(TableColumnConfigWindow_Config.COMBO_ITEMS)
+            self.widget_manager.dict_combobox[f"type_{i}"].setCurrentText(col_info[f'type'])
+            self.widget_manager.dict_table["table_columns"].setCellWidget(i, 1, self.widget_manager.dict_combobox[f"type_{i}"])
             
             # Width
-            self.widget_manager.makeWidgetLineEdit(key="width", text_set=str(col_info['width']))
-            self.widget_manager.dict_table["table_columns"].setCellWidget(i, 2, self.widget_manager.dict_lineedit["width"])
+            self.widget_manager.makeWidgetLineEdit(key=f"width_{i}", text_set=str(col_info['width']))
+            self.widget_manager.dict_table["table_columns"].setCellWidget(i, 2, self.widget_manager.dict_lineedit[f"width_{i}"])
+
+    def deleteSelectedColumns(self):
+        deleteSelectedRows(self.widget_manager.dict_table["table_columns"])
+
+    def addNewColumn(self):
+        row = addRow(self.widget_manager.dict_table["table_columns"])
+        
+        # 新しい行にウィジェットを追加
+        self.widget_manager.makeWidgetLineEdit(key=f"col_name_{row}", text_set=TableColumnConfigWindow_Config.DEFAULT_PARAMS[0])
+        self.widget_manager.dict_table["table_columns"].setCellWidget(row, 0, self.widget_manager.dict_lineedit[f"col_name_{row}"])
+        
+        self.widget_manager.makeWidgetComboBox(key=f"type_{row}")
+        self.widget_manager.dict_combobox[f"type_{row}"].addItems(TableColumnConfigWindow_Config.COMBO_ITEMS)
+        self.widget_manager.dict_combobox[f"type_{row}"].setCurrentText(TableColumnConfigWindow_Config.DEFAULT_PARAMS[1])
+        self.widget_manager.dict_table["table_columns"].setCellWidget(row, 1, self.widget_manager.dict_combobox[f"type_{row}"])
+
+        self.widget_manager.makeWidgetLineEdit(key=f"width_{row}", text_set=TableColumnConfigWindow_Config.DEFAULT_PARAMS[2])
+        self.widget_manager.dict_table["table_columns"].setCellWidget(row, 2, self.widget_manager.dict_lineedit[f"width_{row}"])
 
     def bindFuncAllWidget(self):
         self.widget_manager.dict_button["exit"].clicked.connect(self.close)
+        self.widget_manager.dict_button["del_col"].clicked.connect(self.deleteSelectedColumns)
+        self.widget_manager.dict_button["add_col"].clicked.connect(self.addNewColumn)

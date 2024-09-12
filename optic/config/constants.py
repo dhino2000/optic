@@ -60,3 +60,4 @@ class AxisKeys:
 class TableColumnConfigWindow_Config:
     COLUMNS = ['Column Name', 'Type', 'Width']
     COMBO_ITEMS = ['id', 'celltype', 'checkbox', 'string']
+    DEFAULT_PARAMS = ["new cell type", "celltype", "80"]
