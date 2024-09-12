@@ -78,7 +78,7 @@ class TableControl:
             move_type = action[1] # cell_type, skip_checked, skip_unchecked, selected_type
             step = action[2]
             self.moveCell(move_type, step) 
-        elif action_type == 'radio':
+        elif action_type == 'celltype':
             col_order = action[1]
             self.selectRadioButton(self.selected_row, col_order)
         elif action_type == 'checkbox':
@@ -110,7 +110,7 @@ class TableControl:
     # select radiobutton
     def selectRadioButton(self, row, column):
         for col_name, col_info in self.table_columns.items():
-            if col_info['type'] == 'radio' and col_info['order'] == column:
+            if col_info['type'] == 'celltype' and col_info['order'] == column:
                 radio_button = self.q_table.cellWidget(row, column)
                 if isinstance(radio_button, QRadioButton):
                     radio_button.setChecked(True)
@@ -159,7 +159,7 @@ class TableControl:
     # get celltype of current row, Neruon/Astrocyte/...
     def getCurrentCellType(self, row):
         for col_name, col_info in self.table_columns.items():
-            if col_info['type'] == 'radio':
+            if col_info['type'] == 'celltype':
                 radio_button = self.q_table.cellWidget(row, col_info['order'])
                 if radio_button and radio_button.isChecked():
                     return col_name
