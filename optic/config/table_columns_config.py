@@ -112,10 +112,10 @@ class TableColumnConfigWindow(QDialog):
     def updateTableColumns(self):
         table_columns = self.convertTableToTableColumns()
         self.table_columns.setColumns(table_columns)
-        self.close()
+        self.accept()
 
     def bindFuncAllWidget(self):
         self.widget_manager.dict_button["update"].clicked.connect(self.updateTableColumns)
-        self.widget_manager.dict_button["exit"].clicked.connect(self.close)
+        self.widget_manager.dict_button["exit"].clicked.connect(self.reject)
         self.widget_manager.dict_button["del_col"].clicked.connect(self.deleteSelectedColumns)
         self.widget_manager.dict_button["add_col"].clicked.connect(self.addNewColumn)
