@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QDialog, QVBoxLayout, QTableWidget, QTableWidgetItem, QComboBox, QLineEdit
+from PyQt5.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QTableWidget, QTableWidgetItem, QComboBox, QLineEdit
 from PyQt5.QtCore import Qt
 from ..manager.widget_manager import WidgetManager
 from ..manager.init_managers import initManagers
@@ -28,8 +28,15 @@ class TableColumnConfigWindow(QDialog):
         self.widget_manager.dict_table["table_columns"].setHorizontalHeaderLabels(['Column Name', 'Type', 'Width'])
         self.populateConfigTable()
 
-        layout.addWidget(self.widget_manager.makeWidgetButton(key="update", label="Update"))
-        layout.addWidget(self.widget_manager.makeWidgetButton(key="exit", label="Exit"))
+        layout_column = QHBoxLayout()
+        layout_column.addWidget(self.widget_manager.makeWidgetButton(key="add_col", label="Add column"))
+        layout_column.addWidget(self.widget_manager.makeWidgetButton(key="del_col", label="Delete column"))
+        layout_update_exit = QHBoxLayout()
+        layout_update_exit.addWidget(self.widget_manager.makeWidgetButton(key="update", label="Update"))
+        layout_update_exit.addWidget(self.widget_manager.makeWidgetButton(key="exit", label="Exit"))
+
+        layout.addLayout(layout_column)
+        layout.addLayout(layout_update_exit)
 
         self.setLayout(layout)
 
