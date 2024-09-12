@@ -41,13 +41,13 @@ class GuiDefaults:
         },
         "TABLE_COLUMNS": {
             AppKeys.PRI: {
-                "Cell ID"   : {"order": 0, "type": "id",       "width": 80, "editable": False},
-                "Astrocyte" : {"order": 1, "type": "radio",    "width": 80, "group": "celltype", "default": False},
-                "Neuron"    : {"order": 2, "type": "radio",    "width": 80, "group": "celltype", "default": True},
-                "Not Cell"  : {"order": 3, "type": "radio",    "width": 80, "group": "celltype", "default": False},
+                "Cell ID"   : {"order": 0, "type": "id",       "width": 80},
+                "Astrocyte" : {"order": 1, "type": "celltype", "width": 80, "default": False},
+                "Neuron"    : {"order": 2, "type": "celltype", "width": 80, "default": True},
+                "Not Cell"  : {"order": 3, "type": "celltype", "width": 80, "default": False},
                 "Check"     : {"order": 4, "type": "checkbox", "width": 80, "default": False},
                 "Tracking"  : {"order": 5, "type": "checkbox", "width": 80, "default": False},
-                "Memo"      : {"order": 6, "type": "string",   "width": 200, "editable": True}
+                "Memo"      : {"order": 6, "type": "string",   "width": 200}
             },
         },
         "KEY_FUNCTION_MAP": {
