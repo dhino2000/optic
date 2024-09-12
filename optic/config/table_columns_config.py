@@ -23,13 +23,17 @@ class TableColumnConfigWindow(QDialog):
         self.setWindowTitle('Table Column Configuration')
         layout = QVBoxLayout()
 
-        self.widget_manager.makeWidgetTable(key="table_columns")
+        layout.addWidget(self.widget_manager.makeWidgetTable(key="table_columns"))
         self.widget_manager.dict_table["table_columns"].setColumnCount(3)
         self.widget_manager.dict_table["table_columns"].setHorizontalHeaderLabels(['Column Name', 'Type', 'Width'])
         self.populateConfigTable()
 
-        layout.addWidget(self.widget_manager.dict_table["table_columns"])
+        layout.addWidget(self.widget_manager.makeWidgetButton(key="update", label="Update"))
+        layout.addWidget(self.widget_manager.makeWidgetButton(key="exit", label="Exit"))
+
         self.setLayout(layout)
+
+        self.bindFuncAllWidget()
 
     def populateConfigTable(self):
         columns = self.table_columns.getColumns()
@@ -49,3 +53,6 @@ class TableColumnConfigWindow(QDialog):
             # Width
             self.widget_manager.makeWidgetLineEdit(key="width", text_set=str(col_info['width']))
             self.widget_manager.dict_table["table_columns"].setCellWidget(i, 2, self.widget_manager.dict_lineedit["width"])
+
+    def bindFuncAllWidget(self):
+        self.widget_manager.dict_button["exit"].clicked.connect(self.close)
