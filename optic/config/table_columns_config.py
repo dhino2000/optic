@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QTableWidget, QTa
 from PyQt5.QtCore import Qt
 from ..manager.widget_manager import WidgetManager
 from ..manager.init_managers import initManagers
+from ..config.constants import TableColumnConfigWindow_Config
 
 # Table Columns Config
 class TableColumnConfigWindow(QDialog):
@@ -25,7 +26,7 @@ class TableColumnConfigWindow(QDialog):
 
         layout.addWidget(self.widget_manager.makeWidgetTable(key="table_columns"))
         self.widget_manager.dict_table["table_columns"].setColumnCount(3)
-        self.widget_manager.dict_table["table_columns"].setHorizontalHeaderLabels(['Column Name', 'Type', 'Width'])
+        self.widget_manager.dict_table["table_columns"].setHorizontalHeaderLabels(TableColumnConfigWindow_Config.COLUMNS)
         self.populateConfigTable()
 
         layout_column = QHBoxLayout()
@@ -53,7 +54,7 @@ class TableColumnConfigWindow(QDialog):
             
             # Type
             self.widget_manager.makeWidgetComboBox(key="type")
-            self.widget_manager.dict_combobox["type"].addItems(['id', 'celltype', 'checkbox', 'string'])
+            self.widget_manager.dict_combobox["type"].addItems(TableColumnConfigWindow_Config.COMBO_ITEMS)
             self.widget_manager.dict_combobox["type"].setCurrentText(col_info['type'])
             self.widget_manager.dict_table["table_columns"].setCellWidget(i, 1, self.widget_manager.dict_combobox["type"])
             

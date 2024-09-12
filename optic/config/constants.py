@@ -55,3 +55,8 @@ class AxisKeys:
     TOP = "top"
     MID = "mid"
     BOT = "bot"
+
+# Table Columns Config
+class TableColumnConfigWindow_Config:
+    COLUMNS = ['Column Name', 'Type', 'Width']
+    COMBO_ITEMS = ['id', 'celltype', 'checkbox', 'string']
