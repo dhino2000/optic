@@ -1,5 +1,5 @@
 from ..manager.widget_manager import WidgetManager
-from .app_setup import setupMainWindow, clearLayout
+from .app_setup import setupMainWindow
 from .app_style import setAppStyle, applyAppStyle
 from .base_layouts import makeLayoutLineEditLabel, makeLayoutButtonGroup, makeLayoutSliderLabel
 from .info_layouts import makeLayoutROIProperty, makeLayoutROICount

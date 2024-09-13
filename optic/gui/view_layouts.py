@@ -1,5 +1,6 @@
 # viewに関係するlayout
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout
+from ..utils.layout_utils import clearLayout
 from .base_layouts import makeLayoutLineEditLabel, makeLayoutButtonGroup
 from ..config.constants import BGImageTypeList
 

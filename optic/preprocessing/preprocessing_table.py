@@ -12,7 +12,7 @@ def convertTableDataToDictROICheck(q_table, table_columns, local_var=True):
     row_count = q_table.rowCount()
     # 列ごとに処理
     for col_name, col_info in table_columns.items():
-        if col_info['type'] == 'radio':
+        if col_info['type'] == 'celltype':
             selected_rows = []
             for row in range(row_count):
                 radio_button = q_table.cellWidget(row, col_info['order'])
