@@ -2,6 +2,7 @@
 from PyQt5.QtWidgets import QRadioButton
 from PyQt5.QtCore import Qt
 from ..gui.table_setup import setupWidgetROITable
+from ..visualization.info_visual import updateROIPropertyDisplay
 
 class TableControl:
     def __init__(self, key_app, q_table, data_manager, widget_manager, config_manager, control_manager):
@@ -66,11 +67,11 @@ class TableControl:
     """
     def setSharedAttr_SelectedROI(self, roi_id):
         self.control_manager.setSharedAttr(self.key_app, 'selected_roi_id', roi_id)
+        updateROIPropertyDisplay(self.control_manager, self.data_manager, self.widget_manager, self.key_app)
 
     def getSharedAttr_SelectedROI(self):
         return self.control_manager.getSharedAttr(self.key_app, 'selected_roi_id')
     
-
     def keyPressEvent(self, event):
         if self.selected_row is not None and event.key() in self.key_function_map:
             action = self.key_function_map[event.key()]
