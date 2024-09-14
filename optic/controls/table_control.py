@@ -33,6 +33,20 @@ class TableControl:
         self.q_table.clear()
         self.q_table = setupWidgetROITable(self.q_table, self.len_row, self.table_columns.getColumns(), key_event_ignore=True)
 
+    # change table cell selection
+    def onSelectionChanged(self, selected, deselected):
+        if selected.indexes():
+            row = self.q_table.currentRow()
+            column = self.q_table.currentColumn()
+            
+            self.setSelectedRow(row)
+            self.setSelectedColumn(column)
+            self.setSharedAttr_SelectedROI(row)
+
+    # change table cell content
+    def onCellChanged(self, row, column):
+        pass
+
     """
     get Functions
     """

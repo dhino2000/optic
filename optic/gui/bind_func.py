@@ -22,12 +22,16 @@ def bindFuncROICheckIO(q_window, q_lineedit, q_table, q_button_save, q_button_lo
 def bindFuncTableSelectionChanged(q_table, table_control, view_control):
     def _onSelectionChanged(selected, deselected):
         if selected.indexes():
-            table_control.setSelectedRow(q_table.currentRow())
-            table_control.setSelectedColumn(q_table.currentColumn())
-            table_control.setSharedAttr_SelectedROI(table_control.getSelectedRow())
+            table_control.onSelectionChanged(selected, deselected)
             view_control.updateView()
     q_table.selectionModel().selectionChanged.connect(_onSelectionChanged)
-    
+def bindFuncTableCellChanged(q_table, table_control, view_control):
+    def _onCellChanged(row, column):
+        table_control.onSelectionChanged(row, column)
+        view_control.updateView()
+    q_table.selectionModel().selectionChanged.connect(_onCellChanged)
+
+
 # -> view_layouts.makeLayoutBGImageTypeDisplay
 def bindFuncRadiobuttonBGImageTypeChanged(q_buttongroup, view_control):
     def _onBGImageTypeChanged(button_id):
