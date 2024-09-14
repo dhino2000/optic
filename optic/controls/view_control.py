@@ -133,8 +133,8 @@ class ViewControl:
     """
     shared_attr Functions
     """
-    def setSharedAttr_SelectedROI(self, roi_id):
-        self.control_manager.setSharedAttr(self.key_app, 'selected_roi_id', roi_id)
+    def setSharedAttr_ROISelected(self, roi_id):
+        self.control_manager.setSharedAttr(self.key_app, 'roi_selected_id', roi_id)
 
-    def getSharedAttr_SelectedROI(self):
-        return self.control_manager.getSharedAttr(self.key_app, 'selected_roi_id')
+    def getSharedAttr_ROISelected(self):
+        return self.control_manager.getSharedAttr(self.key_app, 'roi_selected_id')

@@ -24,7 +24,7 @@ def makeLayoutContrastSlider(widget_manager, key_label, key_checkbox, key_slider
 # 透明度調節スライダーのLayout, ALL ROI, Selected ROI
 def makeLayoutOpacitySlider(widget_manager, key_label, key_slider, label):
     layout = QHBoxLayout()
-    for (key_, label_, default_value) in zip(['opacity_allroi', 'opacity_selectedroi'],
+    for (key_, label_, default_value) in zip(['opacity_roi_all', 'opacity_roi_selected'],
                                              ['Opacity of All ROI', 'Opacity of Selected ROI'],
                                              [50, 255]):
         layout.addLayout(makeLayoutSliderLabel

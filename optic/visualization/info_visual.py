@@ -3,11 +3,11 @@ from collections import Counter
 
 # Display Selected ROI Property
 def updateROIPropertyDisplay(control_manager, data_manager, widget_manager, key_app: str):
-    selected_roi_id = control_manager.getSharedAttr(key_app, 'selected_roi_id')
-    if selected_roi_id is None:
+    roi_selected_id = control_manager.getSharedAttr(key_app, 'roi_selected_id')
+    if roi_selected_id is None:
         return
 
-    roi_properties = getRoiProperties(data_manager, key_app, selected_roi_id)
+    roi_properties = getRoiProperties(data_manager, key_app, roi_selected_id)
     displayRoiProperties(widget_manager, key_app, roi_properties)
 
 def getRoiProperties(data_manager, key_app: str, roi_id: int) -> Dict[str, Any]:

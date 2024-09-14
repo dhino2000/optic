@@ -41,7 +41,7 @@ class TableControl:
             
             self.setSelectedRow(row)
             self.setSelectedColumn(column)
-            self.setSharedAttr_SelectedROI(row)
+            self.setSharedAttr_ROISelected(row)
 
     # change table cell content
     def onCellChanged(self, row, column):
@@ -79,13 +79,20 @@ class TableControl:
     """
     shared_attr Functions
     """
-    def setSharedAttr_SelectedROI(self, roi_id):
-        self.control_manager.setSharedAttr(self.key_app, 'selected_roi_id', roi_id)
+    def setSharedAttr_ROISelected(self, roi_id):
+        self.control_manager.setSharedAttr(self.key_app, 'roi_selected_id', roi_id)
         updateROIPropertyDisplay(self.control_manager, self.data_manager, self.widget_manager, self.key_app)
 
-    def getSharedAttr_SelectedROI(self):
-        return self.control_manager.getSharedAttr(self.key_app, 'selected_roi_id')
+    def getSharedAttr_ROISelected(self):
+        return self.control_manager.getSharedAttr(self.key_app, 'roi_selected_id')
     
+    def getSharedAttr_displayROI(self):
+        return self.control_manager.getSharedAttr(self.key_app, 'display_roi')
+
+
+    """
+    KeyPressEvent
+    """
     def keyPressEvent(self, event):
         if self.selected_row is not None and event.key() in self.key_function_map:
             action = self.key_function_map[event.key()]

@@ -97,7 +97,7 @@ def drawAllROIs(view_control, pixmap, data_manager, control_manager, key_app):
         if view_control.getROIDisplay(roiId):
             drawROI(view_control, painter, roiStat, roiId)
     
-    highlightSelectedROI(view_control, painter, data_manager, control_manager, key_app)
+    highlightROISelected(view_control, painter, data_manager, control_manager, key_app)
     painter.end()
 
 def drawROI(view_control, painter, roiStat, roiId):
@@ -111,12 +111,12 @@ def drawROI(view_control, painter, roiStat, roiId):
     for x, y in zip(xpix, ypix):
         painter.drawPoint(int(x), int(y))
 
-def highlightSelectedROI(view_control, painter, data_manager, control_manager, key_app):
-    selectedRoiId = control_manager.getSharedAttr(key_app, "selected_roi_id")
-    if selectedRoiId is not None:
-        roiStat = data_manager.dict_Fall[key_app]["stat"][selectedRoiId]
+def highlightROISelected(view_control, painter, data_manager, control_manager, key_app):
+    ROISelectedId = control_manager.getSharedAttr(key_app, "roi_selected_id")
+    if ROISelectedId is not None:
+        roiStat = data_manager.dict_Fall[key_app]["stat"][ROISelectedId]
         xpix, ypix = roiStat["xpix"], roiStat["ypix"]
-        color = view_control.getROIColor(selectedRoiId)
+        color = view_control.getROIColor(ROISelectedId)
         opacity = view_control.getHighlightOpacity()
         
         pen = QPen(QColor(*color, opacity))
