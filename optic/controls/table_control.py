@@ -84,12 +84,9 @@ class TableControl:
             move_type = action[1] # cell_type, skip_checked, skip_unchecked, selected_type
             step = action[2]
             self.moveCell(move_type, step) 
-        elif action_type == 'celltype':
+        elif action_type == 'toggle':
             col_order = action[1]
-            self.selectRadioButton(self.selected_row, col_order)
-        elif action_type == 'checkbox':
-            col_order = action[1]
-            self.toggleCheckBox(self.selected_row, col_order)
+            self.toggleColumn(self.selected_row, col_order)
 
     """
     Function of executeAction
@@ -113,22 +110,18 @@ class TableControl:
         # elif move_type == 'selected_type':
             # self.moveToSelectedType(self.selected_row, step)
 
-    # select radiobutton
-    def selectRadioButton(self, row, column):
+    # toggle radiobutton, checkbox
+    def toggleColumn(self, row, col_order):
         for col_name, col_info in self.table_columns.getColumns().items():
-            if col_info['type'] == 'celltype' and col_info['order'] == column:
-                radio_button = self.q_table.cellWidget(row, column)
-                if isinstance(radio_button, QRadioButton):
-                    radio_button.setChecked(True)
-                break
-    
-    # check/uncheck checkbox
-    def toggleCheckBox(self, row, column):
-        for col_name, col_info in self.table_columns.getColumns().items():
-            if col_info['type'] == 'checkbox' and col_info['order'] == column:
-                check_box_item = self.q_table.item(row, column)
-                if check_box_item:
-                    check_box_item.setCheckState(Qt.Unchecked if check_box_item.checkState() == Qt.Checked else Qt.Checked)
+            if col_info['order'] == col_order:
+                if col_info['type'] == 'celltype':
+                    radio_button = self.q_table.cellWidget(row, col_order)
+                    if isinstance(radio_button, QRadioButton):
+                        radio_button.setChecked(True)
+                elif col_info['type'] == 'checkbox':
+                    check_box_item = self.q_table.item(row, col_order)
+                    if check_box_item:
+                        check_box_item.setCheckState(Qt.Unchecked if check_box_item.checkState() == Qt.Checked else Qt.Checked)
                 break
 
     # move Neuron->Neuron, Astrocyte->Astrocyte
