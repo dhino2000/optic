@@ -7,7 +7,7 @@ from .io_layouts import makeLayoutLoadFileWidget, makeLayoutROICheckIO, makeLayo
 from .plot_layouts import makeLayoutCanvasTracePlot
 from .slider_layouts import makeLayoutContrastSlider, makeLayoutOpacitySlider
 from .info_layouts import makeLayoutROIProperty
-from .view_layouts import makeLayoutROIThresholds, makeLayoutROITypeDisplay, makeLayoutBGImageTypeDisplay, makeLayoutROIChooseSkip
+from .view_layouts import makeLayoutROIThresholds, makeLayoutROIDisplayType, makeLayoutBGImageTypeDisplay, makeLayoutROIChooseSkip
 from .view_setup import setViewSize
 from .table_layouts import makeLayoutTableROICountLabel, makeLayoutAllROISetSameCelltype, makeLayoutROIFilterThreshold, makeLayoutROIFilterButton
 from .table_setup import setupWidgetROITable

@@ -19,61 +19,70 @@ def bindFuncROICheckIO(q_window, q_lineedit, q_table, q_button_save, q_button_lo
     q_button_load.clicked.connect(lambda: loadROICheck(q_window, q_table, table_columns))
 
 # -> table_layouts.makeLayoutTableROICountLabel
-def bindFuncTableSelectionChanged(q_table, table_controls, view_controls):
+def bindFuncTableSelectionChanged(q_table, table_control, view_control):
     def _onSelectionChanged(selected, deselected):
         if selected.indexes():
-            table_controls.setSelectedRow(q_table.currentRow())
-            table_controls.setSelectedColumn(q_table.currentColumn())
-            table_controls.setSharedAttr_SelectedROI(table_controls.getSelectedRow())
-            view_controls.updateView()
+            table_control.setSelectedRow(q_table.currentRow())
+            table_control.setSelectedColumn(q_table.currentColumn())
+            table_control.setSharedAttr_SelectedROI(table_control.getSelectedRow())
+            view_control.updateView()
     q_table.selectionModel().selectionChanged.connect(_onSelectionChanged)
     
 # -> view_layouts.makeLayoutBGImageTypeDisplay
-def bindFuncRadiobuttonBGImageTypeChanged(q_buttongroup, view_controls):
+def bindFuncRadiobuttonBGImageTypeChanged(q_buttongroup, view_control):
     def _onBGImageTypeChanged(button_id):
         bg_image_type = q_buttongroup.button(button_id).text()
-        view_controls.setBackgroundImageType(bg_image_type)
-        view_controls.updateView()
+        view_control.setBackgroundImageType(bg_image_type)
+        view_control.updateView()
     q_buttongroup.buttonClicked[int].connect(_onBGImageTypeChanged)
     checked_button = q_buttongroup.checkedButton()
     _onBGImageTypeChanged(q_buttongroup.id(checked_button))
 
+# -> view_layouts.makeLayoutROIDisplayType
+def bindFuncRadiobuttonROIDisplayTypeChanged(q_buttongroup, view_control):
+    def _onROIDisplayTypeChanged(button_id):
+        roi_type = q_buttongroup.button(button_id).text()
+        view_control.setROIDisplayType(roi_type)
+    q_buttongroup.buttonClicked[int].connect(_onROIDisplayTypeChanged)
+    checked_button = q_buttongroup.checkedButton()
+    _onROIDisplayTypeChanged(q_buttongroup.id(checked_button))
+
 # -> slider_layouts.makeLayoutOpacitySlider
-def bindFuncOpacitySlider(q_slider, view_controls):
+def bindFuncOpacitySlider(q_slider, view_control):
     def onOpacityChanged(value):
-        view_controls.setROIOpacity(value)
-        view_controls.updateView()
+        view_control.setROIOpacity(value)
+        view_control.updateView()
     q_slider.valueChanged.connect(onOpacityChanged)
 
-def bindFuncHighlightOpacitySlider(q_slider, view_controls):
+def bindFuncHighlightOpacitySlider(q_slider, view_control):
     def onOpacityChanged(value):
-        view_controls.setHighlightOpacity(value)
-        view_controls.updateView()
+        view_control.setHighlightOpacity(value)
+        view_control.updateView()
     q_slider.valueChanged.connect(onOpacityChanged)
 
 # -> slider_layouts.makeLayoutContrastSlider
-def bindFuncBackgroundContrastSlider(q_slider_min, q_slider_max, view_controls, channel):
+def bindFuncBackgroundContrastSlider(q_slider_min, q_slider_max, view_control, channel):
     def onContrastMinChanged(value):
         current_max = q_slider_max.value()
         if value > current_max:
             q_slider_max.setValue(value)
-        view_controls.setBackgroundContrastValue(channel, 'min', value)
-        view_controls.setBackgroundContrastValue(channel, 'max', max(value, current_max))
-        view_controls.updateView()
+        view_control.setBackgroundContrastValue(channel, 'min', value)
+        view_control.setBackgroundContrastValue(channel, 'max', max(value, current_max))
+        view_control.updateView()
     def onContrastMaxChanged(value):
         current_min = q_slider_min.value()
         if value < current_min:
             q_slider_min.setValue(value)
-        view_controls.setBackgroundContrastValue(channel, 'max', value)
-        view_controls.setBackgroundContrastValue(channel, 'min', min(value, current_min))
-        view_controls.updateView()
+        view_control.setBackgroundContrastValue(channel, 'max', value)
+        view_control.setBackgroundContrastValue(channel, 'min', min(value, current_min))
+        view_control.updateView()
     q_slider_min.valueChanged.connect(onContrastMinChanged)
     q_slider_max.valueChanged.connect(onContrastMaxChanged)
 
-def bindFuncBackgroundVisibilityCheckbox(q_checkbox, view_controls, channel):
+def bindFuncBackgroundVisibilityCheckbox(q_checkbox, view_control, channel):
     def onVisibilityChanged(state):
         is_visible = (state == Qt.Checked)
-        view_controls.setBackgroundVisibility(channel, is_visible)
-        view_controls.updateView()
+        view_control.setBackgroundVisibility(channel, is_visible)
+        view_control.updateView()
     q_checkbox.stateChanged.connect(onVisibilityChanged)
     
