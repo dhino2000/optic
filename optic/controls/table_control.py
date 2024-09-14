@@ -2,7 +2,7 @@
 from PyQt5.QtWidgets import QRadioButton
 from PyQt5.QtCore import Qt
 from ..gui.table_setup import setupWidgetROITable
-from ..visualization.info_visual import updateROIPropertyDisplay
+from ..visualization.info_visual import updateROIPropertyDisplay, updateROICountDisplay
 
 class TableControl:
     def __init__(self, key_app, q_table, data_manager, widget_manager, config_manager, control_manager):
@@ -88,6 +88,7 @@ class TableControl:
         elif action_type == 'toggle':
             col_order = action[1]
             self.toggleColumn(self.selected_row, col_order)
+        updateROICountDisplay(self.widget_manager, self.config_manager, self.key_app)
 
     """
     Function of executeAction
