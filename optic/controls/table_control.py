@@ -244,22 +244,41 @@ class TableControl:
     """
     # set All ROIs same celltype (Neuron, Not Cell, ...)
     def setAllROISameCelltype(self, celltype: str):
-        skip_columns = self.getCheckboxColumns()
-        for skip_column in skip_columns:
-            if not self.showConfirmationDialog(f"Skip {skip_column} checked ROI?"):
-                return 
+        checkbox_columns = self.getCheckboxColumns()
+        skip_states = {}
+        
+        for column in checkbox_columns:
+            if self.showConfirmationDialog(f"Skip {column} checked ROI?"):
+                skip_states[column] = self.getCheckboxStates(column)
+            else:
+                skip_states[column] = [False] * self.len_row
             
         col_order = self.table_columns.getColumns()[celltype]["order"]
         for row in range(self.len_row):
-            button_group = self.groups_celltype.get(row)
-            if button_group:
-                button = self.q_table.cellWidget(row, col_order)
-                if isinstance(button, QRadioButton):
-                    button.setChecked(True)
-                    self.updateSharedAttr_ROIDisplay_TableCelltypeChanged(row)
+            if all(not skip_states[col][row] for col in checkbox_columns):
+                button_group = self.groups_celltype.get(row)
+                if button_group:
+                    button = self.q_table.cellWidget(row, col_order)
+                    if isinstance(button, QRadioButton):
+                        button.setChecked(True)
+                        self.updateSharedAttr_ROIDisplay_TableCelltypeChanged(row)
 
     def getCheckboxColumns(self):
         return [col_name for col_name, col_info in self.table_columns.getColumns().items() if col_info['type'] == 'checkbox']
+
+    def getCheckboxStates(self, column_name):
+        col_info = self.table_columns.getColumns()[column_name]
+        if col_info['type'] != 'checkbox':
+            return []
+        
+        states = []
+        for row in range(self.len_row):
+            item = self.q_table.item(row, col_info['order'])
+            if item:
+                states.append(item.checkState() == Qt.Checked)
+            else:
+                states.append(False)
+        return states
 
     # Confirm skip ROIs with checked(Check, Tracking, ...) or not
     def showConfirmationDialog(self, message):
