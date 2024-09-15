@@ -97,6 +97,19 @@ class TableControl:
         roi_display = {roi_id: True for roi_id in range(self.len_row)}
         self.control_manager.setSharedAttr(self.key_app, 'roi_display', roi_display)
 
+    # with dict_buttongroup["{key_app}_roi_type"] change
+    def updateSharedAttr_ROIDisplay_TypeChanged(self, roi_display_type: str):
+        roi_display = self.getSharedAttr_ROIDisplay()
+        for roi_id in roi_display.keys():
+            if roi_display_type == 'All ROI':
+                roi_display[roi_id] = True
+            elif roi_display_type == 'None':
+                roi_display[roi_id] = False
+            else:
+                roi_display[roi_id] = (self.getCurrentCellType(roi_id) == roi_display_type)
+        print(roi_display)
+        self.setSharedAttr_ROIDisplay(roi_display)
+
     """
     KeyPressEvent
     """

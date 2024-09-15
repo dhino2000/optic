@@ -32,6 +32,16 @@ def bindFuncTableCellChanged(q_table, table_control, view_control):
     q_table.selectionModel().selectionChanged.connect(_onCellChanged)
 
 
+# -> view_layouts.makeLayoutROIDisplayType
+def bindFuncRadiobuttonROIDisplayTypeChanged(q_buttongroup, view_control, table_control):
+    def _onROIDisplayTypeChanged(button_id):
+        roi_display_type = q_buttongroup.button(button_id).text()
+        table_control.updateSharedAttr_ROIDisplay_TypeChanged(roi_display_type)
+        view_control.updateView()
+    q_buttongroup.buttonClicked[int].connect(_onROIDisplayTypeChanged)
+    checked_button = q_buttongroup.checkedButton()
+    _onROIDisplayTypeChanged(q_buttongroup.id(checked_button))
+
 # -> view_layouts.makeLayoutBGImageTypeDisplay
 def bindFuncRadiobuttonBGImageTypeChanged(q_buttongroup, view_control):
     def _onBGImageTypeChanged(button_id):
@@ -41,15 +51,6 @@ def bindFuncRadiobuttonBGImageTypeChanged(q_buttongroup, view_control):
     q_buttongroup.buttonClicked[int].connect(_onBGImageTypeChanged)
     checked_button = q_buttongroup.checkedButton()
     _onBGImageTypeChanged(q_buttongroup.id(checked_button))
-
-# -> view_layouts.makeLayoutROIDisplayType
-def bindFuncRadiobuttonROIDisplayTypeChanged(q_buttongroup, view_control):
-    def _onROIDisplayTypeChanged(button_id):
-        roi_type = q_buttongroup.button(button_id).text()
-        view_control.setROIDisplayType(roi_type)
-    q_buttongroup.buttonClicked[int].connect(_onROIDisplayTypeChanged)
-    checked_button = q_buttongroup.checkedButton()
-    _onROIDisplayTypeChanged(q_buttongroup.id(checked_button))
 
 # -> slider_layouts.makeLayoutOpacitySlider
 def bindFuncOpacitySlider(q_slider, view_control):
