@@ -20,10 +20,10 @@ def setupWidgetROITable(q_table, len_row, table_columns, key_event_ignore=True):
     for col_name, col_info in col_sorted:
         q_table.setColumnWidth(col_info['order'], col_info['width'])
 
-    celltype_groups = {}
+    groups_celltype = {}
 
     for cellid in range(len_row):
-        celltype_groups[cellid] = QButtonGroup(q_table)
+        groups_celltype[cellid] = QButtonGroup(q_table)
         for col_name, col_info in col_sorted:
             cell_type = col_info["type"]
             
@@ -37,7 +37,7 @@ def setupWidgetROITable(q_table, len_row, table_columns, key_event_ignore=True):
                     cell.setChecked(True)
                 if key_event_ignore:
                     cell = applyKeyPressEventIgnore(cell)
-                celltype_groups[cellid].addButton(cell)
+                groups_celltype[cellid].addButton(cell)
                 q_table.setCellWidget(cellid, col_info['order'], cell)
             elif cell_type == "checkbox":
                 cell = QTableWidgetItem()
@@ -47,7 +47,7 @@ def setupWidgetROITable(q_table, len_row, table_columns, key_event_ignore=True):
                 cell = QTableWidgetItem()
                 q_table.setItem(cellid, col_info['order'], cell)
 
-    return q_table
+    return q_table, groups_celltype
 
 # dict_roicheckの内容をtableに反映
 def applyDictROICheckToTable(q_table, table_columns, dict_roicheck):

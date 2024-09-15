@@ -25,12 +25,16 @@ def bindFuncTableSelectionChanged(q_table, table_control, view_control):
             table_control.onSelectionChanged(selected, deselected)
             view_control.updateView()
     q_table.selectionModel().selectionChanged.connect(_onSelectionChanged)
-def bindFuncTableCellChanged(q_table, table_control, view_control):
-    def _onCellChanged(row, column):
-        table_control.onSelectionChanged(row, column)
-        view_control.updateView()
-    q_table.selectionModel().selectionChanged.connect(_onCellChanged)
+def bindFuncRadiobuttonCelltypeChanged(table_control, view_control):
+    def __onButtonClicked(row):
+        def _onButtonClicked(button):
+            table_control.updateSharedAttr_ROIDisplay_TableCelltypeChanged(row)
+            view_control.updateView()
+        return _onButtonClicked
 
+    for row, button_group in table_control.groups_celltype.items():
+        handler = __onButtonClicked(row)
+        button_group.buttonClicked.connect(handler)
 
 # -> view_layouts.makeLayoutROIDisplayType
 def bindFuncRadiobuttonROIDisplayTypeChanged(q_buttongroup, view_control, table_control):

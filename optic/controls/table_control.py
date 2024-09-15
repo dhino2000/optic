@@ -1,5 +1,5 @@
 # キーボードでtableを操作
-from PyQt5.QtWidgets import QRadioButton
+from PyQt5.QtWidgets import QRadioButton, QButtonGroup
 from PyQt5.QtCore import Qt
 from ..gui.table_setup import setupWidgetROITable
 from ..visualization.info_visual import updateROIPropertyDisplay, updateROICountDisplay
@@ -13,21 +13,22 @@ class TableControl:
         table_columns    : config.app_config.TableColumns
         key_function_map : config.app_config.KeyFunctionMap
         """
-        self.key_app:           str = key_app
-        self.q_table                = q_table
-        self.data_manager           = data_manager
-        self.widget_manager         = widget_manager
-        self.config_manager         = config_manager
-        self.control_manager        = control_manager
-        self.table_columns          = self.config_manager.getTableColumns(self.key_app)
-        self.key_function_map       = self.config_manager.getKeyFunctionMap(self.key_app).getAllMappings()
-        self.selected_row:      int = 0
-        self.selected_column:   int = 0
-        self.len_row:           int = 0
+        self.key_app:                               str = key_app
+        self.q_table                                    = q_table
+        self.data_manager                               = data_manager
+        self.widget_manager                             = widget_manager
+        self.config_manager                             = config_manager
+        self.control_manager                            = control_manager
+        self.table_columns                              = self.config_manager.getTableColumns(self.key_app)
+        self.key_function_map                           = self.config_manager.getKeyFunctionMap(self.key_app).getAllMappings()
+        self.groups_celltype:   Dict[int, QButtonGroup] = {}
+        self.selected_row:                          int = 0
+        self.selected_column:                       int = 0
+        self.len_row:                               int = 0
 
     def setupWidgetROITable(self, key_app):
         self.setLenRow(len(self.data_manager.dict_Fall[key_app]["stat"])) # for Suite2p
-        self.q_table = setupWidgetROITable(self.q_table, self.len_row, self.table_columns.getColumns(), key_event_ignore=True)
+        self.q_table, self.groups_celltype = setupWidgetROITable(self.q_table, self.len_row, self.table_columns.getColumns(), key_event_ignore=True)
         self.setKeyPressEvent()
         self.initalizeSharedAttr_ROIDisplay()
 
@@ -47,9 +48,7 @@ class TableControl:
 
     # change table cell content
     def onCellChanged(self, row, column):
-        if self.getCurrentCellType(row):
-            self.updateSharedAttr_ROIDisplay_TableCelltypeChanged(row)
-
+        pass
 
     """
     get Functions
@@ -126,10 +125,8 @@ class TableControl:
         
         if current_display_type not in ['All ROI', 'None']:
             new_cell_type = self.getCurrentCellType(row)
-            print(current_display_type, new_cell_type)
             roi_display[row] = (new_cell_type == current_display_type)
             self.setSharedAttr_ROIDisplay(roi_display)
-            self.control_manager.view_controls[self.key_app].updateView()
 
     """
     KeyPressEvent
@@ -179,9 +176,13 @@ class TableControl:
         for col_name, col_info in self.table_columns.getColumns().items():
             if col_info['order'] == col_order:
                 if col_info['type'] == 'celltype':
-                    radio_button = self.q_table.cellWidget(row, col_order)
-                    if isinstance(radio_button, QRadioButton):
-                        radio_button.setChecked(True)
+                    button_group = self.groups_celltype.get(row)
+                    if button_group:
+                        for button in button_group.buttons():
+                            if self.q_table.cellWidget(row, col_order) == button:
+                                button.setChecked(True)
+                                self.updateSharedAttr_ROIDisplay_TableCelltypeChanged(row)
+                                break
                 elif col_info['type'] == 'checkbox':
                     check_box_item = self.q_table.item(row, col_order)
                     if check_box_item:
@@ -219,13 +220,15 @@ class TableControl:
     Sub Function
     """
             
-    # get celltype of current row, Neruon/Astrocyte/...
+    # get celltype of radiobutton, Neruon/Astrocyte/...
     def getCurrentCellType(self, row):
-        for col_name, col_info in self.table_columns.getColumns().items():
-            if col_info['type'] == 'celltype':
-                radio_button = self.q_table.cellWidget(row, col_info['order'])
-                if radio_button and radio_button.isChecked():
-                    return col_name
+        button_group = self.groups_celltype.get(row)
+        if button_group:
+            checked_button = button_group.checkedButton()
+            if checked_button:
+                for col_name, col_info in self.table_columns.getColumns().items():
+                    if col_info['type'] == 'celltype' and self.q_table.cellWidget(row, col_info['order']) == checked_button:
+                        return col_name
         return None
 
     # detect "Check" is checked or not
