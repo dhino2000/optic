@@ -1,5 +1,5 @@
 # キーボードでtableを操作
-from PyQt5.QtWidgets import QRadioButton, QButtonGroup
+from PyQt5.QtWidgets import QRadioButton, QButtonGroup, QMessageBox
 from PyQt5.QtCore import Qt
 from ..gui.table_setup import setupWidgetROITable
 from ..visualization.info_visual import updateROIPropertyDisplay, updateROICountDisplay
@@ -238,3 +238,32 @@ class TableControl:
                 check_box_item = self.q_table.item(row, col_info['order'])
                 return check_box_item.checkState() == Qt.Checked if check_box_item else False
         return False
+    
+    """
+    Button-binding Function
+    """
+    # set All ROIs same celltype (Neuron, Not Cell, ...)
+    def setAllROISameCelltype(self, celltype: str):
+        skip_columns = self.getCheckboxColumns()
+        for skip_column in skip_columns:
+            if not self.showConfirmationDialog(f"Skip {skip_column} checked ROI?"):
+                return 
+            
+        col_order = self.table_columns.getColumns()[celltype]["order"]
+        for row in range(self.len_row):
+            button_group = self.groups_celltype.get(row)
+            if button_group:
+                button = self.q_table.cellWidget(row, col_order)
+                if isinstance(button, QRadioButton):
+                    button.setChecked(True)
+                    self.updateSharedAttr_ROIDisplay_TableCelltypeChanged(row)
+
+    def getCheckboxColumns(self):
+        return [col_name for col_name, col_info in self.table_columns.getColumns().items() if col_info['type'] == 'checkbox']
+
+    # Confirm skip ROIs with checked(Check, Tracking, ...) or not
+    def showConfirmationDialog(self, message):
+        reply = QMessageBox.question(self.q_table, 'Confirmation',
+                                     message,
+                                     QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        return reply == QMessageBox.Yes

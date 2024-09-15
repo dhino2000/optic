@@ -36,6 +36,15 @@ def bindFuncRadiobuttonCelltypeChanged(table_control, view_control):
         handler = __onButtonClicked(row)
         button_group.buttonClicked.connect(handler)
 
+# -> table_layouts.makeLayoutAllROISetSameCelltype
+def bindFuncButtonSetAllROISameCelltype(widget_manager, view_control, table_control):
+    list_celltype = [key for key, value in table_control.table_columns.getColumns().items() if value['type'] == 'celltype']
+    for celltype in list_celltype:
+        widget_manager.dict_button[f"{table_control.key_app}_roi_set_{celltype}"].clicked.connect(
+            lambda checked, ct=celltype: table_control.setAllROISameCelltype(ct)
+        )
+    view_control.updateView()
+
 # -> view_layouts.makeLayoutROIDisplayType
 def bindFuncRadiobuttonROIDisplayTypeChanged(q_buttongroup, view_control, table_control):
     def _onROIDisplayTypeChanged(button_id):
