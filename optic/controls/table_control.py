@@ -31,6 +31,7 @@ class TableControl:
         self.q_table, self.groups_celltype = setupWidgetROITable(self.q_table, self.len_row, self.table_columns.getColumns(), key_event_ignore=True)
         self.setKeyPressEvent()
         self.initalizeSharedAttr_ROIDisplay()
+        updateROICountDisplay(self.widget_manager, self.config_manager, self.key_app)
 
     def updateWidgetROITable(self):
         self.q_table.clear()
@@ -262,6 +263,7 @@ class TableControl:
                     if isinstance(button, QRadioButton):
                         button.setChecked(True)
                         self.updateSharedAttr_ROIDisplay_TableCelltypeChanged(row)
+        updateROICountDisplay(self.widget_manager, self.config_manager, self.key_app)
 
     def getCheckboxColumns(self):
         return [col_name for col_name, col_info in self.table_columns.getColumns().items() if col_info['type'] == 'checkbox']

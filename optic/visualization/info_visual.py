@@ -42,27 +42,38 @@ def countROIs(config_manager, widget_manager, key_app: str) -> Dict[str, int]:
     table_columns = config_manager.getTableColumns(key_app).getColumns()
     celltype_columns = [col_name for col_name, col_info in table_columns.items() if col_info['type'] == 'celltype']
 
-    roi_counts = Counter()
+    roi_counts = {col_name: 0 for col_name in celltype_columns}
+    roi_counts["Unclassified"] = 0
     total_rois = 0
 
     q_table = widget_manager.dict_table[key_app]
     for row in range(q_table.rowCount()):
         total_rois += 1
+        classified = False
         for col_name in celltype_columns:
             col_index = table_columns[col_name]['order']
             radio_button = q_table.cellWidget(row, col_index)
             if radio_button and radio_button.isChecked():
                 roi_counts[col_name] += 1
+                classified = True
                 break
-        else:
+        if not classified:
             roi_counts["Unclassified"] += 1
 
     roi_counts["All"] = total_rois
 
-    return dict(roi_counts)
+    return roi_counts
 
 def displayROICounts(widget_manager, key_app: str, roi_counts: Dict[str, int]):
     for celltype, count in roi_counts.items():
-        label_key = f"{key_app}_roicount_{celltype}"
-        if label_key in widget_manager.dict_label:
-            widget_manager.dict_label[label_key].setText(f"{celltype}: {count}")
+        if celltype not in ["Unclassified", "All"]:  # まず celltype のみ表示
+            label_key = f"{key_app}_roicount_{celltype}"
+            if label_key in widget_manager.dict_label:
+                widget_manager.dict_label[label_key].setText(f"{celltype}: {count}")
+    
+    # "Unclassified" と "All" を最後に表示
+    for special_type in ["Unclassified", "All"]:
+        if special_type in roi_counts:
+            label_key = f"{key_app}_roicount_{special_type}"
+            if label_key in widget_manager.dict_label:
+                widget_manager.dict_label[label_key].setText(f"{special_type}: {roi_counts[special_type]}")
