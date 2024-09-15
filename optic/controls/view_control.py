@@ -29,7 +29,6 @@ class ViewControl:
 
         self.last_click_position:   Tuple[int, int]             = ()
         self.image_sizes:           Tuple[int, int]             = ()
-        self.roi_display_type:      str                         = "All ROI"
         self.bg_image_type:         str                         = BGImageTypeList.FALL[0]
         self.bg_contrast:           Dict[str, Dict[str, int]]   = {}
         self.bg_visibility:         Dict[str, bool]             = {}
@@ -43,10 +42,8 @@ class ViewControl:
         self.roi_colors:        Dict[int, Tuple[int, int, int]] = {}
         self.roi_opacity:       int                             = int(config_manager.gui_defaults["ROI_VISUAL_SETTINGS"]["DEFAULT_ROI_OPACITY"])
         self.highlight_opacity: int                             = int(config_manager.gui_defaults["ROI_VISUAL_SETTINGS"]["DEFAULT_HIGHLIGHT_OPACITY"])
-        self.roi_display:       Dict[int, bool]                 = {}
 
         self.initializeROIColors()
-        self.initializeROIDisplay()
         self.setImageSize()
 
 
@@ -65,10 +62,6 @@ class ViewControl:
         for roi_id in self.data_manager.dict_Fall[self.key_app]["stat"].keys():
             self.roi_colors[roi_id] = self.generateRandomColor()
 
-    def initializeROIDisplay(self):
-        for roi_id in self.data_manager.dict_Fall[self.key_app]["stat"].keys():
-            self.roi_display[roi_id] = True
-
     def generateRandomColor(self):
         return (random.randint(100, 255), random.randint(100, 255), random.randint(100, 255))
     
@@ -77,9 +70,6 @@ class ViewControl:
     """
     def getROIColor(self, roi_id):
         return self.roi_colors[roi_id]
-    
-    def getROIDisplayType(self):
-        return self.roi_display_type
 
     def getROIOpacity(self):
         return self.roi_opacity
@@ -95,9 +85,6 @@ class ViewControl:
             return self.bg_contrast[channel][min_or_max]
         return None
     
-    def getROIDisplay(self, roi_id):
-        return self.roi_display[roi_id]
-    
     def getBackgroundVisibility(self, channel):
         return self.bg_visibility[channel]
     
@@ -107,9 +94,6 @@ class ViewControl:
     """
     set Functions
     """
-    def setROIDisplayType(self, roi_type):
-        self.roi_display_type = roi_type
-
     def setROIOpacity(self, opacity):
         self.roi_opacity = opacity
 

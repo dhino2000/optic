@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import QRadioButton
 from PyQt5.QtCore import Qt
 from ..gui.table_setup import setupWidgetROITable
 from ..visualization.info_visual import updateROIPropertyDisplay, updateROICountDisplay
+from typing import Dict, Any
 
 class TableControl:
     def __init__(self, key_app, q_table, data_manager, widget_manager, config_manager, control_manager):
@@ -46,7 +47,9 @@ class TableControl:
 
     # change table cell content
     def onCellChanged(self, row, column):
-        pass
+        if self.getCurrentCellType(row):
+            self.updateSharedAttr_ROIDisplay_TableCelltypeChanged(row)
+
 
     """
     get Functions
@@ -80,14 +83,14 @@ class TableControl:
     """
     shared_attr Functions
     """
-    def setSharedAttr_ROISelected(self, roi_id):
+    def setSharedAttr_ROISelected(self, roi_id: int):
         self.control_manager.setSharedAttr(self.key_app, 'roi_selected_id', roi_id)
         updateROIPropertyDisplay(self.control_manager, self.data_manager, self.widget_manager, self.key_app)
 
     def getSharedAttr_ROISelected(self):
         return self.control_manager.getSharedAttr(self.key_app, 'roi_selected_id')
     
-    def setSharedAttr_ROIDisplay(self, roi_display):
+    def setSharedAttr_ROIDisplay(self, roi_display: Dict[int, bool]):
         self.control_manager.setSharedAttr(self.key_app, 'roi_display', roi_display)
 
     def getSharedAttr_ROIDisplay(self):
@@ -96,6 +99,12 @@ class TableControl:
     def initalizeSharedAttr_ROIDisplay(self):
         roi_display = {roi_id: True for roi_id in range(self.len_row)}
         self.control_manager.setSharedAttr(self.key_app, 'roi_display', roi_display)
+
+    def setSharedAttr_ROIDisplayType(self, roi_display_type: str):
+        self.control_manager.setSharedAttr(self.key_app, 'roi_display_type', roi_display_type)
+
+    def getSharedAttr_ROIDisplayType(self):
+        return self.control_manager.getSharedAttr(self.key_app, 'roi_display_type')
 
     # with dict_buttongroup["{key_app}_roi_type"] change
     def updateSharedAttr_ROIDisplay_TypeChanged(self, roi_display_type: str):
@@ -107,8 +116,20 @@ class TableControl:
                 roi_display[roi_id] = False
             else:
                 roi_display[roi_id] = (self.getCurrentCellType(roi_id) == roi_display_type)
-        print(roi_display)
+        self.setSharedAttr_ROIDisplayType(roi_display_type)
         self.setSharedAttr_ROIDisplay(roi_display)
+
+    # with "celltype" radiobutton change
+    def updateSharedAttr_ROIDisplay_TableCelltypeChanged(self, row):
+        roi_display = self.getSharedAttr_ROIDisplay()
+        current_display_type = self.getSharedAttr_ROIDisplayType()
+        
+        if current_display_type not in ['All ROI', 'None']:
+            new_cell_type = self.getCurrentCellType(row)
+            print(current_display_type, new_cell_type)
+            roi_display[row] = (new_cell_type == current_display_type)
+            self.setSharedAttr_ROIDisplay(roi_display)
+            self.control_manager.view_controls[self.key_app].updateView()
 
     """
     KeyPressEvent
