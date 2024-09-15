@@ -1,4 +1,5 @@
 from collections import defaultdict
+from typing import Any
 
 # Manager controls class
 class ControlManager:
@@ -7,16 +8,16 @@ class ControlManager:
         self.view_controls = {}
         """
         Dictionary to hold attributes shared between controls
-        The first level key is `app_key`: "pri", "sec", etc.
-        The second level key is `attr_key`: "selected_roi", etc.
+        The first level key is `key_app`: "pri", "sec", etc.
+        The second level key is `key_attr`: "selected_roi", etc.
         """
         self.shared_attr = defaultdict(dict)
 
-    def setSharedAttr(self, app_key: str, attr_key: str, value):
-        self.shared_attr[app_key][attr_key] = value
+    def setSharedAttr(self, key_app: str, key_attr: str, value: Any):
+        self.shared_attr[key_app][key_attr] = value
 
-    def getSharedAttr(self, app_key: str, attr_key: str):
-        return self.shared_attr[app_key].get(attr_key)
+    def getSharedAttr(self, key_app: str, key_attr: str):
+        return self.shared_attr[key_app].get(key_attr)
 
-    def getAllSharedAttrs(self, app_key: str):
-        return self.shared_attr[app_key]
+    def getAllSharedAttrs(self, key_app: str):
+        return self.shared_attr[key_app]

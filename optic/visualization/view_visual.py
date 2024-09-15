@@ -92,9 +92,10 @@ def adjustChannelContrast(image, min_val, max_val, dtype=np.uint8):
 def drawAllROIs(view_control, pixmap, data_manager, control_manager, key_app):
     painter = QPainter(pixmap)
     painter.setRenderHint(QPainter.Antialiasing)
+    roi_display = control_manager.getSharedAttr(key_app, "roi_display")
     
     for roiId, roiStat in data_manager.dict_Fall[key_app]["stat"].items():
-        if view_control.getROIDisplay(roiId):
+        if roi_display[roiId]:
             drawROI(view_control, painter, roiStat, roiId)
     
     highlightROISelected(view_control, painter, data_manager, control_manager, key_app)

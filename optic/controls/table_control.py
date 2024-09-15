@@ -28,6 +28,7 @@ class TableControl:
         self.setLenRow(len(self.data_manager.dict_Fall[key_app]["stat"])) # for Suite2p
         self.q_table = setupWidgetROITable(self.q_table, self.len_row, self.table_columns.getColumns(), key_event_ignore=True)
         self.setKeyPressEvent()
+        self.initalizeSharedAttr_ROIDisplay()
 
     def updateWidgetROITable(self):
         self.q_table.clear()
@@ -86,9 +87,15 @@ class TableControl:
     def getSharedAttr_ROISelected(self):
         return self.control_manager.getSharedAttr(self.key_app, 'roi_selected_id')
     
-    def getSharedAttr_displayROI(self):
-        return self.control_manager.getSharedAttr(self.key_app, 'display_roi')
+    def setSharedAttr_ROIDisplay(self, roi_display):
+        self.control_manager.setSharedAttr(self.key_app, 'roi_display', roi_display)
 
+    def getSharedAttr_ROIDisplay(self):
+        return self.control_manager.getSharedAttr(self.key_app, 'roi_display')
+
+    def initalizeSharedAttr_ROIDisplay(self):
+        roi_display = {roi_id: True for roi_id in range(self.len_row)}
+        self.control_manager.setSharedAttr(self.key_app, 'roi_display', roi_display)
 
     """
     KeyPressEvent
