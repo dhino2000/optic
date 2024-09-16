@@ -26,6 +26,18 @@ def makeLayoutAllROISetSameCelltype(widget_manager, key_button, table_columns):
         layout.addWidget(widget_manager.makeWidgetButton(key=f"{key_button}_roi_set_{celltype}", label=f"Set {celltype}"))
     return layout
 
+# Check, Uncheck "checkbox" of All ROIs
+def makeLayoutAllROICheckboxToggle(widget_manager, key_button, table_columns):
+    layout = QHBoxLayout()
+
+    list_checkbox = [key for key, value in table_columns.items() if value['type'] == 'checkbox']
+    for checkbox in list_checkbox:
+        layout_ = QVBoxLayout()
+        layout_.addWidget(widget_manager.makeWidgetButton(key=f"{key_button}_roi_check_{checkbox}", label=f"Check {checkbox}"))
+        layout_.addWidget(widget_manager.makeWidgetButton(key=f"{key_button}_roi_uncheck_{checkbox}", label=f"Uncheck {checkbox}"))
+        layout.addLayout(layout_)
+    return layout
+
 # ROI filter thresholds
 def makeLayoutROIFilterThreshold(widget_manager, key_label, key_lineedit, dict_roi_threshold, num_row=2, num_col=3):
     layout = QGridLayout()

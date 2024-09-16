@@ -45,6 +45,16 @@ def bindFuncButtonSetAllROISameCelltype(widget_manager, view_control, table_cont
         )
     view_control.updateView()
 
+# -> table_layouts.makeLayoutAllROICheckboxToggle
+def bindFuncButtonToggleAllROICheckbox(widget_manager, view_control, table_control):
+    list_checkbox = [key for key, value in table_control.table_columns.getColumns().items() if value['type'] == 'checkbox']
+    for checkbox in list_checkbox:
+        for label, toggle in zip(["check", "uncheck"], [True, False]):
+            widget_manager.dict_button[f"{table_control.key_app}_roi_{label}_{checkbox}"].clicked.connect(
+                lambda checked, ck=checkbox, tg=toggle: table_control.toggleAllROICheckbox(ck, tg)
+            )
+    view_control.updateView()
+
 # -> view_layouts.makeLayoutROIDisplayType
 def bindFuncRadiobuttonROIDisplayTypeChanged(q_buttongroup, view_control, table_control):
     def _onROIDisplayTypeChanged(button_id):
