@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import QRadioButton, QButtonGroup, QMessageBox
 from PyQt5.QtCore import Qt
 from ..gui.table_setup import setupWidgetROITable
 from ..visualization.info_visual import updateROIPropertyDisplay, updateROICountDisplay
+from ..utils.dialog_utils import showConfirmationDialog
 from typing import Dict, Any
 
 class TableControl:
@@ -256,9 +257,16 @@ class TableControl:
         skip_states = {}
         
         for column in checkbox_columns:
-            if self.showConfirmationDialog(f"Skip {column} checked ROI?"):
+            result = showConfirmationDialog(
+                self.q_table,
+                'Confirmation',
+                f"Skip {column} checked ROI?"
+            )
+            if result == QMessageBox.Yes:
                 skip_states[column] = self.getCheckboxStates(column)
-            else:
+            elif result == QMessageBox.Cancel:
+                return  # 処理を中断
+            else:  # No の場合
                 skip_states[column] = [False] * self.len_row
             
         col_order = self.table_columns.getColumns()[celltype]["order"]
@@ -288,13 +296,6 @@ class TableControl:
             else:
                 states.append(False)
         return states
-
-    # Confirm skip ROIs with checked(Check, Tracking, ...) or not
-    def showConfirmationDialog(self, message):
-        reply = QMessageBox.question(self.q_table, 'Confirmation',
-                                     message,
-                                     QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-        return reply == QMessageBox.Yes
     
     # toggle "Checkbox" of All ROIs
     def toggleAllROICheckbox(self, checkbox: str, toggle: bool):
