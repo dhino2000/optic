@@ -126,4 +126,18 @@ def highlightROISelected(view_control, painter, data_manager, control_manager, k
         for x, y in zip(xpix, ypix):
             painter.drawPoint(int(x), int(y))
 
+# find Closest ROI to click position
+def findClosestROI(x: int, y: int, dict_roi_med: dict):
+    min_distance = float('inf')
+    closest_roi_id = None
+
+    for roi_id, med in dict_roi_med.items():
+        distance = np.sqrt((x - med[0])**2 + (y - med[1])**2)
+        if distance < min_distance:
+            min_distance = distance
+            closest_roi_id = roi_id
+
+    return closest_roi_id
+
+
 

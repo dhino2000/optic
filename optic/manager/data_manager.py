@@ -1,6 +1,6 @@
 from collections import defaultdict
 from scipy.io import loadmat
-from typing import Dict, Tuple
+from typing import Dict, Tuple, Any
 import numpy as np
 from ..preprocessing.preprocessing_fall import convertMatToDictFall
 from ..preprocessing.preprocessing_image import getBGImageFromFall
@@ -26,6 +26,9 @@ class DataManager:
             return True
         except FileNotFoundError as e:
             return False
+        
+    def getDictFall(self, key_app) -> Dict[str, Any]:
+        return self.dict_Fall[key_app]
         
     def getImageSize(self, key_app) -> Tuple[int, int]:
         return (self.dict_Fall[key_app]["ops"]["Lx"].item(), self.dict_Fall[key_app]["ops"]["Ly"].item())

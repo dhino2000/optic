@@ -1,4 +1,4 @@
-from ..visualization.view_visual import updateView
+from ..visualization.view_visual import updateView, findClosestROI
 from ..gui.view_setup import setViewSize
 from ..config.constants import BGImageTypeList
 import random
@@ -122,3 +122,14 @@ class ViewControl:
 
     def getSharedAttr_ROISelected(self):
         return self.control_manager.getSharedAttr(self.key_app, 'roi_selected_id')
+    
+    """
+    event Functions
+    """
+    def mousePressEvent(self, x:int, y:int):
+        dict_Fall_stat = self.data_manager.dict_Fall[self.key_app]["stat"]
+        dict_roi_med = {roi_id: dict_Fall_stat[roi_id]["med"] for roi_id in dict_Fall_stat.keys()}
+        closest_roi_id = findClosestROI(x, y, dict_roi_med)
+        if closest_roi_id is not None:
+            self.control_manager.setSharedAttr(self.key_app, 'roi_selected_id', closest_roi_id)
+            self.updateView()

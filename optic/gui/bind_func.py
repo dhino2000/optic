@@ -55,6 +55,18 @@ def bindFuncButtonToggleAllROICheckbox(widget_manager, view_control, table_contr
             )
     view_control.updateView()
 
+# -> makeWidgetView, mousePressEvent
+def bindFuncViewMousePressEvent(q_view, view_control, table_control):
+    def onViewClicked(event):
+        view_pos = event.pos()
+        scene_pos = q_view.mapToScene(view_pos)
+        view_control.mousePressEvent(int(scene_pos.x()), int(scene_pos.y()))
+        table_control.updateSelectedROI(
+            view_control.control_manager.getSharedAttr(view_control.key_app, 'roi_selected_id')
+        )
+    
+    q_view.mousePressEvent = onViewClicked
+
 # -> view_layouts.makeLayoutROIDisplayType
 def bindFuncRadiobuttonROIDisplayTypeChanged(q_buttongroup, view_control, table_control):
     def _onROIDisplayTypeChanged(button_id):

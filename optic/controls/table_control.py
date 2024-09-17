@@ -129,6 +129,13 @@ class TableControl:
             roi_display[row] = (new_cell_type == current_display_type)
             self.setSharedAttr_ROIDisplay(roi_display)
 
+    # with View mousePressEvent
+    def updateSelectedROI(self, roi_id):
+        if roi_id is not None:
+            self.q_table.selectRow(roi_id)
+            self.setSelectedRow(roi_id)
+            self.setSharedAttr_ROISelected(roi_id)
+
     """
     KeyPressEvent
     """
