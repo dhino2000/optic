@@ -302,7 +302,12 @@ class TableControl:
     # toggle "Checkbox" of All ROIs
     def toggleAllROICheckbox(self, checkbox: str, toggle: bool):
         dict_text = {True: "Check", False: "Uncheck"}
-        if self.showConfirmationDialog(f"{dict_text[toggle]} All {checkbox} ?"):
+        result = showConfirmationDialog(
+            self.q_table,
+            'Confirmation',
+            f"{dict_text[toggle]} All {checkbox} ?"
+        )
+        if result == QMessageBox.Yes:
             col_index = self.table_columns.getColumns()[checkbox]['order']
             check_state = Qt.Checked if toggle else Qt.Unchecked
 

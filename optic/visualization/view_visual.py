@@ -127,17 +127,39 @@ def highlightROISelected(view_control, painter, data_manager, control_manager, k
             painter.drawPoint(int(x), int(y))
 
 # find Closest ROI to click position
-def findClosestROI(x: int, y: int, dict_roi_med: dict):
+def findClosestROI(x: int, y: int, dict_roi_med: dict, skip_roi: dict = None):
+    if not dict_roi_med:
+        return None
+    
     min_distance = float('inf')
     closest_roi_id = None
 
     for roi_id, med in dict_roi_med.items():
+        if skip_roi and skip_roi.get(roi_id, False):
+            continue
         distance = np.sqrt((x - med[0])**2 + (y - med[1])**2)
         if distance < min_distance:
             min_distance = distance
             closest_roi_id = roi_id
 
     return closest_roi_id
+
+# Skip ROIs with "Skip" checkbox checked
+def shouldSkipROI(roi_id, table_columns, q_table, skip_checkboxes):
+    for checkbox in skip_checkboxes:
+        if checkbox.isChecked():
+            celltype = checkbox.text().replace("Skip ", "").replace(" ROI", "")
+            for col_name, col_info in table_columns.items():
+                if col_name == celltype:
+                    if col_info['type'] == 'celltype':
+                        radio_button = q_table.cellWidget(roi_id, col_info['order'])
+                        if radio_button and radio_button.isChecked():
+                            return True
+                    elif col_info['type'] == 'checkbox':
+                        checkbox_item = q_table.item(roi_id, col_info['order'])
+                        if checkbox_item and checkbox_item.checkState() == Qt.Checked:
+                            return True
+    return False
 
 
 

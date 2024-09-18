@@ -36,7 +36,7 @@ def makeLayoutROIChooseSkip(widget_manager, key_checkbox, table_columns):
     layout = QHBoxLayout()
     skip_items = [key for key, value in table_columns.items() if value['type'] in ['celltype', 'checkbox']]
     for item in skip_items:
-        key_checkbox_item = f"skip_{item}"
+        key_checkbox_item = f"skip_choose_{item}"
         label_checkbox_item = f"Skip {item} ROI"
         layout.addWidget(widget_manager.makeWidgetCheckBox(key=f"{key_checkbox}_{key_checkbox_item}", label=label_checkbox_item))
     return layout
