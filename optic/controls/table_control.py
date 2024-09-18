@@ -1,5 +1,5 @@
 # キーボードでtableを操作
-from PyQt5.QtWidgets import QRadioButton, QButtonGroup, QMessageBox
+from PyQt5.QtWidgets import QRadioButton, QButtonGroup, QMessageBox, QAbstractItemView
 from PyQt5.QtCore import Qt
 from ..gui.table_setup import setupWidgetROITable
 from ..visualization.info_visual import updateROIPropertyDisplay, updateROICountDisplay
@@ -136,6 +136,8 @@ class TableControl:
             self.q_table.selectRow(roi_id)
             self.setSelectedRow(roi_id)
             self.setSharedAttr_ROISelected(roi_id)
+            self.q_table.scrollToItem(self.q_table.item(roi_id, 0), QAbstractItemView.PositionAtTop)
+            self.q_table.setCurrentCell(roi_id, 0)
 
     """
     KeyPressEvent
