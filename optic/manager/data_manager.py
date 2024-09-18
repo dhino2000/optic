@@ -2,6 +2,7 @@ from collections import defaultdict
 from scipy.io import loadmat
 from typing import Dict, Tuple, Any
 import numpy as np
+from numpy.typing import NDArray
 from ..preprocessing.preprocessing_fall import convertMatToDictFall
 from ..preprocessing.preprocessing_image import getBGImageFromFall
 
@@ -29,6 +30,23 @@ class DataManager:
         
     def getDictFall(self, key_app) -> Dict[str, Any]:
         return self.dict_Fall[key_app]
+    
+    # get F, Fneu, spks
+    def getTraces(self, key_app) -> Dict[str, NDArray[np.float32]]: # 2d array
+        dict_traces = {
+            "F": self.dict_Fall[key_app]["F"],
+            "Fneu": self.dict_Fall[key_app]["Fneu"],
+            "spks": self.dict_Fall[key_app]["spks"]
+        }
+        return dict_traces
+    
+    def getTracesOfSelectedROI(self, key_app, roi_id) -> Dict[str, NDArray[np.float32]]: # 1d array
+        dict_traces = {
+            "F": self.dict_Fall[key_app]["F"][roi_id],
+            "Fneu": self.dict_Fall[key_app]["Fneu"][roi_id],
+            "spks": self.dict_Fall[key_app]["spks"][roi_id]
+        }
+        return dict_traces
         
     def getImageSize(self, key_app) -> Tuple[int, int]:
         return (self.dict_Fall[key_app]["ops"]["Lx"].item(), self.dict_Fall[key_app]["ops"]["Ly"].item())

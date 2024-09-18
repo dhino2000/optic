@@ -6,6 +6,7 @@ class ControlManager:
     def __init__(self):
         self.table_controls = {}
         self.view_controls = {}
+        self.canvas_controls = {}
         """
         Dictionary to hold attributes shared between controls
         The first level key is `key_app`: "pri", "sec", etc.
