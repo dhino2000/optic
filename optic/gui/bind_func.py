@@ -58,7 +58,7 @@ def bindFuncButtonToggleAllROICheckbox(widget_manager, view_control, table_contr
     view_control.updateView()
 
 # -> makeWidgetView, mousePressEvent
-def bindFuncViewMousePressEvent(q_view, view_control, table_control, canvas_control):
+def bindFuncViewMousePressEvent(q_view, view_control, table_control):
     def onViewClicked(event):
         view_pos = event.pos()
         scene_pos = q_view.mapToScene(view_pos)
@@ -66,8 +66,6 @@ def bindFuncViewMousePressEvent(q_view, view_control, table_control, canvas_cont
         table_control.updateSelectedROI(
             view_control.control_manager.getSharedAttr(view_control.key_app, 'roi_selected_id')
         )
-        canvas_control.plotTraces(canvas_control.control_manager.getSharedAttr(canvas_control.key_app, 'roi_selected_id'))
-        canvas_control.updatePlot()
     
     q_view.mousePressEvent = onViewClicked
 
