@@ -1,14 +1,17 @@
 # アプリのconfigをまとめたManagerクラス
+from typing import Any, TypeVar, Dict
 from ..config.app_settings import AppSettings
 from ..config.table_columns import TableColumns
 from ..config.key_function_map import KeyFunctionMap
+from ..config.gui_defaults import GuiDefaults
+from ..config.table_columns import TableColumns
 
 class ConfigManager:
     def __init__(self):
-        self.current_app = None
-        self.gui_defaults = None
-        self.table_columns = {}
-        self.key_function_maps = {}
+        self.current_app       : str = None
+        self.gui_defaults      : GuiDefaults = None
+        self.table_columns     : Dict[str: TableColumns] = {}
+        self.key_function_maps : Dict[str: KeyFunctionMap] = {}
 
     def setCurrentApp(self, app_name):
         self.current_app = app_name

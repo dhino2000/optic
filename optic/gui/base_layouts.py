@@ -2,16 +2,25 @@
 # ほぼmakeWidgetと同じ
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QRadioButton, QButtonGroup, QSlider
 from PyQt5.QtCore import Qt
+from typing import Literal
+from ..manager.widget_manager import WidgetManager
 
 # QLineEdit Layout label付き
-def makeLayoutLineEditLabel(widget_manager, key_label, key_lineedit, label, axis="vertical", text_set="", width_fix=None):
+def makeLayoutLineEditLabel(widget_manager :WidgetManager, 
+                            key_label      :str,
+                            key_lineedit   :str, 
+                            label          :str, 
+                            axis           :Literal["vertical", "horizontal"] = "vertical", 
+                            text_set       :str = "", 
+                            width_fix      :int = 0,
+                            align               = Qt.AlignLeft):
     if axis == "vertical":
         layout = QVBoxLayout()
     elif axis == "horizontal":
         layout = QHBoxLayout()
     else:
         raise ValueError(f"Invalid axis value: {axis}. Expected 'vertical' or 'horizontal'.")
-    label_widget = widget_manager.makeWidgetLabel(key_label, label)
+    label_widget = widget_manager.makeWidgetLabel(key_label, label, align)
     lineedit_widget = widget_manager.makeWidgetLineEdit(key_lineedit, text_set, width_fix)
     layout.addWidget(label_widget)
     layout.addWidget(lineedit_widget)

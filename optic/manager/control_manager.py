@@ -1,12 +1,15 @@
 from collections import defaultdict
-from typing import Any
+from typing import Any, Dict
+from ..controls.table_control import TableControl
+from ..controls.view_control import ViewControl
+from ..controls.canvas_control import CanvasControl
 
 # Manager controls class
 class ControlManager:
     def __init__(self):
-        self.table_controls = {}
-        self.view_controls = {}
-        self.canvas_controls = {}
+        self.table_controls  : Dict[str, TableControl] = {}
+        self.view_controls   : Dict[str, ViewControl] = {}
+        self.canvas_controls : Dict[str, CanvasControl] = {}
         """
         Dictionary to hold attributes shared between controls
         The first level key is `key_app`: "pri", "sec", etc.

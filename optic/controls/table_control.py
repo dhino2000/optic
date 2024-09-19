@@ -1,20 +1,26 @@
 # キーボードでtableを操作
-from PyQt5.QtWidgets import QRadioButton, QButtonGroup, QMessageBox, QAbstractItemView
+from PyQt5.QtWidgets import QRadioButton, QButtonGroup, QMessageBox, QAbstractItemView, QTableWidget
 from PyQt5.QtCore import Qt
 from ..gui.table_setup import setupWidgetROITable
 from ..visualization.info_visual import updateROIPropertyDisplay, updateROICountDisplay
 from ..utils.dialog_utils import showConfirmationDialog
+from ..manager.config_manager import ConfigManager
+from ..manager.control_manager import ControlManager
+from ..manager.data_manager import DataManager
+from ..manager.widget_manager import WidgetManager
 from typing import Dict, Any
 
 class TableControl:
-    def __init__(self, key_app, q_table, data_manager, widget_manager, config_manager, control_manager):
-        """
-        key_app          : str
-        q_table          : QTableWidget 
-        table_columns    : config.app_config.TableColumns
-        key_function_map : config.app_config.KeyFunctionMap
-        """
-        self.key_app:                               str = key_app
+    def __init__(
+            self, 
+            key_app         : str, 
+            q_table         : QTableWidget,             
+            data_manager    : DataManager, 
+            widget_manager  : WidgetManager, 
+            config_manager  : ConfigManager, 
+            control_manager : ControlManager,
+        ):
+        self.key_app                                    = key_app
         self.q_table                                    = q_table
         self.data_manager                               = data_manager
         self.widget_manager                             = widget_manager

@@ -9,13 +9,16 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 make Widget Function
 """
 # QLabel Widget
-def makeWidgetLabel(label, align=Qt.AlignLeft):
+def makeWidgetLabel(label, 
+                    align=Qt.AlignLeft):
     widget = QLabel(label)
     widget.setAlignment(align)
     return widget
 
 # QCheckBox Widget
-def makeWidgetCheckBox(label, func_=None, checked=False):
+def makeWidgetCheckBox(label, 
+                       func_=None, 
+                       checked=False):
     widget = QCheckBox(label)
     widget.setChecked(checked) 
     if func_:
@@ -23,7 +26,8 @@ def makeWidgetCheckBox(label, func_=None, checked=False):
     return widget
 
 # QLineEdit
-def makeWidgetLineEdit(text_set="", width_fix=None):
+def makeWidgetLineEdit(text_set="", 
+                       width_fix=0):
     widget = QLineEdit()
     if width_fix:
         widget.setFixedWidth(width_fix)
@@ -31,7 +35,12 @@ def makeWidgetLineEdit(text_set="", width_fix=None):
     return widget
 
 # QSlider Widget
-def makeWidgetSlider(func_=None, value_min=0, value_max=255, value_set=10, height=10, axis=Qt.Horizontal):
+def makeWidgetSlider(func_=None, 
+                     value_min=0, 
+                     value_max=255, 
+                     value_set=10, 
+                     height=10, 
+                     axis=Qt.Horizontal):
     widget = QSlider(axis)
     widget.setMinimum(value_min)
     widget.setMaximum(value_max)
@@ -42,7 +51,8 @@ def makeWidgetSlider(func_=None, value_min=0, value_max=255, value_set=10, heigh
     return widget
 
 # QPushButton Widget
-def makeWidgetButton(label, func_=None):
+def makeWidgetButton(label, 
+                     func_=None):
     widget = QPushButton(label)
     if func_:
         widget.clicked.connect(func_)
@@ -108,7 +118,12 @@ def makeWidgetScene():
     return widget
 
 # QGraphicsView Widget
-def makeWidgetView(scene, width_min=None, height_min=None, color="black", anti_aliasing=True, smooth_pixmap_transform=True):
+def makeWidgetView(scene, 
+                   width_min=0, 
+                   height_min=0, 
+                   color="black", 
+                   anti_aliasing=True, 
+                   smooth_pixmap_transform=True):
     widget = QGraphicsView(scene)
     if width_min:
         widget.setMinimumHeight(width_min)
@@ -123,7 +138,10 @@ def makeWidgetView(scene, width_min=None, height_min=None, color="black", anti_a
     return widget
 
 # figureのaxisに追加, 位置を指定
-def addWidgetAxisOnFigure(figure, num_row, num_col, position):
+def addWidgetAxisOnFigure(figure, 
+                          num_row, 
+                          num_col, 
+                          position):
     figure = figure.add_subplot(num_row, num_col, position)
     return figure
 

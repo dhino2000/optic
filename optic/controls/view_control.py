@@ -1,23 +1,26 @@
 from ..visualization.view_visual import updateView, findClosestROI, shouldSkipROI
 from ..gui.view_setup import setViewSize
 from ..config.constants import BGImageTypeList
+from ..manager.config_manager import ConfigManager
+from ..manager.control_manager import ControlManager
+from ..manager.data_manager import DataManager
+from ..manager.widget_manager import WidgetManager
 import random
 import numpy as np
 from typing import List, Tuple, Dict, Optional, Callable
+from PyQt5.QtWidgets import QGraphicsView, QGraphicsScene
 
 class ViewControl:
-    def __init__(self, key_app, q_view, q_scene, data_manager, widget_manager, config_manager, control_manager):
-        """
-        Initializes the ViewControl object.
-
-        Args:
-            key_app (str): The key for the application.
-            q_view (QGraphicsView): The QGraphicsView object.
-            q_scene (QGraphicsScene): The QGraphicsScene object.
-            data_manager (DataManager): The DataManager object.
-            widget_manager (WidgetManager): The WidgetManager object.
-            config_manager (ConfigManager): The ConfigManager object.
-        """
+    def __init__(
+            self, 
+            key_app         : str, 
+            q_view          : QGraphicsView, 
+            q_scene         : QGraphicsScene, 
+            data_manager    : DataManager, 
+            widget_manager  : WidgetManager, 
+            config_manager  : ConfigManager, 
+            control_manager : ControlManager,
+        ):
         # Rest of the code...
         self.key_app         = key_app
         self.q_view          = q_view
