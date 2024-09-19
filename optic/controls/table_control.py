@@ -1,14 +1,13 @@
 # キーボードでtableを操作
 from PyQt5.QtWidgets import QRadioButton, QButtonGroup, QMessageBox, QAbstractItemView, QTableWidget
 from PyQt5.QtCore import Qt
-from ..gui.table_setup import setupWidgetROITable
 from ..visualization.info_visual import updateROIPropertyDisplay, updateROICountDisplay
 from ..utils.dialog_utils import showConfirmationDialog
-from ..manager.config_manager import ConfigManager
-from ..manager.control_manager import ControlManager
-from ..manager.data_manager import DataManager
-from ..manager.widget_manager import WidgetManager
 from typing import Dict, Any
+
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from ..manager import ConfigManager, ControlManager, DataManager, WidgetManager
 
 class TableControl:
     def __init__(
@@ -34,6 +33,7 @@ class TableControl:
         self.len_row:                               int = 0
 
     def setupWidgetROITable(self, key_app):
+        from ..gui.table_setup import setupWidgetROITable
         self.setLenRow(len(self.data_manager.dict_Fall[key_app]["stat"])) # for Suite2p
         self.q_table, self.groups_celltype = setupWidgetROITable(self.q_table, self.len_row, self.table_columns.getColumns(), key_event_ignore=True)
         self.setKeyPressEvent()
@@ -41,6 +41,7 @@ class TableControl:
         updateROICountDisplay(self.widget_manager, self.config_manager, self.key_app)
 
     def updateWidgetROITable(self):
+        from ..gui.table_setup import setupWidgetROITable
         self.q_table.clear()
         self.q_table = setupWidgetROITable(self.q_table, self.len_row, self.table_columns.getColumns(), key_event_ignore=True)
 

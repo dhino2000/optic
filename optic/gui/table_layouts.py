@@ -2,7 +2,6 @@
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QGridLayout
 from .base_layouts import makeLayoutLineEditLabel
 from .info_layouts import makeLayoutROICount
-from .table_setup import setupWidgetROITable
 
 # TableWidgetとROI数のラベル
 def makeLayoutTableROICountLabel(widget_manager, key_label, key_table, table_columns):

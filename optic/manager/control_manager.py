@@ -1,8 +1,9 @@
 from collections import defaultdict
 from typing import Any, Dict
-from ..controls.table_control import TableControl
-from ..controls.view_control import ViewControl
-from ..controls.canvas_control import CanvasControl
+
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from ..controls import TableControl, ViewControl, CanvasControl
 
 # Manager controls class
 class ControlManager:

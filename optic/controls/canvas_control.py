@@ -2,12 +2,13 @@ from typing import Any, Dict, Literal
 from ..config.constants import AxisKeys, PlotColors, PlotLabels
 from ..utils.data_utils import downSampleTrace
 from ..visualization.canvas_visual import plotTraces
-from ..manager.config_manager import ConfigManager
-from ..manager.control_manager import ControlManager
-from ..manager.data_manager import DataManager
-from ..manager.widget_manager import WidgetManager
+from __future__ import annotations
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
+
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from ..manager import ConfigManager, ControlManager, DataManager, WidgetManager
 
 class CanvasControl:
     def __init__(self, 
