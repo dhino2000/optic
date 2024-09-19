@@ -34,6 +34,12 @@ class PlotColors:
     SPKS = 'gray'
     EVENT = 'green'
 
+class PlotLabels:
+    F = "F"
+    FNEU = "Fneu"
+    SPKS = "spks"
+    EVENT = "event"
+
 # widget管理の総合key
 class AppKeys:
     PRI = "pri"

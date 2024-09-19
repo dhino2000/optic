@@ -19,11 +19,13 @@ def bindFuncROICheckIO(q_window, q_lineedit, q_table, q_button_save, q_button_lo
     q_button_load.clicked.connect(lambda: loadROICheck(q_window, q_table, table_columns))
 
 # -> table_layouts.makeLayoutTableROICountLabel
-def bindFuncTableSelectionChanged(q_table, table_control, view_control):
+def bindFuncTableSelectionChanged(q_table, table_control, view_control, canvas_control):
     def _onSelectionChanged(selected, deselected):
         if selected.indexes():
             table_control.onSelectionChanged(selected, deselected)
             view_control.updateView()
+            canvas_control.plotTraces(canvas_control.control_manager.getSharedAttr(canvas_control.key_app, 'roi_selected_id'))
+            canvas_control.updatePlot()
     q_table.selectionModel().selectionChanged.connect(_onSelectionChanged)
 def bindFuncRadiobuttonCelltypeChanged(table_control, view_control):
     def __onButtonClicked(row):
@@ -64,7 +66,7 @@ def bindFuncViewMousePressEvent(q_view, view_control, table_control, canvas_cont
         table_control.updateSelectedROI(
             view_control.control_manager.getSharedAttr(view_control.key_app, 'roi_selected_id')
         )
-        canvas_control.plotTraces(view_control.control_manager.getSharedAttr(view_control.key_app, 'roi_selected_id'))
+        canvas_control.plotTraces(canvas_control.control_manager.getSharedAttr(canvas_control.key_app, 'roi_selected_id'))
         canvas_control.updatePlot()
     
     q_view.mousePressEvent = onViewClicked

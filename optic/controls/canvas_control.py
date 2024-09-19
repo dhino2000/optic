@@ -1,5 +1,5 @@
 from typing import Any, Dict, Literal
-from ..config.constants import AxisKeys, PlotColors
+from ..config.constants import AxisKeys, PlotColors, PlotLabels
 from ..utils.data_utils import downSample
 from ..visualization.canvas_visual import plotTraces
 
@@ -43,7 +43,8 @@ class CanvasControl:
 
     def plotTraces(self, roi_selected_id: int, length_plot:int = 1000):
         traces = self.data_manager.getTracesOfSelectedROI(self.key_app, roi_selected_id)
-        traces = {key: downSample(value, length_plot) for key, value in traces.items()}
+        if self.widget_manager.dict_checkbox[f"{self.key_app}_light_mode"].isChecked():
+            traces = {key: downSample(value, length_plot) for key, value in traces.items()}
         colors = {"F": PlotColors.F, "Fneu": PlotColors.FNEU, "spks": PlotColors.SPKS}
-        labels = {"F": "F", "Fneu": "Fneu", "spks": "spks"}
+        labels = {"F": PlotLabels.F, "Fneu": PlotLabels.FNEU, "spks": PlotLabels.SPKS}
         plotTraces(self.axes["top"], traces, colors, labels, 'Traces')
