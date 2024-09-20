@@ -39,7 +39,6 @@ class DataManager:
             "spks": self.dict_Fall[key_app]["spks"]
         }
         return dict_traces
-    
     def getTracesOfSelectedROI(self, key_app, roi_id) -> Dict[str, NDArray[np.float32]]: # 1d array
         dict_traces = {
             "F": self.dict_Fall[key_app]["F"][roi_id],
@@ -47,6 +46,16 @@ class DataManager:
             "spks": self.dict_Fall[key_app]["spks"][roi_id]
         }
         return dict_traces
+    
+    # get fs
+    def getFs(self, key_app) -> float:
+        return self.dict_Fall[key_app]["ops"]["fs"].flatten()[0]
+
+    # get data length
+    def getLengthOfData(self, key_app) -> int:
+        return len(self.dict_Fall[key_app]["ops"]["xoff1"])
+
+    # get 
         
     def getImageSize(self, key_app) -> Tuple[int, int]:
         return (self.dict_Fall[key_app]["ops"]["Lx"].item(), self.dict_Fall[key_app]["ops"]["Ly"].item())

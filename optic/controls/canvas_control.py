@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import Any, Dict, Literal
 from ..config.constants import AxisKeys, PlotColors, PlotLabels
 from ..utils.data_utils import downSampleTrace
-from ..visualization.canvas_visual import plotTraces
+from ..visualization.canvas_visual import plotTraces, zoomXAxis
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 
@@ -30,8 +30,11 @@ class CanvasControl:
         self.ax_layout                                  = ax_layout
 
         self.axes:                       Dict[str, Any] = {}
+        self.min_zoom_width:                        int = 100
+        self.max_zoom_width:                        int = self.data_manager.getLengthOfData(self.key_app)
 
         self.setupAxes()
+        self.bindEvents()
 
     def setupAxes(self):
         if self.ax_layout == 'single':
@@ -45,6 +48,20 @@ class CanvasControl:
     def updatePlot(self):
         self.canvas.draw()
 
+    # Mouse Event
+    def bindEvents(self):
+        self.canvas.mpl_connect('scroll_event', self.onScroll)
+
+    def onScroll(self, event):
+        if self.max_zoom_width is None:
+            self.max_zoom_width = self.axes[AxisKeys.TOP].get_xlim()[1] - self.axes[AxisKeys.TOP].get_xlim()[0]
+        
+        zoomXAxis(event, 
+                  self.axes[AxisKeys.TOP], 
+                  self.canvas, 
+                  self.min_zoom_width, 
+                  self.max_zoom_width)
+
     def plotTraces(self, roi_selected_id: int):
         traces = self.data_manager.getTracesOfSelectedROI(self.key_app, roi_selected_id)
         if self.widget_manager.dict_checkbox[f"light_plot_mode"].isChecked():
@@ -52,4 +69,4 @@ class CanvasControl:
             traces = {key: downSampleTrace(value, length_plot) for key, value in traces.items()}
         colors = {"F": PlotColors.F, "Fneu": PlotColors.FNEU, "spks": PlotColors.SPKS}
         labels = {"F": PlotLabels.F, "Fneu": PlotLabels.FNEU, "spks": PlotLabels.SPKS}
-        plotTraces(self.axes["top"], traces, colors, labels, 'Traces')
+        plotTraces(self.axes[AxisKeys.TOP], traces, colors, labels, 'Traces')
