@@ -24,7 +24,6 @@ def bindFuncTableSelectionChanged(q_table, table_control, view_control, canvas_c
         if selected.indexes():
             table_control.onSelectionChanged(selected, deselected)
             view_control.updateView()
-            canvas_control.plotTraces(canvas_control.control_manager.getSharedAttr(canvas_control.key_app, 'roi_selected_id'))
             canvas_control.updatePlot()
     q_table.selectionModel().selectionChanged.connect(_onSelectionChanged)
 def bindFuncRadiobuttonCelltypeChanged(table_control, view_control):

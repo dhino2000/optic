@@ -5,6 +5,7 @@ from ..utils.data_utils import downSampleTrace
 from ..visualization.canvas_visual import plotTraces, zoomXAxis
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
+import numpy as np
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -30,8 +31,11 @@ class CanvasControl:
         self.ax_layout                                  = ax_layout
 
         self.axes:                       Dict[str, Any] = {}
-        self.min_zoom_width:                        int = 100
-        self.max_zoom_width:                        int = self.data_manager.getLengthOfData(self.key_app)
+        self.fs:                                  float = self.data_manager.getFs(self.key_app)
+        self.plot_data_points:                      int = self.data_manager.getLengthOfData(self.key_app)
+        self.time_array:                       np.array = np.arange(self.plot_data_points) / self.fs
+        self.plot_start:                            int = 0
+        self.plot_end:                              int = self.plot_data_points
 
         self.setupAxes()
         self.bindEvents()
@@ -45,28 +49,59 @@ class CanvasControl:
         
         self.figure.subplots_adjust(top=0.95, bottom=0.1, right=0.9, left=0.1, hspace=0.4)
 
-    def updatePlot(self):
-        self.canvas.draw()
-
-    # Mouse Event
-    def bindEvents(self):
-        self.canvas.mpl_connect('scroll_event', self.onScroll)
-
-    def onScroll(self, event):
-        if self.max_zoom_width is None:
-            self.max_zoom_width = self.axes[AxisKeys.TOP].get_xlim()[1] - self.axes[AxisKeys.TOP].get_xlim()[0]
-        
-        zoomXAxis(event, 
-                  self.axes[AxisKeys.TOP], 
-                  self.canvas, 
-                  self.min_zoom_width, 
-                  self.max_zoom_width)
-
-    def plotTraces(self, roi_selected_id: int):
-        traces = self.data_manager.getTracesOfSelectedROI(self.key_app, roi_selected_id)
-        if self.widget_manager.dict_checkbox[f"light_plot_mode"].isChecked():
-            length_plot = int(self.widget_manager.dict_lineedit["light_plot_mode_threshold"].text())
-            traces = {key: downSampleTrace(value, length_plot) for key, value in traces.items()}
+    # Plot
+    def plotTraces(self):
+        roi_selected_id = self.control_manager.getSharedAttr(self.key_app, 'roi_selected_id')
+        full_traces = self.data_manager.getTracesOfSelectedROI(self.key_app, roi_selected_id)
         colors = {"F": PlotColors.F, "Fneu": PlotColors.FNEU, "spks": PlotColors.SPKS}
         labels = {"F": PlotLabels.F, "Fneu": PlotLabels.FNEU, "spks": PlotLabels.SPKS}
-        plotTraces(self.axes[AxisKeys.TOP], traces, colors, labels, 'Traces')
+        
+        traces = {key: trace[self.plot_start:self.plot_end] for key, trace in full_traces.items()} # trim
+        
+        # 表示範囲の時間を計算
+        time_range = self.time_array[self.plot_end - 1] - self.time_array[self.plot_start]
+        start_time = self.time_array[self.plot_start]
+        end_time = self.time_array[self.plot_end - 1]
+
+        # x軸の目盛りを1秒刻みで計算
+        tick_interval = max(1, int(time_range / 10))  # 最小1秒間隔、最大10個程度の目盛り
+        xticks = np.arange(start_time, end_time + 1, tick_interval)
+        xticks_indices = np.searchsorted(self.time_array[self.plot_start:self.plot_end], xticks) + self.plot_start
+
+        y_max = max(np.max(trace) for trace in full_traces.values())
+        ylim = (-y_max * 0.1, y_max * 1.1)
+
+        plotTraces(self.axes[AxisKeys.TOP], 
+                   traces, 
+                   colors, 
+                   labels, 
+                   title=f'ROI {roi_selected_id}, Traces',
+                   xlabel='Time (s)',
+                   xticks=xticks_indices - self.plot_start,  # プロットデータに対する相対位置
+                   xticklabels=xticks.astype(int),
+                   ylim=ylim)
+        
+
+    def onScroll(self, event):
+        if event.inaxes != self.axes[AxisKeys.TOP]:
+            return
+
+        self.plot_start, self.plot_end = zoomXAxis(
+            event=event,
+            ax=self.axes[AxisKeys.TOP],
+            plot_start=self.plot_start,
+            plot_end=self.plot_end,
+            total_points=self.plot_data_points
+        )
+        self.plotTraces()
+        self.canvas.draw_idle()
+
+    def updatePlot(self):
+        self.plotTraces()
+
+        self.canvas.draw_idle()
+
+    def bindEvents(self):
+        self.canvas.mpl_connect('scroll_event', self.onScroll)
+        
+

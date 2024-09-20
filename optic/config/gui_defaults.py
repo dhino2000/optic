@@ -45,6 +45,7 @@ class GuiDefaults:
             "DEFAULT_HIGHLIGHT_OPACITY": 255,
         },
         "LIGHT_MODE_DOWNSAMPLE": 250,
+        "MIN_PLOT_WIDTH_SEC": 30,
         "TABLE_COLUMNS": {
             AppKeys.PRI: {
                 "Cell ID"   : {"order": 0, "type": "id",       "width": 80},
