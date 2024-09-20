@@ -50,7 +50,14 @@ class CanvasControl:
         self.figure.subplots_adjust(top=0.95, bottom=0.1, right=0.9, left=0.1, hspace=0.4)
 
     # Plot
+    def updatePlot(self):
+        self.plotTraces()
+
+        self.canvas.draw_idle()
+
     def plotTraces(self):
+        self.updatePlotRange() 
+
         roi_selected_id = self.control_manager.getSharedAttr(self.key_app, 'roi_selected_id')
         full_traces = self.data_manager.getTracesOfSelectedROI(self.key_app, roi_selected_id)
         colors = {"F": PlotColors.F, "Fneu": PlotColors.FNEU, "spks": PlotColors.SPKS}
@@ -64,7 +71,7 @@ class CanvasControl:
         end_time = self.time_array[self.plot_end - 1]
 
         # x軸の目盛りを1秒刻みで計算
-        tick_interval = max(1, int(time_range / 10))  # 最小1秒間隔、最大10個程度の目盛り
+        tick_interval = max(1, int(time_range / 5))  # 最小1秒間隔、最大5個程度の目盛り
         xticks = np.arange(start_time, end_time + 1, tick_interval)
         xticks_indices = np.searchsorted(self.time_array[self.plot_start:self.plot_end], xticks) + self.plot_start
 
@@ -81,7 +88,11 @@ class CanvasControl:
                    xticklabels=xticks.astype(int),
                    ylim=ylim)
         
+    def updatePlotRange(self):
+        min_width_seconds = float(self.widget_manager.dict_lineedit[f"{self.key_app}_plot_min_width"].text())
+        self.min_plot_width = int(min_width_seconds * self.fs)
 
+    # Mouse Event
     def onScroll(self, event):
         if event.inaxes != self.axes[AxisKeys.TOP]:
             return
@@ -91,14 +102,10 @@ class CanvasControl:
             ax=self.axes[AxisKeys.TOP],
             plot_start=self.plot_start,
             plot_end=self.plot_end,
-            total_points=self.plot_data_points
+            total_points=self.plot_data_points,
+            min_width=self.min_plot_width
         )
         self.plotTraces()
-        self.canvas.draw_idle()
-
-    def updatePlot(self):
-        self.plotTraces()
-
         self.canvas.draw_idle()
 
     def bindEvents(self):

@@ -34,7 +34,7 @@ def plotTraces(ax,
     if legend:
         ax.legend()
 
-def zoomXAxis(event, ax, plot_start: float, plot_end: float, total_points: float, zoom_factor: float = 1.5):
+def zoomXAxis(event, ax, plot_start: float, plot_end: float, total_points: float, min_width: int, zoom_factor: float = 1.5):
     current_range = plot_end - plot_start
     relative_x = event.xdata / ax.get_xlim()[1]  # イベントの相対的なx位置
     center = plot_start + int(relative_x * current_range)
@@ -43,7 +43,7 @@ def zoomXAxis(event, ax, plot_start: float, plot_end: float, total_points: float
     else:  # ズームアウト
         new_range = int(current_range * zoom_factor)
 
-    new_range = max(100, min(new_range, total_points))  # 最小100ポイント、最大全体
+    new_range = max(min_width, min(new_range, total_points))
 
     # 新しい範囲の半分
     half_range = new_range // 2
