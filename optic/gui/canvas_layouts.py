@@ -25,8 +25,8 @@ def makeLayoutComponentLightPlotMode(widget_manager, config_manager):
                     widget_manager, 
                     key_label="light_plot_mode_threshold", 
                     key_lineedit="light_plot_mode_threshold",         
-                    label="Plot data size (x4): ", 
-                    axis="horizontal",
+                    label="Plot data size (x4)", 
+                    axis="vertical",
                     text_set=f"{config_manager.gui_defaults['LIGHT_MODE_DOWNSAMPLE']}",
                     )
                 )

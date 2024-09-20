@@ -45,9 +45,10 @@ class CanvasControl:
     def updatePlot(self):
         self.canvas.draw()
 
-    def plotTraces(self, roi_selected_id: int, length_plot:int = 1000):
+    def plotTraces(self, roi_selected_id: int):
         traces = self.data_manager.getTracesOfSelectedROI(self.key_app, roi_selected_id)
         if self.widget_manager.dict_checkbox[f"light_plot_mode"].isChecked():
+            length_plot = int(self.widget_manager.dict_lineedit["light_plot_mode_threshold"].text())
             traces = {key: downSampleTrace(value, length_plot) for key, value in traces.items()}
         colors = {"F": PlotColors.F, "Fneu": PlotColors.FNEU, "spks": PlotColors.SPKS}
         labels = {"F": PlotLabels.F, "Fneu": PlotLabels.FNEU, "spks": PlotLabels.SPKS}
