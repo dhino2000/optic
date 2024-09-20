@@ -1,3 +1,4 @@
+from __future__ import annotations
 from ..visualization.view_visual import updateView, findClosestROI, shouldSkipROI
 from ..gui.view_setup import setViewSize
 from ..config.constants import BGImageTypeList

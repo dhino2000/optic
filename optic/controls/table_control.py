@@ -1,4 +1,4 @@
-# キーボードでtableを操作
+from __future__ import annotations
 from PyQt5.QtWidgets import QRadioButton, QButtonGroup, QMessageBox, QAbstractItemView, QTableWidget
 from PyQt5.QtCore import Qt
 from ..visualization.info_visual import updateROIPropertyDisplay, updateROICountDisplay

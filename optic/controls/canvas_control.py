@@ -1,8 +1,8 @@
+from __future__ import annotations
 from typing import Any, Dict, Literal
 from ..config.constants import AxisKeys, PlotColors, PlotLabels
 from ..utils.data_utils import downSampleTrace
 from ..visualization.canvas_visual import plotTraces
-from __future__ import annotations
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 
