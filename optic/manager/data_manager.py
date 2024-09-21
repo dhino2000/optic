@@ -60,7 +60,7 @@ class DataManager:
     def getImageSize(self, key_app) -> Tuple[int, int]:
         return (self.dict_Fall[key_app]["ops"]["Lx"].item(), self.dict_Fall[key_app]["ops"]["Ly"].item())
     
-    def getDictBackgroundImage(self, key_app) -> Dict[str, np.array]:
+    def getDictBackgroundImage(self, key_app) -> Dict[str, NDArray[np.uint8]]: # 2d array
         return self.dict_im_bg[key_app]
     
     def getBackgroundChan2Image(self, key_app) -> np.array:

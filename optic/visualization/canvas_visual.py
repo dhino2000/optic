@@ -43,21 +43,17 @@ def zoomXAxis(event, ax, plot_start: float, plot_end: float, total_points: float
     else:  # ズームアウト
         new_range = int(current_range * zoom_factor)
 
-    new_range = max(min_width, min(new_range, total_points))
+    new_range = max(min_width, min(new_range, total_points))  # 最小幅を min_width に設定
 
-    # 新しい範囲の半分
     half_range = new_range // 2
-
-    # センターを基準に新しい開始位置と終了位置を計算
     new_start = center - half_range
     new_end = center + half_range
 
-    # 範囲が全体のデータ範囲内に収まるように調整
     if new_start < 0:
         new_start = 0
         new_end = new_range
     elif new_end > total_points:
         new_end = total_points
-        new_start = max(0, new_end - new_range)
+        new_start = max(0, total_points - new_range)
 
-    return int(new_start), int(new_end)
+    return new_start, new_end

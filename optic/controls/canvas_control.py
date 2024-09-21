@@ -33,6 +33,7 @@ class CanvasControl:
         self.axes:                       Dict[str, Any] = {}
         self.fs:                                  float = self.data_manager.getFs(self.key_app)
         self.plot_data_points:                      int = self.data_manager.getLengthOfData(self.key_app)
+        self.downsample_threshold:                  int = 1000
         self.time_array:                       np.array = np.arange(self.plot_data_points) / self.fs
         self.plot_start:                            int = 0
         self.plot_end:                              int = self.plot_data_points
@@ -56,25 +57,39 @@ class CanvasControl:
         self.canvas.draw_idle()
 
     def plotTraces(self):
-        self.updatePlotRange() 
+        self.updatePlotRange()
+        self.updateDownsampleThreshold()
 
         roi_selected_id = self.control_manager.getSharedAttr(self.key_app, 'roi_selected_id')
         full_traces = self.data_manager.getTracesOfSelectedROI(self.key_app, roi_selected_id)
+        
+        # データのトリミングとダウンサンプリング
+        trimmed_traces = {key: trace[self.plot_start:self.plot_end] for key, trace in full_traces.items()}
+        current_points = self.plot_end - self.plot_start
+        
+        if self.widget_manager.dict_checkbox["light_plot_mode"].isChecked() and current_points > self.downsample_threshold:
+            traces = {key: downSampleTrace(trace, self.downsample_threshold) for key, trace in trimmed_traces.items()}
+            downsampling_factor = current_points / self.downsample_threshold
+        else:
+            traces = trimmed_traces
+            downsampling_factor = 1
+
         colors = {"F": PlotColors.F, "Fneu": PlotColors.FNEU, "spks": PlotColors.SPKS}
         labels = {"F": PlotLabels.F, "Fneu": PlotLabels.FNEU, "spks": PlotLabels.SPKS}
         
-        traces = {key: trace[self.plot_start:self.plot_end] for key, trace in full_traces.items()} # trim
-        
         # 表示範囲の時間を計算
-        time_range = self.time_array[self.plot_end - 1] - self.time_array[self.plot_start]
         start_time = self.time_array[self.plot_start]
         end_time = self.time_array[self.plot_end - 1]
+        time_range = end_time - start_time
 
         # x軸の目盛りを1秒刻みで計算
-        tick_interval = max(1, int(time_range / 5))  # 最小1秒間隔、最大5個程度の目盛り
+        tick_interval = max(1, int(time_range / 10))  # 最小1秒間隔、最大10個程度の目盛り
         xticks = np.arange(start_time, end_time + 1, tick_interval)
-        xticks_indices = np.searchsorted(self.time_array[self.plot_start:self.plot_end], xticks) + self.plot_start
+        
+        # ダウンサンプリングに合わせてxticksを調整
+        xticks_indices = np.linspace(0, len(next(iter(traces.values()))) - 1, len(xticks), dtype=int)
 
+        # yの範囲を計算
         y_max = max(np.max(trace) for trace in full_traces.values())
         ylim = (-y_max * 0.1, y_max * 1.1)
 
@@ -86,11 +101,15 @@ class CanvasControl:
                    xlabel='Time (s)',
                    xticks=xticks_indices - self.plot_start,  # プロットデータに対する相対位置
                    xticklabels=xticks.astype(int),
+                   xlim=(0, len(next(iter(traces.values()))) - 1),
                    ylim=ylim)
         
     def updatePlotRange(self):
         min_width_seconds = float(self.widget_manager.dict_lineedit[f"{self.key_app}_plot_min_width"].text())
         self.min_plot_width = int(min_width_seconds * self.fs)
+    def updateDownsampleThreshold(self):
+        base_threshold = int(self.widget_manager.dict_lineedit["light_plot_mode_threshold"].text())
+        self.downsample_threshold = base_threshold
 
     # Mouse Event
     def onScroll(self, event):
