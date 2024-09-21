@@ -119,6 +119,9 @@ class CanvasControl:
         xticks = np.arange(start_time, end_time + 1, tick_interval)
         xticks_indices = np.linspace(0, len(next(iter(traces.values()))) - 1, len(xticks), dtype=int)
 
+        print(xticks_indices.shape)
+        print(xticks_indices[:10])
+
         plotTraces(self.axes[AxisKeys.MID], 
                    traces, 
                    self.colors, 
@@ -130,8 +133,8 @@ class CanvasControl:
                    ylim=self.ylim)
 
         # ズーム範囲を示す紫の四角形を描画
-        zoom_start = self.time_array[self.plot_start]
-        zoom_end = self.time_array[self.plot_end - 1]
+        zoom_start = self.plot_start
+        zoom_end = self.plot_end
         y_min = -self.y_max * 0.05
         y_max = self.y_max * 1.05
 
