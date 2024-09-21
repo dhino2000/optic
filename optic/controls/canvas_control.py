@@ -38,6 +38,8 @@ class CanvasControl:
         self.time_array:                       np.array = np.arange(self.plot_data_points) / self.fs
         self.plot_start:                            int = 0
         self.plot_end:                              int = self.plot_data_points
+        self.downsampled_start:                     int = 0
+        self.downsampled_end:                       int = 0
         self.is_dragging:                          bool = False
         self.drag_start_x:                        float = None
 
@@ -104,47 +106,55 @@ class CanvasControl:
                    ylim=self.ylim)
     # middle axis
     def plotTracesOverall(self):
-        if self.widget_manager.dict_checkbox["light_plot_mode"].isChecked() and self.plot_data_points > self.downsample_threshold:
+        original_length = len(next(iter(self.full_traces.values())))
+        
+        if self.widget_manager.dict_checkbox["light_plot_mode"].isChecked() and original_length > self.downsample_threshold:
             traces = {key: downSampleTrace(trace, self.downsample_threshold) for key, trace in self.full_traces.items()}
+            downsample_factor = original_length / (self.downsample_threshold * 4)
         else:
             traces = self.full_traces
+            downsample_factor = 1
+
+        total_downsampled_points = len(next(iter(traces.values())))
+
+        # ダウンサンプル後の最も近い値を計算
+        self.downsampled_start = int(self.plot_start / downsample_factor)
+        self.downsampled_end = int(self.plot_end / downsample_factor)
 
         roi_selected_id = self.control_manager.getSharedAttr(self.key_app, 'roi_selected_id')
-        
+
+        # 正確な開始時刻と終了時刻を取得
         start_time = self.time_array[0]
         end_time = self.time_array[-1]
-        time_range = end_time - start_time
 
-        tick_interval = max(1, int(time_range / 10))
-        xticks = np.arange(start_time, end_time + 1, tick_interval)
-        xticks_indices = np.linspace(0, len(next(iter(traces.values()))) - 1, len(xticks), dtype=int)
-
-        print(xticks_indices.shape)
-        print(xticks_indices[:10])
+        # x軸の目盛りとラベルを計算
+        num_ticks = 10  # 目盛りの数
+        xticks = np.linspace(0, total_downsampled_points - 1, num_ticks).astype(int)
+        xticklabels = np.linspace(start_time, end_time, num_ticks).astype(int)
 
         plotTraces(self.axes[AxisKeys.MID], 
-                   traces, 
-                   self.colors, 
-                   self.labels, 
-                   title=f'ROI {roi_selected_id}, Traces (Overall)',
-                   xlabel='Time (s)',
-                   xticks=xticks_indices,
-                   xticklabels=xticks.astype(int),
-                   ylim=self.ylim)
+                traces, 
+                self.colors, 
+                self.labels, 
+                title=f'ROI {roi_selected_id}, Traces (Overall)',
+                xlabel='Time (s)',
+                xticks=xticks,
+                xticklabels=xticklabels,
+                xlim=(0, total_downsampled_points - 1),
+                ylim=self.ylim)
 
         # ズーム範囲を示す紫の四角形を描画
-        zoom_start = self.plot_start
-        zoom_end = self.plot_end
         y_min = -self.y_max * 0.05
         y_max = self.y_max * 1.05
 
         rect = patches.Rectangle(
-            (zoom_start, y_min),  # (x, y)
-            zoom_end - zoom_start,  # width
+            (self.downsampled_start, y_min),  # (x, y)
+            self.downsampled_end - self.downsampled_start,  # width
             y_max - y_min,  # height
             fill=False,
             edgecolor='purple',
-            linewidth=2
+            linewidth=2,
+            zorder=2,
         )
         self.axes[AxisKeys.MID].add_patch(rect)
         

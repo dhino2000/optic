@@ -1,5 +1,5 @@
-from typing import Dict, Optional, Tuple
 import numpy as np
+from typing import Dict, Optional, Tuple
 from matplotlib.axes import Axes
 
 def plotTraces(ax          : Axes, 
