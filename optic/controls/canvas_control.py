@@ -99,7 +99,7 @@ class CanvasControl:
                    labels, 
                    title=f'ROI {roi_selected_id}, Traces',
                    xlabel='Time (s)',
-                   xticks=xticks_indices - self.plot_start,  # プロットデータに対する相対位置
+                   xticks=xticks_indices,
                    xticklabels=xticks.astype(int),
                    xlim=(0, len(next(iter(traces.values()))) - 1),
                    ylim=ylim)

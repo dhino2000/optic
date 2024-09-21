@@ -1,15 +1,15 @@
-from typing import Dict, Any, Optional, List, Tuple
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
+from typing import Dict, Optional, Tuple
 import numpy as np
+from matplotlib.axes import Axes
 
-def plotTraces(ax, 
+def plotTraces(ax          : Axes, 
                traces      : Dict[str, np.ndarray], 
                colors      : Dict[str, str], 
                labels      : Dict[str, str], 
                title       : Optional[str] = None,
                xlabel      : Optional[str] = None,
                ylabel      : Optional[str] = None,
-               xticks      : Optional[List[float]] = None,
+               xticks      : Optional[np.ndarray] = None,
                xticklabels : Optional[np.ndarray] = None,
                xlim        : Optional[Tuple[float, float]] = None,
                ylim        : Optional[Tuple[float, float]] = None,
@@ -34,7 +34,13 @@ def plotTraces(ax,
     if legend:
         ax.legend()
 
-def zoomXAxis(event, ax, plot_start: float, plot_end: float, total_points: float, min_width: int, zoom_factor: float = 1.5):
+def zoomXAxis(event, 
+              ax           : Axes,          
+              plot_start   : float, 
+              plot_end     : float, 
+              total_points : float, 
+              min_width    : int, 
+              zoom_factor  : float = 1.5):
     current_range = plot_end - plot_start
     relative_x = event.xdata / ax.get_xlim()[1]  # イベントの相対的なx位置
     center = plot_start + int(relative_x * current_range)
