@@ -64,7 +64,7 @@ class CanvasControl:
         self.canvas.draw_idle()
 
     def prepareTraceData(self):
-        self.updatePlotRange()
+        self.updatePlotWidth()
         self.updateDownsampleThreshold()
 
         roi_selected_id = self.control_manager.getSharedAttr(self.key_app, 'roi_selected_id')
@@ -158,53 +158,68 @@ class CanvasControl:
         )
         self.axes[AxisKeys.MID].add_patch(rect)
         
-    def updatePlotRange(self):
+    def updatePlotWidth(self):
         min_width_seconds = float(self.widget_manager.dict_lineedit[f"{self.key_app}_plot_min_width"].text())
         self.min_plot_width = int(min_width_seconds * self.fs)
     def updateDownsampleThreshold(self):
         base_threshold = int(self.widget_manager.dict_lineedit["light_plot_mode_threshold"].text())
         self.downsample_threshold = base_threshold
-
-    # Mouse Event
-    def onScroll(self, event):
-        if event.inaxes != self.axes[AxisKeys.TOP]:
-            return
-
-        self.plot_start, self.plot_end = zoomXAxis(
-            event=event,
-            ax=self.axes[AxisKeys.TOP],
-            plot_start=self.plot_start,
-            plot_end=self.plot_end,
-            total_points=self.plot_data_points,
-            min_width=self.min_plot_width
-        )
+    def updatePlotRange(self, ax, clicked_x):
+        current_range = self.plot_end - self.plot_start
+        new_center = int(clicked_x * self.plot_data_points / ax.get_xlim()[1])
+        new_start = max(0, new_center - current_range // 2)
+        
+        if new_start + current_range > self.plot_data_points:
+            new_start = self.plot_data_points - current_range
+        
+        self.plot_start = new_start
+        self.plot_end = new_start + current_range
+        
         self.updatePlot()
         self.canvas.draw_idle()
 
+    # Mouse Event
+    def onScroll(self, event, ax):
+        if event.inaxes == ax:
+            self.plot_start, self.plot_end = zoomXAxis(
+                event=event,
+                ax=ax,
+                plot_start=self.plot_start,
+                plot_end=self.plot_end,
+                total_points=self.plot_data_points,
+                min_width=self.min_plot_width
+            )
+            self.updatePlot()
+            self.canvas.draw_idle()
 
-    def onPress(self, event):
-        if event.inaxes == self.axes[AxisKeys.TOP]:
+    def onPress(self, event, ax):
+        if event.inaxes == ax:
             self.is_dragging = True
             self.drag_start_x = event.xdata
 
     def onRelease(self, event):
         self.is_dragging = False
 
-    def onMotion(self, event):
-        if self.is_dragging and event.inaxes == self.axes[AxisKeys.TOP] and event.xdata:
+    def onMotion(self, event, ax):
+        if self.is_dragging and event.inaxes == ax and event.xdata:
             dx = self.drag_start_x - event.xdata
             self.drag_start_x = event.xdata
 
-            move_points = int(dx * (self.plot_end - self.plot_start) / self.axes[AxisKeys.TOP].get_xlim()[1])
+            move_points = int(dx * (self.plot_end - self.plot_start) / ax.get_xlim()[1])
             self.plot_start = max(0, min(self.plot_start + move_points, self.plot_data_points - self.min_plot_width))
             self.plot_end = min(self.plot_data_points, max(self.plot_end + move_points, self.plot_start + self.min_plot_width))
 
             self.updatePlot()
             self.canvas.draw_idle()
 
+    def onClick(self, event, ax):
+        if event.inaxes == ax:
+            self.updatePlotRange(ax, event.xdata)
+
     def bindEvents(self):
-        self.canvas.mpl_connect('scroll_event', self.onScroll)
-        self.canvas.mpl_connect('button_press_event', self.onPress)
+        self.canvas.mpl_connect('scroll_event', lambda event: self.onScroll(event, self.axes[AxisKeys.TOP]))
+        self.canvas.mpl_connect('button_press_event', lambda event: self.onPress(event, self.axes[AxisKeys.TOP]))
         self.canvas.mpl_connect('button_release_event', self.onRelease)
-        self.canvas.mpl_connect('motion_notify_event', self.onMotion)
+        self.canvas.mpl_connect('motion_notify_event', lambda event: self.onMotion(event, self.axes[AxisKeys.TOP]))
+        self.canvas.mpl_connect('button_press_event', lambda event: self.onClick(event, self.axes[AxisKeys.MID]))
 
