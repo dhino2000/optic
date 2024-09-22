@@ -49,6 +49,7 @@ class ViewControl:
 
         self.initializeROIColors()
         self.setImageSize()
+        self.setSharedAttr_ROISelected(roi_id=0)
 
 
     def updateView(self):

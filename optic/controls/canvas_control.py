@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, Dict, Literal
+from typing import Any, Dict, Literal, List
 from ..config.constants import AxisKeys, PlotColors, PlotLabels
 from ..utils.data_utils import downSampleTrace
 from ..visualization.canvas_visual import plotTraces, zoomXAxis
@@ -36,27 +36,31 @@ class CanvasControl:
         self.plot_data_points:                      int = self.data_manager.getLengthOfData(self.key_app)
         self.downsample_threshold:                  int = 1000
         self.time_array:                       np.array = np.arange(self.plot_data_points) / self.fs
-        self.plot_start:                            int = 0
-        self.plot_end:                              int = self.plot_data_points
-        self.downsampled_start:                     int = 0
-        self.downsampled_end:                       int = 0
+        self.plot_range:                 List[int, int] = [0, self.plot_data_points]
+        self.downsampled_range:          List[int, int] = [0, 0]
         self.is_dragging:                          bool = False
         self.drag_start_x:                        float = None
 
 
         self.setupAxes()
         self.bindEvents()
+        self.initializePlot()
 
     def setupAxes(self):
-        if self.ax_layout == 'single':
-            self.axes[AxisKeys.TOP] = self.figure.add_subplot(111)
-        elif self.ax_layout == 'triple':
-            for i, key_ax in enumerate([AxisKeys.TOP, AxisKeys.MID, AxisKeys.BOT]):
-                self.axes[key_ax] = self.figure.add_subplot(3, 1, i+1)
-        
-        self.figure.subplots_adjust(top=0.95, bottom=0.1, right=0.9, left=0.1, hspace=0.4)
+        axes_config = {
+            'single': [(AxisKeys.TOP, 111)],
+            'triple': [(AxisKeys.TOP, 311), (AxisKeys.MID, 312), (AxisKeys.BOT, 313)]
+        }
+        for key, pos in axes_config[self.ax_layout]:
+            self.axes[key] = self.figure.add_subplot(pos)
+        self.figure.tight_layout(pad=1.08, h_pad=2.0, w_pad=2.0)
 
     # Plot
+    def initializePlot(self):
+        self.prepareTraceData()
+        self.plotTracesMean()
+        self.canvas.draw_idle()
+
     def updatePlot(self):
         self.prepareTraceData()
         self.plotTracesZoomed()
@@ -70,127 +74,98 @@ class CanvasControl:
         roi_selected_id = self.control_manager.getSharedAttr(self.key_app, 'roi_selected_id')
         self.full_traces = self.data_manager.getTracesOfSelectedROI(self.key_app, roi_selected_id)
         
-        self.colors = {"F": PlotColors.F, "Fneu": PlotColors.FNEU, "spks": PlotColors.SPKS}
-        self.labels = {"F": PlotLabels.F, "Fneu": PlotLabels.FNEU, "spks": PlotLabels.SPKS}
+        self.colors = {key: getattr(PlotColors, key.upper()) for key in ["F", "Fneu", "spks"]}
+        self.labels = {key: getattr(PlotLabels, key.upper()) for key in ["F", "Fneu", "spks"]}
         
         self.y_max = max(np.max(trace) for trace in self.full_traces.values())
-        self.ylim = (-self.y_max * 0.1, self.y_max * 1.1)
-    # top axis
-    def plotTracesZoomed(self):
-        trimmed_traces = {key: trace[self.plot_start:self.plot_end] for key, trace in self.full_traces.items()}
-        current_points = self.plot_end - self.plot_start
-        
-        if self.widget_manager.dict_checkbox["light_plot_mode"].isChecked() and current_points > self.downsample_threshold:
-            traces = {key: downSampleTrace(trace, self.downsample_threshold) for key, trace in trimmed_traces.items()}
-        else:
-            traces = trimmed_traces
+        ylim_config = self.config_manager.gui_defaults['CANVAS_SETTINGS']['YLIM']
+        self.ylim = (self.y_max * ylim_config[0], self.y_max * ylim_config[1])
 
-        start_time = self.time_array[self.plot_start]
-        end_time = self.time_array[self.plot_end - 1]
-        time_range = end_time - start_time
-
-        tick_interval = max(1, int(time_range / 10))
-        xticks = np.arange(start_time, end_time + 1, tick_interval)
-        xticks_indices = np.linspace(0, len(next(iter(traces.values()))) - 1, len(xticks), dtype=int)
-
-        roi_selected_id = self.control_manager.getSharedAttr(self.key_app, 'roi_selected_id')
-        plotTraces(self.axes[AxisKeys.TOP], 
-                   traces, 
-                   self.colors, 
-                   self.labels, 
-                   title=f'ROI {roi_selected_id}, Traces (Zoomed)',
-                   xlabel='Time (s)',
-                   xticks=xticks_indices,
-                   xticklabels=xticks.astype(int),
-                   xlim=(0, len(next(iter(traces.values()))) - 1),
-                   ylim=self.ylim)
-    # middle axis
-    def plotTracesOverall(self):
-        original_length = len(next(iter(self.full_traces.values())))
-        
-        if self.widget_manager.dict_checkbox["light_plot_mode"].isChecked() and original_length > self.downsample_threshold:
-            traces = {key: downSampleTrace(trace, self.downsample_threshold) for key, trace in self.full_traces.items()}
-            downsample_factor = original_length / (self.downsample_threshold * 4)
-        else:
-            traces = self.full_traces
-            downsample_factor = 1
-
-        total_downsampled_points = len(next(iter(traces.values())))
-
-        # ダウンサンプル後の最も近い値を計算
-        self.downsampled_start = int(self.plot_start / downsample_factor)
-        self.downsampled_end = int(self.plot_end / downsample_factor)
-
-        roi_selected_id = self.control_manager.getSharedAttr(self.key_app, 'roi_selected_id')
-
-        # 正確な開始時刻と終了時刻を取得
-        start_time = self.time_array[0]
-        end_time = self.time_array[-1]
-
-        # x軸の目盛りとラベルを計算
-        num_ticks = 10  # 目盛りの数
-        xticks = np.linspace(0, total_downsampled_points - 1, num_ticks).astype(int)
+    def plotTraces(self, ax_key, traces, title_suffix, start, end, **kwargs):
+        start_time = self.time_array[start]
+        end_time = self.time_array[end - 1]
+        num_ticks = self.config_manager.gui_defaults['CANVAS_SETTINGS']['PLOT_POINTS']
+        xticks = np.linspace(0, len(next(iter(traces.values()))) - 1, num_ticks, dtype=int)
         xticklabels = np.linspace(start_time, end_time, num_ticks).astype(int)
 
-        plotTraces(self.axes[AxisKeys.MID], 
+        roi_selected_id = self.control_manager.getSharedAttr(self.key_app, 'roi_selected_id')
+
+        default_kwargs = {
+            'title': f'ROI {roi_selected_id}, Traces ({title_suffix})',
+            'xlabel': 'Time (s)',
+            'xticks': xticks,
+            'xticklabels': xticklabels,
+            'xlim': (0, len(next(iter(traces.values()))) - 1),
+            'ylim': self.ylim,
+            'legend': (ax_key != AxisKeys.TOP)
+        }
+
+        default_kwargs.update(kwargs)
+
+        plotTraces(self.axes[ax_key], 
                 traces, 
                 self.colors, 
                 self.labels, 
-                title=f'ROI {roi_selected_id}, Traces (Overall)',
-                xlabel='Time (s)',
-                xticks=xticks,
-                xticklabels=xticklabels,
-                xlim=(0, total_downsampled_points - 1),
-                ylim=self.ylim)
+                **default_kwargs)
+    
+    # top axis
+    def plotTracesZoomed(self):
+        start, end = self.plot_range
+        traces = self.getDownsampledTraces(start, end)
+        self.plotTraces(AxisKeys.TOP, traces, "Zoomed", start, end, legend=False)
+    # middle axis
+    def plotTracesOverall(self):
+        traces = self.getDownsampledTraces(0, self.plot_data_points)
+        self.plotTraces(AxisKeys.MID, traces, "Overall", 0, self.plot_data_points)
+        self.updateDownsampledRange()
+        self.drawZoomRectangle()
+    # bottom axis
+    def plotTracesMean(self):
+        traces = self.data_manager.getTraces(self.key_app)
+        mean_traces = {key: np.mean(trace, axis=0) for key, trace in traces.items()}
+        self.plotTraces(AxisKeys.BOT, mean_traces, "Average", 0, self.plot_data_points, ylim=None, title="Average Traces")
 
-        # ズーム範囲を示す紫の四角形を描画
-        y_min = -self.y_max * 0.05
-        y_max = self.y_max * 1.05
+    def getDownsampledTraces(self, start, end):
+        traces = {key: trace[start:end] for key, trace in self.full_traces.items()}
+        if self.widget_manager.dict_checkbox["light_plot_mode"].isChecked() and end - start > self.downsample_threshold:
+            return {key: downSampleTrace(trace, self.downsample_threshold) for key, trace in traces.items()}
+        return traces
 
-        rect = patches.Rectangle(
-            (self.downsampled_start, y_min),  # (x, y)
-            self.downsampled_end - self.downsampled_start,  # width
-            y_max - y_min,  # height
-            fill=False,
-            edgecolor='purple',
-            linewidth=2,
-            zorder=2,
-        )
+    def drawZoomRectangle(self):
+        y_range = self.config_manager.gui_defaults["CANVAS_SETTINGS"]["YLIM_RECTANGLE"]
+        y_min, y_max = self.y_max * y_range[0], self.y_max * y_range[1]
+        start, end = self.downsampled_range
+        rect = patches.Rectangle((start, y_min), end - start, y_max - y_min,
+                                 fill=False, edgecolor=PlotColors.RECTANGLE, linewidth=2, zorder=2)
         self.axes[AxisKeys.MID].add_patch(rect)
-        
+
     def updatePlotWidth(self):
         min_width_seconds = float(self.widget_manager.dict_lineedit[f"{self.key_app}_plot_min_width"].text())
         self.min_plot_width = int(min_width_seconds * self.fs)
     def updateDownsampleThreshold(self):
-        base_threshold = int(self.widget_manager.dict_lineedit["light_plot_mode_threshold"].text())
-        self.downsample_threshold = base_threshold
+        self.downsample_threshold = int(self.widget_manager.dict_lineedit["light_plot_mode_threshold"].text())
     def updatePlotRange(self, ax, clicked_x):
-        current_range = self.plot_end - self.plot_start
+        current_range = self.plot_range[1] - self.plot_range[0]
         new_center = int(clicked_x * self.plot_data_points / ax.get_xlim()[1])
         new_start = max(0, new_center - current_range // 2)
-        
-        if new_start + current_range > self.plot_data_points:
-            new_start = self.plot_data_points - current_range
-        
-        self.plot_start = new_start
-        self.plot_end = new_start + current_range
-        
+        new_end = min(self.plot_data_points, new_start + current_range)
+        self.plot_range = [new_start, new_end]
         self.updatePlot()
-        self.canvas.draw_idle()
+    def updateDownsampledRange(self):
+        if self.widget_manager.dict_checkbox["light_plot_mode"].isChecked() and self.plot_data_points > self.downsample_threshold:
+            downsample_factor = self.plot_data_points / (self.downsample_threshold * 4)
+            self.downsampled_range = [
+                int(self.plot_range[0] / downsample_factor),
+                int(self.plot_range[1] / downsample_factor)
+            ]
+        else:
+            self.downsampled_range = self.plot_range
 
     # Mouse Event
     def onScroll(self, event, ax):
         if event.inaxes == ax:
-            self.plot_start, self.plot_end = zoomXAxis(
-                event=event,
-                ax=ax,
-                plot_start=self.plot_start,
-                plot_end=self.plot_end,
-                total_points=self.plot_data_points,
-                min_width=self.min_plot_width
-            )
+            self.plot_range = list(zoomXAxis(event, ax, *self.plot_range, self.plot_data_points, self.min_plot_width))
             self.updatePlot()
-            self.canvas.draw_idle()
 
     def onPress(self, event, ax):
         if event.inaxes == ax:
@@ -204,13 +179,12 @@ class CanvasControl:
         if self.is_dragging and event.inaxes == ax and event.xdata:
             dx = self.drag_start_x - event.xdata
             self.drag_start_x = event.xdata
-
-            move_points = int(dx * (self.plot_end - self.plot_start) / ax.get_xlim()[1])
-            self.plot_start = max(0, min(self.plot_start + move_points, self.plot_data_points - self.min_plot_width))
-            self.plot_end = min(self.plot_data_points, max(self.plot_end + move_points, self.plot_start + self.min_plot_width))
-
+            move_points = int(dx * (self.plot_range[1] - self.plot_range[0]) / ax.get_xlim()[1])
+            self.plot_range = [
+                max(0, min(self.plot_range[0] + move_points, self.plot_data_points - self.min_plot_width)),
+                min(self.plot_data_points, max(self.plot_range[1] + move_points, self.plot_range[0] + self.min_plot_width))
+            ]
             self.updatePlot()
-            self.canvas.draw_idle()
 
     def onClick(self, event, ax):
         if event.inaxes == ax:

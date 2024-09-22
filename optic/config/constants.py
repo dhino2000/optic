@@ -33,6 +33,7 @@ class PlotColors:
     FNEU = 'red'
     SPKS = 'gray'
     EVENT = 'green'
+    RECTANGLE = "purple"
 
 class PlotLabels:
     F = "F"

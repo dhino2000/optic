@@ -26,7 +26,7 @@ def makeLayoutMinimumPlotRange(widget_manager, config_manager, key_app):
                     key_lineedit=f"{key_app}_plot_min_width", 
                     label="Minimum plot range (sec)", 
                     axis="vertical",
-                    text_set=f"{config_manager.gui_defaults['MIN_PLOT_WIDTH_SEC']}",
+                    text_set=f"{config_manager.gui_defaults['CANVAS_SETTINGS']['MIN_PLOT_WIDTH_SEC']}",
                     )
                 )
     return layout
@@ -42,7 +42,7 @@ def makeLayoutLightPlotMode(widget_manager, config_manager):
                     key_lineedit="light_plot_mode_threshold",         
                     label="Plot data size (x4)", 
                     axis="vertical",
-                    text_set=f"{config_manager.gui_defaults['LIGHT_MODE_DOWNSAMPLE']}",
+                    text_set=f"{config_manager.gui_defaults['CANVAS_SETTINGS']['LIGHT_MODE_DOWNSAMPLE']}",
                     )
                 )
     return layout

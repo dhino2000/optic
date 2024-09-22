@@ -44,8 +44,13 @@ class GuiDefaults:
             "DEFAULT_ROI_OPACITY": 128,
             "DEFAULT_HIGHLIGHT_OPACITY": 255,
         },
-        "LIGHT_MODE_DOWNSAMPLE": 250,
-        "MIN_PLOT_WIDTH_SEC": 30,
+        "CANVAS_SETTINGS": {
+            "LIGHT_MODE_DOWNSAMPLE": 250,
+            "MIN_PLOT_WIDTH_SEC": 30,
+            "YLIM": (-0.1, 1.1),
+            "YLIM_RECTANGLE": (-0.05, 1.05),
+            "PLOT_POINTS": 10,
+        },
         "TABLE_COLUMNS": {
             AppKeys.PRI: {
                 "Cell ID"   : {"order": 0, "type": "id",       "width": 80},

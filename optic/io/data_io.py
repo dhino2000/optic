@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import QMessageBox
 from scipy.io import loadmat, savemat
 import tifffile
 import datetime
+import numpy as np
 from ..gui.table_setup import applyDictROICheckToTable
 from ..preprocessing.preprocessing_fall import convertMatToDictFall, convertMatToDictROICheck
 from ..preprocessing.preprocessing_image import getBGImageFromFall, convertImageDtypeToINT
@@ -28,10 +29,11 @@ def loadTIFImage(data_manager, key_dict_im_chan2, path_image, preprocessing=True
     return data_manager.dict_im_bg_chan2[key_dict_im_chan2]
 
 # EventFile npyの読み込み, 初期化
-def loadEventFileNPY(widget_manager, path_npy):
+def loadEventFileNPY(data_manager, path_npy):
+    eventfile = np.load(path_npy, allow_pickle=True).item()
     pass
 
-def clearEventFileNPY(widget_manager):
+def clearEventFileNPY(data_manager):
     pass
 
 
