@@ -47,3 +47,19 @@ def makeLayoutLightPlotMode(widget_manager, config_manager):
                 )
     return layout
 
+# Eventfile plot, Eventfile plot range
+def makeLayoutEventFilePlot(widget_manager, key_app):
+    layout = QVBoxLayout()
+    layout.addWidget(widget_manager.makeWidgetCheckBox(key=f"{key_app}_plot_eventfile", 
+                                                       label="plot EventFile trace", 
+                                                       checked=True,
+                                                       ))
+    layout.addLayout(makeLayoutLineEditLabel(widget_manager,
+                                                key_label=f"{key_app}_plot_eventfile_range",
+                                                key_lineedit=f"{key_app}_plot_eventfile_range",
+                                                label="plot range from Event start (pre, post; sec)",
+                                                text_set="(10, 10)"))
+    layout.addWidget(widget_manager.makeWidgetButton(key=f"{key_app}_load_eventfile", label="Load EventFile npy file"))
+    layout.addWidget(widget_manager.makeWidgetButton(key=f"{key_app}_clear_eventfile", label="Clear"))
+    return layout
+

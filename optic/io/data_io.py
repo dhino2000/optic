@@ -29,13 +29,11 @@ def loadTIFImage(data_manager, key_dict_im_chan2, path_image, preprocessing=True
     return data_manager.dict_im_bg_chan2[key_dict_im_chan2]
 
 # EventFile npyの読み込み, 初期化
-def loadEventFileNPY(data_manager, path_npy):
-    eventfile = np.load(path_npy, allow_pickle=True).item()
-    pass
-
-def clearEventFileNPY(data_manager):
-    pass
-
+def loadEventFileNPY(q_window, data_manager, key_app):
+    path_eventfile = openFileDialog(q_widget=q_window, file_type="mat", title="Open ROIcheck mat File")
+    eventfile = np.load(path_eventfile)
+    data_manager.dict_eventfile[key_app] = eventfile
+    return data_manager.dict_eventfile[key_app]
 
 # 保存用のファイルパス作成, 初期位置も指定
 def generateSavePath(path_src, prefix="", suffix="", new_extension=None, remove_strings=None):

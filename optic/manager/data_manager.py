@@ -8,11 +8,11 @@ from ..preprocessing.preprocessing_image import getBGImageFromFall
 
 class DataManager:
     def __init__(self):
-        self.dict_Fall                 = {}
-        self.dict_im_bg                = defaultdict(dict)
-        self.dict_im_bg_chan2          = {}
-        self.dict_eventfile            = {}
-        self.dict_roicheck             = {}
+        self.dict_Fall:                 Dict[str, Any] = {}
+        self.dict_im_bg:           Dict[str, np.array] = defaultdict(dict)
+        self.dict_im_bg_chan2:     Dict[str, np.array] = {}
+        self.dict_eventfile:       Dict[str, np.array] = {}
+        self.dict_roicheck:             Dict[str, Any] = {}
 
     # Fall.matの読み込み
     def loadFallMAT(self, key_app, path_fall, preprocessing=True):
@@ -55,8 +55,7 @@ class DataManager:
     def getLengthOfData(self, key_app) -> int:
         return len(self.dict_Fall[key_app]["ops"]["xoff1"])
 
-    # get 
-        
+    # get attibutes
     def getImageSize(self, key_app) -> Tuple[int, int]:
         return (self.dict_Fall[key_app]["ops"]["Lx"].item(), self.dict_Fall[key_app]["ops"]["Ly"].item())
     
@@ -65,4 +64,7 @@ class DataManager:
     
     def getBackgroundChan2Image(self, key_app) -> np.array:
         return self.dict_im_bg_chan2.get(key_app)
+    
+    def getEventFile(self, key_app) -> np.array:
+        return self.dict_eventfile[key_app]
     

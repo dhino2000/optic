@@ -119,6 +119,13 @@ class CanvasControl:
         self.plotTraces(AxisKeys.MID, traces, "Overall", 0, self.plot_data_points)
         self.updateDownsampledRange()
         self.drawZoomRectangle()
+    def drawZoomRectangle(self):
+        y_range = self.config_manager.gui_defaults["CANVAS_SETTINGS"]["YLIM_RECTANGLE"]
+        y_min, y_max = self.y_max * y_range[0], self.y_max * y_range[1]
+        start, end = self.downsampled_range
+        rect = patches.Rectangle((start, y_min), end - start, y_max - y_min,
+                                 fill=False, edgecolor=PlotColors.RECTANGLE, linewidth=2, zorder=2)
+        self.axes[AxisKeys.MID].add_patch(rect)
     # bottom axis
     def plotTracesMean(self):
         traces = self.data_manager.getTraces(self.key_app)
@@ -130,14 +137,6 @@ class CanvasControl:
         if self.widget_manager.dict_checkbox["light_plot_mode"].isChecked() and end - start > self.downsample_threshold:
             return {key: downSampleTrace(trace, self.downsample_threshold) for key, trace in traces.items()}
         return traces
-
-    def drawZoomRectangle(self):
-        y_range = self.config_manager.gui_defaults["CANVAS_SETTINGS"]["YLIM_RECTANGLE"]
-        y_min, y_max = self.y_max * y_range[0], self.y_max * y_range[1]
-        start, end = self.downsampled_range
-        rect = patches.Rectangle((start, y_min), end - start, y_max - y_min,
-                                 fill=False, edgecolor=PlotColors.RECTANGLE, linewidth=2, zorder=2)
-        self.axes[AxisKeys.MID].add_patch(rect)
 
     def updatePlotWidth(self):
         min_width_seconds = float(self.widget_manager.dict_lineedit[f"{self.key_app}_plot_min_width"].text())

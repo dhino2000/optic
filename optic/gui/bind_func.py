@@ -126,4 +126,8 @@ def bindFuncBackgroundVisibilityCheckbox(q_checkbox, view_control, channel):
         view_control.setBackgroundVisibility(channel, is_visible)
         view_control.updateView()
     q_checkbox.stateChanged.connect(onVisibilityChanged)
+
+# -> canvas_layouts.makeLayoutEventFilePlot
+def bindFuncButtonEventfileLoad(q_button, canvas_control):
+    q_button.clicked.connect(lambda: canvas_control.loadEventFile())
     
