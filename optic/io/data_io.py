@@ -31,13 +31,19 @@ def loadTIFImage(data_manager, key_dict_im_chan2, path_image, preprocessing=True
 # EventFile npyの読み込み, 初期化
 def loadEventFileNPY(q_window, data_manager, key_app):
     path_eventfile = openFileDialog(q_widget=q_window, file_type="npy", title="Open Eventfile npy File")
-    eventfile = np.load(path_eventfile)
-    if not len(eventfile) == data_manager.getLengthOfData(key_app):
-        QMessageBox.warning(q_window, "File load failed", "Length of data does not match!")
-        return None
+
+    if path_eventfile:
+        eventfile = np.load(path_eventfile)
+        len_eventfile = len(eventfile)
+        len_Fall = data_manager.getLengthOfData(key_app)
+        if not len_eventfile == len_Fall:
+            QMessageBox.warning(q_window, "File load failed", f"Length of data does not match! \nFall: {len_Fall}, eventfile: {len_eventfile}")
+            return None
+        else:
+            data_manager.dict_eventfile[key_app] = eventfile
+            return data_manager.dict_eventfile[key_app]
     else:
-        data_manager.dict_eventfile[key_app] = eventfile
-        return data_manager.dict_eventfile[key_app]
+        return
 
 # 保存用のファイルパス作成, 初期位置も指定
 def generateSavePath(path_src, prefix="", suffix="", new_extension=None, remove_strings=None):

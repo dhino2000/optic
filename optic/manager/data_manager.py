@@ -65,6 +65,12 @@ class DataManager:
     def getBackgroundChan2Image(self, key_app) -> np.array:
         return self.dict_im_bg_chan2.get(key_app)
     
-    def getEventFile(self, key_app) -> np.array:
+    def getEventfile(self, key_app) -> np.array:
         return self.dict_eventfile[key_app]
+    
+    # clear attributes
+    def clearEventfile(self, key_app):
+        if key_app in self.dict_eventfile:
+            print("delete")
+            del self.dict_eventfile[key_app]
     
