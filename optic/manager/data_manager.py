@@ -60,17 +60,16 @@ class DataManager:
         return (self.dict_Fall[key_app]["ops"]["Lx"].item(), self.dict_Fall[key_app]["ops"]["Ly"].item())
     
     def getDictBackgroundImage(self, key_app) -> Dict[str, NDArray[np.uint8]]: # 2d array
-        return self.dict_im_bg[key_app]
+        return self.dict_im_bg.get(key_app)
     
     def getBackgroundChan2Image(self, key_app) -> np.array:
         return self.dict_im_bg_chan2.get(key_app)
     
     def getEventfile(self, key_app) -> np.array:
-        return self.dict_eventfile[key_app]
+        return self.dict_eventfile.get(key_app)
     
     # clear attributes
     def clearEventfile(self, key_app):
         if key_app in self.dict_eventfile:
-            print("delete")
             del self.dict_eventfile[key_app]
     

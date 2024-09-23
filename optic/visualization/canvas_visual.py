@@ -13,7 +13,8 @@ def plotTraces(ax          : Axes,
                xticklabels : Optional[np.ndarray] = None,
                xlim        : Optional[Tuple[float, float]] = None,
                ylim        : Optional[Tuple[float, float]] = None,
-               legend      : bool = True,):
+               legend      : bool = True,
+               loc         : str = 'best'):
     ax.clear()
     
     for key, trace in traces.items():
@@ -32,7 +33,7 @@ def plotTraces(ax          : Axes,
     if ylim:
         ax.set_ylim(ylim)
     if legend:
-        ax.legend()
+        ax.legend(loc=loc)
 
 def zoomXAxis(event, 
               ax           : Axes,          

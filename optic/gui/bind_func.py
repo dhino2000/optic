@@ -145,8 +145,11 @@ def bindFuncCanvasMouseEvent(
         q_canvas.mpl_connect(event, lambda event, func=func, ax=ax: func(event, ax))
 
 # -> canvas_layouts.makeLayoutEventFilePlot
-def bindFuncButtonEventfileIO(q_button_load, q_button_clear, q_window, data_manager, key_app):
-    q_button_load.clicked.connect(lambda: loadEventFileNPY(q_window, data_manager, key_app))
+def bindFuncButtonEventfileIO(q_button_load, q_button_clear, q_window, data_manager, canvas_control, key_app):
+    def _loadEventFileNPY():
+        loadEventFileNPY(q_window, data_manager, key_app)
+        canvas_control.updatePlot()
+    q_button_load.clicked.connect(_loadEventFileNPY)
     q_button_clear.clicked.connect(lambda: data_manager.clearEventfile(key_app))
 
     

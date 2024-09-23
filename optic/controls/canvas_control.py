@@ -82,6 +82,13 @@ class CanvasControl:
         ylim_config = self.config_manager.gui_defaults['CANVAS_SETTINGS']['YLIM']
         self.ylim = (self.y_max * ylim_config[0], self.y_max * ylim_config[1])
 
+        # eventfileの取得と処理
+        self.eventfile = self.data_manager.getEventfile(self.key_app)
+        if self.eventfile is not None:
+            self.full_traces['event'] = self.eventfile * self.y_max
+            self.colors['event'] = PlotColors.EVENT
+            self.labels['event'] = PlotLabels.EVENT
+
     def plotTraces(self, ax_key, traces, title_suffix, start, end, **kwargs):
         start_time = self.time_array[start]
         end_time = self.time_array[end - 1]
@@ -92,13 +99,14 @@ class CanvasControl:
         roi_selected_id = self.control_manager.getSharedAttr(self.key_app, 'roi_selected_id')
 
         default_kwargs = {
-            'title': f'ROI {roi_selected_id}, Traces ({title_suffix})',
-            'xlabel': 'Time (s)',
-            'xticks': xticks,
-            'xticklabels': xticklabels,
-            'xlim': (0, len(next(iter(traces.values()))) - 1),
-            'ylim': self.ylim,
-            'legend': (ax_key != AxisKeys.TOP)
+            'title'       : f'ROI {roi_selected_id}, Traces ({title_suffix})',
+            'xlabel'      : 'Time (s)',
+            'xticks'      : xticks,
+            'xticklabels' : xticklabels,
+            'xlim'        : (0, len(next(iter(traces.values()))) - 1),
+            'ylim'        : self.ylim,
+            'legend'      : (ax_key != AxisKeys.TOP),
+            'loc'         : 'upper right'
         }
 
         default_kwargs.update(kwargs)
