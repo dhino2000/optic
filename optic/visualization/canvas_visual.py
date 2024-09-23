@@ -1,11 +1,12 @@
 import numpy as np
 from typing import Dict, Optional, Tuple, List
 from matplotlib.axes import Axes
+import matplotlib.pyplot as plt
 
 def plotTraces(ax          : Axes, 
                traces      : Dict[str, np.ndarray], 
-               colors      : Dict[str, str], 
-               labels      : Dict[str, str], 
+               colors      : Optional[Dict[str, str]] = None, 
+               labels      : Optional[Dict[str, str]] = None, 
                title       : Optional[str] = None,
                xlabel      : Optional[str] = None,
                ylabel      : Optional[str] = None,
@@ -17,8 +18,13 @@ def plotTraces(ax          : Axes,
                loc         : str = 'best'):
     ax.clear()
     
-    for key, trace in traces.items():
-        ax.plot(trace, color=colors[key], label=labels[key])
+    # デフォルトの色とラベルを設定
+    default_colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
+    
+    for i, (key, trace) in enumerate(traces.items()):
+        color = colors.get(key, default_colors[i % len(default_colors)]) if colors else default_colors[i % len(default_colors)]
+        label = labels.get(key, key) if labels else key
+        ax.plot(trace, color=color, label=label)
     if title:
         ax.set_title(title)
     if xlabel:
@@ -34,6 +40,58 @@ def plotTraces(ax          : Axes,
         ax.set_ylim(ylim)
     if legend:
         ax.legend(loc=loc)
+
+
+def plotEventAlignedTrace(
+    ax: Axes, 
+    traces: Dict[str, np.ndarray],
+    colors: Optional[Dict[str, str]] = None,
+    labels: Optional[Dict[str, str]] = None,
+    title: Optional[str] = None,
+    xlabel: Optional[str] = None,
+    ylabel: Optional[str] = None,
+    xticks: Optional[np.ndarray] = None,
+    xticklabels: Optional[np.ndarray] = None,
+    xlim: Optional[Tuple[float, float]] = None,
+    ylim: Optional[Tuple[float, float]] = None,
+    legend: bool = True,
+    alpha: float = 0.5,
+    mean_color: Optional[str] = None,
+    mean_linewidth: float = 2,
+    idx_zero: int = None,
+):
+    ax.clear()
+
+    default_colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
+
+    for i, (key, trace) in enumerate(traces.items()):
+        color = colors.get(key, default_colors[i % len(default_colors)]) if colors else default_colors[i % len(default_colors)]
+        label = labels.get(key, key) if labels else key
+        if key == 'mean':
+            ax.plot(trace, color=mean_color or color, linewidth=mean_linewidth, label=label, zorder=10)
+        else:
+            for single_trace in trace:
+                ax.plot(single_trace, color=color, alpha=alpha)
+            ax.plot([], [], color=color, label=label, alpha=alpha)
+
+    if xlabel:
+        ax.set_xlabel(xlabel)
+    if ylabel:
+        ax.set_ylabel(ylabel)
+    if title:
+        ax.set_title(title)
+    if xticks is not None and xticklabels is not None:
+        ax.set_xticks(xticks)
+        ax.set_xticklabels(xticklabels)
+    if xlim:
+        ax.set_xlim(xlim)
+    if ylim:
+        ax.set_ylim(ylim)
+    if legend:
+        ax.legend()
+    if idx_zero is not None:
+        ax.axvline(x=idx_zero, color='k', linestyle='--', zorder=5)
+
 
 def zoomXAxis(event, 
               ax           : Axes,          

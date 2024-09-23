@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import Any, Dict, Literal, List
 from ..config.constants import AxisKeys, PlotColors, PlotLabels
 from ..utils.data_utils import downSampleTrace, extractEventOnsetIndices, extractEventAlignedData
-from ..visualization.canvas_visual import plotTraces, zoomXAxis, moveXAxis, moveToPlotCenter
+from ..visualization.canvas_visual import plotTraces, zoomXAxis, moveXAxis, moveToPlotCenter, plotEventAlignedTrace
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 import matplotlib.patches as patches
@@ -85,10 +85,14 @@ class CanvasControl:
         event_indices = extractEventOnsetIndices(self.eventfile)
         
         range_str = self.widget_manager.dict_lineedit[f"{self.key_app}_plot_eventfile_range"].text()
-        pre_frames, post_frames = map(int, range_str.strip('()').split(','))
+        pre_sec, post_sec = map(int, range_str.strip('()').split(','))
+        pre_frames, post_frames = int(pre_sec * self.fs), int(post_sec * self.fs)
 
         event_segments = extractEventAlignedData(self.eventfile, event_indices, pre_frames, post_frames)
         trace_segments = extractEventAlignedData(self.full_traces['F'], event_indices, pre_frames, post_frames)
+
+        self.event_segments = event_segments
+        self.trace_segments = trace_segments
 
         return event_segments, trace_segments
 
@@ -104,6 +108,8 @@ class CanvasControl:
         self.prepareTraceData()
         self.plotTracesZoomed()
         self.plotTracesOverall()
+        if self.widget_manager.dict_checkbox[f"{self.key_app}_plot_eventfile"].isChecked():
+            self.plotEventAlignedTrace()
         self.canvas.draw_idle()
 
     def plotTraces(self, ax_key, traces, title_suffix, start, end, **kwargs):
@@ -133,6 +139,53 @@ class CanvasControl:
                 self.colors, 
                 self.labels, 
                 **default_kwargs)
+        
+    def plotEventAlignedTrace(self):
+        event_segments, trace_segments = self.prepareEventAlignedData()
+        if event_segments is None or trace_segments is None:
+            return
+
+        range_str = self.widget_manager.dict_lineedit[f"{self.key_app}_plot_eventfile_range"].text()
+        pre_sec, post_sec = map(float, range_str.strip('()').split(','))
+        pre_frame, post_frame = pre_sec * self.fs, post_sec * self.fs
+
+        mean_trace = np.mean(trace_segments, axis=0)
+        mean_event = np.mean(event_segments, axis=0)
+
+        traces = {
+            'trace': np.array(trace_segments),
+            'event': np.array(event_segments) * np.max(trace_segments),
+            'mean': mean_trace
+        }
+
+        colors = {
+            'trace': 'gray',
+            'event': PlotColors.EVENT,
+            'mean': 'red'
+        }
+
+        labels = {
+            'trace': 'Individual Traces',
+            'event': 'Event',
+            'mean': 'Mean Trace'
+        }
+
+        xticks = [0, pre_frame, pre_frame + post_frame]
+        xticklabels = [-pre_sec, 0, post_sec]
+
+        plotEventAlignedTrace(
+            self.axes[AxisKeys.BOT],
+            traces,
+            colors,
+            labels,
+            xlabel='Time (s)',
+            title='Event-aligned Data',
+            xticks=xticks,
+            xticklabels=xticklabels,
+            legend=False,
+            alpha=0.3,
+            idx_zero=pre_frame,
+        )
     
     # top axis
     def plotTracesZoomed(self):
