@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Any, Dict, Literal, List
 from ..config.constants import AxisKeys, PlotColors, PlotLabels
-from ..utils.data_utils import downSampleTrace
+from ..utils.data_utils import downSampleTrace, extractEventOnsetIndices, extractEventAlignedData
 from ..visualization.canvas_visual import plotTraces, zoomXAxis, moveXAxis, moveToPlotCenter
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
@@ -55,19 +55,8 @@ class CanvasControl:
         self.figure.tight_layout(pad=1.08, h_pad=2.0, w_pad=2.0)
 
     """
-    Plot
+    Data preparation
     """
-    def initializePlot(self):
-        self.prepareTraceData()
-        self.plotTracesMean()
-        self.canvas.draw_idle()
-
-    def updatePlot(self):
-        self.prepareTraceData()
-        self.plotTracesZoomed()
-        self.plotTracesOverall()
-        self.canvas.draw_idle()
-
     def prepareTraceData(self):
         self.updatePlotWidth()
         self.updateDownsampleThreshold()
@@ -88,6 +77,34 @@ class CanvasControl:
             self.full_traces['event'] = self.eventfile * self.y_max
             self.colors['event'] = PlotColors.EVENT
             self.labels['event'] = PlotLabels.EVENT
+
+    def prepareEventAlignedData(self):
+        if self.eventfile is None:
+            return None, None
+
+        event_indices = extractEventOnsetIndices(self.eventfile)
+        
+        range_str = self.widget_manager.dict_lineedit[f"{self.key_app}_plot_eventfile_range"].text()
+        pre_frames, post_frames = map(int, range_str.strip('()').split(','))
+
+        event_segments = extractEventAlignedData(self.eventfile, event_indices, pre_frames, post_frames)
+        trace_segments = extractEventAlignedData(self.full_traces['F'], event_indices, pre_frames, post_frames)
+
+        return event_segments, trace_segments
+
+    """
+    Plot
+    """
+    def initializePlot(self):
+        self.prepareTraceData()
+        self.plotTracesMean()
+        self.canvas.draw_idle()
+
+    def updatePlot(self):
+        self.prepareTraceData()
+        self.plotTracesZoomed()
+        self.plotTracesOverall()
+        self.canvas.draw_idle()
 
     def plotTraces(self, ax_key, traces, title_suffix, start, end, **kwargs):
         start_time = self.time_array[start]

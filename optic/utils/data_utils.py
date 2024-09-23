@@ -1,3 +1,4 @@
+from typing import List
 import numpy as np
 
 # Downsample trace data to target length with maintaining waveform shape
@@ -36,16 +37,34 @@ def extractEventOnsetIndices(eventfile: np.ndarray, threshold: float = 0.5) -> n
     Returns:
     np.ndarray: An array of indices where the eventfile crosses the threshold.
     """
-    # Ensure the eventfile is a numpy array
     eventfile = np.array(eventfile)
-    
-    # Create a boolean array where True indicates the value is above the threshold
     above_threshold = eventfile > threshold
-    
-    # Find where the boolean array changes from False to True
     crossings = np.diff(above_threshold.astype(int)) > 0
-    
-    # Get the indices of these crossings
-    onset_indices = np.where(crossings)[0] + 1  # +1 because diff reduces array size by 1
+    onset_indices = np.where(crossings)[0] + 1
     
     return onset_indices
+
+def extractEventAlignedData(data: np.ndarray, 
+                            event_indices: np.ndarray, 
+                            pre_frames: int, 
+                            post_frames: int) -> List[np.ndarray]:
+    """
+    Extracts data segments aligned to event onset indices.
+
+    Args:
+    data (np.ndarray): The full data array to extract segments from.
+    event_indices (np.ndarray): Array of event onset indices.
+    pre_frames (int): Number of frames to include before each event.
+    post_frames (int): Number of frames to include after each event.
+
+    Returns:
+    List[np.ndarray]: List of extracted data segments.
+    """
+    extracted_segments = []
+    for idx in event_indices:
+        start = idx - pre_frames
+        end = idx + post_frames + 1  # +1 to include the post_frames-th frame
+        if start >= 0 and end <= len(data):
+            segment = data[start:end]
+            extracted_segments.append(segment)
+    return extracted_segments
