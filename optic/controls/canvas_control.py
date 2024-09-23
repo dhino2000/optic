@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import Any, Dict, Literal, List
 from ..config.constants import AxisKeys, PlotColors, PlotLabels
 from ..utils.data_utils import downSampleTrace
-from ..visualization.canvas_visual import plotTraces, zoomXAxis
+from ..visualization.canvas_visual import plotTraces, zoomXAxis, moveXAxis, moveToPlotCenter
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 import matplotlib.patches as patches
@@ -43,7 +43,6 @@ class CanvasControl:
 
 
         self.setupAxes()
-        self.bindEvents()
         self.initializePlot()
 
     def setupAxes(self):
@@ -55,7 +54,9 @@ class CanvasControl:
             self.axes[key] = self.figure.add_subplot(pos)
         self.figure.tight_layout(pad=1.08, h_pad=2.0, w_pad=2.0)
 
-    # Plot
+    """
+    Plot
+    """
     def initializePlot(self):
         self.prepareTraceData()
         self.plotTracesMean()
@@ -160,10 +161,12 @@ class CanvasControl:
         else:
             self.downsampled_range = self.plot_range
 
-    # Mouse Event
+    """
+    event Functions
+    """
     def onScroll(self, event, ax):
         if event.inaxes == ax:
-            self.plot_range = list(zoomXAxis(event, ax, *self.plot_range, self.plot_data_points, self.min_plot_width))
+            self.plot_range = zoomXAxis(event, ax, *self.plot_range, self.plot_data_points, self.min_plot_width)
             self.updatePlot()
 
     def onPress(self, event, ax):
@@ -171,28 +174,17 @@ class CanvasControl:
             self.is_dragging = True
             self.drag_start_x = event.xdata
 
-    def onRelease(self, event):
+    def onRelease(self, event, ax):
         self.is_dragging = False
 
     def onMotion(self, event, ax):
         if self.is_dragging and event.inaxes == ax and event.xdata:
             dx = self.drag_start_x - event.xdata
             self.drag_start_x = event.xdata
-            move_points = int(dx * (self.plot_range[1] - self.plot_range[0]) / ax.get_xlim()[1])
-            self.plot_range = [
-                max(0, min(self.plot_range[0] + move_points, self.plot_data_points - self.min_plot_width)),
-                min(self.plot_data_points, max(self.plot_range[1] + move_points, self.plot_range[0] + self.min_plot_width))
-            ]
+            self.plot_range = moveXAxis(ax, self.plot_range, self.plot_data_points, self.min_plot_width, dx)
             self.updatePlot()
 
     def onClick(self, event, ax):
         if event.inaxes == ax:
-            self.updatePlotRange(ax, event.xdata)
-
-    def bindEvents(self):
-        self.canvas.mpl_connect('scroll_event', lambda event: self.onScroll(event, self.axes[AxisKeys.TOP]))
-        self.canvas.mpl_connect('button_press_event', lambda event: self.onPress(event, self.axes[AxisKeys.TOP]))
-        self.canvas.mpl_connect('button_release_event', self.onRelease)
-        self.canvas.mpl_connect('motion_notify_event', lambda event: self.onMotion(event, self.axes[AxisKeys.TOP]))
-        self.canvas.mpl_connect('button_press_event', lambda event: self.onClick(event, self.axes[AxisKeys.MID]))
-
+            self.plot_range = moveToPlotCenter(ax, event.xdata, self.plot_range, self.plot_data_points)
+            self.updatePlot()

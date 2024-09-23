@@ -4,6 +4,9 @@ from ..io.file_dialog import openFileDialogAndSetLineEdit
 from ..io.data_io import saveROICheck, loadROICheck, loadEventFileNPY
 from ..utils import *
 from PyQt5.QtCore import Qt
+from matplotlib.axes import Axes
+from matplotlib.backend_bases import Event
+from typing import List, Callable, Any
 
 # -> io_layouts.makeLayoutLoadFileWidget
 def bindFuncLoadFileWidget(q_button, q_widget, q_lineedit, filetype=None):
@@ -57,7 +60,7 @@ def bindFuncButtonToggleAllROICheckbox(widget_manager, view_control, table_contr
     view_control.updateView()
 
 # -> makeWidgetView, mousePressEvent
-def bindFuncViewMousePressEvent(q_view, view_control, table_control):
+def bindFuncViewMouseEvent(q_view, view_control, table_control):
     def onViewClicked(event):
         view_pos = event.pos()
         scene_pos = q_view.mapToScene(view_pos)
@@ -126,6 +129,20 @@ def bindFuncBackgroundVisibilityCheckbox(q_checkbox, view_control, channel):
         view_control.setBackgroundVisibility(channel, is_visible)
         view_control.updateView()
     q_checkbox.stateChanged.connect(onVisibilityChanged)
+
+# -> canvas_layouts.makeLayoutCanvasTracePlot, mouseEvent
+def bindFuncCanvasMouseEvent(
+    q_canvas,
+    canvas_control,
+    ax: Axes,
+    list_event: List[str],
+    list_func: List[Callable[[Event, Axes], Any]]
+):
+    if len(list_event) != len(list_func):
+        raise ValueError("The number of events and functions must match.")
+
+    for event, func in zip(list_event, list_func):
+        q_canvas.mpl_connect(event, lambda event, func=func, ax=ax: func(event, ax))
 
 # -> canvas_layouts.makeLayoutEventFilePlot
 def bindFuncButtonEventfileLoad(q_button, q_window, data_manager, key_app):
