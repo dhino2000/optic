@@ -24,3 +24,28 @@ def downSampleTrace(data: np.ndarray, target_size: int):
     ]).reshape(-1)
 
     return downsampled
+
+def extractEventOnsetIndices(eventfile: np.ndarray, threshold: float = 0.5) -> np.ndarray:
+    """
+    Extracts indices where the eventfile crosses the specified threshold from below.
+
+    Args:
+    eventfile (np.ndarray): The event file array.
+    threshold (float): The threshold value to detect crossings. Default is 0.5.
+
+    Returns:
+    np.ndarray: An array of indices where the eventfile crosses the threshold.
+    """
+    # Ensure the eventfile is a numpy array
+    eventfile = np.array(eventfile)
+    
+    # Create a boolean array where True indicates the value is above the threshold
+    above_threshold = eventfile > threshold
+    
+    # Find where the boolean array changes from False to True
+    crossings = np.diff(above_threshold.astype(int)) > 0
+    
+    # Get the indices of these crossings
+    onset_indices = np.where(crossings)[0] + 1  # +1 because diff reduces array size by 1
+    
+    return onset_indices
