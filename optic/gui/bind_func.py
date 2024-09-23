@@ -1,20 +1,20 @@
 # 配置した後のwidgetに関数を紐づけ
 # makeLayout <- -> bindFunc
 from ..io.file_dialog import openFileDialogAndSetLineEdit
-from ..io.data_io import saveROICheck, loadROICheck
+from ..io.data_io import saveROICheck, loadROICheck, loadEventFileNPY
 from ..utils import *
 from PyQt5.QtCore import Qt
 
 # -> io_layouts.makeLayoutLoadFileWidget
-def bindFuncLoadFileWidget(q_widget, q_button, q_lineedit, filetype=None):
+def bindFuncLoadFileWidget(q_button, q_widget, q_lineedit, filetype=None):
     q_button.clicked.connect(lambda: openFileDialogAndSetLineEdit(q_widget, filetype, q_lineedit))
 
 # -> widget_manager.dict_button["exit"]
-def bindFuncExit(q_window, q_button):
+def bindFuncExit(q_button, q_window):
     q_button.clicked.connect(lambda: exitApp(q_window))
 
 # -> io_layouts.makeLayoutROICheckIO
-def bindFuncROICheckIO(q_window, q_lineedit, q_table, q_button_save, q_button_load, table_columns, local_var=True):
+def bindFuncROICheckIO(q_button_save, q_button_load, q_window, q_lineedit, q_table, table_columns, local_var=True):
     q_button_save.clicked.connect(lambda: saveROICheck(q_window, q_lineedit, q_table, table_columns, local_var))
     q_button_load.clicked.connect(lambda: loadROICheck(q_window, q_table, table_columns))
 
@@ -128,6 +128,6 @@ def bindFuncBackgroundVisibilityCheckbox(q_checkbox, view_control, channel):
     q_checkbox.stateChanged.connect(onVisibilityChanged)
 
 # -> canvas_layouts.makeLayoutEventFilePlot
-def bindFuncButtonEventfileLoad(q_button, canvas_control):
-    q_button.clicked.connect(lambda: canvas_control.loadEventFile())
+def bindFuncButtonEventfileLoad(q_button, q_window, data_manager, key_app):
+    q_button.clicked.connect(lambda: loadEventFileNPY(q_window, data_manager, key_app))
     
