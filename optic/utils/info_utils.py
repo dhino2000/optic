@@ -1,5 +1,7 @@
+from typing import Tuple, Optional
+
 # "(0, 100)" -> 0, 100
-def extractRangeValues(input_string: str) -> tuple[float, float] | None:
+def extractRangeValues(input_string: str) -> Optional[Tuple[float, float]]:
     cleaned_string = input_string.strip().strip('()')
     parts = cleaned_string.split(',')
     
