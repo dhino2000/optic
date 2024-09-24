@@ -27,7 +27,7 @@ def bindFuncTableSelectionChanged(q_table, table_control, view_control, canvas_c
         if selected.indexes():
             table_control.onSelectionChanged(selected, deselected)
             view_control.updateView()
-            canvas_control.updatePlot()
+            canvas_control.updatePlotWithROISelect()
     q_table.selectionModel().selectionChanged.connect(_onSelectionChanged)
 def bindFuncRadiobuttonCelltypeChanged(table_control, view_control):
     def __onButtonClicked(row):
@@ -145,10 +145,10 @@ def bindFuncCanvasMouseEvent(
         q_canvas.mpl_connect(event, lambda event, func=func, ax=ax: func(event, ax))
 
 # -> canvas_layouts.makeLayoutEventFilePlot
-def bindFuncButtonEventfileIO(q_button_load, q_button_clear, q_window, data_manager, canvas_control, key_app):
+def bindFuncButtonEventfileIO(q_button_load, q_button_clear, q_window, data_manager, control_manager, canvas_control, key_app):
     def _loadEventFileNPY():
-        loadEventFileNPY(q_window, data_manager, key_app)
-        canvas_control.updatePlot()
+        loadEventFileNPY(q_window, data_manager, control_manager, key_app)
+        canvas_control.updatePlotWithROISelect()
     q_button_load.clicked.connect(_loadEventFileNPY)
     q_button_clear.clicked.connect(lambda: data_manager.clearEventfile(key_app))
 

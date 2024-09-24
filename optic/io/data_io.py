@@ -29,13 +29,15 @@ def loadTIFImage(data_manager, key_dict_im_chan2, path_image, preprocessing=True
     return data_manager.dict_im_bg_chan2[key_dict_im_chan2]
 
 # EventFile npyの読み込み, 初期化
-def loadEventFileNPY(q_window, data_manager, key_app):
-    path_eventfile = openFileDialog(q_widget=q_window, file_type="npy", title="Open Eventfile npy File")
+def loadEventFileNPY(q_window, data_manager, control_manager, key_app):
+    path_eventfile = openFileDialog(q_widget=q_window, file_type="npy", title="Open Eventfile npy File").replace("\\", "/")
 
     if path_eventfile:
         eventfile = np.load(path_eventfile)
         len_eventfile = len(eventfile)
         len_Fall = data_manager.getLengthOfData(key_app)
+        eventfile_name = path_eventfile.split("/")[-1].split(".")[0]
+        control_manager.setSharedAttr(key_app, "eventfile_name", eventfile_name)
         if not len_eventfile == len_Fall:
             QMessageBox.warning(q_window, "File load failed", f"Length of data does not match! \nFall: {len_Fall}, eventfile: {len_eventfile}")
             return None

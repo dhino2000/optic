@@ -104,12 +104,18 @@ class CanvasControl:
         self.plotTracesMean()
         self.canvas.draw_idle()
 
-    def updatePlot(self):
+    def updatePlotWithROISelect(self):
         self.prepareTraceData()
         self.plotTracesZoomed()
         self.plotTracesOverall()
         if self.widget_manager.dict_checkbox[f"{self.key_app}_plot_eventfile"].isChecked():
             self.plotEventAlignedTrace()
+        self.canvas.draw_idle()
+
+    def updatePlotWithMouseEvent(self):
+        self.prepareTraceData()
+        self.plotTracesZoomed()
+        self.plotTracesOverall()
         self.canvas.draw_idle()
 
     def plotTraces(self, ax_key, traces, title_suffix, start, end, **kwargs):
@@ -222,13 +228,6 @@ class CanvasControl:
         self.min_plot_width = int(min_width_seconds * self.fs)
     def updateDownsampleThreshold(self):
         self.downsample_threshold = int(self.widget_manager.dict_lineedit["light_plot_mode_threshold"].text())
-    def updatePlotRange(self, ax, clicked_x):
-        current_range = self.plot_range[1] - self.plot_range[0]
-        new_center = int(clicked_x * self.plot_data_points / ax.get_xlim()[1])
-        new_start = max(0, new_center - current_range // 2)
-        new_end = min(self.plot_data_points, new_start + current_range)
-        self.plot_range = [new_start, new_end]
-        self.updatePlot()
     def updateDownsampledRange(self):
         if self.widget_manager.dict_checkbox["light_plot_mode"].isChecked() and self.plot_data_points > self.downsample_threshold:
             downsample_factor = self.plot_data_points / (self.downsample_threshold * 4)
@@ -245,7 +244,7 @@ class CanvasControl:
     def onScroll(self, event, ax):
         if event.inaxes == ax:
             self.plot_range = zoomXAxis(event, ax, *self.plot_range, self.plot_data_points, self.min_plot_width)
-            self.updatePlot()
+            self.updatePlotWithMouseEvent()
 
     def onPress(self, event, ax):
         if event.inaxes == ax:
@@ -260,9 +259,9 @@ class CanvasControl:
             dx = self.drag_start_x - event.xdata
             self.drag_start_x = event.xdata
             self.plot_range = moveXAxis(ax, self.plot_range, self.plot_data_points, self.min_plot_width, dx)
-            self.updatePlot()
+            self.updatePlotWithMouseEvent()
 
     def onClick(self, event, ax):
         if event.inaxes == ax:
             self.plot_range = moveToPlotCenter(ax, event.xdata, self.plot_range, self.plot_data_points)
-            self.updatePlot()
+            self.updatePlotWithMouseEvent()
