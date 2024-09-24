@@ -156,7 +156,6 @@ class CanvasControl:
         pre_frame, post_frame = pre_sec * self.fs, post_sec * self.fs
 
         mean_trace = np.mean(trace_segments, axis=0)
-        mean_event = np.mean(event_segments, axis=0)
 
         traces = {
             'trace': np.array(trace_segments),
@@ -185,7 +184,7 @@ class CanvasControl:
             colors,
             labels,
             xlabel='Time (s)',
-            title='Event-aligned Data',
+            title=self.getTitleOfEventAlignedTrace(),
             xticks=xticks,
             xticklabels=xticklabels,
             legend=False,
@@ -265,3 +264,18 @@ class CanvasControl:
         if event.inaxes == ax:
             self.plot_range = moveToPlotCenter(ax, event.xdata, self.plot_range, self.plot_data_points)
             self.updatePlotWithMouseEvent()
+
+    """
+    Processing
+    """
+    def calculateCorrelationTraceEvent(self):
+        event_flatten = self.eventfile.flatten()
+        trace_flatten = self.full_traces['F'].flatten()
+        corr = np.corrcoef(event_flatten, trace_flatten)[0, 1]
+        return corr
+    
+    def getTitleOfEventAlignedTrace(self):
+        eventfile_name = self.control_manager.getSharedAttr(self.key_app, "eventfile_name")
+        corr = self.calculateCorrelationTraceEvent()
+        title = f"Event-aligned Data\n{eventfile_name}\n(r: {corr:.2f})"
+        return title
