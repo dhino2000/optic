@@ -55,6 +55,9 @@ class TableControl:
             self.setSelectedColumn(column)
             self.setSharedAttr_ROISelected(row)
 
+            roi_display_type = self.widget_manager.dict_buttongroup[f"{self.key_app}_roi_type"].checkedButton().text()
+            self.updateSharedAttr_ROIDisplay_TypeChanged(roi_display_type)
+
     # change table cell content
     def onCellChanged(self, row, column):
         pass

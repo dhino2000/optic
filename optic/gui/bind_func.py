@@ -34,6 +34,16 @@ This module uses the following type annotations:
 - widget_manager: WidgetManager
 """
 
+# -> widget_manager.dict_button["exit"]
+def bindFuncExit(
+    q_button: 'QPushButton', 
+    q_window: 'QWidget'
+) -> None:
+    q_button.clicked.connect(lambda: exitApp(q_window))
+
+"""
+io_layouts
+"""
 # -> io_layouts.makeLayoutLoadFileWidget
 def bindFuncLoadFileWidget(
     q_button: 'QPushButton', 
@@ -42,13 +52,6 @@ def bindFuncLoadFileWidget(
     filetype: str = None
 ) -> None:
     q_button.clicked.connect(lambda: openFileDialogAndSetLineEdit(q_widget, filetype, q_lineedit))
-
-# -> widget_manager.dict_button["exit"]
-def bindFuncExit(
-    q_button: 'QPushButton', 
-    q_window: 'QWidget'
-) -> None:
-    q_button.clicked.connect(lambda: exitApp(q_window))
 
 # -> io_layouts.makeLayoutROICheckIO
 def bindFuncROICheckIO(
@@ -63,7 +66,10 @@ def bindFuncROICheckIO(
     q_button_save.clicked.connect(lambda: saveROICheck(q_window, q_lineedit, q_table, table_columns, local_var))
     q_button_load.clicked.connect(lambda: loadROICheck(q_window, q_table, table_columns))
 
-# -> table_layouts.makeLayoutTableROICountLabel
+"""
+table_layouts
+"""
+# -> QTableWidget, cell selection changed
 def bindFuncTableSelectionChanged(
     q_table: 'QTableWidget', 
     table_control: 'TableControl', 
@@ -77,6 +83,7 @@ def bindFuncTableSelectionChanged(
             canvas_control.updatePlotWithROISelect()
     q_table.selectionModel().selectionChanged.connect(_onSelectionChanged)
 
+# -> QTableWidget, celltype changed
 def bindFuncRadiobuttonCelltypeChanged(
     table_control: 'TableControl', 
     view_control: 'ViewControl'
@@ -118,6 +125,9 @@ def bindFuncButtonToggleAllROICheckbox(
             )
     view_control.updateView()
 
+"""
+view_layouts
+"""
 # -> makeWidgetView, mousePressEvent
 def bindFuncViewMouseEvent(
     q_view: 'QGraphicsView', 
@@ -160,6 +170,17 @@ def bindFuncRadiobuttonBGImageTypeChanged(
     q_buttongroup.buttonClicked[int].connect(_onBGImageTypeChanged)
     checked_button = q_buttongroup.checkedButton()
     _onBGImageTypeChanged(q_buttongroup.id(checked_button))
+
+# -> view_layouts.makeLayoutROIThresholds
+def bindFuncCheckboxROIDisplayWithThresholds(
+        q_checkbox: 'QCheckBox',
+        view_control: 'ViewControl'
+) -> None:
+    q_checkbox.stateChanged.connect(view_control.updateView)
+
+"""
+slider_layouts
+"""
 
 # -> slider_layouts.makeLayoutOpacitySlider
 def bindFuncOpacitySlider(
@@ -204,6 +225,7 @@ def bindFuncBackgroundContrastSlider(
     q_slider_min.valueChanged.connect(onContrastMinChanged)
     q_slider_max.valueChanged.connect(onContrastMaxChanged)
 
+# -> slider_layouts.makeLayoutContrastSlider
 def bindFuncBackgroundVisibilityCheckbox(
     q_checkbox: 'QCheckBox', 
     view_control: 'ViewControl', 
@@ -214,6 +236,10 @@ def bindFuncBackgroundVisibilityCheckbox(
         view_control.setBackgroundVisibility(channel, is_visible)
         view_control.updateView()
     q_checkbox.stateChanged.connect(onVisibilityChanged)
+
+"""
+canvas_layouts
+"""
 
 # -> canvas_layouts.makeLayoutCanvasTracePlot, mouseEvent
 def bindFuncCanvasMouseEvent(
@@ -244,3 +270,4 @@ def bindFuncButtonEventfileIO(
         canvas_control.updatePlotWithROISelect()
     q_button_load.clicked.connect(_loadEventFileNPY)
     q_button_clear.clicked.connect(lambda: data_manager.clearEventfile(key_app))
+

@@ -1,5 +1,5 @@
 from __future__ import annotations
-from ..visualization.view_visual import updateView, findClosestROI, shouldSkipROI
+from ..visualization.view_visual import updateView, findClosestROI, shouldSkipROI, shouldDisplayROI
 from ..gui.view_setup import setViewSize
 from ..config.constants import BGImageTypeList
 import random
@@ -53,6 +53,7 @@ class ViewControl:
 
 
     def updateView(self):
+        self.updateROIDisplay()
         updateView(self.q_scene, self.q_view, self, self.data_manager, self.control_manager, self.key_app)
 
     """
@@ -118,6 +119,26 @@ class ViewControl:
 
     def setImageSize(self):
         self.image_sizes = self.data_manager.getImageSize(self.key_app)
+
+    """
+    update Functions
+    """
+    def updateROIDisplay(self):
+        threshold_checkbox = self.widget_manager.dict_checkbox[f"{self.key_app}_roi_threshold"]
+        threshold_lineedits = {
+            param: self.widget_manager.dict_lineedit[f"{self.key_app}_roi_threshold_{param}"]
+            for param in self.config_manager.gui_defaults["ROI_THRESHOLDS"].keys()
+            if f"{self.key_app}_roi_threshold_{param}" in self.widget_manager.dict_lineedit
+        }
+        
+        roi_display = self.control_manager.getSharedAttr(self.key_app, "roi_display")
+        fall_stat = self.data_manager.dict_Fall[self.key_app]["stat"]
+        
+        if threshold_checkbox.isChecked():
+            for roi_id, roi_stat in fall_stat.items():
+                roi_display[roi_id] = roi_display[roi_id] and shouldDisplayROI(roi_stat, threshold_lineedits)
+        
+        self.control_manager.setSharedAttr(self.key_app, "roi_display", roi_display)
 
     """
     shared_attr Functions
