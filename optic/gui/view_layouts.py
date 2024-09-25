@@ -22,7 +22,7 @@ def makeLayoutROIThresholds(widget_manager, key_label, key_lineedit, key_checkbo
     return layout
 
 # 表示するROIの種類を選択するbuttongroup
-def makeLayoutROIDisplayType(q_widget, widget_manager, key_buttongroup, table_columns):
+def makeLayoutDislplayCelltype(q_widget, widget_manager, key_buttongroup, table_columns):
     # ROIの表示切り替え All, Cell, Not Cell
     roidisp_options = ["All ROI", "None"]
     # Table colをもとに作成

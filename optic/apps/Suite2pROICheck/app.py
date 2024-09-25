@@ -205,13 +205,13 @@ class Suite2pROICheckGUI(QMainWindow):
     # ROI display, background image button group, checkbox
     def makeLayoutComponentROIDisplay_BGImageDisplay_ROISkip(self):
         layout = QVBoxLayout()
-        layout.addLayout(makeLayoutROIDisplayType(self, 
+        layout.addLayout(makeLayoutDislplayCelltype(self, 
                                                   self.widget_manager, 
-                                                  key_buttongroup=f'{self.app_key_pri}_roi_type', 
+                                                  key_buttongroup=f'{self.app_key_pri}_display_celltype', 
                                                   table_columns=self.config_manager.table_columns[self.app_key_pri].getColumns()))
         layout.addLayout(makeLayoutBGImageTypeDisplay(self, 
                                                       self.widget_manager, 
-                                                      key_buttongroup=f'{self.app_key_pri}_bgimage_type'))
+                                                      key_buttongroup=f'{self.app_key_pri}_im_bg_type'))
         layout.addLayout(makeLayoutROIChooseSkip(self.widget_manager, 
                                                  key_checkbox=f'{self.app_key_pri}', 
                                                  table_columns=self.config_manager.table_columns[self.app_key_pri].getColumns()))
@@ -343,12 +343,12 @@ class Suite2pROICheckGUI(QMainWindow):
         )
         # Radiobutton BGImageType buttonChanged
         bindFuncRadiobuttonBGImageTypeChanged(
-            q_buttongroup=self.widget_manager.dict_buttongroup[f"{self.app_key_pri}_bgimage_type"], 
+            q_buttongroup=self.widget_manager.dict_buttongroup[f"{self.app_key_pri}_im_bg_type"], 
             view_control=self.control_manager.view_controls[self.app_key_pri],
         )
         # Radiobutton ROIDisplayType buttonChanged
-        bindFuncRadiobuttonROIDisplayTypeChanged(
-            q_buttongroup=self.widget_manager.dict_buttongroup[f"{self.app_key_pri}_roi_type"], 
+        bindFuncRadiobuttonDisplayCelltypeChanged(
+            q_buttongroup=self.widget_manager.dict_buttongroup[f"{self.app_key_pri}_display_celltype"], 
             view_control=self.control_manager.view_controls[self.app_key_pri],
             table_control=self.control_manager.table_controls[self.app_key_pri],
         )

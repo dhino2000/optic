@@ -114,7 +114,7 @@ class TableControl:
     def getSharedAttr_ROIDisplayType(self):
         return self.control_manager.getSharedAttr(self.key_app, 'roi_display_type')
 
-    # with dict_buttongroup["{key_app}_roi_type"] change
+    # with dict_buttongroup["{key_app}_display_celltype"] change
     def updateSharedAttr_ROIDisplay_TypeChanged(self, roi_display_type: str):
         roi_display = self.getSharedAttr_ROIDisplay()
         for roi_id in roi_display.keys():

@@ -34,89 +34,15 @@ This module uses the following type annotations:
 - widget_manager: WidgetManager
 """
 
-# -> io_layouts.makeLayoutLoadFileWidget
-def bindFuncLoadFileWidget(
-    q_button: 'QPushButton', 
-    q_widget: 'QWidget', 
-    q_lineedit: 'QLineEdit', 
-    filetype: str = None
-) -> None:
-    q_button.clicked.connect(lambda: openFileDialogAndSetLineEdit(q_widget, filetype, q_lineedit))
-
+"""
+others
+"""
 # -> widget_manager.dict_button["exit"]
 def bindFuncExit(
     q_button: 'QPushButton', 
     q_window: 'QWidget'
 ) -> None:
     q_button.clicked.connect(lambda: exitApp(q_window))
-
-# -> io_layouts.makeLayoutROICheckIO
-def bindFuncROICheckIO(
-    q_button_save: 'QPushButton', 
-    q_button_load: 'QPushButton', 
-    q_window: 'QWidget', 
-    q_lineedit: 'QLineEdit', 
-    q_table: 'QTableWidget', 
-    table_columns: List[str], 
-    local_var: bool = True
-) -> None:
-    q_button_save.clicked.connect(lambda: saveROICheck(q_window, q_lineedit, q_table, table_columns, local_var))
-    q_button_load.clicked.connect(lambda: loadROICheck(q_window, q_table, table_columns))
-
-# -> table_layouts.makeLayoutTableROICountLabel
-def bindFuncTableSelectionChanged(
-    q_table: 'QTableWidget', 
-    table_control: 'TableControl', 
-    view_control: 'ViewControl', 
-    canvas_control: 'CanvasControl'
-) -> None:
-    def _onSelectionChanged(selected, deselected) -> None:
-        if selected.indexes():
-            table_control.onSelectionChanged(selected, deselected)
-            view_control.updateView()
-            canvas_control.updatePlotWithROISelect()
-    q_table.selectionModel().selectionChanged.connect(_onSelectionChanged)
-
-def bindFuncRadiobuttonCelltypeChanged(
-    table_control: 'TableControl', 
-    view_control: 'ViewControl'
-) -> None:
-    def __onButtonClicked(row: int) -> Callable[[QPushButton], None]:
-        def _onButtonClicked(button: 'QPushButton') -> None:
-            table_control.updateSharedAttr_ROIDisplay_TableCelltypeChanged(row)
-            view_control.updateView()
-        return _onButtonClicked
-
-    for row, button_group in table_control.groups_celltype.items():
-        handler = __onButtonClicked(row)
-        button_group.buttonClicked.connect(handler)
-
-# -> table_layouts.makeLayoutAllROISetSameCelltype
-def bindFuncButtonSetAllROISameCelltype(
-    widget_manager: 'WidgetManager', 
-    view_control: 'ViewControl', 
-    table_control: 'TableControl'
-) -> None:
-    list_celltype = [key for key, value in table_control.table_columns.getColumns().items() if value['type'] == 'celltype']
-    for celltype in list_celltype:
-        widget_manager.dict_button[f"{table_control.key_app}_roi_set_{celltype}"].clicked.connect(
-            lambda checked, ct=celltype: table_control.setAllROISameCelltype(ct)
-        )
-    view_control.updateView()
-
-# -> table_layouts.makeLayoutAllROICheckboxToggle
-def bindFuncButtonToggleAllROICheckbox(
-    widget_manager: 'WidgetManager', 
-    view_control: 'ViewControl', 
-    table_control: 'TableControl'
-) -> None:
-    list_checkbox = [key for key, value in table_control.table_columns.getColumns().items() if value['type'] == 'checkbox']
-    for checkbox in list_checkbox:
-        for label, toggle in zip(["check", "uncheck"], [True, False]):
-            widget_manager.dict_button[f"{table_control.key_app}_roi_{label}_{checkbox}"].clicked.connect(
-                lambda checked, ck=checkbox, tg=toggle: table_control.toggleAllROICheckbox(ck, tg)
-            )
-    view_control.updateView()
 
 # -> makeWidgetView, mousePressEvent
 def bindFuncViewMouseEvent(
@@ -134,33 +60,68 @@ def bindFuncViewMouseEvent(
     
     q_view.mousePressEvent = onViewClicked
 
-# -> view_layouts.makeLayoutROIDisplayType
-def bindFuncRadiobuttonROIDisplayTypeChanged(
-    q_buttongroup: 'QButtonGroup', 
-    view_control: 'ViewControl', 
-    table_control: 'TableControl'
+"""
+canvas_layouts
+"""
+# -> canvas_layouts.makeLayoutCanvasTracePlot, mouseEvent
+def bindFuncCanvasMouseEvent(
+    q_canvas: 'FigureCanvasQTAgg',
+    canvas_control: 'CanvasControl',
+    ax: Axes,
+    list_event: List[str],
+    list_func: List[Callable[[Event, Axes], Any]]
 ) -> None:
-    def _onROIDisplayTypeChanged(button_id: int) -> None:
-        roi_display_type = q_buttongroup.button(button_id).text()
-        table_control.updateSharedAttr_ROIDisplay_TypeChanged(roi_display_type)
-        view_control.updateView()
-    q_buttongroup.buttonClicked[int].connect(_onROIDisplayTypeChanged)
-    checked_button = q_buttongroup.checkedButton()
-    _onROIDisplayTypeChanged(q_buttongroup.id(checked_button))
+    if len(list_event) != len(list_func):
+        raise ValueError("The number of events and functions must match.")
 
-# -> view_layouts.makeLayoutBGImageTypeDisplay
-def bindFuncRadiobuttonBGImageTypeChanged(
-    q_buttongroup: 'QButtonGroup', 
-    view_control: 'ViewControl'
+    for event, func in zip(list_event, list_func):
+        q_canvas.mpl_connect(event, lambda event, func=func, ax=ax: func(event, ax))
+
+# -> canvas_layouts.makeLayoutEventFilePlot
+def bindFuncButtonEventfileIO(
+    q_button_load: 'QPushButton', 
+    q_button_clear: 'QPushButton', 
+    q_window: 'QWidget', 
+    data_manager: 'DataManager', 
+    control_manager: 'ControlManager', 
+    canvas_control: 'CanvasControl', 
+    key_app: str
 ) -> None:
-    def _onBGImageTypeChanged(button_id: int) -> None:
-        bg_image_type = q_buttongroup.button(button_id).text()
-        view_control.setBackgroundImageType(bg_image_type)
-        view_control.updateView()
-    q_buttongroup.buttonClicked[int].connect(_onBGImageTypeChanged)
-    checked_button = q_buttongroup.checkedButton()
-    _onBGImageTypeChanged(q_buttongroup.id(checked_button))
+    def _loadEventFileNPY() -> None:
+        loadEventFileNPY(q_window, data_manager, control_manager, key_app)
+        canvas_control.updatePlotWithROISelect()
+    q_button_load.clicked.connect(_loadEventFileNPY)
+    q_button_clear.clicked.connect(lambda: data_manager.clearEventfile(key_app))
 
+"""
+io_layouts
+"""
+# -> io_layouts.makeLayoutLoadFileWidget
+def bindFuncLoadFileWidget(
+    q_button: 'QPushButton', 
+    q_widget: 'QWidget', 
+    q_lineedit: 'QLineEdit', 
+    filetype: str = None
+) -> None:
+    q_button.clicked.connect(lambda: openFileDialogAndSetLineEdit(q_widget, filetype, q_lineedit))
+
+
+# -> io_layouts.makeLayoutROICheckIO
+def bindFuncROICheckIO(
+    q_button_save: 'QPushButton', 
+    q_button_load: 'QPushButton', 
+    q_window: 'QWidget', 
+    q_lineedit: 'QLineEdit', 
+    q_table: 'QTableWidget', 
+    table_columns: List[str], 
+    local_var: bool = True
+) -> None:
+    q_button_save.clicked.connect(lambda: saveROICheck(q_window, q_lineedit, q_table, table_columns, local_var))
+    q_button_load.clicked.connect(lambda: loadROICheck(q_window, q_table, table_columns))
+
+"""
+slider_layouts
+"""
 # -> slider_layouts.makeLayoutOpacitySlider
 def bindFuncOpacitySlider(
     q_slider: 'QSlider', 
@@ -204,6 +165,7 @@ def bindFuncBackgroundContrastSlider(
     q_slider_min.valueChanged.connect(onContrastMinChanged)
     q_slider_max.valueChanged.connect(onContrastMaxChanged)
 
+# -> slider_layouts.makeLayoutContrastSlider
 def bindFuncBackgroundVisibilityCheckbox(
     q_checkbox: 'QCheckBox', 
     view_control: 'ViewControl', 
@@ -215,32 +177,95 @@ def bindFuncBackgroundVisibilityCheckbox(
         view_control.updateView()
     q_checkbox.stateChanged.connect(onVisibilityChanged)
 
-# -> canvas_layouts.makeLayoutCanvasTracePlot, mouseEvent
-def bindFuncCanvasMouseEvent(
-    q_canvas: 'FigureCanvasQTAgg',
-    canvas_control: 'CanvasControl',
-    ax: Axes,
-    list_event: List[str],
-    list_func: List[Callable[[Event, Axes], Any]]
+"""
+table_layouts
+"""
+# -> table_layouts.makeLayoutTableROICountLabel
+def bindFuncTableSelectionChanged(
+    q_table: 'QTableWidget', 
+    table_control: 'TableControl', 
+    view_control: 'ViewControl', 
+    canvas_control: 'CanvasControl'
 ) -> None:
-    if len(list_event) != len(list_func):
-        raise ValueError("The number of events and functions must match.")
+    def _onSelectionChanged(selected, deselected) -> None:
+        if selected.indexes():
+            table_control.onSelectionChanged(selected, deselected)
+            view_control.updateView()
+            canvas_control.updatePlotWithROISelect()
+    q_table.selectionModel().selectionChanged.connect(_onSelectionChanged)
 
-    for event, func in zip(list_event, list_func):
-        q_canvas.mpl_connect(event, lambda event, func=func, ax=ax: func(event, ax))
-
-# -> canvas_layouts.makeLayoutEventFilePlot
-def bindFuncButtonEventfileIO(
-    q_button_load: 'QPushButton', 
-    q_button_clear: 'QPushButton', 
-    q_window: 'QWidget', 
-    data_manager: 'DataManager', 
-    control_manager: 'ControlManager', 
-    canvas_control: 'CanvasControl', 
-    key_app: str
+# -> table_layouts.makeLayoutTableROICountLabel
+def bindFuncRadiobuttonOfTableCelltypeChanged(
+    table_control: 'TableControl', 
+    view_control: 'ViewControl'
 ) -> None:
-    def _loadEventFileNPY() -> None:
-        loadEventFileNPY(q_window, data_manager, control_manager, key_app)
-        canvas_control.updatePlotWithROISelect()
-    q_button_load.clicked.connect(_loadEventFileNPY)
-    q_button_clear.clicked.connect(lambda: data_manager.clearEventfile(key_app))
+    def __onButtonClicked(row: int) -> Callable[[QPushButton], None]:
+        def _onButtonClicked(button: 'QPushButton') -> None:
+            table_control.updateSharedAttr_ROIDisplay_TableCelltypeChanged(row)
+            view_control.updateView()
+        return _onButtonClicked
+
+    for row, button_group in table_control.groups_celltype.items():
+        handler = __onButtonClicked(row)
+        button_group.buttonClicked.connect(handler)
+
+# -> table_layouts.makeLayoutAllROISetSameCelltype
+def bindFuncButtonSetAllROISameCelltype(
+    widget_manager: 'WidgetManager', 
+    view_control: 'ViewControl', 
+    table_control: 'TableControl'
+) -> None:
+    list_celltype = [key for key, value in table_control.table_columns.getColumns().items() if value['type'] == 'celltype']
+    for celltype in list_celltype:
+        widget_manager.dict_button[f"{table_control.key_app}_roi_set_{celltype}"].clicked.connect(
+            lambda checked, ct=celltype: table_control.setAllROISameCelltype(ct)
+        )
+    view_control.updateView()
+
+# -> table_layouts.makeLayoutAllROICheckboxToggle
+def bindFuncButtonToggleAllROICheckbox(
+    widget_manager: 'WidgetManager', 
+    view_control: 'ViewControl', 
+    table_control: 'TableControl'
+) -> None:
+    list_checkbox = [key for key, value in table_control.table_columns.getColumns().items() if value['type'] == 'checkbox']
+    for checkbox in list_checkbox:
+        for label, toggle in zip(["check", "uncheck"], [True, False]):
+            widget_manager.dict_button[f"{table_control.key_app}_roi_{label}_{checkbox}"].clicked.connect(
+                lambda checked, ck=checkbox, tg=toggle: table_control.toggleAllROICheckbox(ck, tg)
+            )
+    view_control.updateView()
+
+"""
+view_layouts
+"""
+# -> view_layouts.makeLayoutDislplayCelltype, All ROI, None, Neuron ,Not Cell, ...
+def bindFuncRadiobuttonDisplayCelltypeChanged(
+    q_buttongroup: 'QButtonGroup', 
+    view_control: 'ViewControl', 
+    table_control: 'TableControl'
+) -> None:
+    def _onROIDisplayTypeChanged(button_id: int) -> None:
+        roi_display_type = q_buttongroup.button(button_id).text()
+        table_control.updateSharedAttr_ROIDisplay_TypeChanged(roi_display_type)
+        view_control.updateView()
+    q_buttongroup.buttonClicked[int].connect(_onROIDisplayTypeChanged)
+    checked_button = q_buttongroup.checkedButton()
+    _onROIDisplayTypeChanged(q_buttongroup.id(checked_button))
+
+# -> view_layouts.makeLayoutBGImageTypeDisplay, meanImg, meanImgE, ... 
+def bindFuncRadiobuttonBGImageTypeChanged(
+    q_buttongroup: 'QButtonGroup', 
+    view_control: 'ViewControl'
+) -> None:
+    def _onBGImageTypeChanged(button_id: int) -> None:
+        bg_image_type = q_buttongroup.button(button_id).text()
+        view_control.setBackgroundImageType(bg_image_type)
+        view_control.updateView()
+    q_buttongroup.buttonClicked[int].connect(_onBGImageTypeChanged)
+    checked_button = q_buttongroup.checkedButton()
+    _onBGImageTypeChanged(q_buttongroup.id(checked_button))
+
+
+
+
