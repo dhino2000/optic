@@ -108,14 +108,14 @@ class TableControl:
         roi_display = {roi_id: True for roi_id in range(self.len_row)}
         self.control_manager.setSharedAttr(self.key_app, 'roi_display', roi_display)
 
-    def setSharedAttr_ROIDisplayType(self, roi_display_type: str):
-        self.control_manager.setSharedAttr(self.key_app, 'roi_display_type', roi_display_type)
+    def setSharedAttr_DisplayCelltype(self, roi_display_type: str):
+        self.control_manager.setSharedAttr(self.key_app, 'display_celltype', roi_display_type)
 
-    def getSharedAttr_ROIDisplayType(self):
-        return self.control_manager.getSharedAttr(self.key_app, 'roi_display_type')
+    def getSharedAttr_DisplayCelltype(self):
+        return self.control_manager.getSharedAttr(self.key_app, 'display_celltype')
 
     # with dict_buttongroup["{key_app}_display_celltype"] change
-    def updateSharedAttr_ROIDisplay_TypeChanged(self, roi_display_type: str):
+    def updateROIDisplayWithCelltype(self, roi_display_type: str):
         roi_display = self.getSharedAttr_ROIDisplay()
         for roi_id in roi_display.keys():
             if roi_display_type == 'All ROI':
@@ -124,13 +124,13 @@ class TableControl:
                 roi_display[roi_id] = False
             else:
                 roi_display[roi_id] = (self.getCurrentCellType(roi_id) == roi_display_type)
-        self.setSharedAttr_ROIDisplayType(roi_display_type)
+        self.setSharedAttr_DisplayCelltype(roi_display_type)
         self.setSharedAttr_ROIDisplay(roi_display)
 
-    # with "celltype" radiobutton change
-    def updateSharedAttr_ROIDisplay_TableCelltypeChanged(self, row):
+    # with table's "celltype" radiobutton change
+    def changeRadiobuttonOfTable(self, row):
         roi_display = self.getSharedAttr_ROIDisplay()
-        current_display_type = self.getSharedAttr_ROIDisplayType()
+        current_display_type = self.getSharedAttr_DisplayCelltype()
         
         if current_display_type not in ['All ROI', 'None']:
             new_cell_type = self.getCurrentCellType(row)

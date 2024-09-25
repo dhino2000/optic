@@ -195,13 +195,13 @@ def bindFuncTableSelectionChanged(
     q_table.selectionModel().selectionChanged.connect(_onSelectionChanged)
 
 # -> table_layouts.makeLayoutTableROICountLabel
-def bindFuncRadiobuttonOfTableCelltypeChanged(
+def bindFuncRadiobuttonOfTableChanged(
     table_control: 'TableControl', 
     view_control: 'ViewControl'
 ) -> None:
     def __onButtonClicked(row: int) -> Callable[[QPushButton], None]:
         def _onButtonClicked(button: 'QPushButton') -> None:
-            table_control.updateSharedAttr_ROIDisplay_TableCelltypeChanged(row)
+            table_control.changeRadiobuttonOfTable(row)
             view_control.updateView()
         return _onButtonClicked
 
@@ -247,7 +247,7 @@ def bindFuncRadiobuttonDisplayCelltypeChanged(
 ) -> None:
     def _onROIDisplayTypeChanged(button_id: int) -> None:
         roi_display_type = q_buttongroup.button(button_id).text()
-        table_control.updateSharedAttr_ROIDisplay_TypeChanged(roi_display_type)
+        table_control.updateROIDisplayWithCelltype(roi_display_type)
         view_control.updateView()
     q_buttongroup.buttonClicked[int].connect(_onROIDisplayTypeChanged)
     checked_button = q_buttongroup.checkedButton()
