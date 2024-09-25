@@ -5,6 +5,7 @@ if TYPE_CHECKING:
     from .manager.control_manager import ControlManager
     from .manager.data_manager import DataManager
     from .manager.widget_manager import WidgetManager
+    from .manager.layout_manager import LayoutManager
     from .controls.view_control import ViewControl
     from .controls.table_control import TableControl
     from .controls.canvas_control import CanvasControl

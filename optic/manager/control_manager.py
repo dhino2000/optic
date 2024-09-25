@@ -1,9 +1,6 @@
+from __future__ import annotations
+from ..type_definitions import *
 from collections import defaultdict
-from typing import Any, Dict
-
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from ..controls import TableControl, ViewControl, CanvasControl
 
 # Manager controls class
 class ControlManager:
@@ -18,11 +15,11 @@ class ControlManager:
         """
         self.shared_attr = defaultdict(dict)
 
-    def setSharedAttr(self, key_app: str, key_attr: str, value: Any):
+    def setSharedAttr(self, key_app: str, key_attr: str, value: Any) -> None:
         self.shared_attr[key_app][key_attr] = value
 
-    def getSharedAttr(self, key_app: str, key_attr: str):
+    def getSharedAttr(self, key_app: str, key_attr: str) -> Any:
         return self.shared_attr[key_app].get(key_attr)
 
-    def getAllSharedAttrs(self, key_app: str):
+    def getAllSharedAttrs(self, key_app: str) -> Dict[str, Any]:
         return self.shared_attr[key_app]
