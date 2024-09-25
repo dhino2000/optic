@@ -1,8 +1,9 @@
-# 選択した細胞のプロパティなどを表示するlabelなどをまとめたLayout関数
+from __future__ import annotations
+from ..type_definitions import *
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout
 
 # 選択した細胞のプロパティを表示
-def makeLayoutROIProperty(widget_manager, key_label):
+def makeLayoutROIProperty(widget_manager: WidgetManager, key_label: str) -> QVBoxLayout:
     layout = QVBoxLayout()
     # ROIの中心座標, size, radius, aspect_ratio, compact, footprint, solidity, skew(歪度), std
     for list_roi_prop in (["med", "npix", "npix_soma", "radius", "aspect_ratio"], ["compact", "solidity", "footprint", "skew", "std"]):
@@ -13,7 +14,7 @@ def makeLayoutROIProperty(widget_manager, key_label):
     return layout
 
 # Cell ROI, Not Cell ROI, All ROIの数を表示するlabel用Layout
-def makeLayoutROICount(widget_manager, key_label, table_columns):
+def makeLayoutROICount(widget_manager: WidgetManager, key_label: str, table_columns: TableColumns) -> QHBoxLayout:
     layout = QHBoxLayout()
     # ROI number label
     list_celltype = ["All"]

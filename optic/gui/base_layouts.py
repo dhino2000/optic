@@ -1,19 +1,21 @@
-# シンプルな機能を持つlayout作成用関数
-# ほぼmakeWidgetと同じ
+from __future__ import annotations
+from ..type_definitions import *
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QRadioButton, QButtonGroup, QSlider
 from PyQt5.QtCore import Qt
 from typing import Literal
 from ..manager.widget_manager import WidgetManager
 
 # QLineEdit Layout label付き
-def makeLayoutLineEditLabel(widget_manager :WidgetManager, 
-                            key_label      :str,
-                            key_lineedit   :str, 
-                            label          :str, 
-                            axis           :Literal["vertical", "horizontal"] = "vertical", 
-                            text_set       :str = "", 
-                            width_fix      :int = 0,
-                            align               = Qt.AlignLeft):
+def makeLayoutLineEditLabel(
+        widget_manager :WidgetManager, 
+        key_label      :str,
+        key_lineedit   :str, 
+        label          :str, 
+        axis           :Literal["vertical", "horizontal"] = "vertical", 
+        text_set       :str = "", 
+        width_fix      :int = 0,
+        align          :Qt.AlignmentFlag = Qt.AlignLeft
+        ) -> QVBoxLayout:
     if axis == "vertical":
         layout = QVBoxLayout()
     elif axis == "horizontal":
@@ -27,7 +29,14 @@ def makeLayoutLineEditLabel(widget_manager :WidgetManager,
     return layout
 
 # QButtonGroup Layout
-def makeLayoutButtonGroup(q_widget, widget_manager, key_buttongroup, list_label_buttongroup, set_exclusive=True, idx_check=0):
+def makeLayoutButtonGroup(
+        q_widget: QWidget, 
+        widget_manager: WidgetManager, 
+        key_buttongroup: str, 
+        list_label_buttongroup: List[str], 
+        set_exclusive: bool=True, 
+        idx_check: int=0
+        ) -> QHBoxLayout:
     layout = QHBoxLayout()
     button_group = QButtonGroup(q_widget)
     button_group.setExclusive(set_exclusive)
@@ -43,7 +52,18 @@ def makeLayoutButtonGroup(q_widget, widget_manager, key_buttongroup, list_label_
     return layout
 
 # QSlider Layout label付き
-def makeLayoutSliderLabel(widget_manager, key_label, key_slider, label, align=Qt.AlignLeft, func_=None, value_min=0, value_max=255, value_set=10, height=10, axis=Qt.Horizontal):
+def makeLayoutSliderLabel(
+        widget_manager: WidgetManager, 
+        key_label: str, 
+        key_slider: str, 
+        label: str, 
+        align: Qt.AlignmentFlag=Qt.AlignLeft, 
+        func_: Any=None, 
+        value_min: int=0, 
+        value_max: int=255, 
+        value_set: int=10, 
+        height: int=10, 
+        axis: Qt.Orientation=Qt.Horizontal) -> QVBoxLayout:
     layout = QVBoxLayout()
     label_widget = widget_manager.makeWidgetLabel(key_label, label, align)
     slider_widget = widget_manager.makeWidgetSlider(key_slider, func_, value_min, value_max, value_set, height, axis)

@@ -1,18 +1,13 @@
 from __future__ import annotations
+from ..type_definitions import *
 from ..io.file_dialog import openFileDialogAndSetLineEdit
 from ..io.data_io import saveROICheck, loadROICheck, loadEventFileNPY
 from ..utils import *
 from PyQt5.QtCore import Qt
 from matplotlib.axes import Axes
 from matplotlib.backend_bases import Event
-from typing import List, Callable, Any
 from PyQt5.QtWidgets import QPushButton, QWidget, QLineEdit, QTableWidget, QButtonGroup, QCheckBox, QGraphicsView, QSlider
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
-
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from ..manager import ConfigManager, ControlManager, DataManager, WidgetManager
-    from ..controls import ViewControl, TableControl, CanvasControl
 
 """
 This module uses the following type annotations:

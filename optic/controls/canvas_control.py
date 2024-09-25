@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, Dict, Literal, List
+from ..type_definitions import *
 from ..config.constants import AxisKeys, PlotColors, PlotLabels
 from ..utils.data_utils import downSampleTrace, extractEventOnsetIndices, extractEventAlignedData
 from ..visualization.canvas_visual import plotTraces, zoomXAxis, moveXAxis, moveToPlotCenter, plotEventAlignedTrace
@@ -7,10 +7,6 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 import matplotlib.patches as patches
 import numpy as np
-
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from ..manager import ConfigManager, ControlManager, DataManager, WidgetManager
 
 class CanvasControl:
     def __init__(self, 

@@ -1,15 +1,11 @@
 from __future__ import annotations
+from ..type_definitions import *
 from ..visualization.view_visual import updateView, findClosestROI, shouldSkipROI
 from ..gui.view_setup import setViewSize
 from ..config.constants import BGImageTypeList
 import random
 import numpy as np
-from typing import List, Tuple, Dict, Optional, Callable
-from PyQt5.QtWidgets import QGraphicsView, QGraphicsScene
 
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from ..manager import ConfigManager, ControlManager, DataManager, WidgetManager
 
 class ViewControl:
     def __init__(

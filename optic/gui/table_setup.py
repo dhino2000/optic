@@ -1,9 +1,10 @@
-# TableWidget Setup
+from __future__ import annotations
+from ..type_definitions import *
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QAbstractItemView, QTableWidgetItem, QRadioButton, QButtonGroup
 from ..controls.event_filters import applyKeyPressEventIgnore
 
-def setupWidgetROITable(q_table, len_row, table_columns, key_event_ignore=True):
+def setupWidgetROITable(q_table: QTableWidget, len_row: int, table_columns: TableColumns, key_event_ignore: bool=True):
     q_table.clearSelection() # テーブルの選択初期化
 
     q_table.setRowCount(len_row)
@@ -50,7 +51,7 @@ def setupWidgetROITable(q_table, len_row, table_columns, key_event_ignore=True):
     return q_table, groups_celltype
 
 # dict_roicheckの内容をtableに反映
-def applyDictROICheckToTable(q_table, table_columns, dict_roicheck):
+def applyDictROICheckToTable(q_table: QTableWidget, table_columns: TableColumns, dict_roicheck: Dict[str, List[Tuple[Any]]]):
     row_count = q_table.rowCount()
 
     for col_name, col_info in table_columns.items():

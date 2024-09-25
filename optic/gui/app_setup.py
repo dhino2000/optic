@@ -1,5 +1,7 @@
-# アプリsetup 
-def setupMainWindow(q_window, gui_defaults):
+from __future__ import annotations
+from ..type_definitions import *
+
+def setupMainWindow(q_window: QMainWindow, gui_defaults: GuiDefaults[str]) -> None:
     q_window.setWindowTitle(gui_defaults["TITLE"])
     q_window.setGeometry(gui_defaults["WINDOW_SETTINGS"]["INIT_POSITION_X"], 
                          gui_defaults["WINDOW_SETTINGS"]["INIT_POSITION_Y"], 

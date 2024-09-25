@@ -1,13 +1,9 @@
 from __future__ import annotations
+from ..type_definitions import *
 from PyQt5.QtWidgets import QRadioButton, QButtonGroup, QMessageBox, QAbstractItemView, QTableWidget
 from PyQt5.QtCore import Qt
 from ..visualization.info_visual import updateROIPropertyDisplay, updateROICountDisplay
 from ..utils.dialog_utils import showConfirmationDialog
-from typing import Dict, Any
-
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from ..manager import ConfigManager, ControlManager, DataManager, WidgetManager
 
 class TableControl:
     def __init__(

@@ -1,9 +1,20 @@
-# sliderがメインのlayout作成用関数
+from __future__ import annotations
+from ..type_definitions import *
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout
 from .base_layouts import makeLayoutSliderLabel
 
 # 画像のコントラスト調節スライダー、表示チェックボックス用Layout
-def makeLayoutContrastSlider(widget_manager, key_label, key_checkbox, key_slider, label_checkbox, label_label, checked=True, value_min=0, value_max=255):
+def makeLayoutContrastSlider(
+        widget_manager: WidgetManager, 
+        key_label: str, 
+        key_checkbox: str, 
+        key_slider: str, 
+        label_checkbox: str, 
+        label_label: str, 
+        checked: bool=True, 
+        value_min: int=0, 
+        value_max: int=255
+        ) -> QVBoxLayout:
     layout = QVBoxLayout()
     # チェックボックスの設定
     layout.addWidget(widget_manager.makeWidgetCheckBox(key=f"{key_checkbox}_show", label=label_checkbox, checked=checked))
@@ -22,7 +33,7 @@ def makeLayoutContrastSlider(widget_manager, key_label, key_checkbox, key_slider
     return layout
 
 # 透明度調節スライダーのLayout, ALL ROI, Selected ROI
-def makeLayoutOpacitySlider(widget_manager, key_label, key_slider, label):
+def makeLayoutOpacitySlider(widget_manager: WidgetManager, key_label: str, key_slider: str, label: str) -> QHBoxLayout:
     layout = QHBoxLayout()
     for (key_, label_, default_value) in zip(['opacity_roi_all', 'opacity_roi_selected'],
                                              ['Opacity of All ROI', 'Opacity of Selected ROI'],

@@ -1,4 +1,7 @@
-def setViewSize(q_view, width_min=None, width_max=None, height_min=None, height_max=None):
+from __future__ import annotations
+from ..type_definitions import *
+
+def setViewSize(q_view: QGraphicsView, width_min: int=0, width_max: int=0, height_min: int=0, height_max: int=0) -> None:
     if width_min:
         q_view.setMinimumWidth(width_min)
     if width_max:

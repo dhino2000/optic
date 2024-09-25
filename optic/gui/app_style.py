@@ -1,7 +1,9 @@
+from __future__ import annotations
+from ..type_definitions import *
 from PyQt5.QtWidgets import QApplication, QDesktopWidget
 from PyQt5.QtGui import QFont
 
-def setAppStyle(app: QApplication, font_name: str = "MS UI Gothic", base_font_size: int = 12, base_widget_height: int = 20, base_widget_margin: int = 2):
+def setAppStyle(app: QApplication, font_name: str = "MS UI Gothic", base_font_size: int = 12, base_widget_height: int = 20, base_widget_margin: int = 2) -> None:
     """
     アプリケーション全体のスタイルを設定する。
 
@@ -42,13 +44,13 @@ def setAppStyle(app: QApplication, font_name: str = "MS UI Gothic", base_font_si
         }}
     """)
 
-def applyAppStyle(app: QApplication):
+def applyAppStyle(app: QApplication) -> None:
     """
     アプリケーションにデフォルトのスタイルを適用する。
     """
     setAppStyle(app)
 
-def getScalingFactor():
+def getScalingFactor() -> float:
     """
     ディスプレイの横幅に基づいてスケーリングファクターを計算する。
     """

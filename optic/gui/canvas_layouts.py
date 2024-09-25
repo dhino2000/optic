@@ -1,10 +1,11 @@
-# canvasのplot用
+from __future__ import annotations
+from ..type_definitions import *
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
 from .base_layouts import makeLayoutLineEditLabel
 
 # F, Fneu, spks, eventのプロットプロット用のcanvas Layout
-def makeLayoutCanvasTracePlot(widget_manager, key_figure, key_canvas, key_app="pri", toolbar=False):
+def makeLayoutCanvasTracePlot(widget_manager: WidgetManager, key_figure: str, key_canvas: str, key_app: str, toolbar: bool=False) -> QVBoxLayout:
     # プロットウィジェットの設定
     layout = QVBoxLayout()
     widget_manager.makeWidgetFigure(key_figure)
@@ -17,7 +18,7 @@ def makeLayoutCanvasTracePlot(widget_manager, key_figure, key_canvas, key_app="p
     return layout
 
 # Canvas plot, plot range
-def makeLayoutMinimumPlotRange(widget_manager, config_manager, key_app):
+def makeLayoutMinimumPlotRange(widget_manager: WidgetManager, config_manager: ConfigManager, key_app: str) -> QHBoxLayout:
     layout = QHBoxLayout()
     layout.addLayout(makeLayoutLineEditLabel
                      (
@@ -32,7 +33,7 @@ def makeLayoutMinimumPlotRange(widget_manager, config_manager, key_app):
     return layout
 
 # Canvas plot, Light mode
-def makeLayoutLightPlotMode(widget_manager, config_manager):
+def makeLayoutLightPlotMode(widget_manager: WidgetManager, config_manager: ConfigManager) -> QHBoxLayout:
     layout = QHBoxLayout()
     layout.addWidget(widget_manager.makeWidgetCheckBox(key="light_plot_mode", label="Light Mode", checked=False))
     layout.addLayout(makeLayoutLineEditLabel
@@ -48,7 +49,7 @@ def makeLayoutLightPlotMode(widget_manager, config_manager):
     return layout
 
 # Eventfile plot, Eventfile plot range
-def makeLayoutEventFilePlot(widget_manager, key_app):
+def makeLayoutEventFilePlot(widget_manager: WidgetManager, key_app: str) -> QVBoxLayout:
     layout = QVBoxLayout()
     layout.addWidget(widget_manager.makeWidgetCheckBox(key=f"{key_app}_plot_eventfile", 
                                                        label="plot EventFile trace", 

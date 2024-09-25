@@ -1,22 +1,28 @@
+from __future__ import annotations
+from ..type_definitions import *
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout
 from .base_layouts import makeLayoutLineEditLabel
 
 # 読み込むファイルを選択するためのウィジェット
-def makeLayoutLoadFileWidget(widget_manager, label="", key_label="", key_lineedit="", key_button=""):
+def makeLayoutLoadFileWidget(widget_manager: WidgetManager, label: str="", key_label: str="", key_lineedit: str="", key_button: str="") -> QHBoxLayout:
     layout = QHBoxLayout() # entry
     layout.addLayout(makeLayoutLineEditLabel(widget_manager, key_label=key_label, key_lineedit=key_lineedit, label=label))
     layout.addWidget(widget_manager.makeWidgetButton(key=key_button, label="Browse"))
     return layout
 
 # Load Files, Exit, Help
-def makeLayoutLoadFileExitHelp(widget_manager, list_key = ["load_file", "exit", "help"], list_label = ["Load Files", "Exit", "Help"]):
+def makeLayoutLoadFileExitHelp(
+        widget_manager: WidgetManager, 
+        list_key: List[str] = ["load_file", "exit", "help"], 
+        list_label: List[str] = ["Load Files", "Exit", "Help"]
+        ) -> QHBoxLayout:
     layout = QHBoxLayout()
     for label, key in zip(list_label, list_key):
         layout.addWidget(widget_manager.makeWidgetButton(key=key, label=label))
     return layout
 
 # Table, ROICheck, ROIMatchのIO
-def makeLayoutROICheckIO(widget_manager, key_button):
+def makeLayoutROICheckIO(widget_manager: WidgetManager, key_button: str) -> QHBoxLayout:
     layout = QHBoxLayout()
     list_key = [f"{key_button}_save_roicheck", f"{key_button}_load_roicheck"]
     list_label = ["Save ROICheck", "Load ROICheck"]

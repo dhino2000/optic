@@ -1,10 +1,11 @@
-# TableWidget Layout
+from __future__ import annotations
+from ..type_definitions import *
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QGridLayout
 from .base_layouts import makeLayoutLineEditLabel
 from .info_layouts import makeLayoutROICount
 
 # TableWidgetとROI数のラベル
-def makeLayoutTableROICountLabel(widget_manager, key_label, key_table, table_columns):
+def makeLayoutTableROICountLabel(widget_manager: WidgetManager, key_label: str, key_table: str, table_columns: TableColumns) -> QVBoxLayout:
     layout = QVBoxLayout()
     # table
     q_table = widget_manager.makeWidgetTable(key=key_table)
@@ -17,7 +18,7 @@ def makeLayoutTableROICountLabel(widget_manager, key_label, key_table, table_col
     return layout
 
 # 全てのROIを同じcelltypeにそろえる
-def makeLayoutAllROISetSameCelltype(widget_manager, key_button, table_columns):
+def makeLayoutAllROISetSameCelltype(widget_manager: WidgetManager, key_button: str, table_columns: TableColumns) -> QHBoxLayout:
     layout = QHBoxLayout()
 
     list_celltype = [key for key, value in table_columns.items() if value['type'] == 'celltype']
@@ -26,7 +27,7 @@ def makeLayoutAllROISetSameCelltype(widget_manager, key_button, table_columns):
     return layout
 
 # Check, Uncheck "checkbox" of All ROIs
-def makeLayoutAllROICheckboxToggle(widget_manager, key_button, table_columns):
+def makeLayoutAllROICheckboxToggle(widget_manager: WidgetManager, key_button: str, table_columns: TableColumns) -> QHBoxLayout:
     layout = QHBoxLayout()
 
     list_checkbox = [key for key, value in table_columns.items() if value['type'] == 'checkbox']
@@ -38,7 +39,14 @@ def makeLayoutAllROICheckboxToggle(widget_manager, key_button, table_columns):
     return layout
 
 # ROI filter thresholds
-def makeLayoutROIFilterThreshold(widget_manager, key_label, key_lineedit, dict_roi_threshold, num_row=2, num_col=3):
+def makeLayoutROIFilterThreshold(
+        widget_manager: WidgetManager, 
+        key_label: str, 
+        key_lineedit: str, 
+        dict_roi_threshold: Dict[str, str], 
+        num_row: int=2, 
+        num_col: int=3
+        ) -> QGridLayout:
     layout = QGridLayout()
 
     # 配置する要素数がグリッド数を超えていないか
@@ -60,7 +68,7 @@ def makeLayoutROIFilterThreshold(widget_manager, key_label, key_lineedit, dict_r
     return layout
 
 # ROI filter button
-def makeLayoutROIFilterButton(widget_manager, key_label, key_button):
+def makeLayoutROIFilterButton(widget_manager: WidgetManager, key_label: str, key_button: str) -> QVBoxLayout:
     layout = QVBoxLayout()
     layout.addWidget(widget_manager.makeWidgetLabel(key=f"{key_label}", label="<- thresholds (min, max)"))
     layout.addWidget(widget_manager.makeWidgetButton(key=f"{key_button}", label=f"Filter ROI"))
