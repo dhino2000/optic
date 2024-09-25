@@ -50,8 +50,8 @@ def makeLayoutROIFilterThreshold(widget_manager, key_label, key_lineedit, dict_r
         col = i % num_col
         layout.addLayout(makeLayoutLineEditLabel(
             widget_manager, 
-            key_label, 
-            key_lineedit, 
+            f"{key_label}_{key_threshold}", 
+            f"{key_lineedit}_{key_threshold}", 
             label=key_threshold, 
             axis="vertical", 
             text_set=value_threshold, 
@@ -62,6 +62,6 @@ def makeLayoutROIFilterThreshold(widget_manager, key_label, key_lineedit, dict_r
 # ROI filter button
 def makeLayoutROIFilterButton(widget_manager, key_label, key_button):
     layout = QVBoxLayout()
-    layout.addWidget(widget_manager.makeWidgetLabel(key=f"{key_label}_roi_filter", label="<- thresholds (min, max)"))
-    layout.addWidget(widget_manager.makeWidgetButton(key=f"{key_button}_roi_filter", label=f"Filter ROI"))
+    layout.addWidget(widget_manager.makeWidgetLabel(key=f"{key_label}", label="<- thresholds (min, max)"))
+    layout.addWidget(widget_manager.makeWidgetButton(key=f"{key_button}", label=f"Filter ROI"))
     return layout

@@ -152,14 +152,14 @@ GUI Widget管理用クラス
 """
 class WidgetManager:
     def __init__(self):
-        self.dict_label       = {} # labelの保管
-        self.dict_lineedit    = {} # lineeditの保管
-        self.dict_button      = {} # buttonの保管
-        self.dict_ax          = {} # axの保管
-        self.dict_checkbox    = {} # checkboxの保管
-        self.dict_slider      = {} # sliderの保管
-        self.dict_combobox    = {} # pulldownの保管
-        self.dict_listwidget  = {} # ListWidgetの保管
+        self.dict_label       = {}
+        self.dict_lineedit    = {}
+        self.dict_button      = {} 
+        self.dict_ax          = {} 
+        self.dict_checkbox    = {} 
+        self.dict_slider      = {}
+        self.dict_combobox    = {} 
+        self.dict_listwidget  = {} 
         self.dict_buttongroup = {}
         self.dict_scene       = {}
         self.dict_view        = {}

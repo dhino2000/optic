@@ -1,5 +1,4 @@
-# 配置した後のwidgetに関数を紐づけ
-# makeLayout <- -> bindFunc
+from __future__ import annotations
 from ..io.file_dialog import openFileDialogAndSetLineEdit
 from ..io.data_io import saveROICheck, loadROICheck, loadEventFileNPY
 from ..utils import *

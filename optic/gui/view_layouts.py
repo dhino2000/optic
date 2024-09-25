@@ -3,21 +3,16 @@ from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout
 from ..utils.layout_utils import clearLayout
 from .base_layouts import makeLayoutLineEditLabel, makeLayoutButtonGroup
 from ..config.constants import BGImageTypeList
+from ..gui.table_layouts import makeLayoutROIFilterThreshold
 
 # 表示するROIのThreshold checkbox, lineedit
-def makeLayoutROIThresholds(widget_manager, key_label, key_lineedit, key_checkbox, label_checkbox, dict_roi_threshold, list_threshold_param=["npix", "compact"]):
+def makeLayoutROIThresholds(widget_manager, key_label, key_lineedit, key_button, label_button, dict_roi_threshold):
     layout = QHBoxLayout()
-    layout.addWidget(widget_manager.makeWidgetCheckBox(key=key_checkbox, label=label_checkbox))
-    for threshold_param in list_threshold_param:
-        layout.addLayout(makeLayoutLineEditLabel
-                            (
-                            widget_manager=widget_manager,
-                            key_label=f"{key_label}_{threshold_param}", 
-                            key_lineedit=f"{key_lineedit}_{threshold_param}",
-                            label=threshold_param,
-                            text_set=dict_roi_threshold[threshold_param]
-                            )
-                        )
+    layout.addWidget(widget_manager.makeWidgetButton(key=key_button, label=label_button))
+    layout.addLayout(makeLayoutROIFilterThreshold(widget_manager, 
+                                                  key_label=key_label, 
+                                                  key_lineedit=key_lineedit,
+                                                  dict_roi_threshold=dict_roi_threshold))
                                                 
     return layout
 
