@@ -3,7 +3,6 @@ from PyQt5.QtCore import Qt
 import numpy as np
 from typing import Optional
 from ..config.constants import ChannelKeys
-from ..utils.info_utils import extractRangeValues
 
 # q_view widget visualization
 def updateView(q_scene, q_view, view_control, data_manager, control_manager, key_app):
@@ -162,14 +161,5 @@ def shouldSkipROI(roi_id, table_columns, q_table, skip_checkboxes):
                             return True
     return False
 
-# Display ROIs whose properties are within the threshold
-def shouldDisplayROI(roi_stat, threshold_lineedits):
-    for param, lineedit in threshold_lineedits.items():
-        threshold_range = extractRangeValues(lineedit.text())
-        if threshold_range is None:
-            continue
-        min_val, max_val = threshold_range
-        roi_value = roi_stat.get(param, 0)
-        if not (min_val <= roi_value <= max_val):
-            return False
-    return True
+
+

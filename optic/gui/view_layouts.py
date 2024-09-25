@@ -5,7 +5,7 @@ from .base_layouts import makeLayoutLineEditLabel, makeLayoutButtonGroup
 from ..config.constants import BGImageTypeList
 
 # 表示するROIのThreshold checkbox, lineedit
-def makeLayoutROIThresholds(widget_manager, key_label, key_lineedit, key_checkbox, label_checkbox, dict_roi_threshold, list_threshold_param):
+def makeLayoutROIThresholds(widget_manager, key_label, key_lineedit, key_checkbox, label_checkbox, dict_roi_threshold, list_threshold_param=["npix", "compact"]):
     layout = QHBoxLayout()
     layout.addWidget(widget_manager.makeWidgetCheckBox(key=key_checkbox, label=label_checkbox))
     for threshold_param in list_threshold_param:
