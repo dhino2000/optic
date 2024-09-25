@@ -4,13 +4,15 @@ from ...controls import *
 from ...gui import *
 from ...io import *
 from ...manager import *
-
+from optic.gui.bind_func import *
 
 class Suite2pROICheckGUI(QMainWindow):
     def __init__(self):
         APP_NAME = "SUITE2P_ROI_CHECK"
         QMainWindow.__init__(self)
-        self.widget_manager, self.config_manager, self.data_manager, self.control_manager, self.layout_manager = initManagers(WidgetManager(), ConfigManager(), DataManager(), ControlManager(), LayoutManager())
+        self.widget_manager, self.config_manager, self.data_manager, self.control_manager, self.layout_manager = initManagers(
+            WidgetManager(), ConfigManager(), DataManager(), ControlManager(), LayoutManager()
+        )
         self.config_manager.setCurrentApp(APP_NAME)
         self.app_keys = self.config_manager.gui_defaults["APP_KEYS"]
         self.app_key_pri = self.app_keys[0]
@@ -80,7 +82,7 @@ class Suite2pROICheckGUI(QMainWindow):
                 key_dict_im_chan2=self.app_key_pri, 
                 path_image=self.widget_manager.dict_lineedit[f"{self.app_key_pri}_path_reftif"].text(), 
                 preprocessing=True
-                )
+            )
         return success
 
     def setupMainUILayouts(self):
@@ -90,36 +92,35 @@ class Suite2pROICheckGUI(QMainWindow):
 
     def setupControls(self):
         self.control_manager.table_controls[self.app_key_pri] = TableControl(
-                                                                key_app=self.app_key_pri,
-                                                                q_table=self.widget_manager.dict_table[self.app_key_pri],
-                                                                data_manager=self.data_manager,
-                                                                widget_manager=self.widget_manager,
-                                                                config_manager=self.config_manager,
-                                                                control_manager=self.control_manager,
-                                                                )
+            key_app=self.app_key_pri,
+            q_table=self.widget_manager.dict_table[self.app_key_pri],
+            data_manager=self.data_manager,
+            widget_manager=self.widget_manager,
+            config_manager=self.config_manager,
+            control_manager=self.control_manager,
+        )
         
         self.control_manager.table_controls[self.app_key_pri].setupWidgetROITable(self.app_key_pri)
         self.control_manager.view_controls[self.app_key_pri] = ViewControl(
-                                                                    key_app=self.app_key_pri,
-                                                                    q_view=self.widget_manager.dict_view[self.app_key_pri], 
-                                                                    q_scene=self.widget_manager.dict_scene[self.app_key_pri], 
-                                                                    data_manager=self.data_manager, 
-                                                                    widget_manager=self.widget_manager,
-                                                                    config_manager=self.config_manager,
-                                                                    control_manager=self.control_manager,
-                                                                    )
+            key_app=self.app_key_pri,
+            q_view=self.widget_manager.dict_view[self.app_key_pri], 
+            q_scene=self.widget_manager.dict_scene[self.app_key_pri], 
+            data_manager=self.data_manager, 
+            widget_manager=self.widget_manager,
+            config_manager=self.config_manager,
+            control_manager=self.control_manager,
+        )
         self.control_manager.view_controls[self.app_key_pri].setViewSize()
         self.control_manager.canvas_controls[self.app_key_pri] = CanvasControl(
-                                                                    key_app=self.app_key_pri,
-                                                                    figure=self.widget_manager.dict_figure[self.app_key_pri], 
-                                                                    canvas=self.widget_manager.dict_canvas[self.app_key_pri], 
-                                                                    data_manager=self.data_manager, 
-                                                                    widget_manager=self.widget_manager,
-                                                                    config_manager=self.config_manager,
-                                                                    control_manager=self.control_manager,
-                                                                    ax_layout="triple"
-                                                                    )
-
+            key_app=self.app_key_pri,
+            figure=self.widget_manager.dict_figure[self.app_key_pri], 
+            canvas=self.widget_manager.dict_canvas[self.app_key_pri], 
+            data_manager=self.data_manager, 
+            widget_manager=self.widget_manager,
+            config_manager=self.config_manager,
+            control_manager=self.control_manager,
+            ax_layout="triple"
+        )
 
     """
     makeLayout Function; Component
@@ -133,54 +134,32 @@ class Suite2pROICheckGUI(QMainWindow):
         layout = QVBoxLayout()
 
         # LineEdit
-        list_label = ["Fall mat file path", "Reference Tiff image file path (optional)", "Cellpose Mask path (optional)"]
-        list_key = [f"{self.app_key_pri}_path_fall", f"{self.app_key_pri}_path_reftif", f"{self.app_key_pri}_path_cellpose"]
+        list_label = ["Fall mat file path", "Reference Tiff image file path (optional)"]
+        list_key = [f"{self.app_key_pri}_path_fall", f"{self.app_key_pri}_path_reftif"]
         for label, key in zip(list_label, list_key):
-            layout.addLayout(makeLayoutLoadFileWidget(self.widget_manager, 
-                                                      label=label, 
-                                                      key_label=key, 
-                                                      key_lineedit=key, 
-                                                      key_button=key))
+            layout.addLayout(makeLayoutLoadFileWidget(
+                self.widget_manager, 
+                label=label, 
+                key_label=key, 
+                key_lineedit=key, 
+                key_button=key
+            ))
         # Button
         layout.addLayout(makeLayoutLoadFileExitHelp(self.widget_manager))
         return layout
 
     "Left Upper"
+    def makeLayoutComponentPlotProperty(self):
+        layout = QHBoxLayout()
+        layout.addLayout(makeLayoutLightPlotMode(self.widget_manager, self.config_manager))
+        layout.addLayout(makeLayoutMinimumPlotRange(self.widget_manager, self.config_manager, self.app_key_pri))
+        return layout
+    
     # EventFileの読み込み, plot用
     def makeLayoutComponentEventFilePlot(self):
-        layout = QVBoxLayout()
-        # Eventのplot range
-        layout.addLayout(makeLayoutLineEditLabel(self.widget_manager,
-                                                 key_label="eventfile_align_plot_range",
-                                                 key_lineedit="eventfile_align_plot_range",
-                                                 label="plot range from Event start (pre, post; sec)",
-                                                 text_set="(10, 10)"))
-        # プロットに重ねるEventFile npyファイルの読み込みボタン, Clearボタン
-        layout.addWidget(self.widget_manager.makeWidgetButton(key="loadEventFile", label="Load EventFile npy file"))  ### 要修正
-        layout.addWidget(self.widget_manager.makeWidgetButton(key="clearEventFile", label="Clear"))
+        layout = makeLayoutEventFilePlot(self.widget_manager, self.app_key_pri)
         return layout
-
-    # trace plotの表示範囲
-    def makeLayoutComponentTracePlotRange(self):
-        layout = QVBoxLayout()
-        layout.addLayout(makeLayoutLineEditLabel(self.widget_manager,
-                                                key_label="minPlotRange",
-                                                key_lineedit="minPlotRange",
-                                                label="Minimum plot range (sec)",
-                                                text_set="30"))
-        layout.addWidget(self.widget_manager.makeWidgetCheckBox(key="plot_eventfile_trace", 
-                                                 label="plot EventFile trace", 
-                                                 checked=True,
-                                                 ))
-        return layout
-
-    # 上記二つを合体
-    def makeLayoutComponentEventFilePlot_TracePlotRange(self):
-        layout = QHBoxLayout()
-        layout.addLayout(self.makeLayoutComponentEventFilePlot())
-        layout.addLayout(self.makeLayoutComponentTracePlotRange())
-        return layout
-
+    
     "Middle Upper"
     # ROI view
     def makeLayoutComponentROIView(self):
@@ -193,28 +172,35 @@ class Suite2pROICheckGUI(QMainWindow):
         layout = QVBoxLayout()
 
         layout.addLayout(makeLayoutROIProperty(self.widget_manager, key_label=f"{self.app_key_pri}_roi_prop"))
-        layout.addLayout(makeLayoutROIThresholds(
-            self.widget_manager, 
-            key_label=f"{self.app_key_pri}_roi_threshold", 
-            key_lineedit=f"{self.app_key_pri}_roi_threshold", 
-            key_checkbox=f"{self.app_key_pri}_roi_threshold", 
-            label_checkbox="ROI Show Threshold", 
-            list_threshold_param=["npix", "compact"]))
+        # layout.addLayout(makeLayoutROIThresholds(
+        #     self.widget_manager, 
+        #     key_label=f"{self.app_key_pri}_roi_threshold", 
+        #     key_lineedit=f"{self.app_key_pri}_roi_threshold", 
+        #     key_button=f"{self.app_key_pri}_roi_threshold", 
+        #     label_button="Update ROI Display", 
+        #     dict_roi_threshold=self.config_manager.gui_defaults["ROI_THRESHOLDS"],
+        # ))
         return layout
 
     # ROI display, background image button group, checkbox
     def makeLayoutComponentROIDisplay_BGImageDisplay_ROISkip(self):
         layout = QVBoxLayout()
-        layout.addLayout(makeLayoutDislplayCelltype(self, 
-                                                  self.widget_manager, 
-                                                  key_buttongroup=f'{self.app_key_pri}_display_celltype', 
-                                                  table_columns=self.config_manager.table_columns[self.app_key_pri].getColumns()))
-        layout.addLayout(makeLayoutBGImageTypeDisplay(self, 
-                                                      self.widget_manager, 
-                                                      key_buttongroup=f'{self.app_key_pri}_im_bg_type'))
-        layout.addLayout(makeLayoutROIChooseSkip(self.widget_manager, 
-                                                 key_checkbox=f'{self.app_key_pri}', 
-                                                 table_columns=self.config_manager.table_columns[self.app_key_pri].getColumns()))
+        layout.addLayout(makeLayoutDislplayCelltype(
+            self, 
+            self.widget_manager, 
+            key_buttongroup=f'{self.app_key_pri}_display_celltype', 
+            table_columns=self.config_manager.table_columns[self.app_key_pri].getColumns()
+        ))
+        layout.addLayout(makeLayoutBGImageTypeDisplay(
+            self, 
+            self.widget_manager, 
+            key_buttongroup=f'{self.app_key_pri}_im_bg_type'
+        ))
+        layout.addLayout(makeLayoutROIChooseSkip(
+            self.widget_manager, 
+            key_checkbox=f'{self.app_key_pri}', 
+            table_columns=self.config_manager.table_columns[self.app_key_pri].getColumns()
+        ))
         return layout
 
     # channel contrast, ROI opacity slider
@@ -223,46 +209,66 @@ class Suite2pROICheckGUI(QMainWindow):
         channels = self.config_manager.gui_defaults["CHANNELS"]
         layout_channel = QHBoxLayout()
         for channel in channels:
-            layout_channel.addLayout(makeLayoutContrastSlider(self.widget_manager, 
-                                                            key_label=f"{self.app_key_pri}_{channel}", 
-                                                            key_checkbox=f"{self.app_key_pri}_{channel}", 
-                                                            key_slider=f"{self.app_key_pri}_{channel}", 
-                                                            label_checkbox=f"Show {channel} channel", 
-                                                            label_label=f"{channel} Value", 
-                                                            checked=True))
+            layout_channel.addLayout(makeLayoutContrastSlider(
+                self.widget_manager, 
+                key_label=f"{self.app_key_pri}_{channel}", 
+                key_checkbox=f"{self.app_key_pri}_{channel}", 
+                key_slider=f"{self.app_key_pri}_{channel}", 
+                label_checkbox=f"Show {channel} channel", 
+                label_label=f"{channel} Value", 
+                checked=True
+            ))
 
         layout.addLayout(layout_channel)
-        layout.addLayout(makeLayoutOpacitySlider(self.widget_manager, 
-                                                key_label=self.app_key_pri, 
-                                                key_slider=self.app_key_pri, 
-                                                label=self.app_key_pri
-                                                ))
+        layout.addLayout(makeLayoutOpacitySlider(
+            self.widget_manager, 
+            key_label=self.app_key_pri, 
+            key_slider=self.app_key_pri, 
+            label=self.app_key_pri
+        ))
         return layout
 
     "Right Upper"
     # Table, ROI count label, Table Columns Config, Set ROI Celltype, ROICheck IO
     def makeLayoutComponentTable_ROICountLabel_ROISetSameCelltype_ROICheckIO(self):
         layout = QVBoxLayout()
-        layout.addLayout(makeLayoutTableROICountLabel(self.widget_manager, 
-                                                      key_label=self.app_key_pri, 
-                                                      key_table=self.app_key_pri, 
-                                                      table_columns=self.config_manager.table_columns[self.app_key_pri].getColumns()))
+        layout.addLayout(makeLayoutTableROICountLabel(
+            self.widget_manager, 
+            key_label=self.app_key_pri, 
+            key_table=self.app_key_pri, 
+            table_columns=self.config_manager.table_columns[self.app_key_pri].getColumns()
+        ))
         layout.addWidget(self.widget_manager.makeWidgetButton(key=f"{self.app_key_pri}_config_table", label="Table Columns Config"))
-        layout.addLayout(makeLayoutAllROISetSameCelltype(self.widget_manager, 
-                                                         key_button=self.app_key_pri, 
-                                                         table_columns=self.config_manager.table_columns[self.app_key_pri].getColumns()))
-        layout.addLayout(makeLayoutAllROICheckboxToggle(self.widget_manager, 
-                                                        key_button=self.app_key_pri, 
-                                                        table_columns=self.config_manager.table_columns[self.app_key_pri].getColumns()))
-        layout.addLayout(makeLayoutROICheckIO(self.widget_manager, 
-                                              key_button=self.app_key_pri))
+        layout.addLayout(makeLayoutAllROISetSameCelltype(
+            self.widget_manager, 
+            key_button=self.app_key_pri, 
+            table_columns=self.config_manager.table_columns[self.app_key_pri].getColumns()
+        ))
+        layout.addLayout(makeLayoutAllROICheckboxToggle(
+            self.widget_manager, 
+            key_button=self.app_key_pri, 
+            table_columns=self.config_manager.table_columns[self.app_key_pri].getColumns()
+        ))
+        layout.addLayout(makeLayoutROICheckIO(
+            self.widget_manager, 
+            key_button=self.app_key_pri
+        ))
         return layout
 
     # ROI Filter, threshold
     def makeLayoutComponentROIFilter(self):
         layout = QHBoxLayout()
-        layout.addLayout(makeLayoutROIFilterThreshold(self.widget_manager, key_label=self.app_key_pri, key_lineedit=self.app_key_pri, dict_roi_threshold=self.config_manager.gui_defaults["ROI_THRESHOLDS"]))
-        layout.addLayout(makeLayoutROIFilterButton(self.widget_manager, key_label=self.app_key_pri, key_button=self.app_key_pri))
+        layout.addLayout(makeLayoutROIFilterThreshold(
+            self.widget_manager, 
+            key_label=f"{self.app_key_pri}_roi_filter", 
+            key_lineedit=f"{self.app_key_pri}_roi_filter",
+            dict_roi_threshold=self.config_manager.gui_defaults["ROI_THRESHOLDS"]
+        ))
+        layout.addLayout(makeLayoutROIFilterButton(
+            self.widget_manager, 
+            key_label=f"{self.app_key_pri}_roi_filter", 
+            key_button=f"{self.app_key_pri}_roi_filter"
+        ))
         return layout
     
 
@@ -273,13 +279,14 @@ class Suite2pROICheckGUI(QMainWindow):
     # 左上
     def makeLayoutSectionLeftUpper(self):
         layout = QVBoxLayout()
-        layout.addLayout(makeLayoutCanvasTracePlot(self.widget_manager, 
-                                                   key_figure=self.app_key_pri, 
-                                                   key_canvas=self.app_key_pri, 
-                                                   key_app=self.app_key_pri), 
-                        stretch=1)
-        layout.addLayout(makeLayoutComponentLightPlotMode(self.widget_manager, self.config_manager))
-        layout.addLayout(self.makeLayoutComponentEventFilePlot_TracePlotRange())
+        layout.addLayout(makeLayoutCanvasTracePlot(
+            self.widget_manager, 
+            key_figure=self.app_key_pri, 
+            key_canvas=self.app_key_pri, 
+            key_app=self.app_key_pri
+        ), stretch=1)
+        layout.addLayout(self.makeLayoutComponentPlotProperty())
+        layout.addLayout(self.makeLayoutComponentEventFilePlot())
         return layout
 
     # 中上
@@ -307,9 +314,11 @@ class Suite2pROICheckGUI(QMainWindow):
     make SubWindow, Dialog Function
     """
     def showSubWindowTableColumnConfig(self, key_app):
-        config_window = TableColumnConfigWindow(self, 
-                                                self.control_manager.table_controls[key_app].table_columns, 
-                                                self.config_manager.gui_defaults)
+        config_window = TableColumnConfigWindow(
+            self, 
+            self.control_manager.table_controls[key_app].table_columns, 
+            self.config_manager.gui_defaults
+        )
         if config_window.exec_():
             self.loadFilePathsandInitialize()
             
@@ -319,10 +328,15 @@ class Suite2pROICheckGUI(QMainWindow):
     配置したwidgetに関数を紐づけ
     """
     def bindFuncFileLoadUI(self):        
-        list_key = [f"{self.app_key_pri}_path_fall", f"{self.app_key_pri}_path_reftif", f"{self.app_key_pri}_path_cellpose"]
-        list_filetype = ["mat", "tiff", "npy"]
+        list_key = [f"{self.app_key_pri}_path_fall", f"{self.app_key_pri}_path_reftif"]
+        list_filetype = ["mat", "tiff"]
         for key, filetype in zip(list_key, list_filetype):
-            bindFuncLoadFileWidget(q_widget=self, q_button=self.widget_manager.dict_button[key], q_lineedit=self.widget_manager.dict_lineedit[key], filetype=filetype)
+            bindFuncLoadFileWidget(
+                q_widget=self, 
+                q_button=self.widget_manager.dict_button[key], 
+                q_lineedit=self.widget_manager.dict_lineedit[key], 
+                filetype=filetype
+            )
 
         self.widget_manager.dict_button["load_file"].clicked.connect(lambda: self.loadFilePathsandInitialize())
         bindFuncExit(q_window=self, q_button=self.widget_manager.dict_button["exit"])
@@ -372,7 +386,7 @@ class Suite2pROICheckGUI(QMainWindow):
             canvas_control=self.control_manager.canvas_controls[self.app_key_pri],
         )
         # ROICheck Table TableColumn CellType Changed
-        bindFuncRadiobuttonCelltypeChanged(
+        bindFuncRadiobuttonOfTableChanged(
             table_control=self.control_manager.table_controls[self.app_key_pri],
             view_control=self.control_manager.view_controls[self.app_key_pri],
         )
@@ -399,8 +413,36 @@ class Suite2pROICheckGUI(QMainWindow):
                 channel=channel,
             )
         # View MousePressEvent
-        bindFuncViewMousePressEvent(
+        bindFuncViewMouseEvent(
             q_view=self.widget_manager.dict_view[self.app_key_pri],
             view_control=self.control_manager.view_controls[self.app_key_pri],
             table_control=self.control_manager.table_controls[self.app_key_pri],
+        )
+        # Canvas MouseEvent
+        # Top axis events
+        canvas_control = self.control_manager.canvas_controls[self.app_key_pri]
+        bindFuncCanvasMouseEvent(
+            canvas_control.canvas,
+            canvas_control,
+            canvas_control.axes[AxisKeys.TOP],
+            list_event=['scroll_event', 'button_press_event', 'button_release_event', 'motion_notify_event'],
+            list_func=[canvas_control.onScroll, canvas_control.onPress, canvas_control.onRelease, canvas_control.onMotion]
+        )
+        # Middle axis events
+        bindFuncCanvasMouseEvent(
+            canvas_control.canvas,
+            canvas_control,
+            canvas_control.axes[AxisKeys.MID],
+            list_event=['button_press_event'],
+            list_func=[canvas_control.onClick]
+        )
+        # Canvas load EventFile
+        bindFuncButtonEventfileIO(
+            q_button_load=self.widget_manager.dict_button[f"{self.app_key_pri}_load_eventfile"],
+            q_button_clear=self.widget_manager.dict_button[f"{self.app_key_pri}_clear_eventfile"],
+            q_window=self,
+            data_manager=self.data_manager,
+            control_manager=self.control_manager,
+            canvas_control=self.control_manager.canvas_controls[self.app_key_pri],
+            key_app=self.app_key_pri,
         )
