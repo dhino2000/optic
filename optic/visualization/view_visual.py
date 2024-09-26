@@ -1,11 +1,19 @@
+from __future__ import annotations
+from ..type_definitions import *
 from PyQt5.QtGui import QPainter, QPen, QColor, QImage, QPixmap
 from PyQt5.QtCore import Qt
 import numpy as np
-from typing import Optional
 from ..config.constants import ChannelKeys
 
 # q_view widget visualization
-def updateView(q_scene, q_view, view_control, data_manager, control_manager, key_app):
+def updateView(
+        q_scene: QGraphicsScene, 
+        q_view: QGraphicsView, 
+        view_control: ViewControl, 
+        data_manager: DataManager, 
+        control_manager: ControlManager, 
+        key_app: str,
+        ) -> None:
     bg_image_chan1 = None
     bg_image_chan2 = None
 
@@ -38,9 +46,11 @@ def updateView(q_scene, q_view, view_control, data_manager, control_manager, key
     q_view.fitInView(q_scene.sceneRect(), Qt.KeepAspectRatio)
 
 # 白黒画像からカラー画像作成
-def convertMonoImageToRGBImage(image_r: Optional[np.ndarray] = None, 
-                               image_g: Optional[np.ndarray] = None, 
-                               image_b: Optional[np.ndarray] = None) -> np.ndarray:
+def convertMonoImageToRGBImage(
+        image_r: Optional[np.ndarray] = None, 
+        image_g: Optional[np.ndarray] = None, 
+        image_b: Optional[np.ndarray] = None
+        ) -> np.ndarray:
     """
     1~3チャンネルの画像を組み合わせてRGB画像を生成する。
 
@@ -74,7 +84,12 @@ def convertMonoImageToRGBImage(image_r: Optional[np.ndarray] = None,
 
     return rgb_image
 
-def adjustChannelContrast(image, min_val, max_val, dtype=np.uint8):
+def adjustChannelContrast(
+        image: np.ndarray, 
+        min_val: int, 
+        max_val: int, 
+        dtype: np.dtype=np.uint8
+        ) -> np.ndarray:
     try:
         epsilon = 1e-5 # Zero division prevention
         # 画像の正規化
@@ -89,19 +104,30 @@ def adjustChannelContrast(image, min_val, max_val, dtype=np.uint8):
         image_adjusted = None
     return image_adjusted
 
-def drawAllROIs(view_control, pixmap, data_manager, control_manager, key_app):
+def drawAllROIs(
+        view_control: ViewControl, 
+        pixmap: QPixmap, 
+        data_manager: DataManager, 
+        control_manager: ControlManager, 
+        key_app: str
+        ) -> None:
     painter = QPainter(pixmap)
     painter.setRenderHint(QPainter.Antialiasing)
     roi_display = control_manager.getSharedAttr(key_app, "roi_display")
     
-    for roiId, roiStat in data_manager.dict_Fall[key_app]["stat"].items():
+    for roiId, roiStat in data_manager.getStat(key_app).items():
         if roi_display[roiId]:
             drawROI(view_control, painter, roiStat, roiId)
     
     highlightROISelected(view_control, painter, data_manager, control_manager, key_app)
     painter.end()
 
-def drawROI(view_control, painter, roiStat, roiId):
+def drawROI(
+        view_control: ViewControl, 
+        painter: QPainter, 
+        roiStat: Dict[str, Any],
+        roiId: int
+        ) -> None:
     xpix, ypix = roiStat["xpix"], roiStat["ypix"]
     color = view_control.getROIColor(roiId)
     opacity = view_control.getROIOpacity()
@@ -112,10 +138,16 @@ def drawROI(view_control, painter, roiStat, roiId):
     for x, y in zip(xpix, ypix):
         painter.drawPoint(int(x), int(y))
 
-def highlightROISelected(view_control, painter, data_manager, control_manager, key_app):
+def highlightROISelected(
+        view_control: ViewControl, 
+        painter: QPainter, 
+        data_manager: DataManager, 
+        control_manager: ControlManager, 
+        key_app: str
+        ) -> None:
     ROISelectedId = control_manager.getSharedAttr(key_app, "roi_selected_id")
     if ROISelectedId is not None:
-        roiStat = data_manager.dict_Fall[key_app]["stat"][ROISelectedId]
+        roiStat = data_manager.getStat(key_app)[ROISelectedId]
         xpix, ypix = roiStat["xpix"], roiStat["ypix"]
         color = view_control.getROIColor(ROISelectedId)
         opacity = view_control.getHighlightOpacity()
@@ -127,7 +159,12 @@ def highlightROISelected(view_control, painter, data_manager, control_manager, k
             painter.drawPoint(int(x), int(y))
 
 # find Closest ROI to click position
-def findClosestROI(x: int, y: int, dict_roi_med: dict, skip_roi: dict = None):
+def findClosestROI(
+        x: int, 
+        y: int, 
+        dict_roi_med: dict, 
+        skip_roi: dict = None
+        ) -> Optional[int]:
     if not dict_roi_med:
         return None
     
@@ -145,7 +182,12 @@ def findClosestROI(x: int, y: int, dict_roi_med: dict, skip_roi: dict = None):
     return closest_roi_id
 
 # Skip ROIs with "Skip" checkbox checked
-def shouldSkipROI(roi_id, table_columns, q_table, skip_checkboxes):
+def shouldSkipROI(
+        roi_id: int, 
+        table_columns: dict, 
+        q_table: QTableWidget, 
+        skip_checkboxes: List[QCheckBox]
+        ) -> bool:
     for checkbox in skip_checkboxes:
         if checkbox.isChecked():
             celltype = checkbox.text().replace("Skip ", "").replace(" ROI", "")

@@ -1,8 +1,9 @@
-from typing import Dict, Any, List
+from __future__ import annotations
+from ..type_definitions import *
 from collections import Counter
 
 # Display Selected ROI Property
-def updateROIPropertyDisplay(control_manager, data_manager, widget_manager, key_app: str):
+def updateROIPropertyDisplay(control_manager: ControlManager, data_manager: DataManager, widget_manager: WidgetManager, key_app: str) -> None:
     roi_selected_id = control_manager.getSharedAttr(key_app, 'roi_selected_id')
     if roi_selected_id is None:
         return
@@ -10,14 +11,14 @@ def updateROIPropertyDisplay(control_manager, data_manager, widget_manager, key_
     roi_properties = getRoiProperties(data_manager, key_app, roi_selected_id)
     displayRoiProperties(widget_manager, key_app, roi_properties)
 
-def getRoiProperties(data_manager, key_app: str, roi_id: int) -> Dict[str, Any]:
-    roi_stat = data_manager.dict_Fall[key_app]["stat"][roi_id]
+def getRoiProperties(data_manager: DataManager, key_app: str, roi_id: int) -> Dict[str, Any]:
+    roi_stat = data_manager.getStat(key_app)[roi_id]
     properties = ["med", "npix", "npix_soma", "radius", "aspect_ratio", 
                   "compact", "solidity", "footprint", "skew", "std"]
     
     return {prop: roi_stat.get(prop, "N/A") for prop in properties}
 
-def displayRoiProperties(widget_manager, key_app: str, properties: Dict[str, Any]):
+def displayRoiProperties(widget_manager: WidgetManager, key_app: str, properties: Dict[str, Any]) -> None:
     for prop, value in properties.items():
         label_key = f"{key_app}_roi_prop_{prop}"
         if label_key in widget_manager.dict_label:
@@ -34,11 +35,11 @@ def displayRoiProperties(widget_manager, key_app: str, properties: Dict[str, Any
             widget_manager.dict_label[label_key].setText(f"{prop}: {value_str}")
 
 # Display Celltype Count
-def updateROICountDisplay(widget_manager, config_manager, key_app: str):
+def updateROICountDisplay(widget_manager: WidgetManager, config_manager: ConfigManager, key_app: str) -> None:
     roi_counts = countROIs(config_manager, widget_manager, key_app)
     displayROICounts(widget_manager, key_app, roi_counts)
 
-def countROIs(config_manager, widget_manager, key_app: str) -> Dict[str, int]:
+def countROIs(config_manager: ConfigManager, widget_manager: WidgetManager, key_app: str) -> Dict[str, int]:
     table_columns = config_manager.getTableColumns(key_app).getColumns()
     celltype_columns = [col_name for col_name, col_info in table_columns.items() if col_info['type'] == 'celltype']
 
@@ -64,7 +65,7 @@ def countROIs(config_manager, widget_manager, key_app: str) -> Dict[str, int]:
 
     return roi_counts
 
-def displayROICounts(widget_manager, key_app: str, roi_counts: Dict[str, int]):
+def displayROICounts(widget_manager: WidgetManager, key_app: str, roi_counts: Dict[str, int]) -> None:
     for celltype, count in roi_counts.items():
         if celltype not in ["Unclassified", "All"]:  # まず celltype のみ表示
             label_key = f"{key_app}_roicount_{celltype}"

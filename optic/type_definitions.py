@@ -8,6 +8,7 @@ if TYPE_CHECKING:
     from .controls.view_control import ViewControl
     from .controls.table_control import TableControl
     from .controls.canvas_control import CanvasControl
+    from .config.constants import *
     from .config.gui_defaults import GuiDefaults
     from .config.table_columns import TableColumns
     from .config.key_function_map import KeyFunctionMap

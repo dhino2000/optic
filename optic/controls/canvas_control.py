@@ -224,7 +224,7 @@ class CanvasControl:
     def updateDownsampleThreshold(self):
         self.downsample_threshold = int(self.widget_manager.dict_lineedit["light_plot_mode_threshold"].text())
     def updateDownsampledRange(self):
-        if self.widget_manager.dict_checkbox["light_plot_mode"].isChecked() and self.plot_data_points > self.downsample_threshold:
+        if self.widget_manager.dict_checkbox["light_plot_mode"].isChecked() and self.plot_data_points > self.downsample_threshold and self.downsample_threshold >= 1:
             downsample_factor = self.plot_data_points / (self.downsample_threshold * 4)
             self.downsampled_range = [
                 int(self.plot_range[0] / downsample_factor),

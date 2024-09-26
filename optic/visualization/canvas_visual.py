@@ -15,7 +15,7 @@ def plotTraces(ax          : Axes,
                xlim        : Optional[Tuple[float, float]] = None,
                ylim        : Optional[Tuple[float, float]] = None,
                legend      : bool = True,
-               loc         : str = 'best'):
+               loc         : str = 'best') -> None:
     ax.clear()
     
     # デフォルトの色とラベルを設定
@@ -59,7 +59,7 @@ def plotEventAlignedTrace(
     mean_color: Optional[str] = None,
     mean_linewidth: float = 2,
     idx_zero: int = None,
-):
+) -> None:
     ax.clear()
 
     default_colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
@@ -99,7 +99,7 @@ def zoomXAxis(event,
               plot_end     : float, 
               total_points : float, 
               min_width    : int, 
-              zoom_factor  : float = 1.5):
+              zoom_factor  : float = 1.5) -> Tuple[int, int]:
     current_range = plot_end - plot_start
     relative_x = event.xdata / ax.get_xlim()[1]  # イベントの相対的なx位置
     center = plot_start + int(relative_x * current_range)

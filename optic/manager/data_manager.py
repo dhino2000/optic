@@ -47,6 +47,10 @@ class DataManager:
         }
         return dict_traces
     
+    # get stat
+    def getStat(self, key_app) -> Dict[int, Dict[str, Any]]:
+        return self.dict_Fall[key_app]["stat"]
+    
     # get fs
     def getFs(self, key_app) -> float:
         return self.dict_Fall[key_app]["ops"]["fs"].flatten()[0]

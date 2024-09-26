@@ -3,7 +3,7 @@ import numpy as np
 
 # Downsample trace data to target length with maintaining waveform shape
 def downSampleTrace(data: np.ndarray, target_size: int):
-    if len(data) <= target_size * 4:
+    if len(data) <= target_size * 4 or target_size <= 0:
         return data
 
     # 各ビンのサイズを計算

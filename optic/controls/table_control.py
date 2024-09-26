@@ -30,7 +30,7 @@ class TableControl:
 
     def setupWidgetROITable(self, key_app):
         from ..gui.table_setup import setupWidgetROITable
-        self.setLenRow(len(self.data_manager.dict_Fall[key_app]["stat"])) # for Suite2p
+        self.setLenRow(len(self.data_manager.getStat(self.key_app))) # for Suite2p
         self.q_table, self.groups_celltype = setupWidgetROITable(self.q_table, self.len_row, self.table_columns.getColumns(), key_event_ignore=True)
         self.setKeyPressEvent()
         self.initalizeSharedAttr_ROIDisplay()

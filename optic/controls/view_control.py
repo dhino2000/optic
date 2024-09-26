@@ -60,7 +60,7 @@ class ViewControl:
             setViewSize(self.q_view, width_min=width_min, height_min=height_min)
 
     def initializeROIColors(self):
-        for roi_id in self.data_manager.dict_Fall[self.key_app]["stat"].keys():
+        for roi_id in self.data_manager.getStat(self.key_app).keys():
             self.roi_colors[roi_id] = self.generateRandomColor()
 
     def generateRandomColor(self):
@@ -128,7 +128,7 @@ class ViewControl:
     event Functions
     """
     def mousePressEvent(self, x:int, y:int):
-        dict_Fall_stat = self.data_manager.dict_Fall[self.key_app]["stat"]
+        dict_Fall_stat = self.data_manager.getStat(self.key_app)
         dict_roi_med = {roi_id: dict_Fall_stat[roi_id]["med"] for roi_id in dict_Fall_stat.keys()}
         skip_checkboxes = [checkbox for key, checkbox in self.widget_manager.dict_checkbox.items() if key.startswith(f"{self.key_app}_skip_choose_")]
         dict_roi_skip = {roi_id: shouldSkipROI(roi_id, 
