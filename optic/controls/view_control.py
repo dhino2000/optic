@@ -48,13 +48,13 @@ class ViewControl:
         self.setSharedAttr_ROISelected(roi_id=0)
 
 
-    def updateView(self):
+    def updateView(self) -> None:
         updateView(self.q_scene, self.q_view, self, self.data_manager, self.control_manager, self.key_app)
 
     """
     initialize Functions
     """
-    def setViewSize(self, use_self_size=True):
+    def setViewSize(self, use_self_size: bool=True) -> None:
         if use_self_size:
             width_min, height_min = self.getImageSize()
             setViewSize(self.q_view, width_min=width_min, height_min=height_min)
@@ -63,62 +63,62 @@ class ViewControl:
         for roi_id in self.data_manager.getStat(self.key_app).keys():
             self.roi_colors[roi_id] = self.generateRandomColor()
 
-    def generateRandomColor(self):
+    def generateRandomColor(self) -> Tuple[int, int, int]:
         return (random.randint(100, 255), random.randint(100, 255), random.randint(100, 255))
     
     """
     get Functions
     """
-    def getROIColor(self, roi_id):
+    def getROIColor(self, roi_id: int) -> Tuple[int, int, int]:
         return self.roi_colors[roi_id]
 
-    def getROIOpacity(self):
+    def getROIOpacity(self) -> int:
         return self.roi_opacity
 
-    def getHighlightOpacity(self):
+    def getHighlightOpacity(self) -> int:
         return self.highlight_opacity
     
     def getBackgroundImageType(self) -> str:
         return self.bg_image_type
     
-    def getBackgroundContrastValue(self, channel, min_or_max):
+    def getBackgroundContrastValue(self, channel: str, min_or_max: Literal['min', 'max']) -> Optional[int]:
         if channel in self.bg_contrast and min_or_max in ['min', 'max']:
             return self.bg_contrast[channel][min_or_max]
         return None
     
-    def getBackgroundVisibility(self, channel):
+    def getBackgroundVisibility(self, channel: str) -> bool:
         return self.bg_visibility[channel]
     
-    def getImageSize(self):
+    def getImageSize(self) -> Tuple[int, int]:
         return self.image_sizes
     
     """
     set Functions
     """
-    def setROIOpacity(self, opacity):
+    def setROIOpacity(self, opacity: int) -> None:
         self.roi_opacity = opacity
 
-    def setHighlightOpacity(self, opacity):
+    def setHighlightOpacity(self, opacity: int) -> None:
         self.highlight_opacity = opacity
 
-    def setBackgroundImageType(self, bg_type: str):
+    def setBackgroundImageType(self, bg_type: str) -> None:
         self.bg_image_type = bg_type
 
-    def setBackgroundContrastValue(self, channel, min_or_max, value):
+    def setBackgroundContrastValue(self, channel: str, min_or_max: Literal['min', 'max'], value: int) -> None:
         if channel in self.bg_contrast and min_or_max in ['min', 'max']:
             self.bg_contrast[channel][min_or_max] = value
 
-    def setBackgroundVisibility(self, channel, is_visible):
+    def setBackgroundVisibility(self, channel: str, is_visible: bool) -> None:
         if channel in self.bg_visibility:
             self.bg_visibility[channel] = is_visible
 
-    def setImageSize(self):
+    def setImageSize(self) -> None:
         self.image_sizes = self.data_manager.getImageSize(self.key_app)
 
     """
     shared_attr Functions
     """
-    def setSharedAttr_ROISelected(self, roi_id):
+    def setSharedAttr_ROISelected(self, roi_id: int) -> None:
         self.control_manager.setSharedAttr(self.key_app, 'roi_selected_id', roi_id)
 
     def getSharedAttr_ROISelected(self):

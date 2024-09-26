@@ -21,14 +21,14 @@ class TableControl:
         self.widget_manager                             = widget_manager
         self.config_manager                             = config_manager
         self.control_manager                            = control_manager
-        self.table_columns                              = self.config_manager.getTableColumns(self.key_app)
-        self.key_function_map                           = self.config_manager.getKeyFunctionMap(self.key_app).getAllMappings()
+        self.table_columns:                TableColumns = self.config_manager.getTableColumns(self.key_app)
+        self.key_function_map:        Dict[Qt.Key, Any] = self.config_manager.getKeyFunctionMap(self.key_app).getAllMappings()
         self.groups_celltype:   Dict[int, QButtonGroup] = {}
         self.selected_row:                          int = 0
         self.selected_column:                       int = 0
         self.len_row:                               int = 0
 
-    def setupWidgetROITable(self, key_app):
+    def setupWidgetROITable(self, key_app: str) -> None:
         from ..gui.table_setup import setupWidgetROITable
         self.setLenRow(len(self.data_manager.getStat(self.key_app))) # for Suite2p
         self.q_table, self.groups_celltype = setupWidgetROITable(self.q_table, self.len_row, self.table_columns.getColumns(), key_event_ignore=True)
@@ -36,82 +36,77 @@ class TableControl:
         self.initalizeSharedAttr_ROIDisplay()
         updateROICountDisplay(self.widget_manager, self.config_manager, self.key_app)
 
-    def updateWidgetROITable(self):
+    def updateWidgetROITable(self) -> None:
         from ..gui.table_setup import setupWidgetROITable
         self.q_table.clear()
         self.q_table = setupWidgetROITable(self.q_table, self.len_row, self.table_columns.getColumns(), key_event_ignore=True)
 
     # change table cell selection
-    def onSelectionChanged(self, selected, deselected):
+    def onSelectionChanged(self, selected: QItemSelection, deselected: QItemSelection) -> None:
         if selected.indexes():
-            row = self.q_table.currentRow()
-            column = self.q_table.currentColumn()
+            row: int = self.q_table.currentRow()
+            column: int = self.q_table.currentColumn()
             
             self.setSelectedRow(row)
             self.setSelectedColumn(column)
             self.setSharedAttr_ROISelected(row)
-
-    # change table cell content
-    def onCellChanged(self, row, column):
-        pass
-
     """
     get Functions
     """
-    def getSelectedRow(self):
+    def getSelectedRow(self) -> int:
         return self.selected_row
 
-    def getSelectedColumn(self):
+    def getSelectedColumn(self) -> int:
         return self.selected_column
     
-    def getLenRow(self):
+    def getLenRow(self) -> int:
         return self.len_row
 
     """
     set Functions
     """
-    def setSelectedRow(self, row):
+    def setSelectedRow(self, row: int) -> None:
         self.selected_row = row
 
-    def setSelectedColumn(self, column):
+    def setSelectedColumn(self, column: int) -> None:
         self.selected_column = column
 
-    def setLenRow(self, len_row):
+    def setLenRow(self, len_row: int) -> None:
         self.len_row = len_row
 
-    def setKeyPressEvent(self):
+    def setKeyPressEvent(self) -> None:
         self.q_table.keyPressEvent = self.keyPressEvent
 
-    def setTableColumns(self, table_columns):
+    def setTableColumns(self, table_columns: TableColumns) -> None:
         self.table_columns = table_columns
     """
     shared_attr Functions
     """
-    def setSharedAttr_ROISelected(self, roi_id: int):
+    def setSharedAttr_ROISelected(self, roi_id: int) -> None:
         self.control_manager.setSharedAttr(self.key_app, 'roi_selected_id', roi_id)
         updateROIPropertyDisplay(self.control_manager, self.data_manager, self.widget_manager, self.key_app)
 
-    def getSharedAttr_ROISelected(self):
+    def getSharedAttr_ROISelected(self) -> int:
         return self.control_manager.getSharedAttr(self.key_app, 'roi_selected_id')
     
-    def setSharedAttr_ROIDisplay(self, roi_display: Dict[int, bool]):
+    def setSharedAttr_ROIDisplay(self, roi_display: Dict[int, bool]) -> None:
         self.control_manager.setSharedAttr(self.key_app, 'roi_display', roi_display)
 
-    def getSharedAttr_ROIDisplay(self):
+    def getSharedAttr_ROIDisplay(self) -> Dict[int, bool]:
         return self.control_manager.getSharedAttr(self.key_app, 'roi_display')
 
-    def initalizeSharedAttr_ROIDisplay(self):
+    def initalizeSharedAttr_ROIDisplay(self) -> None:
         roi_display = {roi_id: True for roi_id in range(self.len_row)}
         self.control_manager.setSharedAttr(self.key_app, 'roi_display', roi_display)
 
-    def setSharedAttr_DisplayCelltype(self, roi_display_type: str):
+    def setSharedAttr_DisplayCelltype(self, roi_display_type: str) -> None:
         self.control_manager.setSharedAttr(self.key_app, 'display_celltype', roi_display_type)
 
-    def getSharedAttr_DisplayCelltype(self):
+    def getSharedAttr_DisplayCelltype(self) -> str:
         return self.control_manager.getSharedAttr(self.key_app, 'display_celltype')
 
     # with dict_buttongroup["{key_app}_display_celltype"] change
-    def updateROIDisplayWithCelltype(self, roi_display_type: str):
+    def updateROIDisplayWithCelltype(self, roi_display_type: str) -> None:
         roi_display = self.getSharedAttr_ROIDisplay()
         for roi_id in roi_display.keys():
             if roi_display_type == 'All ROI':
@@ -124,7 +119,7 @@ class TableControl:
         self.setSharedAttr_ROIDisplay(roi_display)
 
     # with table's "celltype" radiobutton change
-    def changeRadiobuttonOfTable(self, row):
+    def changeRadiobuttonOfTable(self, row: int) -> None:
         roi_display = self.getSharedAttr_ROIDisplay()
         current_display_type = self.getSharedAttr_DisplayCelltype()
         
@@ -134,7 +129,7 @@ class TableControl:
             self.setSharedAttr_ROIDisplay(roi_display)
 
     # with View mousePressEvent
-    def updateSelectedROI(self, roi_id):
+    def updateSelectedROI(self, roi_id: int) -> None:
         if roi_id is not None:
             self.q_table.selectRow(roi_id)
             self.setSelectedRow(roi_id)
@@ -145,14 +140,14 @@ class TableControl:
     """
     KeyPressEvent
     """
-    def keyPressEvent(self, event):
+    def keyPressEvent(self, event: QKeyEvent) -> None:
         if self.selected_row is not None and event.key() in self.key_function_map:
             action = self.key_function_map[event.key()]
             self.executeAction(action)
             self.q_table.setCurrentCell(self.selected_row, self.selected_column)
             self.q_table.scrollToItem(self.q_table.item(self.selected_row, self.selected_column))
 
-    def executeAction(self, action):
+    def executeAction(self, action: Tuple) -> None:
         action_type = action[0] # radio, checkbox, move
         if action_type == 'move':
             move_type = action[1] # cell_type, skip_checked, skip_unchecked, selected_type
@@ -167,7 +162,7 @@ class TableControl:
     Function of executeAction
     """
     # move table cell
-    def moveCell(self, move_type, step):
+    def moveCell(self, move_type: str, step: Literal[-1, 1]) -> None:
         if move_type == 'up':
             self.selected_row = max(0, self.selected_row - step)
         elif move_type == 'down':
@@ -186,7 +181,7 @@ class TableControl:
             # self.moveToSelectedType(self.selected_row, step)
 
     # toggle radiobutton, checkbox
-    def toggleColumn(self, row, col_order):
+    def toggleColumn(self, row: int, col_order: int) -> None:
         for col_name, col_info in self.table_columns.getColumns().items():
             if col_info['order'] == col_order:
                 if col_info['type'] == 'celltype':
@@ -204,7 +199,7 @@ class TableControl:
                 break
 
     # move Neuron->Neuron, Astrocyte->Astrocyte
-    def moveToSameCellType(self, start_row, direction):
+    def moveToSameCellType(self, start_row: int, direction: Literal[-1, 1]) -> None:
         current_cell_type = self.getCurrentCellType(start_row)
         total_rows = self.q_table.rowCount()
         new_row = start_row
@@ -218,7 +213,7 @@ class TableControl:
                 return
             
     # move row with skipping "Check checked" or "Check unchecked"
-    def moveSkippingChecked(self, start_row, direction, skip_checked):
+    def moveSkippingChecked(self, start_row: int, direction: Literal[-1, 1], skip_checked: bool) -> None:
         total_rows = self.q_table.rowCount()
         new_row = start_row
 
@@ -235,7 +230,7 @@ class TableControl:
     """
             
     # get celltype of radiobutton, Neruon/Astrocyte/...
-    def getCurrentCellType(self, row):
+    def getCurrentCellType(self, row: int) -> str:
         button_group = self.groups_celltype.get(row)
         if button_group:
             checked_button = button_group.checkedButton()
@@ -246,7 +241,7 @@ class TableControl:
         return None
 
     # detect "Check" is checked or not
-    def getRowChecked(self, row):
+    def getRowChecked(self, row: int) -> bool:
         for col_name, col_info in self.table_columns.getColumns().items():
             if col_info['type'] == 'checkbox' and col_name == 'Check':
                 check_box_item = self.q_table.item(row, col_info['order'])
@@ -257,7 +252,7 @@ class TableControl:
     Button-binding Function
     """
     # set All ROIs same celltype (Neuron, Not Cell, ...)
-    def setAllROISameCelltype(self, celltype: str):
+    def setAllROISameCelltype(self, celltype: str) -> None:
         checkbox_columns = self.getCheckboxColumns()
         skip_states = {}
         
@@ -274,7 +269,7 @@ class TableControl:
             else:  # No の場合
                 skip_states[column] = [False] * self.len_row
             
-        col_order = self.table_columns.getColumns()[celltype]["order"]
+        col_order: int = self.table_columns.getColumns()[celltype]["order"]
         for row in range(self.len_row):
             if all(not skip_states[col][row] for col in checkbox_columns):
                 button_group = self.groups_celltype.get(row)
@@ -285,10 +280,10 @@ class TableControl:
                         self.updateSharedAttr_ROIDisplay_TableCelltypeChanged(row)
         updateROICountDisplay(self.widget_manager, self.config_manager, self.key_app)
 
-    def getCheckboxColumns(self):
+    def getCheckboxColumns(self) -> List[str]:
         return [col_name for col_name, col_info in self.table_columns.getColumns().items() if col_info['type'] == 'checkbox']
 
-    def getCheckboxStates(self, column_name):
+    def getCheckboxStates(self, column_name: str) -> List[bool]:
         col_info = self.table_columns.getColumns()[column_name]
         if col_info['type'] != 'checkbox':
             return []
@@ -303,7 +298,7 @@ class TableControl:
         return states
     
     # toggle "Checkbox" of All ROIs
-    def toggleAllROICheckbox(self, checkbox: str, toggle: bool):
+    def toggleAllROICheckbox(self, checkbox: str, toggle: bool) -> None:
         dict_text = {True: "Check", False: "Uncheck"}
         result = showConfirmationDialog(
             self.q_table,

@@ -1,4 +1,5 @@
-# Widgetのデフォルトのキーイベントを無効化するフィルター
+from __future__ import annotations
+from ..type_definitions import *
 from PyQt5.QtWidgets import QRadioButton
 from types import MethodType
 
