@@ -1,3 +1,5 @@
+from __future__ import annotations
+from ..type_definitions import *
 from ..config.constants_local import ROICheckMatKeysLocal
 import datetime
 import numpy as np
@@ -37,9 +39,8 @@ def convertTableDataToDictROICheck(q_table, table_columns, local_var=True):
                 item = q_table.item(row, col_info['order'])
                 dict_roicheck[col_name][row] = item.text() if item else ''
 
-    # 更新日付
-    today = datetime.datetime.today().strftime('%y%m%d')
-    dict_roicheck["update"] = today
+    now = datetime.datetime.now().strftime('%y%m%d_%H%M%S')
+    dict_roicheck["update"] = now
     return dict_roicheck
 
 # dict_roicheck -> mat_roicheck
@@ -53,6 +54,32 @@ def convertDictROICheckToMatROICheck(dict_roicheck):
 
 # mat_roicheck -> dict_roicheck
 def convertMatROICheckToDictROICheck(mat_roicheck):
+    mat_roicheck = mat_roicheck["manualROIcheck"]
+    mat_dtype = list(mat_roicheck[0].dtype.fields)
+    dict_roicheck = {}
+    for key_, value_ in zip(mat_dtype, list(mat_roicheck[0][0])):
+        if value_.dtype=="object":
+            value_ = np.array([[x[0].item() if x[0].size > 0 else ""] for x in value_])
+        dict_roicheck[key_] = value_
+    return dict_roicheck
+
+
+# 後で上と入れ替える
+# dict_roicheck -> mat_roicheck
+def convertDictROICheckToMatROICheck_new(dict_roicheck: Dict[str: Any], path_Fall: str, roi_number: int):
+    mat_roicheck = {
+    "path_Fall": path_Fall,
+    "ROInumber": roi_number,
+    "manualROIcheck": {
+        dict_roicheck["update"]: {
+        **dict_roicheck,
+        }
+    }
+}
+    return mat_roicheck
+
+# mat_roicheck -> dict_roicheck
+def convertMatROICheckToDictROICheck_new(mat_roicheck):
     mat_roicheck = mat_roicheck["manualROIcheck"]
     mat_dtype = list(mat_roicheck[0].dtype.fields)
     dict_roicheck = {}
