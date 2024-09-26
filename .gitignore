@@ -163,5 +163,6 @@ cython_debug/
 data/
 elastix/
 repo2prompt-main/
+images/
 *.tif
 *.mat
