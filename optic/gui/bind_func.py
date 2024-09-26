@@ -217,7 +217,7 @@ def bindFuncButtonSetAllROISameCelltype(
     view_control.updateView()
 
 # -> table_layouts.makeLayoutAllROICheckboxToggle
-def bindFuncButtonToggleAllROICheckbox(
+def bindFuncCheckboxToggleAllROI(
     widget_manager: 'WidgetManager', 
     view_control: 'ViewControl', 
     table_control: 'TableControl'
@@ -228,6 +228,18 @@ def bindFuncButtonToggleAllROICheckbox(
             widget_manager.dict_button[f"{table_control.key_app}_roi_{label}_{checkbox}"].clicked.connect(
                 lambda checked, ck=checkbox, tg=toggle: table_control.toggleAllROICheckbox(ck, tg)
             )
+    view_control.updateView()
+
+# -> table_layouts.makeLayoutROIFilterButton
+def bindFuncButtonFilterROI(
+    q_button: 'QPushButton',
+    table_control: 'TableControl', 
+    view_control: 'ViewControl'
+) -> None:
+    thresholds = table_control.getThresholdsOfROIFilter()
+    q_button.clicked.connect(
+        lambda: table_control.filterROI(thresholds)
+    )
     view_control.updateView()
 
 """

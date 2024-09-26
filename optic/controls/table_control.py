@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import QRadioButton, QButtonGroup, QMessageBox, QAbstractIt
 from PyQt5.QtCore import Qt
 from ..visualization.info_visual import updateROIPropertyDisplay, updateROICountDisplay
 from ..utils.dialog_utils import showConfirmationDialog
+from ..utils.info_utils import extractRangeValues
 
 class TableControl:
     def __init__(
@@ -190,7 +191,7 @@ class TableControl:
                         for button in button_group.buttons():
                             if self.q_table.cellWidget(row, col_order) == button:
                                 button.setChecked(True)
-                                self.updateSharedAttr_ROIDisplay_TableCelltypeChanged(row)
+                                self.changeRadiobuttonOfTable(row)
                                 break
                 elif col_info['type'] == 'checkbox':
                     check_box_item = self.q_table.item(row, col_order)
@@ -277,7 +278,7 @@ class TableControl:
                     button = self.q_table.cellWidget(row, col_order)
                     if isinstance(button, QRadioButton):
                         button.setChecked(True)
-                        self.updateSharedAttr_ROIDisplay_TableCelltypeChanged(row)
+                        self.changeRadiobuttonOfTable(row)
         updateROICountDisplay(self.widget_manager, self.config_manager, self.key_app)
 
     def getCheckboxColumns(self) -> List[str]:
@@ -315,3 +316,32 @@ class TableControl:
                     item.setCheckState(check_state)
         else:
             return
+        
+    # Filter ROIs, set celltype radiobutton "Not Cell" (column with the highest order)
+    def filterROI(self, thresholds: Dict[str, Tuple[float, float]]) -> None:
+        result = showConfirmationDialog(
+            self.q_table,
+            'Confirmation',
+            f"Filter ROIs ?",
+        )
+        if result == QMessageBox.Yes:
+            celltype_columns = [col for col, info in self.table_columns.getColumns().items() if info['type'] == 'celltype']
+            target_celltype = max(celltype_columns, key=lambda col: self.table_columns.getColumns()[col]['order'])
+            target_column = self.table_columns.getColumns()[target_celltype]['order']
+
+            for row in range(self.q_table.rowCount()):
+                roi_stat = self.data_manager.getStat(self.key_app)[row]
+                if all(thresholds[param][0] <= roi_stat[param] <= thresholds[param][1] for param in thresholds):
+                    radio_button: QRadioButton = self.q_table.cellWidget(row, target_column)
+                    if radio_button:
+                        radio_button.setChecked(True)
+            updateROICountDisplay(self.widget_manager, self.config_manager, self.key_app)
+        else:
+            return
+    # get thresholds of ROI filter
+    def getThresholdsOfROIFilter(self) -> Dict[str, Tuple[float, float]]:
+        thresholds = {}
+        q_lineedits = {key: self.widget_manager.dict_lineedit[f"{self.key_app}_roi_filter_{key}"] for key in self.config_manager.gui_defaults["ROI_THRESHOLDS"].keys()}
+        for key, q_lineedit in q_lineedits.items():
+            thresholds[key] = extractRangeValues(q_lineedit.text())
+        return thresholds
