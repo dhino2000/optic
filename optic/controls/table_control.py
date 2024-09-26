@@ -331,10 +331,11 @@ class TableControl:
 
             for row in range(self.q_table.rowCount()):
                 roi_stat = self.data_manager.getStat(self.key_app)[row]
-                if all(thresholds[param][0] <= roi_stat[param] <= thresholds[param][1] for param in thresholds):
+                if not all(min_val <= roi_stat[param] <= max_val for param, (min_val, max_val) in thresholds.items()):
                     radio_button: QRadioButton = self.q_table.cellWidget(row, target_column)
                     if radio_button:
                         radio_button.setChecked(True)
+                        self.changeRadiobuttonOfTable(row)
             updateROICountDisplay(self.widget_manager, self.config_manager, self.key_app)
         else:
             return
