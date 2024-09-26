@@ -349,7 +349,8 @@ class Suite2pROICheckGUI(QMainWindow):
             q_table=self.widget_manager.dict_table[f"{self.app_key_pri}"], 
             q_button_save=self.widget_manager.dict_button[f"{self.app_key_pri}_save_roicheck"], 
             q_button_load=self.widget_manager.dict_button[f"{self.app_key_pri}_load_roicheck"], 
-            table_columns=self.config_manager.table_columns[self.app_key_pri].getColumns()
+            table_columns=self.config_manager.table_columns[self.app_key_pri].getColumns(),
+            table_control=self.control_manager.table_controls[self.app_key_pri],
         )
         # Table Column Config
         self.widget_manager.dict_button[f"{self.app_key_pri}_config_table"].clicked.connect(
@@ -372,8 +373,14 @@ class Suite2pROICheckGUI(QMainWindow):
             table_control=self.control_manager.table_controls[self.app_key_pri],
             view_control=self.control_manager.view_controls[self.app_key_pri],
         )
+        # Filter ROIs
+        bindFuncButtonFilterROI(
+            q_button=self.widget_manager.dict_button[f"{self.app_key_pri}_roi_filter"],
+            table_control=self.control_manager.table_controls[self.app_key_pri],
+            view_control=self.control_manager.view_controls[self.app_key_pri],
+        )
         # Toggle AllROI checkbox
-        bindFuncButtonToggleAllROICheckbox(
+        bindFuncCheckboxToggleAllROI(
             widget_manager=self.widget_manager,
             table_control=self.control_manager.table_controls[self.app_key_pri],
             view_control=self.control_manager.view_controls[self.app_key_pri],

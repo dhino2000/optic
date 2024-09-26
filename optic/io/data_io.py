@@ -1,4 +1,5 @@
-# データの読み込み用関数
+from __future__ import annotations
+from ..type_definitions import *
 import os
 from PyQt5.QtWidgets import QMessageBox
 from scipy.io import loadmat, savemat
@@ -12,7 +13,7 @@ from ..preprocessing.preprocessing_table import convertTableDataToDictROICheck, 
 from .file_dialog import openFileDialog, saveFileDialog
 
 # Fallの読み込み, メッセージ付き
-def loadFallMATWithGUI(q_window, data_manager, key_app, path_fall):
+def loadFallMATWithGUI(q_window: QMainWindow, data_manager: DataManager, key_app: str, path_fall: str) -> bool:
     success = data_manager.loadFallMAT(key_app, path_fall)
     if success:
         QMessageBox.information(q_window, "File load", "File loaded successfully!")
@@ -22,14 +23,14 @@ def loadFallMATWithGUI(q_window, data_manager, key_app, path_fall):
         return False
 
 # tif imageの読み込み
-def loadTIFImage(data_manager, key_dict_im_chan2, path_image, preprocessing=True):
+def loadTIFImage(data_manager: DataManager, key_dict_im_chan2: str, path_image: str, preprocessing: bool=True) -> np.array:
     im = tifffile.imread(path_image)
     im = convertImageDtypeToINT(im)
     data_manager.dict_im_bg_chan2[key_dict_im_chan2] = im
     return data_manager.dict_im_bg_chan2[key_dict_im_chan2]
 
 # EventFile npyの読み込み, 初期化
-def loadEventFileNPY(q_window, data_manager, control_manager, key_app):
+def loadEventFileNPY(q_window: QMainWindow, data_manager: DataManager, control_manager: ControlManager, key_app: str) -> None | np.array:
     path_eventfile = openFileDialog(q_widget=q_window, file_type="npy", title="Open Eventfile npy File").replace("\\", "/")
 
     if path_eventfile:
@@ -48,7 +49,7 @@ def loadEventFileNPY(q_window, data_manager, control_manager, key_app):
         return
 
 # 保存用のファイルパス作成, 初期位置も指定
-def generateSavePath(path_src, prefix="", suffix="", new_extension=None, remove_strings=None):
+def generateSavePath(path_src: str, prefix: str="", suffix: str="", new_extension: str=None, remove_strings: str=None) -> str:
     """
     元のファイルパスを基に、新しい保存パスを生成する。
 
@@ -80,26 +81,29 @@ def generateSavePath(path_src, prefix="", suffix="", new_extension=None, remove_
     return path_dst
 
 # Tableの内容をROICheckとして保存
-def saveROICheck(q_window, q_lineedit, q_table, table_columns, local_var=True):
+def saveROICheck(q_window: QMainWindow, q_lineedit: QLineEdit, q_table: QTableWidget, table_columns: TableColumns, local_var: bool=True) -> None:
     path_src = q_lineedit.text()
     path_dst = generateSavePath(path_src, prefix="ROIcheck_", remove_strings="Fall_")
     path_dst = saveFileDialog(q_widget=q_window, file_type="mat", title="Save ROIcheck mat File", initial_dir=path_dst)
-    try:
-        dict_roicheck = convertTableDataToDictROICheck(q_table, table_columns, local_var)
-        mat_roicheck = convertDictROICheckToMatROICheck(dict_roicheck)
-        savemat(path_dst, mat_roicheck)
-        QMessageBox.information(q_window, "File save", "ROICheck file saved!")
-    except Exception as e:
-        QMessageBox.warning(q_window, "File save failed", f"Error saving ROICheck file: {e}")
-
-
+    if path_dst:
+        try:
+            dict_roicheck = convertTableDataToDictROICheck(q_table, table_columns, local_var)
+            mat_roicheck = convertDictROICheckToMatROICheck(dict_roicheck)
+            savemat(path_dst, mat_roicheck)
+            QMessageBox.information(q_window, "File save", "ROICheck file saved!")
+        except Exception as e:
+            QMessageBox.warning(q_window, "File save failed", f"Error saving ROICheck file: {e}")
 
 # ROICheckを読み込んでTableを更新
-def loadROICheck(q_window, q_table, table_columns):
+def loadROICheck(q_window: QMainWindow, q_table: QTableWidget, table_columns: TableColumns, table_control: TableControl) -> None:
     path_roicheck = openFileDialog(q_widget=q_window, file_type="mat", title="Open ROIcheck mat File")
-    # try:
-    dict_roicheck = convertMatROICheckToDictROICheck(loadmat(path_roicheck))
-    applyDictROICheckToTable(q_table, table_columns, dict_roicheck)
-    QMessageBox.information(q_window, "File load", "ROICheck file loaded!")
-    # except Exception as e:
-        # QMessageBox.warning(q_window, "File load failed", f"Error loading ROICheck file: {e}")
+    if path_roicheck:
+        try:
+            dict_roicheck = convertMatROICheckToDictROICheck(loadmat(path_roicheck))
+            # if table_control.len_row != len(dict_roicheck):
+            #     QMessageBox.warning(q_window, "File load failed", f"Length of data does not match! \nTable: {table_control.len_row}, ROICheck: {len(dict_roicheck)}")
+            #     return
+            applyDictROICheckToTable(q_table, table_columns, dict_roicheck)
+            QMessageBox.information(q_window, "File load", "ROICheck file loaded!")
+        except Exception as e:
+            QMessageBox.warning(q_window, "File load failed", f"Error loading ROICheck file: {e}")

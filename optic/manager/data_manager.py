@@ -26,7 +26,7 @@ class DataManager:
             else:
                 self.dict_Fall[key_app] = Fall
             return True
-        except FileNotFoundError as e:
+        except Exception as e:
             return False
         
     def getDictFall(self, key_app: str) -> Dict[str, Any]:
