@@ -26,3 +26,6 @@ Anaconda環境の作り方を書く。
 - python {path_of_suite2p_roi_check.py}
 
 (ex) python C:/Users/dhino2000/optic/scripts/suite2p_roi_check.py
+
+3. Sort and Check ROIs!
+([Suite2pROICheck Tutorial](https://github.com/dhino2000/optic/blob/main/docs/Suite2pROICheck/tutorial.md))
