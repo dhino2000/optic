@@ -6,7 +6,6 @@ from ..config.constants import BGImageTypeList
 import random
 import numpy as np
 
-
 class ViewControl:
     def __init__(
             self, 

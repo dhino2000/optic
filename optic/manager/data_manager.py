@@ -9,11 +9,11 @@ from ..preprocessing.preprocessing_image import getBGImageFromFall
 
 class DataManager:
     def __init__(self):
-        self.dict_Fall:                 Dict[str, Any] = {}
-        self.dict_im_bg:           Dict[str, np.array] = defaultdict(dict)
-        self.dict_im_bg_chan2:     Dict[str, np.array] = {}
-        self.dict_eventfile:       Dict[str, np.array] = {}
-        self.dict_roicheck:             Dict[str, Any] = {}
+        self.dict_Fall:            Dict[str, Any] = {}
+        self.dict_im_bg:           Dict[str, Dict[str, np.ndarray[np.uint8, Tuple[int, int, int]]]] = defaultdict(dict)
+        self.dict_im_bg_chan2:     Dict[str, Dict[str, np.ndarray[np.uint8, Tuple[int, int, int]]]] = defaultdict(dict)
+        self.dict_eventfile:       Dict[str, np.ndarray[Tuple[int]]] = {}
+        self.dict_roicheck:        Dict[str, Any] = {}
 
     # Fall.matの読み込み
     def loadFallMAT(self, key_app: str, path_fall: str, preprocessing: bool=True) -> bool:
