@@ -6,6 +6,6 @@ from .io_layouts import makeLayoutLoadFileWidget, makeLayoutROICheckIO, makeLayo
 from .canvas_layouts import makeLayoutCanvasTracePlot, makeLayoutMinimumPlotRange, makeLayoutLightPlotMode, makeLayoutEventFilePlot
 from .slider_layouts import makeLayoutContrastSlider, makeLayoutOpacitySlider
 from .info_layouts import makeLayoutROIProperty
-from .view_layouts import makeLayoutROIThresholds, makeLayoutDislplayCelltype, makeLayoutBGImageTypeDisplay, makeLayoutROIChooseSkip
+from .view_layouts import makeLayoutViewWithZSlider, makeLayoutROIThresholds, makeLayoutDislplayCelltype, makeLayoutBGImageTypeDisplay, makeLayoutROIChooseSkip
 from .view_setup import setViewSize
 from .table_layouts import makeLayoutTableROICountLabel, makeLayoutAllROISetSameCelltype, makeLayoutAllROICheckboxToggle, makeLayoutROIFilterThreshold, makeLayoutROIFilterButton

@@ -6,6 +6,33 @@ from .base_layouts import makeLayoutLineEditLabel, makeLayoutButtonGroup
 from ..config.constants import BGImageTypeList
 from ..gui.table_layouts import makeLayoutROIFilterThreshold
 
+def makeLayoutViewWithZSlider(
+        widget_manager: WidgetManager,
+        key_view: str,
+        key_label: str,
+        key_slider: str,
+        z_stack_size: int
+) -> QVBoxLayout:
+    layout = QVBoxLayout()
+
+    q_view = widget_manager.makeWidgetView(key=key_view)
+    layout.addWidget(q_view)
+
+    # add label
+    z_label = widget_manager.makeWidgetLabel(key=key_label, label="Z: 0")
+    layout.addWidget(z_label)
+
+    # add z slider
+    z_slider = widget_manager.makeWidgetSlider(
+        key=key_slider,
+        value_min=0,
+        value_max=z_stack_size - 1,
+        value_set=0,
+    )
+    layout.addWidget(z_slider)
+
+    return layout
+
 # 表示するROIのThreshold checkbox, lineedit
 def makeLayoutROIThresholds(
         widget_manager: WidgetManager, 
