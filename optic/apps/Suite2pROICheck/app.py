@@ -77,11 +77,9 @@ class Suite2pROICheckGUI(QMainWindow):
             path_fall=self.widget_manager.dict_lineedit[f"{self.app_key_pri}_path_fall"].text()
         )
         if self.widget_manager.dict_lineedit[f"{self.app_key_pri}_path_reftif"].text() != "":
-            self.data_manager.dict_im_bg_chan2[self.app_key_pri] = loadTIFImage(
-                data_manager=self.data_manager, 
-                key_dict_im_chan2=self.app_key_pri, 
+            self.data_manager.loadTifImage(
+                key_app=self.app_key_pri,
                 path_image=self.widget_manager.dict_lineedit[f"{self.app_key_pri}_path_reftif"].text(), 
-                preprocessing=True
             )
         return success
 

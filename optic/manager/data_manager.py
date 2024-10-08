@@ -8,6 +8,7 @@ import tifffile
 from ..preprocessing.preprocessing_fall import convertMatToDictFall
 from ..preprocessing.preprocessing_image import getBGImageFromFall
 from ..config.constants import Extension
+from ..io.data_io import loadTiffStack, loadTifImage
 
 class DataManager:
     def __init__(self):
@@ -17,10 +18,11 @@ class DataManager:
 
         self.dict_im_bg:           Dict[str, Dict[str, np.ndarray[np.uint8, Tuple[int, int, int]]]] = defaultdict(dict)
         self.dict_im_bg_chan2:     Dict[str, Dict[str, np.ndarray[np.uint8, Tuple[int, int, int]]]] = defaultdict(dict)
+        self.dict_im_bg_optional:  Dict[str, np.ndarray[np.uint8, Tuple[int, int, int]]] = defaultdict(dict)
         self.dict_eventfile:       Dict[str, np.ndarray[Tuple[int]]] = {}
         self.dict_roicheck:        Dict[str, Any] = {}
 
-    # Fall.matの読み込み
+    # load Fall.mat data
     def loadFallMAT(self, key_app: str, path_fall: str, preprocessing: bool=True) -> bool:
         try:
             Fall = loadmat(path_fall)
@@ -35,7 +37,16 @@ class DataManager:
         except Exception as e:
             return False
         
-    def loadTiff(self, key_app: str, path_tiff: str) -> bool:
+    # load tiff image data (for optional)
+    def loadTifImage(self, key_app: str, path_image: str) -> bool:
+        try:
+            self.dict_im_bg_optional[key_app] = loadTifImage(path_image)
+            return True
+        except Exception as e:
+            return False
+        
+    # load tiff stack data
+    def loadTiffStack(self, key_app: str, path_tiff: str) -> bool:
         try:
             tiff = tifffile.imread(path_tiff)
             self.dict_im_dtype[key_app] = Extension.TIFF

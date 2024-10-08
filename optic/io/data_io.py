@@ -22,12 +22,16 @@ def loadFallMATWithGUI(q_window: QMainWindow, data_manager: DataManager, key_app
         QMessageBox.warning(q_window, "File Load Error", "Failed to load the file.")
         return False
 
-# tif imageの読み込み
-def loadTIFImage(data_manager: DataManager, key_dict_im_chan2: str, path_image: str, preprocessing: bool=True) -> np.array:
+# load tif image data (XYC)
+def loadTifImage(path_image: str, preprocessing: bool=True) -> np.array:
     im = tifffile.imread(path_image)
     im = convertImageDtypeToINT(im)
-    data_manager.dict_im_bg_chan2[key_dict_im_chan2] = im
-    return data_manager.dict_im_bg_chan2[key_dict_im_chan2]
+    return im
+
+# load tiff stack data (XYZCT)
+def loadTiffStack(path_tiff: str, preprocessing: bool=True) -> bool:
+    im = tifffile.imread(path_tiff)
+    return im
 
 # EventFile npyの読み込み, 初期化
 def loadEventFileNPY(q_window: QMainWindow, data_manager: DataManager, control_manager: ControlManager, key_app: str) -> None | np.array:
