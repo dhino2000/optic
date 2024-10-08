@@ -1,6 +1,11 @@
 # アプリ間で共有する定数
 from enum import Enum
 
+class Extension:
+    MAT = ".mat"
+    TIFF = ".tif"
+    NPY = ".npy"
+
 # ファイル選択時の拡張子
 class FileFilters:
     MAT = "mat Files (*.mat);;All Files (*)"
@@ -8,15 +13,12 @@ class FileFilters:
     NPY = "npy Files (*.npy);;All Files (*)"
 
 FILE_FILTERS = {
-    "mat": "mat Files (*.mat);;All Files (*)",
-    "tiff": "tiff Files (*.tif *.tiff);;All Files (*)",
-    "npy": "npy Files (*.npy);;All Files (*)"
+    ".mat": "mat Files (*.mat);;All Files (*)",
+    ".tif": "tiff Files (*.tif *.tiff);;All Files (*)",
+    ".npy": "npy Files (*.npy);;All Files (*)"
 }
 
-class Extension:
-    MAT = ".mat"
-    TIFF = ".tif"
-    NPY = ".npy"
+
 
 # BackGroungImage Type
 class BGImageType:
