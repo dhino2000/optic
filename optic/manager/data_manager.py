@@ -99,10 +99,10 @@ class DataManager:
     def getDictBackgroundImage(self, key_app: str) -> Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]: # 2d array
         return self.dict_im_bg.get(key_app)
     
-    def getBackgroundChan2Image(self, key_app: str) -> Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]:
+    def getDictBackgroundImageChannel2(self, key_app: str) -> Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]:
         return self.dict_im_bg_chan2.get(key_app)
     
-    def getBackgroundOptionalImage(self, key_app: str) -> np.ndarray[np.uint8, Tuple[int, int]]:
+    def getBackgroundImageOptional(self, key_app: str) -> np.ndarray[np.uint8, Tuple[int, int]]:
         return self.dict_im_bg_optional.get(key_app)
     
     def getEventfile(self, key_app: str) -> np.array:
