@@ -4,14 +4,17 @@ from collections import defaultdict
 from scipy.io import loadmat
 import numpy as np
 from numpy.typing import NDArray
+import tifffile
 from ..preprocessing.preprocessing_fall import convertMatToDictFall
 from ..preprocessing.preprocessing_image import getBGImageFromFall
+from ..config.constants import Extension
 
 class DataManager:
     def __init__(self):
-        self.data_type:            Literal["mat", "tif"] = ""
+        self.dict_im_dtype:        Dict[str, Literal[Extension.MAT, Extension.TIFF]] = {}
         self.dict_Fall:            Dict[str, Any] = {}
         self.dict_tiff:            Dict[str, np.ndarray[Tuple[int, int, int]]] = {}
+
         self.dict_im_bg:           Dict[str, Dict[str, np.ndarray[np.uint8, Tuple[int, int, int]]]] = defaultdict(dict)
         self.dict_im_bg_chan2:     Dict[str, Dict[str, np.ndarray[np.uint8, Tuple[int, int, int]]]] = defaultdict(dict)
         self.dict_eventfile:       Dict[str, np.ndarray[Tuple[int]]] = {}
@@ -21,12 +24,22 @@ class DataManager:
     def loadFallMAT(self, key_app: str, path_fall: str, preprocessing: bool=True) -> bool:
         try:
             Fall = loadmat(path_fall)
+            self.dict_im_dtype[key_app] = Extension.MAT
             if preprocessing:
                 dict_Fall = convertMatToDictFall(Fall)
                 self.dict_Fall[key_app] = dict_Fall
                 getBGImageFromFall(self, key_app, key_app)
             else:
                 self.dict_Fall[key_app] = Fall
+            return True
+        except Exception as e:
+            return False
+        
+    def loadTiff(self, key_app: str, path_tiff: str) -> bool:
+        try:
+            tiff = tifffile.imread(path_tiff)
+            self.dict_im_dtype[key_app] = Extension.TIFF
+            self.dict_tiff[key_app] = tiff
             return True
         except Exception as e:
             return False

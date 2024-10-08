@@ -13,6 +13,11 @@ FILE_FILTERS = {
     "npy": "npy Files (*.npy);;All Files (*)"
 }
 
+class Extension:
+    MAT = ".mat"
+    TIFF = ".tif"
+    NPY = ".npy"
+
 # BackGroungImage Type
 class BGImageType:
     MEAN_IMG = "meanImg"
