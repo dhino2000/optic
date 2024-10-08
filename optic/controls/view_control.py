@@ -1,8 +1,8 @@
 from __future__ import annotations
 from ..type_definitions import *
-from ..visualization.view_visual import updateView, findClosestROI, shouldSkipROI
+from ..visualization.view_visual import updateViewFall, updateViewTiff, findClosestROI, shouldSkipROI
 from ..gui.view_setup import setViewSize
-from ..config.constants import BGImageTypeList
+from ..config.constants import BGImageTypeList, Extension
 import random
 import numpy as np
 
@@ -26,6 +26,7 @@ class ViewControl:
         self.config_manager  = config_manager
         self.control_manager = control_manager
 
+        self.im_dtype:              str                         = ""
         self.last_click_position:   Tuple[int, int]             = ()
         self.image_sizes:           Tuple[int, int]             = ()
         self.bg_image_type:         str                         = BGImageTypeList.FALL[0]
@@ -42,17 +43,25 @@ class ViewControl:
         self.roi_opacity:       int                             = int(config_manager.gui_defaults["ROI_VISUAL_SETTINGS"]["DEFAULT_ROI_OPACITY"])
         self.highlight_opacity: int                             = int(config_manager.gui_defaults["ROI_VISUAL_SETTINGS"]["DEFAULT_HIGHLIGHT_OPACITY"])
 
+        self.setImageDataType()
         self.initializeROIColors()
         self.setImageSize()
         self.setSharedAttr_ROISelected(roi_id=0)
 
 
     def updateView(self) -> None:
-        updateView(self.q_scene, self.q_view, self, self.data_manager, self.control_manager, self.key_app)
+        if self.im_dtype == Extension.MAT:
+            updateViewFall(self.q_scene, self.q_view, self, self.data_manager, self.control_manager, self.key_app)
+        elif self.im_dtype == Extension.TIFF:
+            updateViewTiff()
+        
 
     """
     initialize Functions
     """
+    def setImageDataType(self) -> None:
+        self.im_dtype = self.data_manager.getImageDataType(self.key_app)
+
     def setViewSize(self, use_self_size: bool=True) -> None:
         if use_self_size:
             width_min, height_min = self.getImageSize()

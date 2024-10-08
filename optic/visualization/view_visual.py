@@ -6,7 +6,8 @@ import numpy as np
 from ..config.constants import ChannelKeys
 
 # q_view widget visualization
-def updateView(
+# update view for Fall data
+def updateViewFall(
         q_scene: QGraphicsScene, 
         q_view: QGraphicsView, 
         view_control: ViewControl, 
@@ -44,6 +45,10 @@ def updateView(
     q_scene.addPixmap(pixmap)
     q_view.setScene(q_scene)
     q_view.fitInView(q_scene.sceneRect(), Qt.KeepAspectRatio)
+
+# update view for Tiff data
+def updateViewTiff() -> None:
+    pass
 
 # 白黒画像からカラー画像作成
 def convertMonoImageToRGBImage(

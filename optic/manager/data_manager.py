@@ -11,7 +11,7 @@ from ..config.constants import Extension
 
 class DataManager:
     def __init__(self):
-        self.dict_im_dtype:        Dict[str, Literal[Extension.MAT, Extension.TIFF]] = {}
+        self.dict_im_dtype:        Dict[str, str] = {}
         self.dict_Fall:            Dict[str, Any] = {}
         self.dict_tiff:            Dict[str, np.ndarray[Tuple[int, int, int]]] = {}
 
@@ -73,9 +73,15 @@ class DataManager:
 
     # get data length
     def getLengthOfData(self, key_app: str) -> int:
-        return len(self.dict_Fall[key_app]["ops"]["xoff1"])
+        if self.dict_im_dtype[key_app] == Extension.MAT:
+            return len(self.dict_Fall[key_app]["ops"]["xoff1"])
+        elif self.dict_im_dtype[key_app] == Extension.TIFF:
+            return len(self.dict_tiff[key_app])
 
     # get attibutes
+    def getImageDataType(self, key_app: str) -> str:
+        return self.dict_im_dtype.get(key_app)
+
     def getImageSize(self, key_app: str) -> Tuple[int, int]:
         return (self.dict_Fall[key_app]["ops"]["Lx"].item(), self.dict_Fall[key_app]["ops"]["Ly"].item())
     
