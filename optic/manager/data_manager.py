@@ -14,11 +14,11 @@ class DataManager:
     def __init__(self):
         self.dict_im_dtype:        Dict[str, str] = {}
         self.dict_Fall:            Dict[str, Any] = {}
-        self.dict_tiff:            Dict[str, np.ndarray[Tuple[int, int, int]]] = {}
+        self.dict_tiff:            Dict[str, np.ndarray[Tuple[int, int, int, int, int]]] = {}
 
-        self.dict_im_bg:           Dict[str, Dict[str, np.ndarray[np.uint8, Tuple[int, int, int]]]] = defaultdict(dict)
-        self.dict_im_bg_chan2:     Dict[str, Dict[str, np.ndarray[np.uint8, Tuple[int, int, int]]]] = defaultdict(dict)
-        self.dict_im_bg_optional:  Dict[str, np.ndarray[np.uint8, Tuple[int, int, int]]] = defaultdict(dict)
+        self.dict_im_bg:           Dict[str, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
+        self.dict_im_bg_chan2:     Dict[str, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
+        self.dict_im_bg_optional:  Dict[str, np.ndarray[np.uint8, Tuple[int, int]]] = defaultdict(dict)
         self.dict_eventfile:       Dict[str, np.ndarray[Tuple[int]]] = {}
         self.dict_roicheck:        Dict[str, Any] = {}
 
@@ -96,11 +96,14 @@ class DataManager:
     def getImageSize(self, key_app: str) -> Tuple[int, int]:
         return (self.dict_Fall[key_app]["ops"]["Lx"].item(), self.dict_Fall[key_app]["ops"]["Ly"].item())
     
-    def getDictBackgroundImage(self, key_app: str) -> Dict[str, NDArray[np.uint8]]: # 2d array
+    def getDictBackgroundImage(self, key_app: str) -> Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]: # 2d array
         return self.dict_im_bg.get(key_app)
     
-    def getBackgroundChan2Image(self, key_app: str) -> np.array:
+    def getBackgroundChan2Image(self, key_app: str) -> Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]:
         return self.dict_im_bg_chan2.get(key_app)
+    
+    def getBackgroundOptionalImage(self, key_app: str) -> np.ndarray[np.uint8, Tuple[int, int]]:
+        return self.dict_im_bg_optional.get(key_app)
     
     def getEventfile(self, key_app: str) -> np.array:
         return self.dict_eventfile.get(key_app)

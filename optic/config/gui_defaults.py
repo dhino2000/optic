@@ -25,7 +25,7 @@ class GuiDefaults:
         },
         "TITLE": "Suite2pROICheckGUI",
         "APP_KEYS": [AppKeys.PRI],
-        "CHANNELS": [ChannelKeys.CHAN1, ChannelKeys.CHAN2],
+        "CHANNELS": [ChannelKeys.CHAN1, ChannelKeys.CHAN2, ChannelKeys.CHAN3],
         "ROI_THRESHOLDS": {
             "npix": "(50, 200)",
             "radius": "(3, 12)",

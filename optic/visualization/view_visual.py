@@ -17,6 +17,7 @@ def updateViewFall(
         ) -> None:
     bg_image_chan1 = None
     bg_image_chan2 = None
+    bg_image_chan3 = None # optional
 
     if view_control.getBackgroundVisibility(ChannelKeys.CHAN1):
         image_type = view_control.getBackgroundImageType()
@@ -27,13 +28,19 @@ def updateViewFall(
             )
     if view_control.getBackgroundVisibility(ChannelKeys.CHAN2):
         bg_image_chan2 = adjustChannelContrast(
-            image=data_manager.getBackgroundChan2Image(key_app),
+            image=data_manager.getDictBackgroundImage(key_app).get(image_type),
             min_val=view_control.getBackgroundContrastValue(ChannelKeys.CHAN2, 'min'),
             max_val=view_control.getBackgroundContrastValue(ChannelKeys.CHAN2, 'max'),
             )
+    if view_control.getBackgroundVisibility(ChannelKeys.CHAN2):
+        bg_image_chan3 = adjustChannelContrast(
+            image=data_manager.getBackgroundOptionalImage(key_app),
+            min_val=view_control.getBackgroundContrastValue(ChannelKeys.CHAN3, 'min'),
+            max_val=view_control.getBackgroundContrastValue(ChannelKeys.CHAN3, 'max'),
+            )
 
     (width, height) = view_control.getImageSize()
-    bg_image = convertMonoImageToRGBImage(image_g=bg_image_chan1, image_r=bg_image_chan2)
+    bg_image = convertMonoImageToRGBImage(image_g=bg_image_chan1, image_r=bg_image_chan2, image_b=bg_image_chan3)
 
     height, width = bg_image.shape[:2]
     qimage = QImage(bg_image.data, width, height, width * 3, QImage.Format_RGB888)
@@ -54,7 +61,9 @@ def updateViewTiff() -> None:
 def convertMonoImageToRGBImage(
         image_r: Optional[np.ndarray] = None, 
         image_g: Optional[np.ndarray] = None, 
-        image_b: Optional[np.ndarray] = None
+        image_b: Optional[np.ndarray] = None,
+        height: int = 512,
+        width: int = 512
         ) -> np.ndarray:
     """
     1~3チャンネルの画像を組み合わせてRGB画像を生成する。
