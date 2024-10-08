@@ -6,30 +6,47 @@ from .base_layouts import makeLayoutLineEditLabel, makeLayoutButtonGroup
 from ..config.constants import BGImageTypeList
 from ..gui.table_layouts import makeLayoutROIFilterThreshold
 
-def makeLayoutViewWithZSlider(
+def makeLayoutViewWithZTSlider(
         widget_manager: WidgetManager,
         key_view: str,
-        key_label: str,
-        key_slider: str,
-        z_stack_size: int
+        slider_z: bool = False,
+        slider_t: bool = False,
+        key_label_z: str = "",
+        key_label_t: str = "",
+        key_slider_z: str = "",
+        key_slider_t: str = "",
+        stack_size_z: int = 1,
+        stack_size_t: int = 1,
 ) -> QVBoxLayout:
     layout = QVBoxLayout()
 
     q_view = widget_manager.makeWidgetView(key=key_view)
     layout.addWidget(q_view)
 
-    # add label
-    z_label = widget_manager.makeWidgetLabel(key=key_label, label="Z: 0")
-    layout.addWidget(z_label)
-
     # add z slider
-    z_slider = widget_manager.makeWidgetSlider(
-        key=key_slider,
-        value_min=0,
-        value_max=z_stack_size - 1,
-        value_set=0,
-    )
-    layout.addWidget(z_slider)
+    if slider_z:
+        # add label
+        label = widget_manager.makeWidgetLabel(key=key_label_z, label="Z: 0")
+        layout.addWidget(label)
+        slider = widget_manager.makeWidgetSlider(
+            key=key_slider_z,
+            value_min=0,
+            value_max=stack_size_z - 1,
+            value_set=0,
+        )
+        layout.addWidget(slider)
+
+    # add t slider
+    if slider_t:
+        label = widget_manager.makeWidgetLabel(key=key_label_t, label="T: 0")
+        layout.addWidget(label)
+        slider = widget_manager.makeWidgetSlider(
+            key=key_slider_t,
+            value_min=0,
+            value_max=stack_size_t - 1,
+            value_set=0,
+        )
+        layout.addWidget(slider)
 
     return layout
 

@@ -9,7 +9,9 @@ from ..preprocessing.preprocessing_image import getBGImageFromFall
 
 class DataManager:
     def __init__(self):
+        self.data_type:            Literal["mat", "tif"] = ""
         self.dict_Fall:            Dict[str, Any] = {}
+        self.dict_tiff:            Dict[str, np.ndarray[Tuple[int, int, int]]] = {}
         self.dict_im_bg:           Dict[str, Dict[str, np.ndarray[np.uint8, Tuple[int, int, int]]]] = defaultdict(dict)
         self.dict_im_bg_chan2:     Dict[str, Dict[str, np.ndarray[np.uint8, Tuple[int, int, int]]]] = defaultdict(dict)
         self.dict_eventfile:       Dict[str, np.ndarray[Tuple[int]]] = {}
