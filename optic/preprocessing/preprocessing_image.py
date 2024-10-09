@@ -32,4 +32,5 @@ def getBGImageFromFall(data_manager, key_dict_Fall, key_dict_im_bg, dtype="uint8
         img = convertImageDtypeToINT(data_manager.dict_Fall[key_dict_Fall]["ops"][key_im], dtype=dtype)
         img = resizeImageShape(img, base_shape)
         data_manager.dict_im_bg[key_dict_im_bg][key_im] = img
+    return data_manager
         

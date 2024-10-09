@@ -10,6 +10,7 @@ from ..gui.table_setup import applyDictROICheckToTable
 from ..preprocessing.preprocessing_fall import convertMatToDictFall, convertMatToDictROICheck
 from ..preprocessing.preprocessing_image import getBGImageFromFall, convertImageDtypeToINT
 from ..preprocessing.preprocessing_table import convertTableDataToDictROICheck, convertDictROICheckToMatROICheck, convertMatROICheckToDictROICheck
+from ..preprocessing.preprocessing_tiff import standardizeTIFFStack
 from .file_dialog import openFileDialog, saveFileDialog
 
 # Fallの読み込み, メッセージ付き
@@ -25,12 +26,19 @@ def loadFallMATWithGUI(q_window: QMainWindow, data_manager: DataManager, key_app
 # load tif image data (XYC)
 def loadTifImage(path_image: str, preprocessing: bool=True) -> np.array:
     im = tifffile.imread(path_image)
-    im = convertImageDtypeToINT(im)
+    if preprocessing:
+        im = convertImageDtypeToINT(im)
     return im
 
-# load tiff stack data (XYZCT)
-def loadTiffStack(path_tiff: str, preprocessing: bool=True) -> bool:
-    im = tifffile.imread(path_tiff)
+# load tiff stack data (XYCZT)
+def loadTiffStack(path_tiff: str, preprocessing: bool=True, axes_tgt: str="XYCZT") -> bool:
+    if preprocessing:
+        with tifffile.TiffFile(path_tiff) as tif:
+            series = tif.series[0]
+            axes_src = series.axes
+            im = standardizeTIFFStack(series.asarray(), axes_src, axes_tgt)
+    else:
+        im = tifffile.imread(path_tiff)
     return im
 
 # EventFile npyの読み込み, 初期化

@@ -30,7 +30,7 @@ class DataManager:
             if preprocessing:
                 dict_Fall = convertMatToDictFall(Fall)
                 self.dict_Fall[key_app] = dict_Fall
-                getBGImageFromFall(self, key_app, key_app)
+                self = getBGImageFromFall(self, key_app, key_app)
             else:
                 self.dict_Fall[key_app] = Fall
             return True
@@ -48,7 +48,7 @@ class DataManager:
     # load tiff stack data
     def loadTiffStack(self, key_app: str, path_tiff: str) -> bool:
         try:
-            tiff = tifffile.imread(path_tiff)
+            tiff = loadTiffStack(path_tiff)
             self.dict_im_dtype[key_app] = Extension.TIFF
             self.dict_tiff[key_app] = tiff
             return True
