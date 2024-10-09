@@ -42,8 +42,7 @@ def getBGImageFromFall(data_manager: DataManager, key_app: str, dtype: str="uint
 def getBGImageChannel2FromFall(data_manager: DataManager, key_app: str, dtype: str="uint8") -> Dict[str, np.ndarray]:
     # get image shape from meanImg
     dict_im_bg = {}
-    for key_im in BGImageTypeList.FALL:
-        img = convertImageDtypeToINT(data_manager.dict_Fall[key_app]["ops"]["meanImg_chan2"], dtype=dtype)
-        dict_im_bg[key_im] = img
+    dict_im_bg["meanImg"] = convertImageDtypeToINT(data_manager.dict_Fall[key_app]["ops"]["meanImg_chan2"], dtype=dtype)
+    dict_im_bg["meanImg_corrected"] = convertImageDtypeToINT(data_manager.dict_Fall[key_app]["ops"]["meanImg_chan2_corrected"], dtype=dtype)
     return dict_im_bg
         
