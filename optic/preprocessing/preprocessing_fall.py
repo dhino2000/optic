@@ -21,11 +21,18 @@ def convertMatToDictFall(Fall):
         dict_Fall_stat_cell["med"] = dict_Fall_stat_cell["med"][::-1] # yx -> xy
         dict_Fall_stat[cellid] = dict_Fall_stat_cell
         
-    # opsの変換
     Fall_ops = Fall["ops"]
     dict_Fall_ops = {key: value for key, value in zip(Fall_ops[0].dtype.fields, Fall_ops[0][0])}
 
-    return {"stat": dict_Fall_stat, "F": Fall["F"], "Fneu": Fall["Fneu"], "spks": Fall["spks"], "ops": dict_Fall_ops}
+    dict_Fall = {"stat": dict_Fall_stat, "F": Fall["F"], "Fneu": Fall["Fneu"], "spks": Fall["spks"], "ops": dict_Fall_ops, "iscell": Fall["iscell"]}
+
+    # add chan2 data
+    if dict_Fall_ops["nchannels"].flatten()[0] == 2:
+        dict_Fall["F_chan2"] = Fall["F_chan2"]
+        dict_Fall["Fneu_chan2"] = Fall["Fneu_chan2"]
+        dict_Fall["redcell"] = Fall["redcell"]
+
+    return dict_Fall
 
 # ROICheckのmatを扱いやすいdictに変換
 def convertMatToDictROICheck(mat):

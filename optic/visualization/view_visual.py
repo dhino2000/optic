@@ -29,7 +29,7 @@ def updateViewFall(
     if view_control.getBackgroundVisibility(ChannelKeys.CHAN2):
         image_type = view_control.getBackgroundImageType()
         bg_image_chan2 = adjustChannelContrast(
-            image=data_manager.getDictBackgroundImage(key_app).get(image_type), # 後でchannel2用に修正
+            image=data_manager.getDictBackgroundImageChannel2(key_app).get(image_type),
             min_val=view_control.getBackgroundContrastValue(ChannelKeys.CHAN2, 'min'),
             max_val=view_control.getBackgroundContrastValue(ChannelKeys.CHAN2, 'max'),
             )

@@ -26,7 +26,7 @@ def resizeImageShape(img, shape_tgt) -> np.ndarray:
     new_img[start_y:start_y+img.shape[0], start_x:start_x+img.shape[1]] = img
     return new_img
 
-# Fallからbackground image取得
+# get Background Images from Fall.mat
 def getBGImageFromFall(data_manager: DataManager, key_app: str, dtype: str="uint8") -> Dict[str, np.ndarray]:
     # get image shape from meanImg
     dict_im_bg = {}
@@ -34,6 +34,16 @@ def getBGImageFromFall(data_manager: DataManager, key_app: str, dtype: str="uint
     for key_im in BGImageTypeList.FALL:
         img = convertImageDtypeToINT(data_manager.dict_Fall[key_app]["ops"][key_im], dtype=dtype)
         img = resizeImageShape(img, base_shape)
+        dict_im_bg[key_im] = img
+    return dict_im_bg
+
+# get chan2 Background Images from Fall.mat
+# but chan2 background images are only "meanImg" and "meanImg corrected"
+def getBGImageChannel2FromFall(data_manager: DataManager, key_app: str, dtype: str="uint8") -> Dict[str, np.ndarray]:
+    # get image shape from meanImg
+    dict_im_bg = {}
+    for key_im in BGImageTypeList.FALL:
+        img = convertImageDtypeToINT(data_manager.dict_Fall[key_app]["ops"]["meanImg_chan2"], dtype=dtype)
         dict_im_bg[key_im] = img
     return dict_im_bg
         

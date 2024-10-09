@@ -5,7 +5,7 @@ from scipy.io import loadmat
 import numpy as np
 from numpy.typing import NDArray
 import tifffile
-from ..preprocessing.preprocessing_image import getBGImageFromFall
+from ..preprocessing.preprocessing_image import getBGImageFromFall, getBGImageChannel2FromFall
 from ..config.constants import Extension
 from ..io.data_io import loadFallMat, loadTiffStack, loadTifImage
 
@@ -31,6 +31,8 @@ class DataManager:
             self.dict_Fall[key_app] = dict_Fall
             self.dict_im_dtype[key_app] = Extension.MAT
             self.dict_im_bg[key_app] = getBGImageFromFall(self, key_app)
+            if self.getNChannels(key_app) == 2:
+                self.dict_im_bg_chan2[key_app] = getBGImageChannel2FromFall(self, key_app)
             return True
         except Exception as e:
             return False
@@ -88,8 +90,10 @@ class DataManager:
     def getLengthOfData(self, key_app: str) -> int:
         if self.dict_im_dtype[key_app] == Extension.MAT:
             return len(self.dict_Fall[key_app]["ops"]["xoff1"])
-        elif self.dict_im_dtype[key_app] == Extension.TIFF:
-            return len(self.dict_tiff[key_app])
+        
+    # get nchannels
+    def getNChannels(self, key_app: str) -> int:
+        return self.dict_Fall[key_app]["ops"]["nchannels"].flatten()[0]
         
     "Tiff data"
     def getSizeOfX(self, key_app: str) -> int:
