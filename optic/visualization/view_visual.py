@@ -42,9 +42,14 @@ def updateViewFall(
             )
 
     (width, height) = view_control.getImageSize()
-    bg_image = convertMonoImageToRGBImage(image_g=bg_image_chan1, image_r=bg_image_chan2, image_b=bg_image_chan3)
+    bg_image = convertMonoImageToRGBImage(
+        image_g=bg_image_chan1, 
+        image_r=bg_image_chan2, 
+        image_b=bg_image_chan3,
+        height=height,
+        width=width,
+        dtype=np.uint8)
 
-    height, width = bg_image.shape[:2]
     qimage = QImage(bg_image.data, width, height, width * 3, QImage.Format_RGB888)
     pixmap = QPixmap.fromImage(qimage)
 
@@ -63,6 +68,7 @@ def updateViewTiff(
         data_manager: DataManager, 
         control_manager: ControlManager, 
         key_app: str,
+        dtype: np.dtype = np.uint8
         ) -> None:
     bg_image_chan1 = None
     bg_image_chan2 = None
@@ -90,13 +96,14 @@ def updateViewTiff(
             )
 
     (width, height) = view_control.getImageSize()
-    bg_image = convertMonoImageToRGBImage(image_g=bg_image_chan1, image_r=bg_image_chan2, image_b=bg_image_chan3)
+    bg_image = convertMonoImageToRGBImage(
+        image_g=bg_image_chan1, 
+        image_r=bg_image_chan2, 
+        image_b=bg_image_chan3, 
+        height=height,
+        width=width,
+        dtype=dtype)
 
-    print(bg_image.shape)
-    print(np.mean(bg_image))
-    print(np.max(bg_image), np.min(bg_image))
-
-    height, width = bg_image.shape[:2]
     qimage = QImage(bg_image.data, width, height, width * 3, QImage.Format_RGB888)
     pixmap = QPixmap.fromImage(qimage)
 
@@ -111,7 +118,8 @@ def convertMonoImageToRGBImage(
         image_g: Optional[np.ndarray] = None, 
         image_b: Optional[np.ndarray] = None,
         height: int = 512,
-        width: int = 512
+        width: int = 512,
+        dtype: np.dtype = np.uint8
         ) -> np.ndarray:
     """
     1~3チャンネルの画像を組み合わせてRGB画像を生成する。
@@ -127,19 +135,15 @@ def convertMonoImageToRGBImage(
     Raises:
     ValueError: 提供された画像のサイズが異なる場合
     """
-    # 非Noneの画像のリストを作成
+    # return black image if no image provided
     images = [img for img in [image_r, image_g, image_b] if img is not None]
     if not images:
-        # 全てのチャンネルがNoneの場合、デフォルトサイズの黒い画像を返す
-        return np.zeros((height, width, 3), dtype=np.uint8)
-    # すべての画像のサイズが同じであることを確認
+        return np.zeros((width, height, 3), dtype=dtype)
+    # check if all images have the same shapes
     if len(set(img.shape for img in images)) != 1:
-        raise ValueError("All provided images must have the same dimensions")
-    # 画像サイズを取得
-    height, width = images[0].shape[:2]
-    # RGB画像を初期化
-    rgb_image = np.zeros((height, width, 3), dtype=np.uint8)
-    # 各チャンネルを処理
+        raise ValueError("All provided images must have the same shapes")
+
+    rgb_image = np.zeros((width, height, 3), dtype=dtype)
     for i, img in enumerate([image_r, image_g, image_b]):
         if img is not None:
             rgb_image[:, :, i] = img

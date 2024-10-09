@@ -160,6 +160,24 @@ def bindFuncBackgroundContrastSlider(
     q_slider_min.valueChanged.connect(onContrastMinChanged)
     q_slider_max.valueChanged.connect(onContrastMaxChanged)
 
+# -> view_layouts.makeLayoutViewWithZTSlider
+def bindFuncPlaneZSlider(
+    q_slider: 'QSlider',
+    view_control: 'ViewControl'
+) -> None:
+    def onZChanged(value: int) -> None:
+        view_control.setPlaneZ(value)
+        view_control.updateView()
+    q_slider.valueChanged.connect(onZChanged)
+def bindFuncPlaneTSlider(
+    q_slider: 'QSlider',
+    view_control: 'ViewControl'
+) -> None:
+    def onTChanged(value: int) -> None:
+        view_control.setPlaneT(value)
+        view_control.updateView()
+    q_slider.valueChanged.connect(onTChanged)
+
 # -> slider_layouts.makeLayoutContrastSlider
 def bindFuncBackgroundVisibilityCheckbox(
     q_checkbox: 'QCheckBox', 

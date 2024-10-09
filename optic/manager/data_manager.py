@@ -56,7 +56,7 @@ class DataManager:
     """
     get Functions
     """
-        
+    "Fall data"
     def getDictFall(self, key_app: str) -> Dict[str, Any]:
         return self.dict_Fall[key_app]
     
@@ -90,6 +90,18 @@ class DataManager:
             return len(self.dict_Fall[key_app]["ops"]["xoff1"])
         elif self.dict_im_dtype[key_app] == Extension.TIFF:
             return len(self.dict_tiff[key_app])
+        
+    "Tiff data"
+    def getSizeOfX(self, key_app: str) -> int:
+        return self.dict_tiff[key_app].shape[0]
+    def getSizeOfY(self, key_app: str) -> int:
+        return self.dict_tiff[key_app].shape[1]
+    def getSizeOfC(self, key_app: str) -> int:
+        return self.dict_tiff[key_app].shape[2]
+    def getSizeOfZ(self, key_app: str) -> int:
+        return self.dict_tiff[key_app].shape[3]
+    def getSizeOfT(self, key_app: str) -> int:
+        return self.dict_tiff[key_app].shape[4]
 
     # get attibutes
     def getImageDataType(self, key_app: str) -> str:
