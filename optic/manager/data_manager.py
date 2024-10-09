@@ -11,7 +11,7 @@ from ..io.data_io import loadFallMat, loadTiffStack, loadTifImage
 
 class DataManager:
     def __init__(self):
-        self.dict_im_dtype:        Dict[str, str] = {}
+        self.dict_data_dtype:        Dict[str, str] = {}
         self.dict_Fall:            Dict[str, Any] = {}
         self.dict_tiff:            Dict[str, np.ndarray[Tuple[int, int, int, int, int]]] = {}
 
@@ -29,7 +29,7 @@ class DataManager:
         try:
             dict_Fall = loadFallMat(path_fall)
             self.dict_Fall[key_app] = dict_Fall
-            self.dict_im_dtype[key_app] = Extension.MAT
+            self.dict_data_dtype[key_app] = Extension.MAT
             self.dict_im_bg[key_app] = getBGImageFromFall(self, key_app)
             if self.getNChannels(key_app) == 2:
                 self.dict_im_bg_chan2[key_app] = getBGImageChannel2FromFall(self, key_app)
@@ -49,7 +49,7 @@ class DataManager:
     def loadTiffStack(self, key_app: str, path_tiff: str) -> bool:
         try:
             tiff = loadTiffStack(path_tiff)
-            self.dict_im_dtype[key_app] = Extension.TIFF
+            self.dict_data_dtype[key_app] = Extension.TIFF
             self.dict_tiff[key_app] = tiff
             return True
         except Exception as e:
@@ -88,7 +88,7 @@ class DataManager:
 
     # get data length
     def getLengthOfData(self, key_app: str) -> int:
-        if self.dict_im_dtype[key_app] == Extension.MAT:
+        if self.dict_data_dtype[key_app] == Extension.MAT:
             return len(self.dict_Fall[key_app]["ops"]["xoff1"])
         
     # get nchannels
@@ -108,14 +108,17 @@ class DataManager:
         return self.dict_tiff[key_app].shape[4]
 
     # get attibutes
-    def getImageDataType(self, key_app: str) -> str:
-        return self.dict_im_dtype.get(key_app)
+    def getDataType(self, key_app: str) -> str:
+        return self.dict_data_dtype.get(key_app)
+    
+    def getDataTypeOfTIFFStack(self, key_app: str) -> str:
+        return self.dict_tiff[key_app].dtype
 
     # get image size, change return with dtype
     def getImageSize(self, key_app: str) -> Tuple[int, int]:
-        if self.dict_im_dtype[key_app] == Extension.MAT:
+        if self.dict_data_dtype[key_app] == Extension.MAT:
             return (self.dict_Fall[key_app]["ops"]["Lx"].item(), self.dict_Fall[key_app]["ops"]["Ly"].item())
-        elif self.dict_im_dtype[key_app] == Extension.TIFF:
+        elif self.dict_data_dtype[key_app] == Extension.TIFF:
             return (self.dict_tiff[key_app].shape[0], self.dict_tiff[key_app].shape[1])
         
     def getImageFromXYCZTTiffStack(self, key_app: str, plane_z: int, plane_t: int, channel: int) -> np.ndarray[np.uint8, Tuple[int, int]]:

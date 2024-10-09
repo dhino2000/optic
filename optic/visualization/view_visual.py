@@ -35,7 +35,7 @@ def updateViewFall(
             max_val=view_control.getBackgroundContrastValue(ChannelKeys.CHAN2, 'max'),
             )
     # optional
-    if view_control.getBackgroundVisibility(ChannelKeys.CHAN3):
+    if view_control.getBackgroundVisibility(ChannelKeys.CHAN3) and data_manager.getBackgroundImageOptional(key_app):
         bg_image_chan3 = adjustChannelContrast(
             image=data_manager.getBackgroundImageOptional(key_app),
             min_val=view_control.getBackgroundContrastValue(ChannelKeys.CHAN3, 'min'),
@@ -69,7 +69,6 @@ def updateViewTiff(
         data_manager: DataManager, 
         control_manager: ControlManager, 
         key_app: str,
-        dtype: np.dtype = np.uint8
         ) -> None:
     bg_image_chan1 = None
     bg_image_chan2 = None
@@ -103,7 +102,9 @@ def updateViewTiff(
         image_b=bg_image_chan3, 
         height=height,
         width=width,
-        dtype=dtype)
+        )
+    
+    view_control.bg_image = bg_image
 
     qimage = QImage(bg_image.data, width, height, width * 3, QImage.Format_RGB888)
     pixmap = QPixmap.fromImage(qimage)
@@ -153,23 +154,38 @@ def convertMonoImageToRGBImage(
 
 def adjustChannelContrast(
         image: np.ndarray, 
-        min_val: int, 
-        max_val: int, 
-        dtype: np.dtype=np.uint8
+        min_val: float, 
+        max_val: float
         ) -> np.ndarray:
     try:
-        epsilon = 1e-5 # Zero division prevention
-        # 画像の正規化
-        image_min, image_max = image.min(), image.max()
-        image_normalized = (image - image_min) / (image_max - image_min + epsilon)
+        # 入力画像の型を確認
+        input_dtype = image.dtype
+        if input_dtype not in [np.uint8, np.uint16, np.uint32, np.float32, np.float64]:
+            raise ValueError(f"Unsupported input dtype: {input_dtype}")
+
+        epsilon = 1e-7  # Zero division prevention
+        
+        # 画像の実際の最小値と最大値を取得
+        image_min, image_max = np.min(image), np.max(image)
+        
+        # 画像の正規化 (0-1の範囲に)
+        image_normalized = (image.astype(np.float32) - image_min) / (image_max - image_min + epsilon)
+
+        # コントラスト調整用のmin_val, max_valを0-1の範囲に正規化
+        min_val_norm = (min_val - image_min) / (image_max - image_min)
+        max_val_norm = (max_val - image_min) / (image_max - image_min)
 
         # コントラスト調整
-        min_val, max_val = min_val / 255, max_val / 255  # 0-1の範囲に正規化
-        image_contrasted = np.clip((image_normalized - min_val) / (max_val - min_val + epsilon), 0, 1)
-        image_adjusted = (image_contrasted * 255).astype(dtype)
-    except (TypeError, AttributeError) as e:
-        image_adjusted = None
-    return image_adjusted
+        image_contrasted = np.clip((image_normalized - min_val_norm) / (max_val_norm - min_val_norm + epsilon), 0, 1)
+        
+        # uint8に変換
+        image_adjusted = (image_contrasted * 255).astype(np.uint8)
+
+        return image_adjusted
+
+    except (TypeError, AttributeError, ValueError) as e:
+        print(f"Error in adjustChannelContrast: {str(e)}")
+        return None
 
 def drawAllROIs(
         view_control: ViewControl, 

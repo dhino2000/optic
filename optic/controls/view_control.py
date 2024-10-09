@@ -25,7 +25,8 @@ class ViewControl:
         self.config_manager  = config_manager
         self.control_manager = control_manager
 
-        self.im_dtype:              str                         = "" # ".mat" or ".tif"
+        self.data_dtype:            str                         = "" # ".mat" or ".tif"
+        self.im_dtype:              np.dtype                    = np.uint8
         self.last_click_position:   Tuple[int, int]             = ()
         self.image_sizes:           Tuple[int, int]             = ()
         self.bg_image_type:         str                         = BGImageTypeList.FALL[0]
@@ -45,25 +46,30 @@ class ViewControl:
         self.roi_opacity:       int                             = int(config_manager.gui_defaults["ROI_VISUAL_SETTINGS"]["DEFAULT_ROI_OPACITY"])
         self.highlight_opacity: int                             = int(config_manager.gui_defaults["ROI_VISUAL_SETTINGS"]["DEFAULT_HIGHLIGHT_OPACITY"])
 
-        self.setImageDataType()
+        self.setDataType()
         self.setImageSize()
-        if self.im_dtype == Extension.MAT:
+        if self.data_dtype == Extension.MAT:
             self.initializeROIColors()
             self.setSharedAttr_ROISelected(roi_id=0)
+        elif self.data_dtype == Extension.TIFF:
+            self.setImageDataType()
 
 
     def updateView(self) -> None:
-        if self.im_dtype == Extension.MAT:
+        if self.data_dtype == Extension.MAT:
             updateViewFall(self.q_scene, self.q_view, self, self.data_manager, self.control_manager, self.key_app)
-        elif self.im_dtype == Extension.TIFF:
+        elif self.data_dtype == Extension.TIFF:
             updateViewTiff(self.q_scene, self.q_view, self, self.data_manager, self.control_manager, self.key_app)
         
 
     """
     initialize Functions
     """
+    def setDataType(self) -> None:
+        self.data_dtype = self.data_manager.getDataType(self.key_app)
+
     def setImageDataType(self) -> None:
-        self.im_dtype = self.data_manager.getImageDataType(self.key_app)
+        self.im_dtype = self.data_manager.getDataTypeOfTIFFStack(self.key_app)
 
     def setViewSize(self, use_self_size: bool=True) -> None:
         if use_self_size:
