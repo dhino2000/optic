@@ -56,8 +56,54 @@ def updateViewFall(
     q_view.fitInView(q_scene.sceneRect(), Qt.KeepAspectRatio)
 
 # update view for Tiff data
-def updateViewTiff() -> None:
-    pass
+def updateViewTiff(
+        q_scene: QGraphicsScene, 
+        q_view: QGraphicsView, 
+        view_control: ViewControl, 
+        data_manager: DataManager, 
+        control_manager: ControlManager, 
+        key_app: str,
+        ) -> None:
+    bg_image_chan1 = None
+    bg_image_chan2 = None
+    bg_image_chan3 = None 
+    plane_z = view_control.getPlaneZ()
+    plane_t = view_control.getPlaneT()
+
+    if view_control.getBackgroundVisibility(ChannelKeys.CHAN1):
+        bg_image_chan1 = adjustChannelContrast(
+            image=data_manager.getImageFromXYCZTTiffStack(key_app, plane_z, plane_t, 0),
+            min_val=view_control.getBackgroundContrastValue(ChannelKeys.CHAN1, 'min'),
+            max_val=view_control.getBackgroundContrastValue(ChannelKeys.CHAN1, 'max'),
+            )
+    if view_control.getBackgroundVisibility(ChannelKeys.CHAN2):
+        bg_image_chan2 = adjustChannelContrast(
+            image=data_manager.getImageFromXYCZTTiffStack(key_app, plane_z, plane_t, 1),
+            min_val=view_control.getBackgroundContrastValue(ChannelKeys.CHAN2, 'min'),
+            max_val=view_control.getBackgroundContrastValue(ChannelKeys.CHAN2, 'max'),
+            )
+    if view_control.getBackgroundVisibility(ChannelKeys.CHAN3):
+        bg_image_chan3 = adjustChannelContrast(
+            image=data_manager.getImageFromXYCZTTiffStack(key_app, plane_z, plane_t, 2),
+            min_val=view_control.getBackgroundContrastValue(ChannelKeys.CHAN3, 'min'),
+            max_val=view_control.getBackgroundContrastValue(ChannelKeys.CHAN3, 'max'),
+            )
+
+    (width, height) = view_control.getImageSize()
+    bg_image = convertMonoImageToRGBImage(image_g=bg_image_chan1, image_r=bg_image_chan2, image_b=bg_image_chan3)
+
+    print(bg_image.shape)
+    print(np.mean(bg_image))
+    print(np.max(bg_image), np.min(bg_image))
+
+    height, width = bg_image.shape[:2]
+    qimage = QImage(bg_image.data, width, height, width * 3, QImage.Format_RGB888)
+    pixmap = QPixmap.fromImage(qimage)
+
+    q_scene.clear()
+    q_scene.addPixmap(pixmap)
+    q_view.setScene(q_scene)
+    q_view.fitInView(q_scene.sceneRect(), Qt.KeepAspectRatio)
 
 # 白黒画像からカラー画像作成
 def convertMonoImageToRGBImage(

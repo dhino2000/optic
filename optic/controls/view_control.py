@@ -17,7 +17,6 @@ class ViewControl:
             config_manager  : ConfigManager, 
             control_manager : ControlManager,
         ):
-        # Rest of the code...
         self.key_app         = key_app
         self.q_view          = q_view
         self.q_scene         = q_scene
@@ -26,7 +25,7 @@ class ViewControl:
         self.config_manager  = config_manager
         self.control_manager = control_manager
 
-        self.im_dtype:              str                         = ""
+        self.im_dtype:              str                         = "" # ".mat" or ".tif"
         self.last_click_position:   Tuple[int, int]             = ()
         self.image_sizes:           Tuple[int, int]             = ()
         self.bg_image_type:         str                         = BGImageTypeList.FALL[0]
@@ -38,6 +37,9 @@ class ViewControl:
                 'max': config_manager.gui_defaults["VIEW_SETTINGS"]["DEFAULT_CONTRAST_MAX"]
             }
             self.bg_visibility[channel] = True
+
+        self.plane_z:           int                             = 0
+        self.plane_t:           int                             = 0
 
         self.roi_colors:        Dict[int, Tuple[int, int, int]] = {}
         self.roi_opacity:       int                             = int(config_manager.gui_defaults["ROI_VISUAL_SETTINGS"]["DEFAULT_ROI_OPACITY"])
@@ -54,7 +56,7 @@ class ViewControl:
         if self.im_dtype == Extension.MAT:
             updateViewFall(self.q_scene, self.q_view, self, self.data_manager, self.control_manager, self.key_app)
         elif self.im_dtype == Extension.TIFF:
-            updateViewTiff()
+            updateViewTiff(self.q_scene, self.q_view, self, self.data_manager, self.control_manager, self.key_app)
         
 
     """
@@ -78,6 +80,12 @@ class ViewControl:
     """
     get Functions
     """
+    def getPlaneZ(self) -> int:
+        return self.plane_z
+    
+    def getPlaneT(self) -> int:
+        return self.plane_t
+    
     def getROIColor(self, roi_id: int) -> Tuple[int, int, int]:
         return self.roi_colors[roi_id]
 
@@ -104,6 +112,12 @@ class ViewControl:
     """
     set Functions
     """
+    def setPlaneZ(self, plane_z: int) -> None:
+        self.plane_z = plane_z
+
+    def setPlaneT(self, plane_t: int) -> None:
+        self.plane_t = plane_t
+
     def setROIOpacity(self, opacity: int) -> None:
         self.roi_opacity = opacity
 

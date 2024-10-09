@@ -101,6 +101,13 @@ class DataManager:
             return (self.dict_Fall[key_app]["ops"]["Lx"].item(), self.dict_Fall[key_app]["ops"]["Ly"].item())
         elif self.dict_im_dtype[key_app] == Extension.TIFF:
             return (self.dict_tiff[key_app].shape[0], self.dict_tiff[key_app].shape[1])
+        
+    def getImageFromXYCZTTiffStack(self, key_app: str, plane_z: int, plane_t: int, channel: int) -> np.ndarray[np.uint8, Tuple[int, int]]:
+        try:
+            return self.dict_tiff[key_app][:, :, channel, plane_z, plane_t]
+        except IndexError:
+            # out of index, return black image
+            return np.zeros(self.dict_tiff[key_app].shape[:2], dtype=np.uint8)
     
     def getDictBackgroundImage(self, key_app: str) -> Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]: # 2d array
         return self.dict_im_bg.get(key_app)
