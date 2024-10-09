@@ -5,10 +5,9 @@ from scipy.io import loadmat
 import numpy as np
 from numpy.typing import NDArray
 import tifffile
-from ..preprocessing.preprocessing_fall import convertMatToDictFall
 from ..preprocessing.preprocessing_image import getBGImageFromFall
 from ..config.constants import Extension
-from ..io.data_io import loadTiffStack, loadTifImage
+from ..io.data_io import loadFallMat, loadTiffStack, loadTifImage
 
 class DataManager:
     def __init__(self):
@@ -22,17 +21,16 @@ class DataManager:
         self.dict_eventfile:       Dict[str, np.ndarray[Tuple[int]]] = {}
         self.dict_roicheck:        Dict[str, Any] = {}
 
+    """
+    IO Functions
+    """
     # load Fall.mat data
-    def loadFallMAT(self, key_app: str, path_fall: str, preprocessing: bool=True) -> bool:
+    def loadFallMat(self, key_app: str, path_fall: str, preprocessing: bool=True) -> bool:
         try:
-            Fall = loadmat(path_fall)
+            dict_Fall = loadFallMat(path_fall)
+            self.dict_Fall[key_app] = dict_Fall
             self.dict_im_dtype[key_app] = Extension.MAT
-            if preprocessing:
-                dict_Fall = convertMatToDictFall(Fall)
-                self.dict_Fall[key_app] = dict_Fall
-                self = getBGImageFromFall(self, key_app, key_app)
-            else:
-                self.dict_Fall[key_app] = Fall
+            self.dict_im_bg[key_app] = getBGImageFromFall(self, key_app)
             return True
         except Exception as e:
             return False
@@ -54,6 +52,10 @@ class DataManager:
             return True
         except Exception as e:
             return False
+        
+    """
+    get Functions
+    """
         
     def getDictFall(self, key_app: str) -> Dict[str, Any]:
         return self.dict_Fall[key_app]
@@ -93,8 +95,12 @@ class DataManager:
     def getImageDataType(self, key_app: str) -> str:
         return self.dict_im_dtype.get(key_app)
 
+    # get image size, change return with dtype
     def getImageSize(self, key_app: str) -> Tuple[int, int]:
-        return (self.dict_Fall[key_app]["ops"]["Lx"].item(), self.dict_Fall[key_app]["ops"]["Ly"].item())
+        if self.dict_im_dtype[key_app] == Extension.MAT:
+            return (self.dict_Fall[key_app]["ops"]["Lx"].item(), self.dict_Fall[key_app]["ops"]["Ly"].item())
+        elif self.dict_im_dtype[key_app] == Extension.TIFF:
+            return (self.dict_tiff[key_app].shape[0], self.dict_tiff[key_app].shape[1])
     
     def getDictBackgroundImage(self, key_app: str) -> Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]: # 2d array
         return self.dict_im_bg.get(key_app)

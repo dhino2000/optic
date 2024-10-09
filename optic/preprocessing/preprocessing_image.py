@@ -1,9 +1,11 @@
-# 画像データの前処理関数
+from __future__ import annotations
+from ..type_definitions import *
 import numpy as np
 from ..config.constants import BGImageTypeList
+from typing import Dict
 
 # 画像をint型に変換 型は指定可能
-def convertImageDtypeToINT(img, dtype="uint8"):
+def convertImageDtypeToINT(img, dtype="uint8") -> np.ndarray:
     img = img.astype("float")
     img -= np.min(img)
     img /= np.max(img)
@@ -12,7 +14,7 @@ def convertImageDtypeToINT(img, dtype="uint8"):
     return img
 
 # 大きさが異なる画像をそろえる, max_proj, Vcorr用
-def resizeImageShape(img, shape_tgt):
+def resizeImageShape(img, shape_tgt) -> np.ndarray:
     if img.shape == shape_tgt:
         return img
     # 新しい黒い画像を作成
@@ -25,12 +27,13 @@ def resizeImageShape(img, shape_tgt):
     return new_img
 
 # Fallからbackground image取得
-def getBGImageFromFall(data_manager, key_dict_Fall, key_dict_im_bg, dtype="uint8"):
-    # まず、meanImgのサイズを基準サイズとして取得
-    base_shape = data_manager.dict_Fall[key_dict_Fall]["ops"]["meanImg"].shape
+def getBGImageFromFall(data_manager: DataManager, key_app: str, dtype: str="uint8") -> Dict[str, np.ndarray]:
+    # get image shape from meanImg
+    dict_im_bg = {}
+    base_shape = data_manager.dict_Fall[key_app]["ops"]["meanImg"].shape
     for key_im in BGImageTypeList.FALL:
-        img = convertImageDtypeToINT(data_manager.dict_Fall[key_dict_Fall]["ops"][key_im], dtype=dtype)
+        img = convertImageDtypeToINT(data_manager.dict_Fall[key_app]["ops"][key_im], dtype=dtype)
         img = resizeImageShape(img, base_shape)
-        data_manager.dict_im_bg[key_dict_im_bg][key_im] = img
-    return data_manager
+        dict_im_bg[key_im] = img
+    return dict_im_bg
         

@@ -13,15 +13,14 @@ from ..preprocessing.preprocessing_table import convertTableDataToDictROICheck, 
 from ..preprocessing.preprocessing_tiff import standardizeTIFFStack
 from .file_dialog import openFileDialog, saveFileDialog
 
-# Fallの読み込み, メッセージ付き
-def loadFallMATWithGUI(q_window: QMainWindow, data_manager: DataManager, key_app: str, path_fall: str) -> bool:
-    success = data_manager.loadFallMAT(key_app, path_fall)
-    if success:
-        QMessageBox.information(q_window, "File load", "File loaded successfully!")
-        return True
+# load Fall.mat data
+def loadFallMat(path_fall: str, preprocessing: bool=True) -> Dict[str, Any]:
+    Fall = loadmat(path_fall)
+    if preprocessing:
+        dict_Fall = convertMatToDictFall(Fall)
     else:
-        QMessageBox.warning(q_window, "File Load Error", "Failed to load the file.")
-        return False
+        dict_Fall = Fall
+    return dict_Fall
 
 # load tif image data (XYC)
 def loadTifImage(path_image: str, preprocessing: bool=True) -> np.array:
@@ -31,7 +30,7 @@ def loadTifImage(path_image: str, preprocessing: bool=True) -> np.array:
     return im
 
 # load tiff stack data (XYCZT)
-def loadTiffStack(path_tiff: str, preprocessing: bool=True, axes_tgt: str="XYCZT") -> bool:
+def loadTiffStack(path_tiff: str, preprocessing: bool=True, axes_tgt: str="XYCZT") -> np.ndarray:
     if preprocessing:
         with tifffile.TiffFile(path_tiff) as tif:
             series = tif.series[0]

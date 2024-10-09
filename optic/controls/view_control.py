@@ -44,9 +44,10 @@ class ViewControl:
         self.highlight_opacity: int                             = int(config_manager.gui_defaults["ROI_VISUAL_SETTINGS"]["DEFAULT_HIGHLIGHT_OPACITY"])
 
         self.setImageDataType()
-        self.initializeROIColors()
         self.setImageSize()
-        self.setSharedAttr_ROISelected(roi_id=0)
+        if self.im_dtype == Extension.MAT:
+            self.initializeROIColors()
+            self.setSharedAttr_ROISelected(roi_id=0)
 
 
     def updateView(self) -> None:
