@@ -2,6 +2,16 @@ from __future__ import annotations
 from ..type_definitions import *
 from collections import Counter
 
+# Display Z,T plane number
+def updateZPlaneDisplay(widget_manager: WidgetManager, key_app: str, z: int) -> None:
+    label_key = f"{key_app}_plane_z"
+    if label_key in widget_manager.dict_label:
+        widget_manager.dict_label[label_key].setText(f"Z: {z}")
+def updateTPlaneDisplay(widget_manager: WidgetManager, key_app: str, t: int) -> None:
+    label_key = f"{key_app}_plane_t"
+    if label_key in widget_manager.dict_label:
+        widget_manager.dict_label[label_key].setText(f"T: {t}")
+
 # Display Selected ROI Property
 def updateROIPropertyDisplay(control_manager: ControlManager, data_manager: DataManager, widget_manager: WidgetManager, key_app: str) -> None:
     roi_selected_id = control_manager.getSharedAttr(key_app, 'roi_selected_id')

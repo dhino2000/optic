@@ -167,6 +167,7 @@ def bindFuncPlaneZSlider(
 ) -> None:
     def onZChanged(value: int) -> None:
         view_control.setPlaneZ(value)
+        
         view_control.updateView()
     q_slider.valueChanged.connect(onZChanged)
 def bindFuncPlaneTSlider(

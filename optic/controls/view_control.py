@@ -1,6 +1,7 @@
 from __future__ import annotations
 from ..type_definitions import *
 from ..visualization.view_visual import updateViewFall, updateViewTiff, findClosestROI, shouldSkipROI
+from ..visualization.info_visual import updateZPlaneDisplay, updateTPlaneDisplay
 from ..gui.view_setup import setViewSize
 from ..config.constants import BGImageTypeList, Extension
 import random
@@ -120,9 +121,11 @@ class ViewControl:
     """
     def setPlaneZ(self, plane_z: int) -> None:
         self.plane_z = plane_z
+        updateZPlaneDisplay(self.widget_manager, self.key_app, plane_z)
 
     def setPlaneT(self, plane_t: int) -> None:
         self.plane_t = plane_t
+        updateTPlaneDisplay(self.widget_manager, self.key_app, plane_t)
 
     def setROIOpacity(self, opacity: int) -> None:
         self.roi_opacity = opacity
