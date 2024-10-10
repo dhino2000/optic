@@ -183,6 +183,50 @@ class GuiDefaults:
             },
         },
     }
+
+    TIFSTACK_EXPLORER = {
+        "WINDOW_SETTINGS": {
+            "INIT_POSITION_X": 100, 
+            "INIT_POSITION_Y": 100,
+            "WIDTH": 1200,
+            "HEIGHT": 200,
+            # "MAX_WIDTH": 1920,
+            # "MAX_HEIGHT": 1080,
+        },
+        "WINDOW_SETTINGS_TABLE_COLUMNS_CONFIG": {
+            "INIT_POSITION_X": 100, 
+            "INIT_POSITION_Y": 100,
+            "WIDTH": 800,
+            "HEIGHT": 600,
+            # "MAX_WIDTH": 1920,
+            # "MAX_HEIGHT": 1080,
+        },
+        "TITLE": "TIFStackExplorerGUI",
+        "APP_KEYS": [AppKeys.PRI],
+        "CHANNELS": [ChannelKeys.CHAN1, ChannelKeys.CHAN2, ChannelKeys.CHAN3],
+        "ROI_THRESHOLDS": {
+        },
+        "VIEW_SETTINGS": {
+            "DEFAULT_CONTRAST_MIN": 0,
+            "DEFAULT_CONTRAST_MAX": 255,
+        },
+        "ROI_VISUAL_SETTINGS": {
+            "COLOR_MIN": 100,
+            "COLOR_MAX": 255,
+            "DEFAULT_ROI_OPACITY": 128,
+            "DEFAULT_HIGHLIGHT_OPACITY": 255,
+        },
+        "CANVAS_SETTINGS": {
+        },
+        "TABLE_COLUMNS": {
+            AppKeys.PRI: {
+            },
+        },
+        "KEY_FUNCTION_MAP": {
+            AppKeys.PRI: {
+            },
+        },
+    }
     
     @classmethod
     def getROIDisplayOptions(cls, app_name, table_columns):
