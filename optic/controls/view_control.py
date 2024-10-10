@@ -69,7 +69,7 @@ class ViewControl:
         self.data_dtype = self.data_manager.getDataType(self.key_app)
 
     def setImageDataType(self) -> None:
-        self.im_dtype = self.data_manager.getDataTypeOfTIFFStack(self.key_app)
+        self.im_dtype = self.data_manager.getDataTypeOfTiffStack(self.key_app)
 
     def setViewSize(self, use_self_size: bool=True) -> None:
         if use_self_size:

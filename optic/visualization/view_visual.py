@@ -24,22 +24,22 @@ def updateViewFall(
         image_type = view_control.getBackgroundImageType()
         bg_image_chan1 = adjustChannelContrast(
             image=data_manager.getDictBackgroundImage(key_app).get(image_type),
-            min_val=view_control.getBackgroundContrastValue(ChannelKeys.CHAN1, 'min'),
-            max_val=view_control.getBackgroundContrastValue(ChannelKeys.CHAN1, 'max'),
+            min_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN1, 'min'),
+            max_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN1, 'max'),
             )
     # chan 2
     if view_control.getBackgroundVisibility(ChannelKeys.CHAN2) and data_manager.getNChannels(key_app) == 2:
         bg_image_chan2 = adjustChannelContrast(
             image=data_manager.getDictBackgroundImageChannel2(key_app).get("meanImg"),
-            min_val=view_control.getBackgroundContrastValue(ChannelKeys.CHAN2, 'min'),
-            max_val=view_control.getBackgroundContrastValue(ChannelKeys.CHAN2, 'max'),
+            min_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN2, 'min'),
+            max_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN2, 'max'),
             )
     # optional
     if view_control.getBackgroundVisibility(ChannelKeys.CHAN3) and isinstance(data_manager.getBackgroundImageOptional(key_app), np.ndarray):
         bg_image_chan3 = adjustChannelContrast(
             image=data_manager.getBackgroundImageOptional(key_app),
-            min_val=view_control.getBackgroundContrastValue(ChannelKeys.CHAN3, 'min'),
-            max_val=view_control.getBackgroundContrastValue(ChannelKeys.CHAN3, 'max'),
+            min_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN3, 'min'),
+            max_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN3, 'max'),
             )
 
     (width, height) = view_control.getImageSize()
@@ -75,25 +75,39 @@ def updateViewTiff(
     bg_image_chan3 = None 
     plane_z = view_control.getPlaneZ()
     plane_t = view_control.getPlaneT()
+    min_val_image = np.min(data_manager.getTiffSrack(key_app))
+    max_val_image = np.max(data_manager.getTiffSrack(key_app))
+
+    print(min_val_image, max_val_image)
 
     if view_control.getBackgroundVisibility(ChannelKeys.CHAN1):
         bg_image_chan1 = adjustChannelContrast(
             image=data_manager.getImageFromXYCZTTiffStack(key_app, plane_z, plane_t, 0),
-            min_val=view_control.getBackgroundContrastValue(ChannelKeys.CHAN1, 'min'),
-            max_val=view_control.getBackgroundContrastValue(ChannelKeys.CHAN1, 'max'),
+            min_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN1, 'min'),
+            max_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN1, 'max'),
+            min_val_image=min_val_image,
+            max_val_image=max_val_image
             )
     if view_control.getBackgroundVisibility(ChannelKeys.CHAN2):
         bg_image_chan2 = adjustChannelContrast(
             image=data_manager.getImageFromXYCZTTiffStack(key_app, plane_z, plane_t, 1),
-            min_val=view_control.getBackgroundContrastValue(ChannelKeys.CHAN2, 'min'),
-            max_val=view_control.getBackgroundContrastValue(ChannelKeys.CHAN2, 'max'),
+            min_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN2, 'min'),
+            max_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN2, 'max'),
+            min_val_image=min_val_image,
+            max_val_image=max_val_image
             )
     if view_control.getBackgroundVisibility(ChannelKeys.CHAN3):
         bg_image_chan3 = adjustChannelContrast(
             image=data_manager.getImageFromXYCZTTiffStack(key_app, plane_z, plane_t, 2),
-            min_val=view_control.getBackgroundContrastValue(ChannelKeys.CHAN3, 'min'),
-            max_val=view_control.getBackgroundContrastValue(ChannelKeys.CHAN3, 'max'),
+            min_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN3, 'min'),
+            max_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN3, 'max'),
+            min_val_image=min_val_image,
+            max_val_image=max_val_image
             )
+        
+    view_control.bg_image_chan1 = bg_image_chan1
+    view_control.bg_image_chan2 = bg_image_chan2
+    view_control.bg_image_chan3 = bg_image_chan3
 
     (width, height) = view_control.getImageSize()
     bg_image = convertMonoImageToRGBImage(
@@ -154,36 +168,35 @@ def convertMonoImageToRGBImage(
 
 def adjustChannelContrast(
         image: np.ndarray, 
-        min_val: float, 
-        max_val: float
+        min_val_slider: float,  # 0-255の範囲
+        max_val_slider: float,  # 0-255の範囲
+        min_val_image: float = None,
+        max_val_image: float = None
         ) -> np.ndarray:
     try:
-        # 入力画像の型を確認
-        input_dtype = image.dtype
-        if input_dtype not in [np.uint8, np.uint16, np.uint32, np.float32, np.float64]:
-            raise ValueError(f"Unsupported input dtype: {input_dtype}")
+        # 画像の最小値と最大値を取得または計算
+        if min_val_image is None:
+            min_val_image = np.min(image)
+        if max_val_image is None:
+            max_val_image = np.max(image)
 
-        epsilon = 1e-7  # Zero division prevention
-        
-        # 画像の実際の最小値と最大値を取得
-        image_min, image_max = np.min(image), np.max(image)
-        
-        # 画像の正規化 (0-1の範囲に)
-        image_normalized = (image.astype(np.float32) - image_min) / (image_max - image_min + epsilon)
+        # スライダーの値を入力画像の型に応じた範囲にスケーリング
+        min_val = min_val_image + (min_val_slider / 255) * (max_val_image - min_val_image)
+        max_val = min_val_image + (max_val_slider / 255) * (max_val_image - min_val_image)
 
-        # コントラスト調整用のmin_val, max_valを0-1の範囲に正規化
-        min_val_norm = (min_val - image_min) / (image_max - image_min)
-        max_val_norm = (max_val - image_min) / (image_max - image_min)
+        # 入力範囲を0-1にスケーリング
+        image_float = image.astype(np.float32)
+        image_scaled = (image_float - min_val) / (max_val - min_val)
 
-        # コントラスト調整
-        image_contrasted = np.clip((image_normalized - min_val_norm) / (max_val_norm - min_val_norm + epsilon), 0, 1)
-        
-        # uint8に変換
-        image_adjusted = (image_contrasted * 255).astype(np.uint8)
+        # 0-1の範囲にクリップ
+        image_clipped = np.clip(image_scaled, 0, 1)
 
-        return image_adjusted
+        # 0-255の範囲にスケーリングしてuint8に変換
+        image_uint8 = (image_clipped * 255).astype(np.uint8)
 
-    except (TypeError, AttributeError, ValueError) as e:
+        return image_uint8
+
+    except Exception as e:
         print(f"Error in adjustChannelContrast: {str(e)}")
         return None
 

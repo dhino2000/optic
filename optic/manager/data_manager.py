@@ -102,6 +102,9 @@ class DataManager:
         return self.dict_Fall[key_app]["ops"]["nchannels"].flatten()[0]
         
     "Tiff data"
+    def getTiffSrack(self, key_app: str) -> np.ndarray[np.uint8, Tuple[int, int, int, int, int]]:
+        return self.dict_tiff[key_app]
+
     def getSizeOfX(self, key_app: str) -> int:
         return self.dict_tiff[key_app].shape[0]
     def getSizeOfY(self, key_app: str) -> int:
@@ -117,7 +120,7 @@ class DataManager:
     def getDataType(self, key_app: str) -> str:
         return self.dict_data_dtype.get(key_app)
     
-    def getDataTypeOfTIFFStack(self, key_app: str) -> str:
+    def getDataTypeOfTiffStack(self, key_app: str) -> str:
         return self.dict_tiff[key_app].dtype
 
     # get image size, change return with dtype
