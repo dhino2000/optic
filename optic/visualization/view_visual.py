@@ -78,8 +78,6 @@ def updateViewTiff(
     min_val_image = np.min(data_manager.getTiffSrack(key_app))
     max_val_image = np.max(data_manager.getTiffSrack(key_app))
 
-    print(min_val_image, max_val_image)
-
     if view_control.getBackgroundVisibility(ChannelKeys.CHAN1):
         bg_image_chan1 = adjustChannelContrast(
             image=data_manager.getImageFromXYCZTTiffStack(key_app, plane_z, plane_t, 0),
@@ -104,10 +102,6 @@ def updateViewTiff(
             min_val_image=min_val_image,
             max_val_image=max_val_image
             )
-        
-    view_control.bg_image_chan1 = bg_image_chan1
-    view_control.bg_image_chan2 = bg_image_chan2
-    view_control.bg_image_chan3 = bg_image_chan3
 
     (width, height) = view_control.getImageSize()
     bg_image = convertMonoImageToRGBImage(
@@ -117,10 +111,9 @@ def updateViewTiff(
         height=height,
         width=width,
         )
-    
-    view_control.bg_image = bg_image
 
-    qimage = QImage(bg_image.data, width, height, width * 3, QImage.Format_RGB888)
+    # Caution !!! width and height are swapped between TIFF and QImage
+    qimage = QImage(bg_image.data, height, width, height * 3, QImage.Format_RGB888)
     pixmap = QPixmap.fromImage(qimage)
 
     q_scene.clear()
