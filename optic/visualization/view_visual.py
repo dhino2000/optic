@@ -35,7 +35,7 @@ def updateViewFall(
             max_val=view_control.getBackgroundContrastValue(ChannelKeys.CHAN2, 'max'),
             )
     # optional
-    if view_control.getBackgroundVisibility(ChannelKeys.CHAN3) and data_manager.getBackgroundImageOptional(key_app):
+    if view_control.getBackgroundVisibility(ChannelKeys.CHAN3) and isinstance(data_manager.getBackgroundImageOptional(key_app), np.ndarray):
         bg_image_chan3 = adjustChannelContrast(
             image=data_manager.getBackgroundImageOptional(key_app),
             min_val=view_control.getBackgroundContrastValue(ChannelKeys.CHAN3, 'min'),
