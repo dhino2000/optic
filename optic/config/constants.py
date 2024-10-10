@@ -39,6 +39,8 @@ class PlotColors:
     F = 'cyan'
     FNEU = 'red'
     SPKS = 'gray'
+    F_CHAN2 = 'dodgerblue'
+    FNEU_CHAN2 = 'darkorange'
     EVENT = 'green'
     RECTANGLE = "purple"
 
@@ -46,6 +48,8 @@ class PlotLabels:
     F = "F"
     FNEU = "Fneu"
     SPKS = "spks"
+    F_CHAN2 = "F_chan2"
+    FNEU_CHAN2 = "Fneu_chan2"
     EVENT = "event"
 
 # widget管理の総合key

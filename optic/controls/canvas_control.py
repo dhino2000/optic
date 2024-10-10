@@ -58,10 +58,14 @@ class CanvasControl:
         self.updateDownsampleThreshold()
 
         roi_selected_id = self.control_manager.getSharedAttr(self.key_app, 'roi_selected_id')
-        self.full_traces = self.data_manager.getTracesOfSelectedROI(self.key_app, roi_selected_id)
+        self.full_traces = self.data_manager.getTracesOfSelectedROI(self.key_app, roi_selected_id, n_channels=self.data_manager.getNChannels(self.key_app))
         
-        self.colors = {key: getattr(PlotColors, key.upper()) for key in ["F", "Fneu", "spks"]}
-        self.labels = {key: getattr(PlotLabels, key.upper()) for key in ["F", "Fneu", "spks"]}
+        if self.data_manager.getNChannels(self.key_app) == 1:
+            self.colors = {key: getattr(PlotColors, key.upper()) for key in ["F", "Fneu", "spks"]}
+            self.labels = {key: getattr(PlotLabels, key.upper()) for key in ["F", "Fneu", "spks"]}
+        elif self.data_manager.getNChannels(self.key_app) == 2:
+            self.colors = {key: getattr(PlotColors, key.upper()) for key in ["F", "Fneu", "spks", "F_chan2", "Fneu_chan2"]}
+            self.labels = {key: getattr(PlotLabels, key.upper()) for key in ["F", "Fneu", "spks", "F_chan2", "Fneu_chan2"]}
         
         self.y_max = max(np.max(trace) for trace in self.full_traces.values())
         ylim_config = self.config_manager.gui_defaults['CANVAS_SETTINGS']['YLIM']
@@ -208,7 +212,7 @@ class CanvasControl:
         self.axes[AxisKeys.MID].add_patch(rect)
     # bottom axis
     def plotTracesMean(self):
-        traces = self.data_manager.getTraces(self.key_app)
+        traces = self.data_manager.getTraces(self.key_app, n_channels=self.data_manager.getNChannels(self.key_app))
         mean_traces = {key: np.mean(trace, axis=0) for key, trace in traces.items()}
         self.plotTraces(AxisKeys.BOT, mean_traces, "Average", 0, self.plot_data_points, ylim=None, title="Average Traces")
 

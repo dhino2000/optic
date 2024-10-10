@@ -53,8 +53,10 @@ class Suite2pROICheckGUI(QMainWindow):
         self.control_manager, self.data_manager = initManagers(self.control_manager, self.data_manager)
         success = self.loadData()
         if success:
+            QMessageBox.information(self, "File load", "File loaded successfully!")
             self.setupMainUI()
         else:
+            QMessageBox.warning(self, "File Load Error", "Failed to load the file.")
             return
 
     def setupMainUI(self):
@@ -70,14 +72,12 @@ class Suite2pROICheckGUI(QMainWindow):
         self.setupUI_done = True
 
     def loadData(self):
-        success = loadFallMATWithGUI(
-            q_window=self, 
-            data_manager=self.data_manager, 
+        success = self.data_manager.loadFallMat(
             key_app=self.app_key_pri, 
             path_fall=self.widget_manager.dict_lineedit[f"{self.app_key_pri}_path_fall"].text()
         )
         if self.widget_manager.dict_lineedit[f"{self.app_key_pri}_path_reftif"].text() != "":
-            self.data_manager.loadTifImage(
+            success = self.data_manager.loadTifImage(
                 key_app=self.app_key_pri,
                 path_image=self.widget_manager.dict_lineedit[f"{self.app_key_pri}_path_reftif"].text(), 
             )
@@ -161,8 +161,7 @@ class Suite2pROICheckGUI(QMainWindow):
     "Middle Upper"
     # ROI view
     def makeLayoutComponentROIView(self):
-        layout = QVBoxLayout()
-        layout.addWidget(self.widget_manager.makeWidgetView(key=self.app_key_pri))
+        layout = makeLayoutViewWithZTSlider(self.widget_manager, self.app_key_pri)
         return layout
 
     # ROI property label, threshold lineedit
@@ -327,7 +326,7 @@ class Suite2pROICheckGUI(QMainWindow):
     """
     def bindFuncFileLoadUI(self):        
         list_key = [f"{self.app_key_pri}_path_fall", f"{self.app_key_pri}_path_reftif"]
-        list_filetype = ["mat", "tiff"]
+        list_filetype = [Extension.MAT, Extension.TIFF]
         for key, filetype in zip(list_key, list_filetype):
             bindFuncLoadFileWidget(
                 q_widget=self, 
