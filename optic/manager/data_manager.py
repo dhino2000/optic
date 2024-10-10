@@ -3,7 +3,6 @@ from ..type_definitions import *
 from collections import defaultdict
 from scipy.io import loadmat
 import numpy as np
-from numpy.typing import NDArray
 import tifffile
 from ..preprocessing.preprocessing_image import getBGImageFromFall, getBGImageChannel2FromFall
 from ..config.constants import Extension
@@ -63,7 +62,7 @@ class DataManager:
         return self.dict_Fall[key_app]
     
     # get F, Fneu, spks
-    def getTraces(self, key_app: str, n_channels: int=1) -> Dict[str, NDArray[np.float32]]: # 2d array
+    def getTraces(self, key_app: str, n_channels: int=1) -> Dict[str, np.ndarray[np.float32]]: # 2d array
         dict_traces = {
             "F": self.dict_Fall[key_app]["F"],
             "Fneu": self.dict_Fall[key_app]["Fneu"],
@@ -73,7 +72,7 @@ class DataManager:
             dict_traces["F_chan2"] = self.dict_Fall[key_app]["F_chan2"]
             dict_traces["Fneu_chan2"] = self.dict_Fall[key_app]["Fneu_chan2"]
         return dict_traces
-    def getTracesOfSelectedROI(self, key_app: str, roi_id: int, n_channels: int=1) -> Dict[str, NDArray[np.float32]]: # 1d array
+    def getTracesOfSelectedROI(self, key_app: str, roi_id: int, n_channels: int=1) -> Dict[str, np.ndarray[np.float32]]: # 1d array
         dict_traces = {
             "F": self.dict_Fall[key_app]["F"][roi_id],
             "Fneu": self.dict_Fall[key_app]["Fneu"][roi_id],
