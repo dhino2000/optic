@@ -62,7 +62,7 @@ def applyDictROICheckToTable(q_table: QTableWidget, table_columns: TableColumns,
                 for row in range(row_count):
                     radio_button = q_table.cellWidget(row, col_info['order'])
                     if radio_button:
-                        radio_button.setChecked(any(row == sr[0] for sr in selected_rows))
+                        radio_button.setChecked(any(row == sr for sr in selected_rows))
 
         # checkbox or string
         elif col_info['type'] in ['checkbox', 'string']:
@@ -72,9 +72,9 @@ def applyDictROICheckToTable(q_table: QTableWidget, table_columns: TableColumns,
                     item = q_table.item(row, col_info['order'])
                     if item:
                         if col_info['type'] == 'checkbox':
-                            item.setCheckState(Qt.Checked if data[row][0] else Qt.Unchecked)
+                            item.setCheckState(Qt.Checked if data[row] else Qt.Unchecked)
                         else:  # string
-                            value = str(data[row][0])
+                            value = str(data[row])
                             if value == '[]' or value == '':
                                 value = ''
                             item.setText(value)

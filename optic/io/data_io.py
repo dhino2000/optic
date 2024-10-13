@@ -118,15 +118,21 @@ def saveROICheck(q_window: QMainWindow, q_lineedit: QLineEdit, q_table: QTableWi
             QMessageBox.warning(q_window, "File save failed", f"Error saving ROICheck file: {e}")
 
 # load ROIcheck.mat
-def loadROICheck(q_window: QMainWindow, q_table: QTableWidget, table_columns: TableColumns, table_control: TableControl) -> None:
+def loadROICheck(q_window: QMainWindow, q_table: QTableWidget, table_columns: Dict[str, Dict[str, Any]], table_control: TableControl) -> None:
     path_roicheck = openFileDialog(q_widget=q_window, file_type="mat", title="Open ROIcheck mat File")
     if path_roicheck:
-        try:
-            dict_roicheck = convertMatROICheckToDictROICheck(loadmat(path_roicheck))
-            # if table_control.len_row != len(dict_roicheck):
-            #     QMessageBox.warning(q_window, "File load failed", f"Length of data does not match! \nTable: {table_control.len_row}, ROICheck: {len(dict_roicheck)}")
-            #     return
-            applyDictROICheckToTable(q_table, table_columns, dict_roicheck)
-            QMessageBox.information(q_window, "File load", "ROICheck file loaded!")
-        except Exception as e:
-            QMessageBox.warning(q_window, "File load failed", f"Error loading ROICheck file: {e}")
+        # try:
+        mat_roicheck = loadmat(path_roicheck, simplify_cells=True)
+        list_date = list(mat_roicheck["manualROIcheck"].keys())
+        # select saved date
+        date = list_date[0]
+        dict_roicheck = mat_roicheck["manualROIcheck"][date]
+
+        # check number of ROIs between of Fall file and of ROICheck file
+        # if table_control.len_row != len(dict_roicheck):
+        #     QMessageBox.warning(q_window, "File load failed", f"Length of data does not match! \nTable: {table_control.len_row}, ROICheck: {len(dict_roicheck)}")
+        #     return
+        applyDictROICheckToTable(q_table, table_columns, dict_roicheck)
+        QMessageBox.information(q_window, "File load", "ROICheck file loaded!")
+        # except Exception as e:
+            # QMessageBox.warning(q_window, "File load failed", f"Error loading ROICheck file: {e}")
