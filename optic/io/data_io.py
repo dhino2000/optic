@@ -91,21 +91,33 @@ def generateSavePath(path_src: str, prefix: str="", suffix: str="", new_extensio
     path_dst = os.path.join(dir_src, name_ext_dst).replace("\\", "/")
     return path_dst
 
-# Tableの内容をROICheckとして保存
+# save table content as ROIcheck.mat
 def saveROICheck(q_window: QMainWindow, q_lineedit: QLineEdit, q_table: QTableWidget, table_columns: TableColumns, local_var: bool=True) -> None:
     path_src = q_lineedit.text()
     path_dst = generateSavePath(path_src, prefix="ROIcheck_", remove_strings="Fall_")
-    path_dst = saveFileDialog(q_widget=q_window, file_type="mat", title="Save ROIcheck mat File", initial_dir=path_dst)
+
+    path_dst, is_overwrite = saveFileDialog(q_widget=q_window, file_type="mat", title="Save ROIcheck mat File", initial_dir=path_dst)
     if path_dst:
         try:
-            dict_roicheck = convertTableDataToDictROICheck(q_table, table_columns, local_var)
-            mat_roicheck = convertDictROICheckToMatROICheck(dict_roicheck)
+            if is_overwrite:
+                mat_roicheck = loadROICheck(path_dst)
+                mat_roicheck = convertDictROICheckToMatROICheck(
+                    dict_roicheck,
+                    mat_roicheck=mat_roicheck,
+                    )
+            else:
+                dict_roicheck = convertTableDataToDictROICheck(q_table, table_columns, local_var)
+                mat_roicheck = convertDictROICheckToMatROICheck(
+                    dict_roicheck,
+                    n_roi=q_table.rowCount(),
+                    path_fall=path_src,
+                    )
             savemat(path_dst, mat_roicheck)
             QMessageBox.information(q_window, "File save", "ROICheck file saved!")
         except Exception as e:
             QMessageBox.warning(q_window, "File save failed", f"Error saving ROICheck file: {e}")
 
-# ROICheckを読み込んでTableを更新
+# load ROIcheck.mat
 def loadROICheck(q_window: QMainWindow, q_table: QTableWidget, table_columns: TableColumns, table_control: TableControl) -> None:
     path_roicheck = openFileDialog(q_widget=q_window, file_type="mat", title="Open ROIcheck mat File")
     if path_roicheck:

@@ -39,17 +39,31 @@ def convertTableDataToDictROICheck(q_table, table_columns, local_var=True):
                 item = q_table.item(row, col_info['order'])
                 dict_roicheck[col_name][row] = item.text() if item else ''
 
-    now = datetime.datetime.now().strftime('%y%m%d_%H%M%S')
-    dict_roicheck["update"] = now
     return dict_roicheck
 
 # dict_roicheck -> mat_roicheck
-def convertDictROICheckToMatROICheck(dict_roicheck):
-    mat_roicheck = {
-    "manualROIcheck": {
-        **dict_roicheck,
+def convertDictROICheckToMatROICheck(
+        dict_roicheck   : Dict[str, Any], 
+        mat_roicheck    : Dict[str, Any]=None, 
+        n_roi           : int=0, 
+        path_fall       : str=""
+        ):
+    now = datetime.datetime.now().strftime('%y%m%d_%H%M%S')
+    user = "Fukatsu" # modify ! choose user with combobox 
+
+    if mat_roicheck:
+        mat_roicheck["manualROIcheck"][now] = dict_roicheck
+    else:
+        mat_roicheck = {
+        "manualROIcheck": {
+            now: {
+            **dict_roicheck,
+            }
+        },
+        "NumberOfROI": n_roi,
+        "path_Fall": path_fall,
+        "name_Fall": path_fall.split("/")[-1]
     }
-}
     return mat_roicheck
 
 # mat_roicheck -> dict_roicheck
