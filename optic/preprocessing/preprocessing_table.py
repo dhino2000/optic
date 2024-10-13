@@ -5,14 +5,14 @@ import datetime
 import numpy as np
 from PyQt5.QtCore import Qt
 
-# Tableの内容をdict_roicheckに保管
+# convert contents of QTableWidget into dict_roicheck
 def convertTableDataToDictROICheck(q_table, table_columns, local_var=True):
     if local_var:
-        cell_type_keys = ROICheckMatKeysLocal.cell_type_keys # ローカル変数
+        cell_type_keys = ROICheckMatKeysLocal.cell_type_keys # local variables
     
     dict_roicheck = {}
     row_count = q_table.rowCount()
-    # 列ごとに処理
+    # process each column
     for col_name, col_info in table_columns.items():
         if col_info['type'] == 'celltype':
             selected_rows = []
@@ -47,53 +47,27 @@ def convertDictROICheckToMatROICheck(
         mat_roicheck    : Dict[str, Any]=None, 
         n_roi           : int=0, 
         path_fall       : str=""
-        ):
-    now = datetime.datetime.now().strftime('%y%m%d_%H%M%S')
-    user = "Fukatsu" # modify ! choose user with combobox 
+        )-> Dict[str, Any]:
+    now = f"save_{datetime.datetime.now().strftime('%y%m%d_%H%M%S')}"
+    user = "Fukatsu" # modify ! choose user with combobox
 
-    if mat_roicheck:
-        mat_roicheck["manualROIcheck"][now] = dict_roicheck
-    else:
+    if mat_roicheck is None:
         mat_roicheck = {
-        "manualROIcheck": {
-            now: {
-            **dict_roicheck,
-            }
-        },
-        "NumberOfROI": n_roi,
-        "path_Fall": path_fall,
-        "name_Fall": path_fall.split("/")[-1]
+            "NumberOfROI": n_roi,
+            "path_Fall": path_fall,
+            "name_Fall": path_fall.split("/")[-1],
+            "manualROIcheck": {},
+        }
+
+    mat_roicheck["manualROIcheck"][now] = {
+        "user": user,
+        **dict_roicheck,
     }
+
     return mat_roicheck
 
 # mat_roicheck -> dict_roicheck
 def convertMatROICheckToDictROICheck(mat_roicheck):
-    mat_roicheck = mat_roicheck["manualROIcheck"]
-    mat_dtype = list(mat_roicheck[0].dtype.fields)
-    dict_roicheck = {}
-    for key_, value_ in zip(mat_dtype, list(mat_roicheck[0][0])):
-        if value_.dtype=="object":
-            value_ = np.array([[x[0].item() if x[0].size > 0 else ""] for x in value_])
-        dict_roicheck[key_] = value_
-    return dict_roicheck
-
-
-# 後で上と入れ替える
-# dict_roicheck -> mat_roicheck
-def convertDictROICheckToMatROICheck_new(dict_roicheck: Dict[str: Any], path_Fall: str, roi_number: int):
-    mat_roicheck = {
-    "path_Fall": path_Fall,
-    "ROInumber": roi_number,
-    "manualROIcheck": {
-        dict_roicheck["update"]: {
-        **dict_roicheck,
-        }
-    }
-}
-    return mat_roicheck
-
-# mat_roicheck -> dict_roicheck
-def convertMatROICheckToDictROICheck_new(mat_roicheck):
     mat_roicheck = mat_roicheck["manualROIcheck"]
     mat_dtype = list(mat_roicheck[0].dtype.fields)
     dict_roicheck = {}
