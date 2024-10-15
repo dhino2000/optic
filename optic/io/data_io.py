@@ -14,7 +14,10 @@ from ..preprocessing.preprocessing_tiff import standardizeTIFFStack
 from .file_dialog import openFileDialog, saveFileDialog
 
 # load Fall.mat data
-def loadFallMat(path_fall: str, preprocessing: bool=True) -> Dict[str, Any]:
+def loadFallMat(
+        path_fall       : str, 
+        preprocessing   : bool=True
+        ) -> Dict[str, Any]:
     Fall = loadmat(path_fall)
     if preprocessing:
         dict_Fall = convertMatToDictFall(Fall)
@@ -23,14 +26,21 @@ def loadFallMat(path_fall: str, preprocessing: bool=True) -> Dict[str, Any]:
     return dict_Fall
 
 # load tif image data (XYC)
-def loadTifImage(path_image: str, preprocessing: bool=True) -> np.array:
+def loadTifImage(
+        path_image      : str, 
+        preprocessing   : bool=True
+        ) -> np.array:
     im = tifffile.imread(path_image)
     if preprocessing:
         im = convertImageDtypeToINT(im)
     return im
 
 # load tiff stack data (XYCZT)
-def loadTiffStack(path_tiff: str, preprocessing: bool=True, axes_tgt: str="XYCZT") -> np.ndarray:
+def loadTiffStack(
+        path_tiff       : str, 
+        preprocessing   : bool=True, 
+        axes_tgt        : str="XYCZT"
+        ) -> np.ndarray:
     if preprocessing:
         with tifffile.TiffFile(path_tiff) as tif:
             series = tif.series[0]
@@ -41,7 +51,12 @@ def loadTiffStack(path_tiff: str, preprocessing: bool=True, axes_tgt: str="XYCZT
     return im
 
 # EventFile npyの読み込み, 初期化
-def loadEventFileNPY(q_window: QMainWindow, data_manager: DataManager, control_manager: ControlManager, key_app: str) -> None | np.array:
+def loadEventFileNPY(
+        q_window        : QMainWindow, 
+        data_manager    : DataManager, 
+        control_manager : ControlManager, 
+        key_app         : str
+        ) -> None | np.array:
     path_eventfile = openFileDialog(q_widget=q_window, file_type="npy", title="Open Eventfile npy File").replace("\\", "/")
 
     if path_eventfile:
@@ -60,7 +75,13 @@ def loadEventFileNPY(q_window: QMainWindow, data_manager: DataManager, control_m
         return
 
 # 保存用のファイルパス作成, 初期位置も指定
-def generateSavePath(path_src: str, prefix: str="", suffix: str="", new_extension: str=None, remove_strings: str=None) -> str:
+def generateSavePath(
+        path_src        : str, 
+        prefix          : str="", 
+        suffix          : str="", 
+        new_extension   : str=None, 
+        remove_strings  : str=None
+        ) -> str:
     """
     元のファイルパスを基に、新しい保存パスを生成する。
 
@@ -92,7 +113,13 @@ def generateSavePath(path_src: str, prefix: str="", suffix: str="", new_extensio
     return path_dst
 
 # save table content as ROIcheck.mat
-def saveROICheck(q_window: QMainWindow, q_lineedit: QLineEdit, q_table: QTableWidget, table_columns: TableColumns, local_var: bool=True) -> None:
+def saveROICheck(
+        q_window        : QMainWindow, 
+        q_lineedit      : QLineEdit, 
+        q_table         : QTableWidget, 
+        table_columns   : TableColumns, 
+        local_var       : bool=True
+        ) -> None:
     path_src = q_lineedit.text()
     path_dst = generateSavePath(path_src, prefix="ROIcheck_", remove_strings="Fall_")
 
@@ -100,7 +127,8 @@ def saveROICheck(q_window: QMainWindow, q_lineedit: QLineEdit, q_table: QTableWi
     if path_dst:
         try:
             if is_overwrite:
-                mat_roicheck = loadROICheck(path_dst)
+                mat_roicheck = loadmat(path_dst, simplify_cells=True)
+                dict_roicheck = convertTableDataToDictROICheck(q_table, table_columns, local_var)
                 mat_roicheck = convertDictROICheckToMatROICheck(
                     dict_roicheck,
                     mat_roicheck=mat_roicheck,
@@ -118,7 +146,12 @@ def saveROICheck(q_window: QMainWindow, q_lineedit: QLineEdit, q_table: QTableWi
             QMessageBox.warning(q_window, "File save failed", f"Error saving ROICheck file: {e}")
 
 # load ROIcheck.mat
-def loadROICheck(q_window: QMainWindow, q_table: QTableWidget, table_columns: Dict[str, Dict[str, Any]], table_control: TableControl) -> None:
+def loadROICheck(
+        q_window        : QMainWindow, 
+        q_table         : QTableWidget, 
+        table_columns   : Dict[str, Dict[str, Any]], 
+        table_control   : TableControl,
+        ) -> Union[Dict[str, Any], None]:
     path_roicheck = openFileDialog(q_widget=q_window, file_type="mat", title="Open ROIcheck mat File")
     if path_roicheck:
         # try:
@@ -129,9 +162,10 @@ def loadROICheck(q_window: QMainWindow, q_table: QTableWidget, table_columns: Di
         dict_roicheck = mat_roicheck["manualROIcheck"][date]
 
         # check number of ROIs between of Fall file and of ROICheck file
-        # if table_control.len_row != len(dict_roicheck):
-        #     QMessageBox.warning(q_window, "File load failed", f"Length of data does not match! \nTable: {table_control.len_row}, ROICheck: {len(dict_roicheck)}")
-        #     return
+        if table_control.len_row != mat_roicheck["NumberOfROI"]:
+            QMessageBox.warning(q_window, "File load failed", f"Length of data does not match! \nTable: {table_control.len_row}, ROICheck: {mat_roicheck['NumberOfROI']}")
+            return
+        
         applyDictROICheckToTable(q_table, table_columns, dict_roicheck)
         QMessageBox.information(q_window, "File load", "ROICheck file loaded!")
         # except Exception as e:
