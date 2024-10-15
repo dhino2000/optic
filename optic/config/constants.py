@@ -18,6 +18,9 @@ FILE_FILTERS = {
     ".npy": "npy Files (*.npy);;All Files (*)"
 }
 
+# Default items of dialogs
+USERS = ["Fukatsu", ""]
+
 
 
 # BackGroungImage Type
@@ -75,7 +78,7 @@ class AxisKeys:
     BOT = "bot"
 
 # Table Columns Config
-class TableColumnConfigWindow_Config:
+class TableColumnConfigDialog_Config:
     COLUMNS = ['Column Name', 'Type', 'Width']
     COMBO_ITEMS = ['id', 'celltype', 'checkbox', 'string']
     DEFAULT_PARAMS = ["new cell type", "celltype", "80"]

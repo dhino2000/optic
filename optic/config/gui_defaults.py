@@ -23,6 +23,12 @@ class GuiDefaults:
             # "MAX_WIDTH": 1920,
             # "MAX_HEIGHT": 1080,
         },
+        "WINDOW_SETTINGS_DIALOG": {
+            "INIT_POSITION_X": 100, 
+            "INIT_POSITION_Y": 100,
+            "WIDTH": 300,
+            "HEIGHT": 200,
+        },
         "TITLE": "Suite2pROICheckGUI",
         "APP_KEYS": [AppKeys.PRI],
         "CHANNELS": [ChannelKeys.CHAN1, ChannelKeys.CHAN2, ChannelKeys.CHAN3],

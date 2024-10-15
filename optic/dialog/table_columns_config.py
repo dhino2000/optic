@@ -2,11 +2,11 @@ from PyQt5.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QTableWidget, QTa
 from PyQt5.QtCore import Qt
 from ..manager.widget_manager import WidgetManager
 from ..manager.init_managers import initManagers
-from ..config.constants import TableColumnConfigWindow_Config
+from ..config.constants import TableColumnConfigDialog_Config
 from ..utils.table_utils import deleteSelectedRows, addRow
 
 # Table Columns Config
-class TableColumnConfigWindow(QDialog):
+class TableColumnConfigDialog(QDialog):
     def __init__(self, parent, table_columns, gui_defaults):
         super().__init__(parent)
         self.widget_manager = initManagers(WidgetManager())
@@ -27,7 +27,7 @@ class TableColumnConfigWindow(QDialog):
 
         layout.addWidget(self.widget_manager.makeWidgetTable(key="table_columns"))
         self.widget_manager.dict_table["table_columns"].setColumnCount(3)
-        self.widget_manager.dict_table["table_columns"].setHorizontalHeaderLabels(TableColumnConfigWindow_Config.COLUMNS)
+        self.widget_manager.dict_table["table_columns"].setHorizontalHeaderLabels(TableColumnConfigDialog_Config.COLUMNS)
         self.setupConfigTable()
 
         layout_column = QHBoxLayout()
@@ -55,7 +55,7 @@ class TableColumnConfigWindow(QDialog):
             
             # Type
             self.widget_manager.makeWidgetComboBox(key=f"type_{i}")
-            self.widget_manager.dict_combobox[f"type_{i}"].addItems(TableColumnConfigWindow_Config.COMBO_ITEMS)
+            self.widget_manager.dict_combobox[f"type_{i}"].addItems(TableColumnConfigDialog_Config.COMBO_ITEMS)
             self.widget_manager.dict_combobox[f"type_{i}"].setCurrentText(col_info[f'type'])
             self.widget_manager.dict_table["table_columns"].setCellWidget(i, 1, self.widget_manager.dict_combobox[f"type_{i}"])
             
@@ -70,15 +70,15 @@ class TableColumnConfigWindow(QDialog):
         row = addRow(self.widget_manager.dict_table["table_columns"])
         
         # 新しい行にウィジェットを追加
-        self.widget_manager.makeWidgetLineEdit(key=f"col_name_{row}", text_set=TableColumnConfigWindow_Config.DEFAULT_PARAMS[0])
+        self.widget_manager.makeWidgetLineEdit(key=f"col_name_{row}", text_set=TableColumnConfigDialog_Config.DEFAULT_PARAMS[0])
         self.widget_manager.dict_table["table_columns"].setCellWidget(row, 0, self.widget_manager.dict_lineedit[f"col_name_{row}"])
         
         self.widget_manager.makeWidgetComboBox(key=f"type_{row}")
-        self.widget_manager.dict_combobox[f"type_{row}"].addItems(TableColumnConfigWindow_Config.COMBO_ITEMS)
-        self.widget_manager.dict_combobox[f"type_{row}"].setCurrentText(TableColumnConfigWindow_Config.DEFAULT_PARAMS[1])
+        self.widget_manager.dict_combobox[f"type_{row}"].addItems(TableColumnConfigDialog_Config.COMBO_ITEMS)
+        self.widget_manager.dict_combobox[f"type_{row}"].setCurrentText(TableColumnConfigDialog_Config.DEFAULT_PARAMS[1])
         self.widget_manager.dict_table["table_columns"].setCellWidget(row, 1, self.widget_manager.dict_combobox[f"type_{row}"])
 
-        self.widget_manager.makeWidgetLineEdit(key=f"width_{row}", text_set=TableColumnConfigWindow_Config.DEFAULT_PARAMS[2])
+        self.widget_manager.makeWidgetLineEdit(key=f"width_{row}", text_set=TableColumnConfigDialog_Config.DEFAULT_PARAMS[2])
         self.widget_manager.dict_table["table_columns"].setCellWidget(row, 2, self.widget_manager.dict_lineedit[f"width_{row}"])
 
     def convertTableToTableColumns(self):

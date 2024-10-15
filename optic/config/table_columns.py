@@ -14,6 +14,6 @@ class TableColumns:
         self._column_order = sorted(self._columns.keys(), key=lambda x: self._columns[x]['order'])
     
     def openConfigWindow(self, parent, gui_defaults):
-        from .table_columns_config import TableColumnConfigWindow
-        config_window = TableColumnConfigWindow(parent, self, gui_defaults)
+        from ..dialog.table_columns_config import TableColumnConfigDialog
+        config_window = TableColumnConfigDialog(parent, self, gui_defaults)
         config_window.exec_()

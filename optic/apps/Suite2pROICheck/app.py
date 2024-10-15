@@ -311,7 +311,7 @@ class Suite2pROICheckGUI(QMainWindow):
     make SubWindow, Dialog Function
     """
     def showSubWindowTableColumnConfig(self, key_app):
-        config_window = TableColumnConfigWindow(
+        config_window = TableColumnConfigDialog(
             self, 
             self.control_manager.table_controls[key_app].table_columns, 
             self.config_manager.gui_defaults

@@ -1,7 +1,7 @@
 from __future__ import annotations
 from ..type_definitions import *
 import os
-from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtWidgets import QMessageBox, QDialog
 from scipy.io import loadmat, savemat
 import tifffile
 import datetime
@@ -117,13 +117,18 @@ def saveROICheck(
         q_window        : QMainWindow, 
         q_lineedit      : QLineEdit, 
         q_table         : QTableWidget, 
+        gui_defaults    : GuiDefaults,
         table_columns   : TableColumns, 
         local_var       : bool=True
         ) -> None:
     path_src = q_lineedit.text()
     path_dst = generateSavePath(path_src, prefix="ROIcheck_", remove_strings="Fall_")
-
     path_dst, is_overwrite = saveFileDialog(q_widget=q_window, file_type="mat", title="Save ROIcheck mat File", initial_dir=path_dst)
+    
+    from ..dialog.user_select import UserSelectDialog
+    dialog = UserSelectDialog(parent=q_window, gui_defaults=gui_defaults)
+    if dialog.exec_() == QDialog.Accepted:
+        pass
     if path_dst:
         try:
             if is_overwrite:
