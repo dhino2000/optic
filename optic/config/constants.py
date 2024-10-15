@@ -19,7 +19,8 @@ FILE_FILTERS = {
 }
 
 # Default items of dialogs
-USERS = ["Fukatsu", ""]
+# In the future, user json file for default settings
+USERS = ["Fukatsu", "Takahashi", "Tanisumi"]
 
 
 

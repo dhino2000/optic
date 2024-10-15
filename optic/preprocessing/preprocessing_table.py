@@ -45,11 +45,11 @@ def convertTableDataToDictROICheck(q_table, table_columns, local_var=True):
 def convertDictROICheckToMatROICheck(
         dict_roicheck   : Dict[str, Any], 
         mat_roicheck    : Dict[str, Any]=None, 
+        user            : str="",
         n_roi           : int=0, 
         path_fall       : str=""
         )-> Dict[str, Any]:
     now = f"save_{datetime.datetime.now().strftime('%y%m%d_%H%M%S')}"
-    user = "Fukatsu" # modify ! choose user with combobox
 
     if mat_roicheck is None:
         mat_roicheck = {

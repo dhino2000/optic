@@ -125,23 +125,26 @@ def saveROICheck(
     path_dst = generateSavePath(path_src, prefix="ROIcheck_", remove_strings="Fall_")
     path_dst, is_overwrite = saveFileDialog(q_widget=q_window, file_type="mat", title="Save ROIcheck mat File", initial_dir=path_dst)
     
-    from ..dialog.user_select import UserSelectDialog
-    dialog = UserSelectDialog(parent=q_window, gui_defaults=gui_defaults)
-    if dialog.exec_() == QDialog.Accepted:
-        pass
     if path_dst:
         try:
+            from ..dialog.user_select import UserSelectDialog
+            dialog = UserSelectDialog(parent=q_window, gui_defaults=gui_defaults)
+            if dialog.exec_() == QDialog.Accepted:
+                dialog.getUser()
+                user = dialog.user
             if is_overwrite:
                 mat_roicheck = loadmat(path_dst, simplify_cells=True)
                 dict_roicheck = convertTableDataToDictROICheck(q_table, table_columns, local_var)
                 mat_roicheck = convertDictROICheckToMatROICheck(
                     dict_roicheck,
                     mat_roicheck=mat_roicheck,
+                    user=user
                     )
             else:
                 dict_roicheck = convertTableDataToDictROICheck(q_table, table_columns, local_var)
                 mat_roicheck = convertDictROICheckToMatROICheck(
                     dict_roicheck,
+                    user=user,
                     n_roi=q_table.rowCount(),
                     path_fall=path_src,
                     )

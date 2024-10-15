@@ -8,6 +8,7 @@ class UserSelectDialog(QDialog):
     def __init__(self, parent, gui_defaults):
         super().__init__(parent)
         self.widget_manager = initManagers(WidgetManager())
+        self.user = ""
 
         window_settings = gui_defaults.get("WINDOW_SETTINGS_DIALOG", {})
         self.setGeometry(
@@ -27,7 +28,11 @@ class UserSelectDialog(QDialog):
 
         self.setLayout(layout)
 
-        # self.bindFuncAllWidget()
+        self.bindFuncAllWidget()
 
-    def OK(self):
-        return
+    def getUser(self):
+        self.user =  self.widget_manager.dict_combobox["user"].currentText()
+        self.accept()
+    
+    def bindFuncAllWidget(self):
+        self.widget_manager.dict_button["ok"].clicked.connect(self.getUser)
