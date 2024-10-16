@@ -10,7 +10,7 @@ from ..io.data_io import loadFallMat, loadTiffStack, loadTifImage
 
 class DataManager:
     def __init__(self):
-        self.dict_data_dtype:        Dict[str, str] = {}
+        self.dict_data_dtype:      Dict[str, str] = {}
         self.dict_Fall:            Dict[str, Any] = {}
         self.dict_tiff:            Dict[str, np.ndarray[Tuple[int, int, int, int, int]]] = {}
 
