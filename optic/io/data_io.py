@@ -132,24 +132,27 @@ def saveROICheck(
             if dialog.exec_() == QDialog.Accepted:
                 dialog.getUser()
                 user = dialog.user
+            now = f"save_{datetime.datetime.now().strftime('%y%m%d_%H%M%S')}"
             if is_overwrite:
                 mat_roicheck = loadmat(path_dst, simplify_cells=True)
                 dict_roicheck = convertTableDataToDictROICheck(q_table, table_columns, local_var)
                 mat_roicheck = convertDictROICheckToMatROICheck(
                     dict_roicheck,
                     mat_roicheck=mat_roicheck,
+                    date=now,
                     user=user
                     )
             else:
                 dict_roicheck = convertTableDataToDictROICheck(q_table, table_columns, local_var)
                 mat_roicheck = convertDictROICheckToMatROICheck(
                     dict_roicheck,
+                    date=now,
                     user=user,
                     n_roi=q_table.rowCount(),
                     path_fall=path_src,
                     )
             savemat(path_dst, mat_roicheck)
-            QMessageBox.information(q_window, "File save", "ROICheck file saved!")
+            QMessageBox.information(q_window, "File save", f"ROICheck file saved!\nuser: {user}, date: {now}")
         except Exception as e:
             QMessageBox.warning(q_window, "File save failed", f"Error saving ROICheck file: {e}")
 
@@ -157,24 +160,29 @@ def saveROICheck(
 def loadROICheck(
         q_window        : QMainWindow, 
         q_table         : QTableWidget, 
+        gui_defaults    : GuiDefaults,
         table_columns   : Dict[str, Dict[str, Any]], 
         table_control   : TableControl,
         ) -> Union[Dict[str, Any], None]:
     path_roicheck = openFileDialog(q_widget=q_window, file_type="mat", title="Open ROIcheck mat File")
     if path_roicheck:
-        # try:
-        mat_roicheck = loadmat(path_roicheck, simplify_cells=True)
-        list_date = list(mat_roicheck["manualROIcheck"].keys())
-        # select saved date
-        date = list_date[0]
-        dict_roicheck = mat_roicheck["manualROIcheck"][date]
+        try:
+            mat_roicheck = loadmat(path_roicheck, simplify_cells=True)
+            # check number of ROIs between of Fall file and of ROICheck file
+            if table_control.len_row != mat_roicheck["NumberOfROI"]:
+                QMessageBox.warning(q_window, "File load failed", f"Length of data does not match! \nTable: {table_control.len_row}, ROICheck: {mat_roicheck['NumberOfROI']}")
+                return
 
-        # check number of ROIs between of Fall file and of ROICheck file
-        if table_control.len_row != mat_roicheck["NumberOfROI"]:
-            QMessageBox.warning(q_window, "File load failed", f"Length of data does not match! \nTable: {table_control.len_row}, ROICheck: {mat_roicheck['NumberOfROI']}")
-            return
-        
-        applyDictROICheckToTable(q_table, table_columns, dict_roicheck)
-        QMessageBox.information(q_window, "File load", "ROICheck file loaded!")
-        # except Exception as e:
-            # QMessageBox.warning(q_window, "File load failed", f"Error loading ROICheck file: {e}")
+            from ..dialog.date_select import DateSelectDialog
+            list_date = list(mat_roicheck["manualROIcheck"].keys())
+            dialog = DateSelectDialog(parent=q_window, gui_defaults=gui_defaults, list_date=list_date)
+            if dialog.exec_() == QDialog.Accepted:
+                date = dialog.date
+            
+            # select saved date
+            dict_roicheck = mat_roicheck["manualROIcheck"][date]
+            
+            applyDictROICheckToTable(q_table, table_columns, dict_roicheck)
+            QMessageBox.information(q_window, "File load", "ROICheck file loaded!")
+        except Exception as e:
+            QMessageBox.warning(q_window, "File load failed", f"Error loading ROICheck file: {e}")

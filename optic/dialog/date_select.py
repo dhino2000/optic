@@ -4,14 +4,14 @@ from PyQt5.QtWidgets import QDialog, QVBoxLayout
 from PyQt5.QtCore import Qt
 from ..manager.init_managers import initManagers
 from ..manager.widget_manager import WidgetManager
-from ..config.constants import USERS
 
-# User select 
-class UserSelectDialog(QDialog):
-    def __init__(self, parent: QWidget, gui_defaults: GuiDefaults):
+# Date select 
+class DateSelectDialog(QDialog):
+    def __init__(self, parent: QWidget, gui_defaults: GuiDefaults, list_date: List[str]):
         super().__init__(parent)
         self.widget_manager = initManagers(WidgetManager())
-        self.user = ""
+        self.list_date = list_date
+        self.date = ""
 
         window_settings = gui_defaults.get("WINDOW_SETTINGS_DIALOG", {})
         self.setGeometry(
@@ -23,20 +23,19 @@ class UserSelectDialog(QDialog):
         self.initUI()
 
     def initUI(self):
-        self.setWindowTitle('User Selection')
+        self.setWindowTitle('Date Selection')
         layout = QVBoxLayout()
-        list_user = USERS
-        layout.addWidget(self.widget_manager.makeWidgetLabel(key="user", label="User:"))
-        layout.addWidget(self.widget_manager.makeWidgetComboBox(key="user", items=list_user))
+        layout.addWidget(self.widget_manager.makeWidgetLabel(key="date", label="Date"))
+        layout.addWidget(self.widget_manager.makeWidgetComboBox(key="date", items=self.list_date))
         layout.addWidget(self.widget_manager.makeWidgetButton(key="ok", label="OK"))
 
         self.setLayout(layout)
 
         self.bindFuncAllWidget()
 
-    def getUser(self):
-        self.user =  self.widget_manager.dict_combobox["user"].currentText()
+    def getDate(self):
+        self.date =  self.widget_manager.dict_combobox["date"].currentText()
         self.accept()
     
     def bindFuncAllWidget(self):
-        self.widget_manager.dict_button["ok"].clicked.connect(self.getUser)
+        self.widget_manager.dict_button["ok"].clicked.connect(self.getDate)
