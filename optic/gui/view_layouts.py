@@ -1,11 +1,11 @@
 from __future__ import annotations
 from ..type_definitions import *
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout
-from ..utils.layout_utils import clearLayout
-from .base_layouts import makeLayoutLineEditLabel, makeLayoutButtonGroup
+from .base_layouts import makeLayoutButtonGroup
 from ..config.constants import BGImageTypeList
 from ..gui.table_layouts import makeLayoutROIFilterThreshold
 
+# change z,t plane of the view
 def makeLayoutViewWithZTSlider(
         widget_manager: WidgetManager,
         key_view: str,
@@ -50,7 +50,7 @@ def makeLayoutViewWithZTSlider(
 
     return layout
 
-# 表示するROIのThreshold checkbox, lineedit
+# Displayed ROI's Threshold checkbox, lineedit
 def makeLayoutROIThresholds(
         widget_manager: WidgetManager, 
         key_label: str, 
@@ -68,7 +68,7 @@ def makeLayoutROIThresholds(
                                                 
     return layout
 
-# 表示するROIの種類を選択するbuttongroup
+# Select ROI display type of the buttongroup
 def makeLayoutDislplayCelltype(q_widget: QWidget, widget_manager: WidgetManager, key_buttongroup: str, table_columns: TableColumns) -> QHBoxLayout:
     # ROIの表示切り替え All, Cell, Not Cell
     roidisp_options = ["All ROI", "None"]
@@ -77,14 +77,14 @@ def makeLayoutDislplayCelltype(q_widget: QWidget, widget_manager: WidgetManager,
     layout = makeLayoutButtonGroup(q_widget, widget_manager, key_buttongroup=key_buttongroup, list_label_buttongroup=roidisp_options)
     return layout
 
-# 表示するbackgroundを選択するbuttongroup
+# Select background image display type of the buttongroup
 def makeLayoutBGImageTypeDisplay(q_widget: QWidget, widget_manager: WidgetManager, key_buttongroup: str) -> QHBoxLayout:
     # 背景画像の切り替え meanImg, meanImgE, max_proj, Vcorr, RefImg
     bg_types = BGImageTypeList.FALL
     layout = makeLayoutButtonGroup(q_widget, widget_manager, key_buttongroup=key_buttongroup, list_label_buttongroup=bg_types)
     return layout
 
-# 画面クリック時 Astrocyte, Neuron, Not Cell, Check, TrackingのROIをスキップするか
+# Skip ROI choose
 def makeLayoutROIChooseSkip(widget_manager: WidgetManager, key_checkbox: str, table_columns: TableColumns) -> QHBoxLayout:
     layout = QHBoxLayout()
     skip_items = [key for key, value in table_columns.items() if value['type'] in ['celltype', 'checkbox']]

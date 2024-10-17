@@ -232,6 +232,7 @@ class GuiDefaults:
             AppKeys.PRI: {
             },
         },
+        "REGISTRATION_METHOD": ["None", "affine", "bspline"],
     }
     
     @classmethod
