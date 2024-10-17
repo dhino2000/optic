@@ -23,3 +23,18 @@ def makeLayoutElastixConfig(widget_manager: WidgetManager, key_button: str) -> Q
     layout = QVBoxLayout()
     layout.addWidget(widget_manager.makeWidgetButton(key=key_button, label="Elastix Config"))
     return layout
+
+# Image Normalization config
+def makeLayoutImageNormalization(
+        widget_manager      : WidgetManager,
+        key_label           : str,
+        key_label_area      : str,
+        key_lineedit_area   : str,
+        key_button          : str,
+    ) -> QVBoxLayout:
+    layout = QVBoxLayout()
+    layout.addWidget(widget_manager.makeWidgetLabel(key=key_label, label="Image Normalization"))
+    layout.addWidget(widget_manager.makeWidgetLabel(key=key_label_area, label="Area for Normalization ((x_min, x_max, y_min, y_max), z, t)"))
+    layout.addWidget(widget_manager.makeWidgetLineEdit(key=key_lineedit_area))
+    layout.addWidget(widget_manager.makeWidgetButton(key=key_button, label="Run Image Normalization"))
+    return layout
