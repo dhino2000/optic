@@ -42,6 +42,7 @@ class ViewControl:
             self.bg_visibility[channel] = True
 
         # for tiff view
+        self.tiff_shape:        Tuple[int, int, int, int, int]  = ()
         self.plane_z:           int                             = 0
         self.plane_t:           int                             = 0
         self.rect:              QGraphicsRectItem               = None
@@ -58,6 +59,7 @@ class ViewControl:
             self.setSharedAttr_ROISelected(roi_id=0)
         elif self.data_dtype == Extension.TIFF:
             self.setImageDataType()
+            self.setTIFFShape()
 
 
     def updateView(self) -> None:
@@ -80,6 +82,15 @@ class ViewControl:
         if use_self_size:
             width_min, height_min = self.getImageSize()
             setViewSize(self.q_view, width_min=width_min, height_min=height_min)
+
+    def setTIFFShape(self) -> None:
+        self.tiff_shape = (
+            self.data_manager.getSizeOfX(self.key_app),
+            self.data_manager.getSizeOfY(self.key_app),
+            self.data_manager.getSizeOfC(self.key_app),
+            self.data_manager.getSizeOfZ(self.key_app),
+            self.data_manager.getSizeOfT(self.key_app)
+        )
 
     def initializeROIColors(self):
         for roi_id in self.data_manager.getStat(self.key_app).keys():

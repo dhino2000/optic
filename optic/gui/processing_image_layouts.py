@@ -32,6 +32,8 @@ def makeLayoutImageNormalization(
         key_lineedit_area   : str,
         key_button_area     : str,
         key_button_add      : str,
+        key_button_remove   : str,
+        key_button_clear    : str,
         key_button_run      : str,
         key_listwidget      : str,
     ) -> QVBoxLayout:
@@ -40,7 +42,11 @@ def makeLayoutImageNormalization(
     layout.addWidget(widget_manager.makeWidgetLabel(key=key_label_area, label="Area for Normalization (x_min, x_max, y_min, y_max, z_min, z_max, t_min, t_max)"))
     layout.addWidget(widget_manager.makeWidgetLineEdit(key=key_lineedit_area, text_set="0, 511, 0, 511, 0, 0, 0, 0"))
     layout.addWidget(widget_manager.makeWidgetButton(key=key_button_area, label="Set reference area"))
-    layout.addWidget(widget_manager.makeWidgetButton(key=key_button_add, label="Add reference area"))
+    layout_add_remove = QHBoxLayout()
+    layout_add_remove.addWidget(widget_manager.makeWidgetButton(key=key_button_add, label="Add current area"))
+    layout_add_remove.addWidget(widget_manager.makeWidgetButton(key=key_button_remove, label="Remove selected area"))
+    layout_add_remove.addWidget(widget_manager.makeWidgetButton(key=key_button_clear, label="Clear all areas"))
+    layout.addLayout(layout_add_remove)
     layout.addWidget(widget_manager.makeWidgetListWidget(key=key_listwidget))
     layout.addWidget(widget_manager.makeWidgetButton(key=key_button_run, label="Run Image Normalization"))
     return layout

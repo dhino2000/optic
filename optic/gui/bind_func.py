@@ -2,11 +2,12 @@ from __future__ import annotations
 from ..type_definitions import *
 from ..io.file_dialog import openFileDialogAndSetLineEdit
 from ..io.data_io import saveROICheck, loadROICheck, loadEventFileNPY
+from ..visualization.view_visual_rectangle import clipRectangleRange
 from ..utils import *
 from PyQt5.QtCore import Qt
 from matplotlib.axes import Axes
 from matplotlib.backend_bases import Event
-from PyQt5.QtWidgets import QPushButton, QWidget, QLineEdit, QTableWidget, QButtonGroup, QCheckBox, QGraphicsView, QSlider
+from PyQt5.QtWidgets import QPushButton, QWidget, QLineEdit, QTableWidget, QButtonGroup, QCheckBox, QGraphicsView, QSlider, QMessageBox
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 
 """
@@ -128,12 +129,15 @@ def bindFuncButtonSetRectangeRange(
     def onButtonClicked() -> None:
         try:
             rect_range = [int(x) for x in q_lineedit.text().replace(" ", "").split(",")]
+            # if values are out of range
+            rect_range = clipRectangleRange(view_control.tiff_shape, rect_range)
+            q_lineedit.setText(','.join(map(str, rect_range)))
             if len(rect_range) != 8:
                 raise ValueError("Expected 8 values")
+            view_control.setRectRange(rect_range)
+            view_control.updateView()
         except ValueError:
             QMessageBox.warning(q_widget, "Invalid Input", "Please enter 8 integer values separated by commas.\nEx) 100, 200, 100, 200, 1, 2, 0, 0")
-            view_control.setRectRange(rect_range)
-        view_control.updateView()
     q_button.clicked.connect(onButtonClicked)
 
 """
