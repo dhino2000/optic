@@ -292,5 +292,16 @@ def shouldSkipROI(
                             return True
     return False
 
-
-
+# draw rectangle
+def drawRectangle(
+        painter: QPainter, 
+        x1: int, 
+        y1: int, 
+        x2: int, 
+        y2: int, 
+        color: Tuple[int, int, int], 
+        opacity: int
+        ) -> None:
+    pen = QPen(QColor(*color, opacity))
+    painter.setPen(pen)
+    painter.drawRect(x1, y1, x2 - x1, y2 - y1)
