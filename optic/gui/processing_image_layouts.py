@@ -35,8 +35,8 @@ def makeLayoutImageNormalization(
     ) -> QVBoxLayout:
     layout = QVBoxLayout()
     layout.addWidget(widget_manager.makeWidgetLabel(key=key_label, label="Image Normalization"))
-    layout.addWidget(widget_manager.makeWidgetLabel(key=key_label_area, label="Area for Normalization ((x_min, x_max, y_min, y_max), z, t)"))
-    layout.addWidget(widget_manager.makeWidgetLineEdit(key=key_lineedit_area, text_set="(0, 511, 0, 511), 0, 0"))
+    layout.addWidget(widget_manager.makeWidgetLabel(key=key_label_area, label="Area for Normalization (x_min, x_max, y_min, y_max, z_min, z_max, t_min, t_max)"))
+    layout.addWidget(widget_manager.makeWidgetLineEdit(key=key_lineedit_area, text_set="0, 511, 0, 511, 0, 0, 0, 0, 0"))
     layout.addWidget(widget_manager.makeWidgetButton(key=key_button_area, label="Set reference area"))
     layout.addWidget(widget_manager.makeWidgetButton(key=key_button_run, label="Run Image Normalization"))
     return layout

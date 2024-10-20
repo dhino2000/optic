@@ -346,8 +346,10 @@ class Suite2pROICheckGUI(QMainWindow):
             q_table=self.widget_manager.dict_table[f"{self.app_key_pri}"], 
             q_button_save=self.widget_manager.dict_button[f"{self.app_key_pri}_save_roicheck"], 
             q_button_load=self.widget_manager.dict_button[f"{self.app_key_pri}_load_roicheck"], 
+            gui_defaults=self.config_manager.gui_defaults,
             table_columns=self.config_manager.table_columns[self.app_key_pri].getColumns(),
             table_control=self.control_manager.table_controls[self.app_key_pri],
+            local_var=False
         )
         # Table Column Config
         self.widget_manager.dict_button[f"{self.app_key_pri}_config_table"].clicked.connect(
