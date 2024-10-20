@@ -116,6 +116,27 @@ def bindFuncROICheckIO(
     q_button_load.clicked.connect(lambda: loadROICheck(q_window, q_table, gui_defaults, table_columns, table_control))
 
 """
+processing_image_layouts
+"""
+# -> processing_image_layouts.makeLayoutImageNormalization
+def bindFuncButtonSetRectangeRange(
+    q_widget: 'QWidget',
+    q_button: 'QPushButton', 
+    q_lineedit: 'QLineEdit',
+    view_control: 'ViewControl'
+) -> None:
+    def onButtonClicked() -> None:
+        try:
+            rect_range = [int(x) for x in q_lineedit.text().replace(" ", "").split(",")]
+            if len(rect_range) != 8:
+                raise ValueError("Expected 8 values")
+        except ValueError:
+            QMessageBox.warning(q_widget, "Invalid Input", "Please enter 8 integer values separated by commas.\nEx) 100, 200, 100, 200, 1, 2, 0, 0")
+            view_control.setRectRange(rect_range)
+        view_control.updateView()
+    q_button.clicked.connect(onButtonClicked)
+
+"""
 slider_layouts
 """
 # -> slider_layouts.makeLayoutOpacitySlider

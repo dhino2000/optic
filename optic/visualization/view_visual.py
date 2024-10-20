@@ -4,6 +4,8 @@ from PyQt5.QtGui import QPainter, QPen, QColor, QImage, QPixmap
 from PyQt5.QtCore import Qt
 import numpy as np
 from ..config.constants import ChannelKeys
+from .view_visual_roi import drawAllROIs, drawROI, highlightROISelected, findClosestROI, shouldSkipROI
+from .view_visual_rectangle import drawRectangle, drawRectangleIfInRange
 
 # q_view widget visualization
 # update view for Fall data
@@ -118,6 +120,21 @@ def updateViewTiff(
 
     q_scene.clear()
     q_scene.addPixmap(pixmap)
+    # draw rectangle
+    rect_range = view_control.getRectRange()
+    existing_rect = view_control.getRect()
+
+    if rect_range:
+        x_min, x_max, y_min, y_max, z_min, z_max, t_min, t_max = rect_range
+        current_z = view_control.getPlaneZ()
+        current_t = view_control.getPlaneT()
+        new_rect = drawRectangleIfInRange(
+            q_scene, current_z, current_t,
+            x_min, x_max, y_min, y_max, z_min, z_max, t_min, t_max,
+            existing_rect
+        )
+        view_control.setRect(new_rect)
+
     q_view.setScene(q_scene)
     q_view.fitInView(q_scene.sceneRect(), Qt.KeepAspectRatio)
 
@@ -192,116 +209,3 @@ def adjustChannelContrast(
     except Exception as e:
         print(f"Error in adjustChannelContrast: {str(e)}")
         return None
-
-def drawAllROIs(
-        view_control: ViewControl, 
-        pixmap: QPixmap, 
-        data_manager: DataManager, 
-        control_manager: ControlManager, 
-        key_app: str
-        ) -> None:
-    painter = QPainter(pixmap)
-    painter.setRenderHint(QPainter.Antialiasing)
-    roi_display = control_manager.getSharedAttr(key_app, "roi_display")
-    
-    for roiId, roiStat in data_manager.getStat(key_app).items():
-        if roi_display[roiId]:
-            drawROI(view_control, painter, roiStat, roiId)
-    
-    highlightROISelected(view_control, painter, data_manager, control_manager, key_app)
-    painter.end()
-
-def drawROI(
-        view_control: ViewControl, 
-        painter: QPainter, 
-        roiStat: Dict[str, Any],
-        roiId: int
-        ) -> None:
-    xpix, ypix = roiStat["xpix"], roiStat["ypix"]
-    color = view_control.getROIColor(roiId)
-    opacity = view_control.getROIOpacity()
-    
-    pen = QPen(QColor(*color, opacity))
-    painter.setPen(pen)
-    
-    for x, y in zip(xpix, ypix):
-        painter.drawPoint(int(x), int(y))
-
-def highlightROISelected(
-        view_control: ViewControl, 
-        painter: QPainter, 
-        data_manager: DataManager, 
-        control_manager: ControlManager, 
-        key_app: str
-        ) -> None:
-    ROISelectedId = control_manager.getSharedAttr(key_app, "roi_selected_id")
-    if ROISelectedId is not None:
-        roiStat = data_manager.getStat(key_app)[ROISelectedId]
-        xpix, ypix = roiStat["xpix"], roiStat["ypix"]
-        color = view_control.getROIColor(ROISelectedId)
-        opacity = view_control.getHighlightOpacity()
-        
-        pen = QPen(QColor(*color, opacity))
-        painter.setPen(pen)
-        
-        for x, y in zip(xpix, ypix):
-            painter.drawPoint(int(x), int(y))
-
-# find Closest ROI to click position
-def findClosestROI(
-        x: int, 
-        y: int, 
-        dict_roi_med: dict, 
-        skip_roi: dict = None
-        ) -> Optional[int]:
-    if not dict_roi_med:
-        return None
-    
-    min_distance = float('inf')
-    closest_roi_id = None
-
-    for roi_id, med in dict_roi_med.items():
-        if skip_roi and skip_roi.get(roi_id, False):
-            continue
-        distance = np.sqrt((x - med[0])**2 + (y - med[1])**2)
-        if distance < min_distance:
-            min_distance = distance
-            closest_roi_id = roi_id
-
-    return closest_roi_id
-
-# Skip ROIs with "Skip" checkbox checked
-def shouldSkipROI(
-        roi_id: int, 
-        table_columns: dict, 
-        q_table: QTableWidget, 
-        skip_checkboxes: List[QCheckBox]
-        ) -> bool:
-    for checkbox in skip_checkboxes:
-        if checkbox.isChecked():
-            celltype = checkbox.text().replace("Skip ", "").replace(" ROI", "")
-            for col_name, col_info in table_columns.items():
-                if col_name == celltype:
-                    if col_info['type'] == 'celltype':
-                        radio_button = q_table.cellWidget(roi_id, col_info['order'])
-                        if radio_button and radio_button.isChecked():
-                            return True
-                    elif col_info['type'] == 'checkbox':
-                        checkbox_item = q_table.item(roi_id, col_info['order'])
-                        if checkbox_item and checkbox_item.checkState() == Qt.Checked:
-                            return True
-    return False
-
-# draw rectangle
-def drawRectangle(
-        painter: QPainter, 
-        x1: int, 
-        y1: int, 
-        x2: int, 
-        y2: int, 
-        color: Tuple[int, int, int], 
-        opacity: int
-        ) -> None:
-    pen = QPen(QColor(*color, opacity))
-    painter.setPen(pen)
-    painter.drawRect(x1, y1, x2 - x1, y2 - y1)

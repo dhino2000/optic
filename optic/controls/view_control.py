@@ -1,6 +1,7 @@
 from __future__ import annotations
 from ..type_definitions import *
-from ..visualization.view_visual import updateViewFall, updateViewTiff, findClosestROI, shouldSkipROI
+from ..visualization.view_visual import updateViewFall, updateViewTiff
+from ..visualization.view_visual_roi import findClosestROI, shouldSkipROI
 from ..visualization.info_visual import updateZPlaneDisplay, updateTPlaneDisplay
 from ..gui.view_setup import setViewSize
 from ..config.constants import BGImageTypeList, Extension
@@ -40,8 +41,11 @@ class ViewControl:
             }
             self.bg_visibility[channel] = True
 
+        # for tiff view
         self.plane_z:           int                             = 0
         self.plane_t:           int                             = 0
+        self.rect:              QGraphicsRectItem               = None
+        self.rect_range:        List[int, int, int, int, int, int, int, int] = None
 
         self.roi_colors:        Dict[int, Tuple[int, int, int]] = {}
         self.roi_opacity:       int                             = int(config_manager.gui_defaults["ROI_VISUAL_SETTINGS"]["DEFAULT_ROI_OPACITY"])
@@ -93,6 +97,12 @@ class ViewControl:
     def getPlaneT(self) -> int:
         return self.plane_t
     
+    def getRect(self) -> Optional[QGraphicsRectItem]:
+        return self.rect
+    
+    def getRectRange(self) -> Optional[List[int, int, int, int, int, int, int, int]:]:
+        return self.rect_range
+    
     def getROIColor(self, roi_id: int) -> Tuple[int, int, int]:
         return self.roi_colors[roi_id]
 
@@ -126,6 +136,12 @@ class ViewControl:
     def setPlaneT(self, plane_t: int) -> None:
         self.plane_t = plane_t
         updateTPlaneDisplay(self.widget_manager, self.key_app, plane_t)
+
+    def setRect(self, rect: Optional[QGraphicsRectItem]) -> None:
+        self.rect = rect
+
+    def setRectRange(self, rect_range: List[int, int, int, int, int, int, int, int]) -> None:
+        self.rect_range = rect_range
 
     def setROIOpacity(self, opacity: int) -> None:
         self.roi_opacity = opacity
