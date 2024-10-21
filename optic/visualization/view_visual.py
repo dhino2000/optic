@@ -141,6 +141,8 @@ def updateViewTiff(
     existing_rect = view_control.getRectHighlight()
     if rect_range:
         x_min, x_max, y_min, y_max, z_min, z_max, t_min, t_max = rect_range
+        current_z = view_control.getPlaneZ()
+        current_t = view_control.getPlaneT()
         new_rect = drawRectangleIfInRange(
             q_scene, current_z, current_t,
             x_min, x_max, y_min, y_max, z_min, z_max, t_min, t_max,
