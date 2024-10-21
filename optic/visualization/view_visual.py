@@ -77,8 +77,8 @@ def updateViewTiff(
     bg_image_chan3 = None 
     plane_z = view_control.getPlaneZ()
     plane_t = view_control.getPlaneT()
-    min_val_image = np.min(data_manager.getTiffSrack(key_app))
-    max_val_image = np.max(data_manager.getTiffSrack(key_app))
+    min_val_image = np.min(data_manager.getTiffStack(key_app))
+    max_val_image = np.max(data_manager.getTiffStack(key_app))
 
     if view_control.getBackgroundVisibility(ChannelKeys.CHAN1):
         bg_image_chan1 = adjustChannelContrast(

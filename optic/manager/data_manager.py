@@ -101,7 +101,7 @@ class DataManager:
         return self.dict_Fall[key_app]["ops"]["nchannels"].flatten()[0]
         
     "Tiff data"
-    def getTiffSrack(self, key_app: str) -> np.ndarray[np.uint8, Tuple[int, int, int, int, int]]:
+    def getTiffStack(self, key_app: str) -> np.ndarray[np.uint8, Tuple[int, int, int, int, int]]:
         return self.dict_tiff[key_app]
 
     def getSizeOfX(self, key_app: str) -> int:

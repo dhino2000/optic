@@ -1,7 +1,7 @@
 from __future__ import annotations
 from ..type_definitions import *
-from ..io.file_dialog import openFileDialogAndSetLineEdit
-from ..io.data_io import saveROICheck, loadROICheck, loadEventFileNPY
+from ..io.file_dialog import openFileDialogAndSetLineEdit, saveFileDialog
+from ..io.data_io import saveROICheck, loadROICheck, loadEventFileNPY, generateSavePath, saveTifImage
 from ..visualization.view_visual_rectangle import clipRectangleRange
 from ..utils import *
 from PyQt5.QtCore import Qt
@@ -9,6 +9,7 @@ from matplotlib.axes import Axes
 from matplotlib.backend_bases import Event
 from PyQt5.QtWidgets import QPushButton, QWidget, QLineEdit, QTableWidget, QButtonGroup, QCheckBox, QGraphicsView, QSlider, QMessageBox
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
+import numpy as np
 
 """
 This module uses the following type annotations:
@@ -222,6 +223,16 @@ def bindFuncListWidgetSelectionChanged(
             view_control.updateView()
     q_listwidget.itemSelectionChanged.connect(onSelectionChanged)
 
+def bindFuncButtonRunImageNormalization(
+    q_widget: 'QWidget',
+    q_button: 'QPushButton',
+    q_lineedit: 'QLineEdit',
+    q_listwidget: 'QListWidget',
+    view_control: 'ViewControl',
+    tiff_stack: np.ndarray[Tuple[int, int, int, int, int]]
+):
+    path_tif_src = q_lineedit.text()
+    q_button.clicked.connect(lambda: saveTifImage(q_widget, path_tif_src, tiff_stack))
 """
 slider_layouts
 """

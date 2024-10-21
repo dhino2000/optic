@@ -25,6 +25,16 @@ def loadFallMat(
         dict_Fall = Fall
     return dict_Fall
 
+def saveTifImage(
+        q_widget        : QWidget,
+        path_src        : str,
+        im              : np.array[Any, Any, Any]
+        ) -> None:
+    path_dst = generateSavePath(path_src, suffix="_normalized", new_extension=".tif")
+    path_dst, is_overwrite = saveFileDialog(q_widget=q_widget, file_type="mat", title="Save ROIcheck mat File", initial_dir=path_dst)
+    print(path_dst)
+    # tifffile.imsave(path_dst, im)
+
 # load tif image data (XYC)
 def loadTifImage(
         path_image      : str, 
