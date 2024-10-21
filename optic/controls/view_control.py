@@ -2,9 +2,11 @@ from __future__ import annotations
 from ..type_definitions import *
 from ..visualization.view_visual import updateViewFall, updateViewTiff
 from ..visualization.view_visual_roi import findClosestROI, shouldSkipROI
+from ..visualization.view_visual_rectangle import initializeDragRectangle, updateDragRectangle, clipRectangleRange
 from ..visualization.info_visual import updateZPlaneDisplay, updateTPlaneDisplay
 from ..gui.view_setup import setViewSize
 from ..config.constants import BGImageTypeList, Extension
+from PyQt5.QtCore import Qt
 import random
 import numpy as np
 
@@ -29,7 +31,6 @@ class ViewControl:
 
         self.data_dtype:            str                         = "" # ".mat" or ".tif"
         self.im_dtype:              np.dtype                    = np.uint8
-        self.last_click_position:   Tuple[int, int]             = ()
         self.image_sizes:           Tuple[int, int]             = ()
         self.bg_image_type:         str                         = BGImageTypeList.FALL[0]
         self.bg_contrast:           Dict[str, Dict[str, int]]   = {}
@@ -51,6 +52,11 @@ class ViewControl:
         self.roi_colors:        Dict[int, Tuple[int, int, int]] = {}
         self.roi_opacity:       int                             = int(config_manager.gui_defaults["ROI_VISUAL_SETTINGS"]["DEFAULT_ROI_OPACITY"])
         self.highlight_opacity: int                             = int(config_manager.gui_defaults["ROI_VISUAL_SETTINGS"]["DEFAULT_HIGHLIGHT_OPACITY"])
+
+        # Key pushing state, Mouse dragging state
+        self.dict_key_pushed:   Dict[str, bool]                 = {Qt.Key_Control: False, Qt.Key_Shift: False}
+        self.is_dragging:       bool                            = False
+        self.drag_pos_start:    Tuple[int, int]                 = (0, 0)
 
         self.setDataType()
         self.setImageSize()
@@ -186,7 +192,62 @@ class ViewControl:
     """
     event Functions
     """
-    def mousePressEvent(self, x:int, y:int):
+    def keyPressEvent(self, event: QKeyEvent) -> None:
+        if event.key() in self.dict_key_pushed:
+            self.dict_key_pushed[event.key()] = True
+
+    def keyReleaseEvent(self, event: QKeyEvent) -> None:
+        if event.key() == Qt.LeftButton and self.is_dragging:
+            if self.dict_key_pushed[Qt.Key_Control]:
+                self.finishDraggingWithCtrlKey(event)
+            else:
+                self.cancelDraggingWithCtrlKey()
+
+    def mousePressEvent(self, event: QMouseEvent) -> None:
+        if event.button() == Qt.LeftButton:
+            if self.dict_key_pushed[Qt.Key_Control]:
+                self.startDraggingWithCtrlKey(event)
+            else:
+                scene_pos = self.q_view.mapToScene(event.pos())
+                self.getROIwithClick(int(scene_pos.x()), int(scene_pos.y()))
+
+    def mouseMoveEvent(self, event: QMouseEvent) -> None:
+        if self.is_dragging and self.dict_key_pushed[Qt.Key_Control]:
+            self.updateDraggingWithCtrlKey(event)
+
+    def mouseReleaseEvent(self, event: QMouseEvent) -> None:
+        if event.button() == Qt.LeftButton and self.is_dragging:
+            if self.dict_key_pushed[Qt.Key_Control]:
+                self.finishDraggingWithCtrlKey(event)
+            else:
+                self.cancelDraggingWithCtrlKey()
+    
+    def startDraggingWithCtrlKey(self, event: QMouseEvent) -> None:
+        self.drag_start_pos = self.q_view.mapToScene(event.pos())
+        self.is_dragging = True
+        self.current_rect = initializeDragRectangle(self.q_scene, self.drag_start_pos, self.drag_start_pos)
+
+    def updateDraggingWithCtrlKey(self, event: QMouseEvent) -> None:
+        current_pos = self.q_view.mapToScene(event.pos())
+        updateDragRectangle(self.current_rect, self.drag_start_pos, current_pos)
+
+    def finishDraggingWithCtrlKey(self, event: QMouseEvent) -> None:
+        self.is_dragging = False
+        end_pos = self.q_view.mapToScene(event.pos())
+        updateDragRectangle(self.current_rect, self.drag_start_pos, end_pos)
+        final_rect = self.current_rect.rect()
+        rect_range = self.getRectRangeFromQRectF(final_rect)
+        self.setRectRange(clipRectangleRange(self.tiff_shape, rect_range))
+        self.updateView()
+
+    def cancelDraggingWithCtrlKey(self) -> None:
+        if self.rect:
+            self.q_scene.removeItem(self.rect)
+        self.is_dragging = False
+        self.rect = None
+
+
+    def getROIwithClick(self, x:int, y:int):
         dict_Fall_stat = self.data_manager.getStat(self.key_app)
         dict_roi_med = {roi_id: dict_Fall_stat[roi_id]["med"] for roi_id in dict_Fall_stat.keys()}
         skip_checkboxes = [checkbox for key, checkbox in self.widget_manager.dict_checkbox.items() if key.startswith(f"{self.key_app}_skip_choose_")]
@@ -199,3 +260,14 @@ class ViewControl:
         if closest_roi_id is not None:
             self.control_manager.setSharedAttr(self.key_app, 'roi_selected_id', closest_roi_id)
             self.updateView()
+
+    def getRectRangeFromQRectF(self, rect: QRectF) -> List[int, int, int, int, int, int, int, int]:
+        x_start = int(rect.left())
+        x_end = int(rect.right())
+        y_start = int(rect.top())
+        y_end = int(rect.bottom())
+        z_start = self.getPlaneZ()
+        z_end = z_start
+        t_start = self.getPlaneT()
+        t_end = t_start
+        return [x_start, x_end, y_start, y_end, z_start, z_end, t_start, t_end]

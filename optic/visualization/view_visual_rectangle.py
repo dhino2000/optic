@@ -1,7 +1,8 @@
 from __future__ import annotations
 from ..type_definitions import *
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QPointF, QRectF
 from PyQt5.QtGui import QPen, QColor
+from PyQt5.QtWidgets import QGraphicsScene, QGraphicsRectItem
 
 # draw rectangle
 def drawRectangle(
@@ -60,3 +61,29 @@ def clipRectangleRange(
     t_end = max(t_start, min(t_end, frames - 1))
 
     return [x_start, x_end, y_start, y_end, z_start, z_end, t_start, t_end]
+
+# draw rectangle with mouse drag
+def initializeDragRectangle(
+        q_scene: QGraphicsScene,
+        start_pos: QPointF,
+        end_pos: QPointF,
+        color: QColor = Qt.yellow,
+        width: int = 2
+) -> QGraphicsRectItem:
+    pen = QPen(color)
+    pen.setWidth(width)
+
+    rect = QRectF(start_pos, end_pos).normalized()
+    for item in q_scene.items():
+        if isinstance(item, QGraphicsRectItem):
+            q_scene.removeItem(item)
+    rect_item = q_scene.addRect(rect, pen)
+    return rect_item
+
+def updateDragRectangle(
+        rect_item: QGraphicsRectItem,
+        start_pos: QPointF,
+        end_pos: QPointF
+) -> None:
+    rect = QRectF(start_pos, end_pos).normalized()
+    rect_item.setRect(rect)

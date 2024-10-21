@@ -1,5 +1,7 @@
 from __future__ import annotations
 from ..type_definitions import *
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QPen, QColor, QPainter
 import numpy as np
 
 def drawAllROIs(

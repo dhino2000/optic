@@ -45,15 +45,52 @@ def bindFuncViewMouseEvent(
     view_control: 'ViewControl', 
     table_control: 'TableControl'
 ) -> None:
-    def onViewClicked(event) -> None:
-        view_pos = event.pos()
-        scene_pos = q_view.mapToScene(view_pos)
-        view_control.mousePressEvent(int(scene_pos.x()), int(scene_pos.y()))
-        table_control.updateSelectedROI(
-            view_control.control_manager.getSharedAttr(view_control.key_app, 'roi_selected_id')
-        )
+    def onViewPressed(event) -> None:
+        view_control.mousePressEvent(event)
+        roi_selected_id = view_control.control_manager.getSharedAttr(view_control.key_app, 'roi_selected_id')
+        table_control.updateSelectedROI(roi_selected_id)
     
-    q_view.mousePressEvent = onViewClicked
+    q_view.mousePressEvent = onViewPressed
+
+# -> makeWidgetView, mouseMoveEvent
+def bindFuncViewMouseEventForTIFF(
+    q_view: 'QGraphicsView',
+    view_control: 'ViewControl',
+    table_control: 'TableControl'
+) -> None:
+    def onViewPressed(event: QMouseEvent) -> None:
+        if event.button() == Qt.LeftButton:
+            if view_control.dict_key_pushed[Qt.Key_Control]:
+                view_control.startDraggingWithCtrlKey(event)
+            elif table_control:
+                scene_pos = q_view.mapToScene(event.pos())
+                view_control.getROIwithClick(int(scene_pos.x()), int(scene_pos.y()))
+                roi_selected_id = view_control.control_manager.getSharedAttr(view_control.key_app, 'roi_selected_id')
+                table_control.updateSelectedROI(roi_selected_id)
+
+    def onViewMoved(event: QMouseEvent) -> None:
+        if view_control.is_dragging and view_control.dict_key_pushed[Qt.Key_Control]:
+            view_control.updateDraggingWithCtrlKey(event)
+
+    def onViewReleased(event: QMouseEvent) -> None:
+        if event.button() == Qt.LeftButton and view_control.is_dragging:
+            if view_control.dict_key_pushed[Qt.Key_Control]:
+                view_control.finishDraggingWithCtrlKey(event)
+            else:
+                view_control.cancelDraggingWithCtrlKey()
+
+    q_view.mousePressEvent = onViewPressed
+    q_view.mouseMoveEvent = onViewMoved
+    q_view.mouseReleaseEvent = onViewReleased
+
+    def onKeyPressed(event: QKeyEvent) -> None:
+        view_control.keyPressEvent(event)
+
+    def onKeyReleased(event: QKeyEvent) -> None:
+        view_control.keyReleaseEvent(event)
+
+    q_view.keyPressEvent = onKeyPressed
+    q_view.keyReleaseEvent = onKeyReleased
 
 """
 canvas_layouts
