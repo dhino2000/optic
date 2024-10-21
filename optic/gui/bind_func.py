@@ -55,6 +55,7 @@ def bindFuncViewMouseEvent(
 # -> makeWidgetView, mouseMoveEvent
 def bindFuncViewMouseEventForTIFF(
     q_view: 'QGraphicsView',
+    q_lineedit: 'QLineEdit',
     view_control: 'ViewControl',
     table_control: 'TableControl'
 ) -> None:
@@ -76,6 +77,9 @@ def bindFuncViewMouseEventForTIFF(
         if event.button() == Qt.LeftButton and view_control.is_dragging:
             if view_control.dict_key_pushed[Qt.Key_Control]:
                 view_control.finishDraggingWithCtrlKey(event)
+                rect = view_control.rect.rect()
+                rect_range = view_control.getRectRangeFromQRectF(rect)
+                q_lineedit.setText(','.join(map(str, rect_range)))
             else:
                 view_control.cancelDraggingWithCtrlKey()
 
@@ -176,6 +180,47 @@ def bindFuncButtonSetRectangeRange(
         except ValueError:
             QMessageBox.warning(q_widget, "Invalid Input", "Please enter 8 integer values separated by commas.\nEx) 100, 200, 100, 200, 1, 2, 0, 0")
     q_button.clicked.connect(onButtonClicked)
+
+# -> processing_image_layouts.makeLayoutImageNormalization
+def bindFuncButtonManageRectangleRangeForListWidget(
+    q_widget: 'QWidget',
+    q_button_add: 'QPushButton', 
+    q_button_remove: 'QPushButton', 
+    q_button_clear: 'QPushButton', 
+    q_listwidget: 'QListWidget', 
+    q_lineedit: 'QLineEdit',
+    view_control: 'ViewControl'
+) -> None:
+    def _addItemToListWidgetFromLineEdit(q_listwidget, q_lineedit) -> None:
+        try:
+            q_lineedit.setText(q_lineedit.text().replace(" ", ""))
+            rect_range = [int(x) for x in q_lineedit.text().split(",")]
+            if len(rect_range) != 8:
+                raise ValueError("Expected 8 values")
+            addItemToListWidgetFromLineEdit(q_listwidget, q_lineedit)
+        except ValueError:
+            QMessageBox.warning(q_widget, "Invalid Input", "Please enter 8 integer values separated by commas.\nEx) 100, 200, 100, 200, 1, 2, 0, 0")
+    def _removeSelectedItemFromListWidget(q_listwidget, view_control) -> None:
+        view_control.setRectHighlightRange(None)
+        removeSelectedItemFromListWidget(q_listwidget)
+    def _clearListWidget(q_listwidget, view_control) -> None:
+        view_control.setRectHighlightRange(None)
+        clearListWidget(q_listwidget)
+    q_button_add.clicked.connect(lambda: _addItemToListWidgetFromLineEdit(q_listwidget, q_lineedit))
+    q_button_remove.clicked.connect(lambda: _removeSelectedItemFromListWidget(q_listwidget, view_control))
+    q_button_clear.clicked.connect(lambda: _clearListWidget(q_listwidget, view_control))
+
+def bindFuncListWidgetSelectionChanged(
+    q_listwidget: 'QListWidget', 
+    view_control: 'ViewControl'
+) -> None:
+    def onSelectionChanged() -> None:
+        item = q_listwidget.currentItem()
+        if item:
+            rect_range = [int(x) for x in item.text().replace(" ", "").split(",")]
+            view_control.setRectHighlightRange(rect_range)
+            view_control.updateView()
+    q_listwidget.itemSelectionChanged.connect(onSelectionChanged)
 
 """
 slider_layouts

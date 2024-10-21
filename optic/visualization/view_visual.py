@@ -3,7 +3,7 @@ from ..type_definitions import *
 from PyQt5.QtGui import QPainter, QPen, QColor, QImage, QPixmap
 from PyQt5.QtCore import Qt
 import numpy as np
-from ..config.constants import ChannelKeys
+from ..config.constants import ChannelKeys, RectangleColors, DrawingWidth
 from .view_visual_roi import drawAllROIs, drawROI, highlightROISelected, findClosestROI, shouldSkipROI
 from .view_visual_rectangle import drawRectangle, drawRectangleIfInRange
 
@@ -123,7 +123,6 @@ def updateViewTiff(
     # draw rectangle
     rect_range = view_control.getRectRange()
     existing_rect = view_control.getRect()
-
     if rect_range:
         x_min, x_max, y_min, y_max, z_min, z_max, t_min, t_max = rect_range
         current_z = view_control.getPlaneZ()
@@ -131,7 +130,23 @@ def updateViewTiff(
         new_rect = drawRectangleIfInRange(
             q_scene, current_z, current_t,
             x_min, x_max, y_min, y_max, z_min, z_max, t_min, t_max,
-            existing_rect
+            color=RectangleColors.DRAG,
+            width=DrawingWidth.RECTANGLE,
+            existing_rect=existing_rect,
+        )
+        view_control.setRect(new_rect)
+
+    # draw highlight rectangle
+    rect_range = view_control.getRectHighlightRange()
+    existing_rect = view_control.getRectHighlight()
+    if rect_range:
+        x_min, x_max, y_min, y_max, z_min, z_max, t_min, t_max = rect_range
+        new_rect = drawRectangleIfInRange(
+            q_scene, current_z, current_t,
+            x_min, x_max, y_min, y_max, z_min, z_max, t_min, t_max,
+            color=RectangleColors.HIGHLIGHT,
+            width=DrawingWidth.RECTANGLE,
+            existing_rect=existing_rect,
         )
         view_control.setRect(new_rect)
 

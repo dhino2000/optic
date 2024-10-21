@@ -43,11 +43,13 @@ class ViewControl:
             self.bg_visibility[channel] = True
 
         # for tiff view
-        self.tiff_shape:        Tuple[int, int, int, int, int]  = ()
-        self.plane_z:           int                             = 0
-        self.plane_t:           int                             = 0
-        self.rect:              QGraphicsRectItem               = None
-        self.rect_range:        List[int, int, int, int, int, int, int, int] = None
+        self.tiff_shape:            Tuple[int, int, int, int, int]  = ()
+        self.plane_z:               int                             = 0
+        self.plane_t:               int                             = 0
+        self.rect:                  QGraphicsRectItem               = None
+        self.rect_range:            List[int, int, int, int, int, int, int, int] = None
+        self.rect_highlight:        QGraphicsRectItem               = None
+        self.rect_highlight_range:  List[int, int, int, int, int, int, int, int] = None
 
         self.roi_colors:        Dict[int, Tuple[int, int, int]] = {}
         self.roi_opacity:       int                             = int(config_manager.gui_defaults["ROI_VISUAL_SETTINGS"]["DEFAULT_ROI_OPACITY"])
@@ -120,6 +122,12 @@ class ViewControl:
     def getRectRange(self) -> Optional[List[int, int, int, int, int, int, int, int]:]:
         return self.rect_range
     
+    def getRectHighlight(self) -> Optional[QGraphicsRectItem]:
+        return self.rect_highlight
+    
+    def getRectHighlightRange(self) -> Optional[List[int, int, int, int, int, int, int, int]]:
+        return self.rect_highlight_range
+    
     def getROIColor(self, roi_id: int) -> Tuple[int, int, int]:
         return self.roi_colors[roi_id]
 
@@ -160,6 +168,12 @@ class ViewControl:
     def setRectRange(self, rect_range: List[int, int, int, int, int, int, int, int]) -> None:
         self.rect_range = rect_range
 
+    def setRectHighlight(self, rect_highlight: Optional[QGraphicsRectItem]) -> None:
+        self.rect_highlight = rect_highlight
+
+    def setRectHighlightRange(self, rect_highlight_range: List[int, int, int, int, int, int, int, int]) -> None:
+        self.rect_highlight_range = rect_highlight_range
+
     def setROIOpacity(self, opacity: int) -> None:
         self.roi_opacity = opacity
 
@@ -197,10 +211,9 @@ class ViewControl:
             self.dict_key_pushed[event.key()] = True
 
     def keyReleaseEvent(self, event: QKeyEvent) -> None:
-        if event.key() == Qt.LeftButton and self.is_dragging:
-            if self.dict_key_pushed[Qt.Key_Control]:
-                self.finishDraggingWithCtrlKey(event)
-            else:
+        if event.key() in self.dict_key_pushed:
+            self.dict_key_pushed[event.key()] = False
+            if self.is_dragging:
                 self.cancelDraggingWithCtrlKey()
 
     def mousePressEvent(self, event: QMouseEvent) -> None:
@@ -225,20 +238,19 @@ class ViewControl:
     def startDraggingWithCtrlKey(self, event: QMouseEvent) -> None:
         self.drag_start_pos = self.q_view.mapToScene(event.pos())
         self.is_dragging = True
-        self.current_rect = initializeDragRectangle(self.q_scene, self.drag_start_pos, self.drag_start_pos)
+        self.rect = initializeDragRectangle(self.q_scene, self.drag_start_pos, self.drag_start_pos)
 
     def updateDraggingWithCtrlKey(self, event: QMouseEvent) -> None:
         current_pos = self.q_view.mapToScene(event.pos())
-        updateDragRectangle(self.current_rect, self.drag_start_pos, current_pos)
+        updateDragRectangle(self.rect, self.drag_start_pos, current_pos)
 
     def finishDraggingWithCtrlKey(self, event: QMouseEvent) -> None:
         self.is_dragging = False
         end_pos = self.q_view.mapToScene(event.pos())
-        updateDragRectangle(self.current_rect, self.drag_start_pos, end_pos)
-        final_rect = self.current_rect.rect()
+        updateDragRectangle(self.rect, self.drag_start_pos, end_pos)
+        final_rect = self.rect.rect()
         rect_range = self.getRectRangeFromQRectF(final_rect)
         self.setRectRange(clipRectangleRange(self.tiff_shape, rect_range))
-        self.updateView()
 
     def cancelDraggingWithCtrlKey(self) -> None:
         if self.rect:

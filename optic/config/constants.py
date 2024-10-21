@@ -1,4 +1,4 @@
-# アプリ間で共有する定数
+from PyQt5.QtCore import Qt
 from enum import Enum
 
 class Extension:
@@ -83,3 +83,11 @@ class TableColumnConfigDialog_Config:
     COLUMNS = ['Column Name', 'Type', 'Width']
     COMBO_ITEMS = ['id', 'celltype', 'checkbox', 'string']
     DEFAULT_PARAMS = ["new cell type", "celltype", "80"]
+
+# Rectangle Color
+class RectangleColors:
+    DRAG = Qt.yellow
+    HIGHLIGHT = Qt.cyan
+
+class DrawingWidth:
+    RECTANGLE = 2

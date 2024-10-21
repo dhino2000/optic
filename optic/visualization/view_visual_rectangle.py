@@ -32,12 +32,14 @@ def drawRectangleIfInRange(
         z_max: int,
         t_min: int,
         t_max: int,
+        color: QColor = Qt.yellow,
+        width: int = 2,
         existing_rect: Optional[QGraphicsRectItem] = None
 ) -> Optional[QGraphicsRectItem]:
     if (z_min <= current_z <= z_max) and (t_min <= current_t <= t_max):
         if existing_rect is not None and existing_rect in q_scene.items():
             q_scene.removeItem(existing_rect)
-        return drawRectangle(q_scene, x_min, x_max, y_min, y_max)
+        return drawRectangle(q_scene, x_min, x_max, y_min, y_max, color, width)
     elif existing_rect is not None and existing_rect in q_scene.items():
         q_scene.removeItem(existing_rect)
     return None
