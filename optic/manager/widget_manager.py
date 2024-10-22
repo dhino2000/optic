@@ -103,7 +103,7 @@ def makeWidgetListWidget(
     
     # 編集可能設定
     if editable:
-        widget.setEditTriggers(QAbstractItemView.DoubleClicked)
+        widget.setEditTriggers(QAbstractItemView.DoubleClicked | QAbstractItemView.EditKeyPressed)
     
     # ドラッグ＆ドロップモード設定
     widget.setDragDropMode(drag_drop_mode)

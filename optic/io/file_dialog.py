@@ -13,7 +13,7 @@ def openFileDialog(
         multiple    : bool=False
         ) -> Union[str, List[str]]: 
     """
-    :file_type: ".mat", ".tif", ".npy"
+    :file_type: ".mat", ".tif", ".npy", ".h5"
     """
     options = QFileDialog.Options()
     file_filter = FILE_FILTERS.get(file_type, "All Files (*)")

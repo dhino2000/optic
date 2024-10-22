@@ -1,12 +1,28 @@
-from PyQt5.QtWidgets import QListWidget, QLineEdit
+from PyQt5.QtWidgets import QListWidget, QLineEdit, QListWidgetItem
+from PyQt5.QtCore import Qt
 
-def addItemToListWidgetFromLineEdit(list_widget: QListWidget, line_edit: QLineEdit, dupilcate: bool=False) -> None:
+def addItemToListWidget(list_widget: QListWidget, item: str, duplicate: bool=False, editable: bool=False) -> None:
+    """
+    add item to ListWidget
+    """
+    if item:
+        if not duplicate:
+            items = [list_widget.item(i).text() for i in range(list_widget.count())]
+            if item in items:
+                return
+                
+        new_item = QListWidgetItem(item)
+        if editable:
+            new_item.setFlags(new_item.flags() | Qt.ItemIsEditable)
+        list_widget.addItem(new_item)
+
+def addItemToListWidgetFromLineEdit(list_widget: QListWidget, line_edit: QLineEdit, duplicate: bool=False) -> None:
     """
     add item to ListWidget from LineEdit
     """
     text = line_edit.text().strip()
     if text:
-        if not dupilcate:
+        if not duplicate:
             items = [list_widget.item(i).text() for i in range(list_widget.count())]
             if text in items:
                 return False
