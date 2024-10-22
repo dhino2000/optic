@@ -27,13 +27,11 @@ def loadFallMat(
 
 def saveTifImage(
         q_widget        : QWidget,
-        path_src        : str,
+        path_dst        : str,
         im              : np.array[Any, Any, Any]
         ) -> None:
-    path_dst = generateSavePath(path_src, suffix="_normalized", new_extension=".tif")
-    path_dst, is_overwrite = saveFileDialog(q_widget=q_widget, file_type="mat", title="Save ROIcheck mat File", initial_dir=path_dst)
-    print(path_dst)
-    # tifffile.imsave(path_dst, im)
+    path_dst, is_overwrite = saveFileDialog(q_widget=q_widget, file_type="tif", title="Save TIF image file", initial_dir=path_dst)
+    tifffile.imsave(path_dst, im)
 
 # load tif image data (XYC)
 def loadTifImage(
@@ -44,6 +42,22 @@ def loadTifImage(
     if preprocessing:
         im = convertImageDtypeToINT(im)
     return im
+
+# save tiff stack data (TZCYX)
+def saveTiffStack(
+        q_widget        : QWidget,
+        path_dst        : str,
+        tiff_stack      : np.array[Any, Any, Any, Any, Any],
+        imagej          : bool=True,
+        metadata        : Dict[str, Any] = None
+        ) -> None:
+    # To save as ImageJ format, move axes to the last
+    path_dst, is_overwrite = saveFileDialog(q_widget=q_widget, file_type="tif", title="Save TIFF image stack file", initial_dir=path_dst)
+    if imagej:
+        data_ijformat = np.moveaxis(tiff_stack, [0,1,2,3,4], [4,3,2,1,0])
+        tifffile.imwrite(path_dst, data_ijformat, imagej=imagej, metadata=metadata)
+    else:
+        tifffile.imwrite(path_dst, tiff_stack)
 
 # load tiff stack data (XYCZT)
 def loadTiffStack(
@@ -56,9 +70,11 @@ def loadTiffStack(
             series = tif.series[0]
             axes_src = series.axes
             im = standardizeTIFFStack(series.asarray(), axes_src, axes_tgt)
+            metadata = tif.imagej_metadata
     else:
         im = tifffile.imread(path_tiff)
-    return im
+        metadata = None
+    return im, metadata
 
 # EventFile npyの読み込み, 初期化
 def loadEventFileNPY(

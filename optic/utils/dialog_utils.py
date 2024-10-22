@@ -1,4 +1,5 @@
-from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtWidgets import QMessageBox, QProgressDialog, QWidget
+from PyQt5.QtCore import Qt
 
 def showConfirmationDialog(parent, title, message, default_button=QMessageBox.No):
     """
@@ -20,3 +21,16 @@ def showConfirmationDialog(parent, title, message, default_button=QMessageBox.No
     msg_box.setDefaultButton(default_button)
     
     return msg_box.exec_()
+
+def showProgressDialog(q_widget: QWidget, message: str="Processing...") -> QProgressDialog:
+    """
+    show progress dialog
+    """
+    progress_dialog = QProgressDialog(message, None, 0, 0, q_widget)
+    progress_dialog.setCancelButton(None)
+    progress_dialog.setWindowModality(Qt.WindowModal)
+    progress_dialog.setMinimumDuration(0)
+    progress_dialog.show()
+    progress_dialog.setRange(0, 0)
+    
+    return progress_dialog

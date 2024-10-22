@@ -1,4 +1,5 @@
 from __future__ import annotations
+from ..type_definitions import *
 import numpy as np
 
 def standardizeTIFFStack(
@@ -22,3 +23,34 @@ def standardizeTIFFStack(
     new_data = np.transpose(data, trans_order)
 
     return new_data
+
+def extractTIFFStack(
+    tiff_stack: np.ndarray,
+    x_min: Optional[int] = None,
+    x_max: Optional[int] = None,
+    y_min: Optional[int] = None,
+    y_max: Optional[int] = None,
+    z_min: Optional[int] = None,
+    z_max: Optional[int] = None,
+    t_min: Optional[int] = None,
+    t_max: Optional[int] = None,
+    c_min: Optional[int] = None,
+    c_max: Optional[int] = None
+) -> np.ndarray:
+    """
+    create TIFF stack from range list
+
+    :param tiff_stack: original 5D tiff stack (dim: X, Y, C, Z, T)
+    :param range_list: x_min, x_max, y_min, y_max, c_min, c_max, z_min, z_max, t_min, t_max
+    """
+    if not tiff_stack.ndim == 5:
+        raise ValueError("tiff_stack should have 5 dimensions")
+    
+    x_slice = slice(x_min, x_max + 1 if x_max is not None else None)
+    y_slice = slice(y_min, y_max + 1 if y_max is not None else None)
+    c_slice = slice(c_min, c_max + 1 if c_max is not None else None)
+    z_slice = slice(z_min, z_max + 1 if z_max is not None else None)
+    t_slice = slice(t_min, t_max + 1 if t_max is not None else None)
+
+    tiff_stack_extracted = tiff_stack[t_slice, z_slice, c_slice, y_slice, x_slice]
+    return tiff_stack_extracted

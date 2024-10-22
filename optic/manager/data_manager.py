@@ -13,6 +13,7 @@ class DataManager:
         self.dict_data_dtype:      Dict[str, str] = {}
         self.dict_Fall:            Dict[str, Any] = {}
         self.dict_tiff:            Dict[str, np.ndarray[Tuple[int, int, int, int, int]]] = {}
+        self.dict_tiff_metadata:   Dict[str, Dict[str, Any]] = {}
 
         self.dict_im_bg:           Dict[str, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
         self.dict_im_bg_chan2:     Dict[str, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
@@ -47,9 +48,10 @@ class DataManager:
     # load tiff stack data
     def loadTiffStack(self, key_app: str, path_tiff: str) -> bool:
         try:
-            tiff = loadTiffStack(path_tiff)
+            tiff, metadata = loadTiffStack(path_tiff)
             self.dict_data_dtype[key_app] = Extension.TIFF
             self.dict_tiff[key_app] = tiff
+            self.dict_tiff_metadata[key_app] = metadata
             return True
         except Exception as e:
             return False
@@ -103,6 +105,8 @@ class DataManager:
     "Tiff data"
     def getTiffStack(self, key_app: str) -> np.ndarray[np.uint8, Tuple[int, int, int, int, int]]:
         return self.dict_tiff[key_app]
+    def getTiffMetadata(self, key_app: str) -> Dict[str, Any]:
+        return self.dict_tiff_metadata[key_app]
 
     def getSizeOfX(self, key_app: str) -> int:
         return self.dict_tiff[key_app].shape[0]

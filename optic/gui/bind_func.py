@@ -1,8 +1,9 @@
 from __future__ import annotations
 from ..type_definitions import *
 from ..io.file_dialog import openFileDialogAndSetLineEdit, saveFileDialog
-from ..io.data_io import saveROICheck, loadROICheck, loadEventFileNPY, generateSavePath, saveTifImage
+from ..io.data_io import saveROICheck, loadROICheck, loadEventFileNPY, generateSavePath, saveTiffStack
 from ..visualization.view_visual_rectangle import clipRectangleRange
+from ..processing import *
 from ..utils import *
 from PyQt5.QtCore import Qt
 from matplotlib.axes import Axes
@@ -228,11 +229,32 @@ def bindFuncButtonRunImageNormalization(
     q_button: 'QPushButton',
     q_lineedit: 'QLineEdit',
     q_listwidget: 'QListWidget',
-    view_control: 'ViewControl',
-    tiff_stack: np.ndarray[Tuple[int, int, int, int, int]]
+    tiff_stack: np.ndarray[Tuple[int, int, int, int, int]],
+    metadata: Dict[str, Any],
 ):
-    path_tif_src = q_lineedit.text()
-    q_button.clicked.connect(lambda: saveTifImage(q_widget, path_tif_src, tiff_stack))
+    def _bindFuncButtonRunImageNormalization():
+        try:
+            list_reference_areas = [tuple(int(x.strip()) for x in q_listwidget.item(i).text().split(",")) for i in range(q_listwidget.count())]
+            print(list_reference_areas)
+            if len(list_reference_areas) == 0:
+                raise ValueError("Add reference areas to the list !")
+
+            # progress dialog
+            progress_dialog = showProgressDialog(q_widget, "Normalizing image stack...")
+            try:
+                path_tif_src = q_lineedit.text()
+                path_tif_dst = generateSavePath(path_tif_src, suffix="_normalized", new_extension=".tif")
+                tiff_stack_norm = normalizeImageStackWithReferenceAreas(tiff_stack, list_reference_areas)
+                saveTiffStack(q_widget, path_tif_dst, tiff_stack_norm, imagej=True, metadata=metadata)
+            finally:
+                progress_dialog.close()
+
+        except ValueError as e:
+            QMessageBox.warning(q_widget, "Invalid Input", str(e))
+        except Exception as e:
+            QMessageBox.warning(q_widget, "Error", f"An error occurred: {str(e)}")
+
+    q_button.clicked.connect(_bindFuncButtonRunImageNormalization)
 """
 slider_layouts
 """
