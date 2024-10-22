@@ -5,17 +5,20 @@ class Extension:
     MAT = ".mat"
     TIFF = ".tif"
     NPY = ".npy"
+    HDF5 = ".h5"
 
 # ファイル選択時の拡張子
 class FileFilters:
     MAT = "mat Files (*.mat);;All Files (*)"
     TIFF = "tiff Files (*.tif *.tiff);;All Files (*)"
     NPY = "npy Files (*.npy);;All Files (*)"
+    HDF5 = "h5 Files (*.h5);;All Files (*)"
 
 FILE_FILTERS = {
     ".mat": "mat Files (*.mat);;All Files (*)",
     ".tif": "tiff Files (*.tif *.tiff);;All Files (*)",
-    ".npy": "npy Files (*.npy);;All Files (*)"
+    ".npy": "npy Files (*.npy);;All Files (*)",
+    ".h5": "h5 Files (*.h5);;All Files (*)",
 }
 
 # Default items of dialogs
