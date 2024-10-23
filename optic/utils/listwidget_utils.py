@@ -1,3 +1,5 @@
+from __future__ import annotations
+from ..type_definitions import *
 from PyQt5.QtWidgets import QListWidget, QLineEdit, QListWidgetItem
 from PyQt5.QtCore import Qt
 
@@ -30,6 +32,27 @@ def addItemToListWidgetFromLineEdit(list_widget: QListWidget, line_edit: QLineEd
         return True
     return False
 
+def getSelectedItemFromListWidget(list_widget: QListWidget) -> str:
+    """
+    get selected item from ListWidget
+    """
+    current_item = list_widget.currentItem()
+    if current_item:
+        return current_item.text()
+    return ""
+
+def getIndexedItemFromListWidget(list_widget: QListWidget, idx: int) -> int:
+    """
+    get indexed item from ListWidget
+    """
+    return list_widget.item(idx).text()
+
+def getAllItemsFromListWidget(list_widget: QListWidget) -> List[str]:
+    """
+    get all items from ListWidget
+    """
+    return [list_widget.item(i).text() for i in range(list_widget.count())]
+
 def removeSelectedItemFromListWidget(list_widget: QListWidget) -> None:
     """
     remove selected item from ListWidget
@@ -38,6 +61,12 @@ def removeSelectedItemFromListWidget(list_widget: QListWidget) -> None:
     if current_item:
         row = list_widget.row(current_item)
         list_widget.takeItem(row)
+
+def removeIndexedItemFromListWidget(list_widget: QListWidget, idx: int) -> None:
+    """
+    remove indexed item from ListWidget
+    """
+    list_widget.takeItem(idx)
 
 def clearListWidget(list_widget: QListWidget) -> None:
     """

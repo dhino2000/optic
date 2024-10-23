@@ -1,6 +1,7 @@
 from __future__ import annotations
 from ..type_definitions import *
 import numpy as np
+import tifffile
 
 def standardizeTIFFStack(
         data: np.ndarray, 
@@ -54,3 +55,18 @@ def extractTIFFStack(
 
     tiff_stack_extracted = tiff_stack[t_slice, z_slice, c_slice, y_slice, x_slice]
     return tiff_stack_extracted
+
+def getTiffStackShape(path: str) -> Tuple[int, int, int, int, int]:
+    """
+    get shape of tiff stack and return as XYCZT format
+    """
+    with tifffile.TiffFile(path) as tif:
+        shape = tif.series[0].shape
+        axes = tif.series[0].axes
+        dims = {'X': 1, 'Y': 1, 'C': 1, 'Z': 1, 'T': 1}
+        
+        for size, axis in zip(shape, axes):
+            if axis in dims:
+                dims[axis] = size
+   
+    return (dims['X'], dims['Y'], dims['C'], dims['Z'], dims['T'])
