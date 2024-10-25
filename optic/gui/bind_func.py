@@ -51,6 +51,7 @@ def bindFuncViewMouseEvent(
         view_control.mousePressEvent(event)
         roi_selected_id = view_control.control_manager.getSharedAttr(view_control.key_app, 'roi_selected_id')
         table_control.updateSelectedROI(roi_selected_id)
+        table_control.q_table.setFocus()
     
     q_view.mousePressEvent = onViewPressed
 
