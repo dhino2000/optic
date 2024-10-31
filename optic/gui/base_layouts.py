@@ -14,7 +14,12 @@ def makeLayoutLineEditLabel(
         axis           :Literal["vertical", "horizontal"] = "vertical", 
         text_set       :str = "", 
         width_fix      :int = 0,
-        align          :Qt.AlignmentFlag = Qt.AlignLeft
+        align          :Qt.AlignmentFlag = Qt.AlignLeft,
+        font_family    :str = "MS Shell Dlg 2", 
+        font_size      :int = 8,
+        color          :str = "black",
+        bold           :bool = False,
+        italic         :bool = False
         ) -> QVBoxLayout:
     if axis == "vertical":
         layout = QVBoxLayout()
@@ -22,7 +27,7 @@ def makeLayoutLineEditLabel(
         layout = QHBoxLayout()
     else:
         raise ValueError(f"Invalid axis value: {axis}. Expected 'vertical' or 'horizontal'.")
-    label_widget = widget_manager.makeWidgetLabel(key_label, label, align)
+    label_widget = widget_manager.makeWidgetLabel(key_label, label, align, font_family, font_size, color, bold, italic)
     lineedit_widget = widget_manager.makeWidgetLineEdit(key_lineedit, text_set, width_fix)
     layout.addWidget(label_widget)
     layout.addWidget(lineedit_widget)
