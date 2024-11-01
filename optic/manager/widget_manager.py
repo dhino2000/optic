@@ -15,8 +15,8 @@ make Widget Function
 def makeWidgetLabel(
     label: str,
     align: Qt.AlignmentFlag=Qt.AlignLeft,
-    font_family: str="MS Shell Dlg 2", 
-    font_size: int=8,
+    font_family: str="Arial", 
+    font_size: int=12,
     color: str="black",
     bold: bool=False,
     italic: bool=False
@@ -206,8 +206,8 @@ class WidgetManager:
         key: str, 
         label: str, 
         align: Qt.AlignmentFlag = Qt.AlignLeft,
-        font_family: str="MS Shell Dlg 2", 
-        font_size: int=8,
+        font_family: str="Arial", 
+        font_size: int=12,
         color: str="black",
         bold: bool=False,
         italic: bool=False

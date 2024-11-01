@@ -203,14 +203,14 @@ def bindFuncButtonManageRectangleRangeForListWidget(
             addItemToListWidgetFromLineEdit(q_listwidget, q_lineedit)
         except ValueError:
             QMessageBox.warning(q_widget, "Invalid Input", "Please enter 8 integer values separated by commas.\nEx) 100, 200, 100, 200, 1, 2, 0, 0")
-    def _removeSelectedItemFromListWidget(q_listwidget, view_control) -> None:
+    def _removeSelectedItemsFromListWidget(q_listwidget, view_control) -> None:
         view_control.setRectHighlightRange(None)
-        removeSelectedItemFromListWidget(q_listwidget)
+        removeSelectedItemsFromListWidget(q_listwidget)
     def _clearListWidget(q_listwidget, view_control) -> None:
         view_control.setRectHighlightRange(None)
         clearListWidget(q_listwidget)
     q_button_add.clicked.connect(lambda: _addItemToListWidgetFromLineEdit(q_listwidget, q_lineedit))
-    q_button_remove.clicked.connect(lambda: _removeSelectedItemFromListWidget(q_listwidget, view_control))
+    q_button_remove.clicked.connect(lambda: _removeSelectedItemsFromListWidget(q_listwidget, view_control))
     q_button_clear.clicked.connect(lambda: _clearListWidget(q_listwidget, view_control))
 
 def bindFuncListWidgetSelectionChanged(
