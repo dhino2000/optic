@@ -166,3 +166,4 @@ repo2prompt-main/
 old/
 *.tif
 *.mat
+notebook/tmp/
