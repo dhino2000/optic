@@ -32,7 +32,7 @@ def addItemToListWidgetFromLineEdit(list_widget: QListWidget, line_edit: QLineEd
         return True
     return False
 
-def getSelectedItemFromListWidget(list_widget: QListWidget) -> str:
+def getSelectedItemsFromListWidget(list_widget: QListWidget) -> str:
     """
     get selected item from ListWidget
     """
@@ -41,7 +41,7 @@ def getSelectedItemFromListWidget(list_widget: QListWidget) -> str:
         return current_item.text()
     return ""
 
-def getIndexedItemFromListWidget(list_widget: QListWidget, idx: int) -> int:
+def getIndexedItemsFromListWidget(list_widget: QListWidget, idx: int) -> int:
     """
     get indexed item from ListWidget
     """
@@ -53,16 +53,14 @@ def getAllItemsFromListWidget(list_widget: QListWidget) -> List[str]:
     """
     return [list_widget.item(i).text() for i in range(list_widget.count())]
 
-def removeSelectedItemFromListWidget(list_widget: QListWidget) -> None:
+def removeSelectedItemsFromListWidget(list_widget: QListWidget) -> None:
     """
     remove selected item from ListWidget
     """
-    current_item = list_widget.currentItem()
-    if current_item:
-        row = list_widget.row(current_item)
-        list_widget.takeItem(row)
+    for item in reversed(list_widget.selectedItems()):
+        list_widget.takeItem(list_widget.row(item))
 
-def removeIndexedItemFromListWidget(list_widget: QListWidget, idx: int) -> None:
+def removeIndexedItemsFromListWidget(list_widget: QListWidget, idx: int) -> None:
     """
     remove indexed item from ListWidget
     """

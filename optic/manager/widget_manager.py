@@ -13,11 +13,22 @@ make Widget Function
 """
 # QLabel Widget
 def makeWidgetLabel(
-    label: str, 
-    align: Qt.AlignmentFlag=Qt.AlignLeft
+    label: str,
+    align: Qt.AlignmentFlag=Qt.AlignLeft,
+    font_family: str="Arial", 
+    font_size: int=12,
+    color: str="black",
+    bold: bool=False,
+    italic: bool=False
 ) -> QLabel:
     widget = QLabel(label)
     widget.setAlignment(align)
+    font = QFont(font_family)
+    font.setPointSize(font_size)
+    font.setBold(bold)
+    font.setItalic(italic)
+    widget.setFont(font)
+    widget.setStyleSheet(f"color: {color};")
     return widget
 
 # QCheckBox Widget
@@ -64,7 +75,7 @@ def makeWidgetSlider(
 # QPushButton Widget
 def makeWidgetButton(
     label: str, 
-    func_: Callable[..., Any]=None
+    func_: Callable[..., Any]=None,
 ) -> QPushButton:
     widget = QPushButton(label)
     if func_:
@@ -194,9 +205,14 @@ class WidgetManager:
         self, 
         key: str, 
         label: str, 
-        align: Qt.AlignmentFlag = Qt.AlignLeft
+        align: Qt.AlignmentFlag = Qt.AlignLeft,
+        font_family: str="Arial", 
+        font_size: int=12,
+        color: str="black",
+        bold: bool=False,
+        italic: bool=False
     ) -> QLabel:
-        self.dict_label[key] = makeWidgetLabel(label, align)
+        self.dict_label[key] = makeWidgetLabel(label, align, font_family, font_size, color, bold, italic)
         return self.dict_label[key]
     
     def makeWidgetCheckBox(

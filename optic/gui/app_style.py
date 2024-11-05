@@ -3,7 +3,7 @@ from ..type_definitions import *
 from PyQt5.QtWidgets import QApplication, QDesktopWidget
 from PyQt5.QtGui import QFont
 
-def setAppStyle(app: QApplication, font_name: str = "MS UI Gothic", base_font_size: int = 12, base_widget_height: int = 20, base_widget_margin: int = 2) -> None:
+def setAppStyle(app: QApplication, font_name: str = "Arial", base_font_size: int = 12, base_widget_height: int = 20, base_widget_margin: int = 2) -> None:
     """
     アプリケーション全体のスタイルを設定する。
 
@@ -27,6 +27,7 @@ def setAppStyle(app: QApplication, font_name: str = "MS UI Gothic", base_font_si
     app.setStyleSheet(f"""
         QWidget {{
             font-size: {font_size}px;
+            font-family: {font_name};
         }}
         QLineEdit, QPushButton, QComboBox {{
             min-height: {widget_height}px;
@@ -44,11 +45,11 @@ def setAppStyle(app: QApplication, font_name: str = "MS UI Gothic", base_font_si
         }}
     """)
 
-def applyAppStyle(app: QApplication) -> None:
+def applyAppStyle(app: QApplication, font_name: str = "MS UI Gothic", base_font_size: int = 12, base_widget_height: int = 20, base_widget_margin: int = 2) -> None:
     """
     アプリケーションにデフォルトのスタイルを適用する。
     """
-    setAppStyle(app)
+    setAppStyle(app, font_name, base_font_size, base_widget_height, base_widget_margin)
 
 def getScalingFactor() -> float:
     """
