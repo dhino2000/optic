@@ -154,10 +154,11 @@ def bindFuncROICheckIO(
     q_table: 'QTableWidget', 
     gui_defaults: GuiDefaults,
     table_columns: List[str], 
+    json_config: JsonConfig,
     table_control: 'TableControl',
     local_var: bool = True
 ) -> None:
-    q_button_save.clicked.connect(lambda: saveROICheck(q_window, q_lineedit, q_table, gui_defaults, table_columns, local_var))
+    q_button_save.clicked.connect(lambda: saveROICheck(q_window, q_lineedit, q_table, gui_defaults, table_columns, json_config, local_var))
     q_button_load.clicked.connect(lambda: loadROICheck(q_window, q_table, gui_defaults, table_columns, table_control))
 
 """

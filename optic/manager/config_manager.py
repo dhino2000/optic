@@ -3,6 +3,7 @@ from ..type_definitions import *
 from ..config.app_settings import AppSettings
 from ..config.table_columns import TableColumns
 from ..config.key_function_map import KeyFunctionMap
+from ..config.json_config import JsonConfig
 from pathlib import Path
 import json
 
@@ -17,7 +18,7 @@ class ConfigManager:
         self.gui_defaults      : GuiDefaults = None
         self.table_columns     : Dict[str: TableColumns] = {}
         self.key_function_maps : Dict[str: KeyFunctionMap] = {}
-        self.elastix_params    : Dict[str: str] = {}
+        self.json_config       : JsonConfig = JsonConfig()
 
     def setCurrentApp(self, app_name: str) -> None:
         self.current_app = app_name
@@ -29,10 +30,6 @@ class ConfigManager:
             self.table_columns[key_app] = TableColumns(table_columns)
         for key_app, key_map in self.gui_defaults["KEY_FUNCTION_MAP"].items():
             self.key_function_maps[key_app] = KeyFunctionMap(key_map)
-
-    def initalizeElastixParams(self) -> None:
-        elastix_params = json.load(open(f"{JSON_DIR}/elastix_params.json"))
-        self.elastix_params = elastix_params
 
     def getTableColumns(self, key_app: str) -> TableColumns:
         return self.table_columns[key_app]

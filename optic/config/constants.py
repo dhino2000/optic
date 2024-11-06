@@ -3,9 +3,6 @@ from enum import Enum
 import json
 from pathlib import Path
 
-CURRENT_DIR = Path(__file__).resolve().parent
-JSON_DIR = CURRENT_DIR / "json"
-
 class Extension:
     MAT = ".mat"
     TIFF = ".tif"
@@ -25,12 +22,6 @@ FILE_FILTERS = {
     ".npy": "npy Files (*.npy);;All Files (*)",
     ".h5": "h5 Files (*.h5);;All Files (*)",
 }
-
-# Default items of dialogs
-# In the future, user json file for default settings
-with open(f"{JSON_DIR}/user.json") as f:
-    USERS = json.load(f)["user"]
-
 
 # BackGroungImage Type
 class BGImageType:

@@ -144,7 +144,8 @@ def saveROICheck(
         q_lineedit      : QLineEdit, 
         q_table         : QTableWidget, 
         gui_defaults    : GuiDefaults,
-        table_columns   : TableColumns, 
+        table_columns   : TableColumns,
+        json_config     : JsonConfig, 
         local_var       : bool=True
         ) -> None:
     path_src = q_lineedit.text()
@@ -154,7 +155,7 @@ def saveROICheck(
     if path_dst:
         try:
             from ..dialog.user_select import UserSelectDialog
-            dialog = UserSelectDialog(parent=q_window, gui_defaults=gui_defaults)
+            dialog = UserSelectDialog(parent=q_window, gui_defaults=gui_defaults, json_config=json_config)
             if dialog.exec_() == QDialog.Accepted:
                 dialog.getUser()
                 user = dialog.user
