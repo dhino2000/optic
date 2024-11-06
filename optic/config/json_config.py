@@ -21,3 +21,6 @@ class JsonConfig:
 
     def get(self, config_name: str) -> Dict[str, Any]:
         return self.configs.get(config_name, {})
+    
+    def set(self, config_name: str, new_config: Dict[str, Any]) -> None:
+        self.configs[config_name] = new_config

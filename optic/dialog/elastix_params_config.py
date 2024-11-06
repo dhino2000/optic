@@ -5,6 +5,7 @@ from PyQt5.QtCore import Qt
 from ..manager.widget_manager import WidgetManager
 from ..manager.init_managers import initManagers
 from ..gui.base_layouts import makeLayoutLineEditLabel
+import ast
 
 # Elastix Config
 class ElastixParamsConfigDialog(QDialog):
@@ -35,7 +36,7 @@ class ElastixParamsConfigDialog(QDialog):
         layout.addLayout(self.makeLayoutButton())
         self.setLayout(layout)
 
-        # self.bindFuncAllWidget()
+        self.bindFuncAllWidget()
 
     def makeLayoutElastixParamsAffine(self):
         layout = QVBoxLayout()
@@ -66,6 +67,26 @@ class ElastixParamsConfigDialog(QDialog):
         layout.addWidget(self.widget_manager.makeWidgetButton(key="ok", label="OK"))
         layout.addWidget(self.widget_manager.makeWidgetButton(key="cancel", label="Cancel"))
         return layout
+    
+    def getElastixParams(self):
+        for key_param in self.elastix_params["affine"].keys():
+            text = self.widget_manager.dict_lineedit[f"{key_param}_affine"].text()
+            try:
+                self.elastix_params["affine"][key_param] = ast.literal_eval(text)
+            except (ValueError, SyntaxError):
+                self.elastix_params["affine"][key_param] = text
+                
+        for key_param in self.elastix_params["bspline"].keys():
+            text = self.widget_manager.dict_lineedit[f"{key_param}_bspline"].text()
+            try:
+                self.elastix_params["bspline"][key_param] = ast.literal_eval(text)
+            except (ValueError, SyntaxError):
+                self.elastix_params["bspline"][key_param] = text
+    
+    def ok(self):
+        self.getElastixParams()
+        self.accept()
 
     def bindFuncAllWidget(self):
-        pass
+        self.widget_manager.dict_button["ok"].clicked.connect(self.ok)
+        self.widget_manager.dict_button["cancel"].clicked.connect(self.reject)
