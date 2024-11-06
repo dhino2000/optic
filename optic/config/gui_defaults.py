@@ -199,7 +199,7 @@ class GuiDefaults:
             # "MAX_WIDTH": 1920,
             # "MAX_HEIGHT": 1080,
         },
-        "WINDOW_SETTINGS_TABLE_COLUMNS_CONFIG": {
+        "WINDOW_SETTINGS_ELASTIX_CONFIG": {
             "INIT_POSITION_X": 100, 
             "INIT_POSITION_Y": 100,
             "WIDTH": 800,

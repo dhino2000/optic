@@ -1,7 +1,6 @@
 from typing import Dict, Any, List
 from copy import deepcopy
 
-
 class TableColumns:
     def __init__(self, columns_config: Dict[str, Dict[str, Any]]):
         self._columns = deepcopy(columns_config)
