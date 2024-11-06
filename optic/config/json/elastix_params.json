@@ -1,7 +1,7 @@
 {
     "affine": {
         "AutomaticParameterEstimation": "true",
-        "AutomaticScalesEstimation": "true", 
+        "AutomaticScalesEstimation": "true",
         "CheckNumberOfSamples": "true",
         "DefaultPixelValue": "0",
         "FinalBSplineInterpolationOrder": "3",
@@ -27,28 +27,34 @@
     },
     "bspline": {
         "AutomaticParameterEstimation": "true",
-        "AutomaticScalesEstimation": "true",
         "CheckNumberOfSamples": "true",
         "DefaultPixelValue": "0",
         "FinalBSplineInterpolationOrder": "3",
+        "FinalGridSpacingInPhysicalUnits": "10.000000",
         "FixedImagePyramid": "FixedSmoothingImagePyramid",
+        "GridSpacingSchedule": ["2.803221", "1.988100", "1.410000", "1.000000"],
         "ImageSampler": "RandomCoordinate",
         "Interpolator": "LinearInterpolator",
         "MaximumNumberOfIterations": "256",
         "MaximumNumberOfSamplingAttempts": "8",
-        "Metric": "AdvancedMattesMutualInformation",
+        "Metric": [
+            "AdvancedMattesMutualInformation",
+            "TransformBendingEnergyPenalty"
+        ],
+        "Metric0Weight": "1.0",
+        "Metric1Weight": "1.0",
         "MovingImagePyramid": "MovingSmoothingImagePyramid",
         "NewSamplesEveryIteration": "true",
         "NumberOfResolutions": "4",
         "NumberOfSamplesForExactGradient": "4096",
         "NumberOfSpatialSamples": "2048",
         "Optimizer": "AdaptiveStochasticGradientDescent",
-        "Registration": "MultiResolutionRegistration",
+        "Registration": "MultiMetricMultiResolutionRegistration",
         "ResampleInterpolator": "FinalBSplineInterpolator",
         "Resampler": "DefaultResampler",
         "ResultImageFormat": "nii",
-        "Transform": "AffineTransform",
+        "Transform": "BSplineTransform",
         "WriteIterationInfo": "false",
         "WriteResultImage": "true"
-    }    
+    }
 }

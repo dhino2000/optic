@@ -3,7 +3,7 @@ from ..type_definitions import *
 from PyQt5.QtWidgets import QApplication, QDesktopWidget
 from PyQt5.QtGui import QFont
 
-def setAppStyle(app: QApplication, font_name: str = "Arial", base_font_size: int = 12, base_widget_height: int = 20, base_widget_margin: int = 2) -> None:
+def setAppStyle(app: QApplication, font_name: str, base_font_size: int, base_widget_height: int, base_widget_margin: int) -> None:
     """
     アプリケーション全体のスタイルを設定する。
 
@@ -25,7 +25,13 @@ def setAppStyle(app: QApplication, font_name: str = "Arial", base_font_size: int
 
     # スタイルシートの設定
     app.setStyleSheet(f"""
-        QWidget {{
+        QLabel:not([objectName="skip-global"]),
+        QPushButton:not([objectName="skip-global"]),
+        QLineEdit:not([objectName="skip-global"]),
+        QComboBox:not([objectName="skip-global"]),
+        QCheckBox:not([objectName="skip-global"]),
+        QRadioButton:not([objectName="skip-global"]),
+        QTableWidget:not([objectName="skip-global"]) {{
             font-size: {font_size}px;
             font-family: {font_name};
         }}
@@ -45,7 +51,7 @@ def setAppStyle(app: QApplication, font_name: str = "Arial", base_font_size: int
         }}
     """)
 
-def applyAppStyle(app: QApplication, font_name: str = "Arial", base_font_size: int = 12, base_widget_height: int = 20, base_widget_margin: int = 2) -> None:
+def applyAppStyle(app: QApplication, font_name: str = "Arial", base_font_size: int = 6, base_widget_height: int = 6, base_widget_margin: int = 2) -> None:
     """
     アプリケーションにデフォルトのスタイルを適用する。
     """

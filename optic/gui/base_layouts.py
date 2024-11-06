@@ -16,7 +16,7 @@ def makeLayoutLineEditLabel(
         width_fix      :int = 0,
         align          :Qt.AlignmentFlag = Qt.AlignLeft,
         font_family    :str = "MS Shell Dlg 2", 
-        font_size      :int = 8,
+        font_size      :int = 12,
         color          :str = "black",
         bold           :bool = False,
         italic         :bool = False

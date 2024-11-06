@@ -202,8 +202,8 @@ class GuiDefaults:
         "WINDOW_SETTINGS_ELASTIX_CONFIG": {
             "INIT_POSITION_X": 100, 
             "INIT_POSITION_Y": 100,
-            "WIDTH": 800,
-            "HEIGHT": 600,
+            "WIDTH": 1600,
+            "HEIGHT": 1000,
             # "MAX_WIDTH": 1920,
             # "MAX_HEIGHT": 1080,
         },
