@@ -1,5 +1,10 @@
 from PyQt5.QtCore import Qt
 from enum import Enum
+import json
+from pathlib import Path
+
+CURRENT_DIR = Path(__file__).resolve().parent
+JSON_DIR = CURRENT_DIR / "json"
 
 class Extension:
     MAT = ".mat"
@@ -23,8 +28,8 @@ FILE_FILTERS = {
 
 # Default items of dialogs
 # In the future, user json file for default settings
-USERS = ["Ando", "Aolin", "Fukatsu", "Swati", "Takahashi", "Tanisumi"]
-
+with open(f"{JSON_DIR}/user.json") as f:
+    USERS = json.load(f)["user"]
 
 
 # BackGroungImage Type
