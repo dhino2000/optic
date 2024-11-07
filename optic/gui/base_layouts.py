@@ -5,7 +5,7 @@ from PyQt5.QtCore import Qt
 from typing import Literal
 from ..manager.widget_manager import WidgetManager
 
-# QLineEdit Layout label付き
+# QLineEdit + QLabel Layout
 def makeLayoutLineEditLabel(
         widget_manager :WidgetManager, 
         key_label      :str,
@@ -15,7 +15,7 @@ def makeLayoutLineEditLabel(
         text_set       :str = "", 
         width_fix      :int = 0,
         align          :Qt.AlignmentFlag = Qt.AlignLeft,
-        font_family    :str = "MS Shell Dlg 2", 
+        font_family    :str = "Arial", 
         font_size      :int = 12,
         color          :str = "black",
         bold           :bool = False,
@@ -31,6 +31,33 @@ def makeLayoutLineEditLabel(
     lineedit_widget = widget_manager.makeWidgetLineEdit(key_lineedit, text_set, width_fix)
     layout.addWidget(label_widget)
     layout.addWidget(lineedit_widget)
+    return layout
+
+# QComboBox + QLabel Layout 
+def makeLayoutComboBoxLabel(
+        widget_manager :WidgetManager, 
+        key_label      :str, 
+        key_combobox   :str, 
+        label          :str, 
+        axis           :Literal["vertical", "horizontal"] = "vertical", 
+        items          :List[str] = [], 
+        align          :Qt.AlignmentFlag = Qt.AlignLeft, 
+        font_family    :str = "Arial", 
+        font_size      :int = 12, 
+        color          :str = "black", 
+        bold           :bool = False, 
+        italic         :bool = False
+        ) -> QVBoxLayout:
+    if axis == "vertical":
+        layout = QVBoxLayout()
+    elif axis == "horizontal":
+        layout = QHBoxLayout()
+    else:
+        raise ValueError(f"Invalid axis value: {axis}. Expected 'vertical' or 'horizontal'.")
+    label_widget = widget_manager.makeWidgetLabel(key_label, label, align, font_family, font_size, color, bold, italic)
+    combobox_widget = widget_manager.makeWidgetComboBox(key_combobox, items)
+    layout.addWidget(label_widget)
+    layout.addWidget(combobox_widget)
     return layout
 
 # QButtonGroup Layout

@@ -1,21 +1,58 @@
 from __future__ import annotations
 from ..type_definitions import *
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout
+from ..gui.base_layouts import makeLayoutComboBoxLabel
 
 # Image Registration config
 def makeLayoutImageRegistration(
-        widget_manager      : WidgetManager, 
-        key_label           : str, 
-        key_combobox        : str, 
-        key_button_config   : str,
-        key_button_run      : str,
-        items_combobox      : List[str]=[],
+        widget_manager              : WidgetManager, 
+        data_manager                : DataManager,
+        key_app                     : str,
+        key_label_elastix_method    : str, 
+        key_label_ref_t             : str,
+        key_label_ref_z             : str,
+        key_combobox_elastix_method : str, 
+        key_combobox_ref_t          : str,
+        key_combobox_ref_z          : str,
+        key_button_config           : str,
+        key_button_run_t            : str,
+        key_button_run_z            : str,
         ) -> QVBoxLayout:
     layout = QVBoxLayout()
-    layout.addWidget(widget_manager.makeWidgetLabel(key=key_label, label="Image Registration"))
-    layout.addWidget(widget_manager.makeWidgetComboBox(key=key_combobox, items=items_combobox))
-    layout.addLayout(makeLayoutElastixConfig(widget_manager, key_button_config))
-    layout.addWidget(widget_manager.makeWidgetButton(key=key_button_run, label="Run Image Registration"))
+    layout.addWidget(widget_manager.makeWidgetLabel(key=key_label_elastix_method, label="Image Registration", bold=True, italic=True, use_global_style=False))
+    layout_elastix = QHBoxLayout()
+    layout_elastix.addLayout(makeLayoutComboBoxLabel(
+        widget_manager, 
+        key_label_elastix_method, 
+        key_combobox_elastix_method, 
+        "Elastix method:", 
+        axis="horizontal", 
+        items=["affine", "bspline"]
+        ))
+    layout_elastix.addLayout(makeLayoutElastixConfig(widget_manager, key_button_config))
+    layout_ref_plane = QHBoxLayout()
+    layout_ref_plane.addLayout(makeLayoutComboBoxLabel(
+        widget_manager, 
+        key_label_ref_t, 
+        key_combobox_ref_t, 
+        "Reference T plane:", 
+        axis="horizontal",
+        items=[str(i) for i in range(data_manager.getSizeOfT(key_app))]
+        ))
+    layout_ref_plane.addLayout(makeLayoutComboBoxLabel(
+        widget_manager, 
+        key_label_ref_z, 
+        key_combobox_ref_z, 
+        "Reference Z plane:", 
+        axis="horizontal",
+        items=[str(i) for i in range(data_manager.getSizeOfZ(key_app))]
+        ))
+    layout_run = QHBoxLayout()
+    layout_run.addWidget(widget_manager.makeWidgetButton(key=key_button_run_t, label="Run Elastix (t-axis)"))
+    layout_run.addWidget(widget_manager.makeWidgetButton(key=key_button_run_z, label="Run Elastix (z-axis)"))
+    layout.addLayout(layout_elastix)
+    layout.addLayout(layout_ref_plane)
+    layout.addLayout(layout_run)
     return layout
 
 # Elastix Config
@@ -38,7 +75,7 @@ def makeLayoutImageNormalization(
         key_listwidget      : str,
     ) -> QVBoxLayout:
     layout = QVBoxLayout()
-    layout.addWidget(widget_manager.makeWidgetLabel(key=key_label, label="Image Normalization"))
+    layout.addWidget(widget_manager.makeWidgetLabel(key=key_label, label="Image Normalization", bold=True, italic=True, use_global_style=False))
     layout.addWidget(widget_manager.makeWidgetLabel(key=key_label_area, label="Area for Normalization (x_min, x_max, y_min, y_max, z_min, z_max, t_min, t_max)"))
     layout.addWidget(widget_manager.makeWidgetLineEdit(key=key_lineedit_area, text_set="0, 511, 0, 511, 0, 0, 0, 0"))
     layout.addWidget(widget_manager.makeWidgetButton(key=key_button_area, label="Set reference area"))

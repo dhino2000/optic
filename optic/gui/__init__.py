@@ -1,6 +1,6 @@
 from .app_setup import setupMainWindow
 from .app_style import setAppStyle, applyAppStyle
-from .base_layouts import makeLayoutLineEditLabel, makeLayoutButtonGroup, makeLayoutSliderLabel
+from .base_layouts import makeLayoutLineEditLabel, makeLayoutButtonGroup, makeLayoutSliderLabel, makeLayoutComboBoxLabel
 from .info_layouts import makeLayoutROIProperty, makeLayoutROICount
 from .io_layouts import makeLayoutLoadFileWidget, makeLayoutROICheckIO, makeLayoutLoadFileExitHelp
 from .processing_image_layouts import makeLayoutElastixConfig, makeLayoutImageRegistration, makeLayoutImageNormalization

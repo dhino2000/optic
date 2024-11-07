@@ -447,7 +447,7 @@ def bindFuncButtonRunElastixForSingleStack(
     
     q_button.clicked.connect(lambda: runElastix())
 
-def bindFuncButtonRunElastixBetweenTwinStacks(
+def bindFuncButtonRunElastixForDoubleImages(
         q_button: 'QPushButton',
         data_manager: 'DataManager',
         config_manager: 'ConfigManager',
