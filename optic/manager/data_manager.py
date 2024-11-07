@@ -14,6 +14,7 @@ class DataManager:
         self.dict_Fall:            Dict[str, Any] = {}
         self.dict_tiff:            Dict[str, np.ndarray[Tuple[int, int, int, int, int]]] = {}
         self.dict_tiff_metadata:   Dict[str, Dict[str, Any]] = {}
+        self.dict_tiff_reg:        Dict[str, np.ndarray[Tuple[int, int, int, int, int]]] = {}
 
         self.dict_im_bg:           Dict[str, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
         self.dict_im_bg_chan2:     Dict[str, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
@@ -107,6 +108,8 @@ class DataManager:
         return self.dict_tiff[key_app]
     def getTiffMetadata(self, key_app: str) -> Dict[str, Any]:
         return self.dict_tiff_metadata[key_app]
+    def getTiffStackRegistered(self, key_app: str) -> np.ndarray[np.uint8, Tuple[int, int, int, int, int]]:
+        return self.dict_tiff_reg[key_app]
 
     def getSizeOfX(self, key_app: str) -> int:
         return self.dict_tiff[key_app].shape[0]

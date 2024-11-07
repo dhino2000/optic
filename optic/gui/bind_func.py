@@ -435,6 +435,23 @@ def bindFuncRadiobuttonBGImageTypeChanged(
     checked_button = q_buttongroup.checkedButton()
     _onBGImageTypeChanged(q_buttongroup.id(checked_button))
 
+"""
+processing
+"""
+# -> processing_image_layouts.makeLayoutImageRegistration
+def bindFuncButtonRunElastixForSingleStack(
+        q_button: 'QPushButton',
+        data_manager: 'DataManager',
+        config_manager: 'ConfigManager',
+) -> None:
+    
+    q_button.clicked.connect(lambda: runElastix())
 
-
+def bindFuncButtonRunElastixBetweenTwinStacks(
+        q_button: 'QPushButton',
+        data_manager: 'DataManager',
+        config_manager: 'ConfigManager',
+) -> None:
+    
+    q_button.clicked.connect(lambda: runElastix())
 
