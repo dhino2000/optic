@@ -257,6 +257,55 @@ def bindFuncButtonRunImageNormalization(
             QMessageBox.warning(q_widget, "Error", f"An error occurred: {str(e)}")
 
     q_button.clicked.connect(_bindFuncButtonRunImageNormalization)
+
+# -> processing_image_layouts.makeLayoutImageRegistration
+def bindFuncCheckboxShowRegisteredImage(
+    q_checkbox: 'QCheckBox',
+    view_control: 'ViewControl'
+) -> None:
+    def onVisibilityChanged(state: int) -> None:
+        is_visible = (state == Qt.Checked)
+        view_control.setShowReg(is_visible)
+        view_control.updateView()
+    q_checkbox.stateChanged.connect(onVisibilityChanged)
+
+# -> processing_image_layouts.makeLayoutImageRegistration
+def bindFuncButtonRunElastixForSingleStack(
+        q_button: 'QPushButton',
+        data_manager: 'DataManager',
+        key_app: str,
+        dict_params: Dict[str, Any],
+        channel_ref: int,
+        idx_ref: int,
+        axis: Literal["t", "z"],
+) -> None:
+    def _runElastix():
+        img_stack = data_manager.getTiffStack(key_app)
+        img_stack_reg = runStackRegistration(img_stack, dict_params, channel_ref, idx_ref, axis, display_iters=10)
+        data_manager.dict_tiff_reg[key_app] = img_stack_reg
+    q_button.clicked.connect(lambda: _runElastix())
+
+def bindFuncButtonRunElastixForDoubleImages(
+        q_button: 'QPushButton',
+        data_manager: 'DataManager',
+        config_manager: 'ConfigManager',
+) -> None:
+    pass
+
+# -> processing_image_layouts.makeLayoutImageRegistration
+def bindFuncButtonSaveRegisterdImage(
+    q_widget: 'QWidget',
+    q_button: 'QPushButton',
+    data_manager: 'DataManager',
+    key_app: str,
+    path_tif_src: str
+) -> None:
+    def _saveRegisteredImage():
+        path_tif_dst = generateSavePath(path_tif_src, suffix="_reg", new_extension=".tif")
+        metadata = data_manager.getTiffMetadata(key_app)
+        saveTiffStack(q_widget, path_tif_dst, data_manager.getTiffStackRegistered(key_app), imagej=True, metadata=metadata)
+    q_button.clicked.connect(_saveRegisteredImage)
+
 """
 slider_layouts
 """
@@ -310,7 +359,6 @@ def bindFuncPlaneZSlider(
 ) -> None:
     def onZChanged(value: int) -> None:
         view_control.setPlaneZ(value)
-        
         view_control.updateView()
     q_slider.valueChanged.connect(onZChanged)
 def bindFuncPlaneTSlider(
@@ -435,23 +483,4 @@ def bindFuncRadiobuttonBGImageTypeChanged(
     checked_button = q_buttongroup.checkedButton()
     _onBGImageTypeChanged(q_buttongroup.id(checked_button))
 
-"""
-processing
-"""
-# -> processing_image_layouts.makeLayoutImageRegistration
-def bindFuncButtonRunElastixForSingleStack(
-        q_button: 'QPushButton',
-        data_manager: 'DataManager',
-        config_manager: 'ConfigManager',
-) -> None:
-    
-    q_button.clicked.connect(lambda: runElastix())
-
-def bindFuncButtonRunElastixForDoubleImages(
-        q_button: 'QPushButton',
-        data_manager: 'DataManager',
-        config_manager: 'ConfigManager',
-) -> None:
-    
-    q_button.clicked.connect(lambda: runElastix())
 

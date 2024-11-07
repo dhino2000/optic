@@ -9,14 +9,18 @@ def makeLayoutImageRegistration(
         data_manager                : DataManager,
         key_app                     : str,
         key_label_elastix_method    : str, 
+        key_label_ref_c             : str,
         key_label_ref_t             : str,
         key_label_ref_z             : str,
         key_combobox_elastix_method : str, 
+        key_combobox_ref_c          : str,
         key_combobox_ref_t          : str,
         key_combobox_ref_z          : str,
         key_button_config           : str,
         key_button_run_t            : str,
         key_button_run_z            : str,
+        key_button_export           : str,
+        key_checkbox_show_reg       : str,
         ) -> QVBoxLayout:
     layout = QVBoxLayout()
     layout.addWidget(widget_manager.makeWidgetLabel(key=key_label_elastix_method, label="Image Registration", bold=True, italic=True, use_global_style=False))
@@ -31,6 +35,14 @@ def makeLayoutImageRegistration(
         ))
     layout_elastix.addLayout(makeLayoutElastixConfig(widget_manager, key_button_config))
     layout_ref_plane = QHBoxLayout()
+    layout_ref_plane.addLayout(makeLayoutComboBoxLabel(
+        widget_manager, 
+        key_label_ref_c, 
+        key_combobox_ref_c, 
+        "Reference channel:", 
+        axis="horizontal",
+        items=[str(i) for i in range(data_manager.getSizeOfC(key_app))]
+        ))
     layout_ref_plane.addLayout(makeLayoutComboBoxLabel(
         widget_manager, 
         key_label_ref_t, 
@@ -50,9 +62,14 @@ def makeLayoutImageRegistration(
     layout_run = QHBoxLayout()
     layout_run.addWidget(widget_manager.makeWidgetButton(key=key_button_run_t, label="Run Elastix (t-axis)"))
     layout_run.addWidget(widget_manager.makeWidgetButton(key=key_button_run_z, label="Run Elastix (z-axis)"))
+    layout_checkbox = QHBoxLayout()
+    layout_checkbox.addWidget(widget_manager.makeWidgetCheckBox(key=key_checkbox_show_reg, label="Show Registered Image"))
+
     layout.addLayout(layout_elastix)
     layout.addLayout(layout_ref_plane)
     layout.addLayout(layout_run)
+    layout.addLayout(layout_checkbox)
+    layout.addWidget(widget_manager.makeWidgetButton(key=key_button_export, label="Export Image"))
     return layout
 
 # Elastix Config

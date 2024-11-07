@@ -53,6 +53,7 @@ class DataManager:
             self.dict_data_dtype[key_app] = Extension.TIFF
             self.dict_tiff[key_app] = tiff
             self.dict_tiff_metadata[key_app] = metadata
+            self.dict_tiff_reg[key_app] = tiff
             return True
         except Exception as e:
             return False
@@ -105,11 +106,11 @@ class DataManager:
         
     "Tiff data"
     def getTiffStack(self, key_app: str) -> np.ndarray[np.uint8, Tuple[int, int, int, int, int]]:
-        return self.dict_tiff[key_app]
+        return self.dict_tiff.get(key_app, None)
     def getTiffMetadata(self, key_app: str) -> Dict[str, Any]:
-        return self.dict_tiff_metadata[key_app]
+        return self.dict_tiff_metadata.get(key_app, None)
     def getTiffStackRegistered(self, key_app: str) -> np.ndarray[np.uint8, Tuple[int, int, int, int, int]]:
-        return self.dict_tiff_reg[key_app]
+        return self.dict_tiff_reg.get(key_app, None)
 
     def getSizeOfX(self, key_app: str) -> int:
         return self.dict_tiff[key_app].shape[0]
@@ -136,12 +137,17 @@ class DataManager:
         elif self.dict_data_dtype[key_app] == Extension.TIFF:
             return (self.dict_tiff[key_app].shape[0], self.dict_tiff[key_app].shape[1])
         
-    def getImageFromXYCZTTiffStack(self, key_app: str, plane_z: int, plane_t: int, channel: int) -> np.ndarray[np.uint8, Tuple[int, int]]:
+    def getImageFromXYCZTTiffStack(self, key_app: str, plane_z: int, plane_t: int, channel: int, get_reg: bool = False) -> np.ndarray[np.uint8, Tuple[int, int]]:
+        # use registered image if get_reg is True
+        if get_reg:
+            img_stack = self.getTiffStackRegistered(key_app)
+        else:
+            img_stack = self.getTiffStack(key_app)
         try:
-            return self.dict_tiff[key_app][:, :, channel, plane_z, plane_t]
+            return img_stack[:, :, channel, plane_z, plane_t]
         except IndexError:
             # out of index, return black image
-            return np.zeros(self.dict_tiff[key_app].shape[:2], dtype=np.uint8)
+            return np.zeros(img_stack.shape[:2], dtype=np.uint8)
     
     def getDictBackgroundImage(self, key_app: str) -> Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]: # 2d array
         return self.dict_im_bg.get(key_app)

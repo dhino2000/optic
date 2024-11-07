@@ -34,13 +34,14 @@ class ViewControl:
         self.image_sizes:           Tuple[int, int]             = ()
         self.bg_image_type:         str                         = BGImageTypeList.FALL[0]
         self.bg_contrast:           Dict[str, Dict[str, int]]   = {}
-        self.bg_visibility:         Dict[str, bool]             = {}
+        self.bg_visibility:         Dict[str, bool]             = {} # show or hide background image
         for channel in config_manager.gui_defaults["CHANNELS"]:
             self.bg_contrast[channel] = {
                 'min': config_manager.gui_defaults["VIEW_SETTINGS"]["DEFAULT_CONTRAST_MIN"],
                 'max': config_manager.gui_defaults["VIEW_SETTINGS"]["DEFAULT_CONTRAST_MAX"]
             }
             self.bg_visibility[channel] = True
+        self.show_reg:              bool                        = False # show or hide registration image
 
         # for tiff view
         self.tiff_shape:            Tuple[int, int, int, int, int]  = ()
@@ -151,6 +152,9 @@ class ViewControl:
     def getImageSize(self) -> Tuple[int, int]:
         return self.image_sizes
     
+    def getShowReg(self) -> bool:
+        return self.show_reg
+    
     """
     set Functions
     """
@@ -193,6 +197,9 @@ class ViewControl:
 
     def setImageSize(self) -> None:
         self.image_sizes = self.data_manager.getImageSize(self.key_app)
+
+    def setShowReg(self, show_reg: bool) -> None:
+        self.show_reg = show_reg
 
     """
     shared_attr Functions
