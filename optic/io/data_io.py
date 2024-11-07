@@ -53,11 +53,14 @@ def saveTiffStack(
         ) -> None:
     # To save as ImageJ format, move axes to the last
     path_dst, is_overwrite = saveFileDialog(q_widget=q_widget, file_type="tif", title="Save TIFF image stack file", initial_dir=path_dst)
-    if imagej:
-        data_ijformat = np.moveaxis(tiff_stack, [0,1,2,3,4], [4,3,2,1,0])
-        tifffile.imwrite(path_dst, data_ijformat, imagej=imagej, metadata=metadata)
+    if path_dst:
+        if imagej:
+            data_ijformat = np.moveaxis(tiff_stack, [0,1,2,3,4], [4,3,2,1,0])
+            tifffile.imwrite(path_dst, data_ijformat, imagej=imagej, metadata=metadata)
+        else:
+            tifffile.imwrite(path_dst, tiff_stack)
     else:
-        tifffile.imwrite(path_dst, tiff_stack)
+        return
 
 # load tiff stack data (XYCZT)
 def loadTiffStack(
@@ -65,16 +68,19 @@ def loadTiffStack(
         preprocessing   : bool=True, 
         axes_tgt        : str="XYCZT"
         ) -> np.ndarray:
-    if preprocessing:
-        with tifffile.TiffFile(path_tiff) as tif:
-            series = tif.series[0]
-            axes_src = series.axes
-            im = standardizeTIFFStack(series.asarray(), axes_src, axes_tgt)
-            metadata = tif.imagej_metadata
+    if path_tiff:
+        if preprocessing:
+            with tifffile.TiffFile(path_tiff) as tif:
+                series = tif.series[0]
+                axes_src = series.axes
+                im = standardizeTIFFStack(series.asarray(), axes_src, axes_tgt)
+                metadata = tif.imagej_metadata
+        else:
+            im = tifffile.imread(path_tiff)
+            metadata = None
+        return im, metadata
     else:
-        im = tifffile.imread(path_tiff)
-        metadata = None
-    return im, metadata
+        return
 
 # EventFile npyの読み込み, 初期化
 def loadEventFileNPY(

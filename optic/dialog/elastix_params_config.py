@@ -31,31 +31,25 @@ class ElastixParamsConfigDialog(QDialog):
     def initUI(self):
         self.setWindowTitle('Elastix Configuration')
         layout = QVBoxLayout()
-        layout.addLayout(self.makeLayoutElastixParamsAffine())
-        layout.addLayout(self.makeLayoutElastixParamsBSpline())
+        for elastix_method in ["rigid", "affine", "bspline"]:
+            layout.addLayout(self.makeLayoutElastixConfig(elastix_method))
         layout.addLayout(self.makeLayoutButton())
         self.setLayout(layout)
 
         self.bindFuncAllWidget()
 
-    def makeLayoutElastixParamsAffine(self):
+    def makeLayoutElastixConfig(self, elastix_method: Literal["rigid", "affine", "bspline"]):
         layout = QVBoxLayout()
-        layout.addWidget(self.widget_manager.makeWidgetLabel(key="params_affine", label="Affine Paramaters", font_size=12, bold=True, italic=True, use_global_style=False))
+        layout.addWidget(self.widget_manager.makeWidgetLabel(
+            key=f"params_{elastix_method}", 
+            label=f"{elastix_method} Paramaters", 
+            font_size=12, bold=True, 
+            italic=True, 
+            use_global_style=False
+            ))
         layout_params = QGridLayout()
-        for i, (key_param, value_param) in enumerate(self.elastix_params["affine"].items()):
-            key_label = f"{key_param}_affine"
-            row = i % 7
-            column = i // 7
-            layout_params.addLayout(makeLayoutLineEditLabel(self.widget_manager, key_label, key_label, key_param, text_set=str(value_param)), row, column)
-        layout.addLayout(layout_params)
-        return layout
-    
-    def makeLayoutElastixParamsBSpline(self):
-        layout = QVBoxLayout()
-        layout.addWidget(self.widget_manager.makeWidgetLabel(key="params_bspline", label="B-Spline Paramaters", font_size=12, bold=True, italic=True, use_global_style=False))
-        layout_params = QGridLayout()
-        for i, (key_param, value_param) in enumerate(self.elastix_params["bspline"].items()):
-            key_label = f"{key_param}_bspline"
+        for i, (key_param, value_param) in enumerate(self.elastix_params[elastix_method].items()):
+            key_label = f"{key_param}_{elastix_method}"
             row = i % 7
             column = i // 7
             layout_params.addLayout(makeLayoutLineEditLabel(self.widget_manager, key_label, key_label, key_param, text_set=str(value_param)), row, column)
@@ -69,19 +63,13 @@ class ElastixParamsConfigDialog(QDialog):
         return layout
     
     def getElastixParams(self):
-        for key_param in self.elastix_params["affine"].keys():
-            text = self.widget_manager.dict_lineedit[f"{key_param}_affine"].text()
-            try:
-                self.elastix_params["affine"][key_param] = ast.literal_eval(text)
-            except (ValueError, SyntaxError):
-                self.elastix_params["affine"][key_param] = text
-                
-        for key_param in self.elastix_params["bspline"].keys():
-            text = self.widget_manager.dict_lineedit[f"{key_param}_bspline"].text()
-            try:
-                self.elastix_params["bspline"][key_param] = ast.literal_eval(text)
-            except (ValueError, SyntaxError):
-                self.elastix_params["bspline"][key_param] = text
+        for elastix_method in ["rigid", "affine", "bspline"]:
+            for key_param in self.elastix_params[elastix_method].keys():
+                text = self.widget_manager.dict_lineedit[f"{key_param}_{elastix_method}"].text()
+                try:
+                    self.elastix_params[elastix_method][key_param] = ast.literal_eval(text)
+                except (ValueError, SyntaxError):
+                    self.elastix_params[elastix_method][key_param] = text
     
     def ok(self):
         self.getElastixParams()

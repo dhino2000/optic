@@ -31,7 +31,7 @@ def makeLayoutImageRegistration(
         key_combobox_elastix_method, 
         "Elastix method:", 
         axis="horizontal", 
-        items=["affine", "bspline"]
+        items=["rigid", "affine", "bspline"]
         ))
     layout_elastix.addLayout(makeLayoutElastixConfig(widget_manager, key_button_config))
     layout_ref_plane = QHBoxLayout()

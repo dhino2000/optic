@@ -51,27 +51,22 @@ def calculateStackTransform(
 ) -> Dict[str, elastixParameterObject]:
     dict_transform_parameters = {}
 
-    i = 0
     if axis == "t": # register t-axis
         for z in range(img_stack.shape[3]):
             img_fix = img_stack[:, :, channel_ref, z, idx_ref]
             for t in range(img_stack.shape[4]):
-                if i % display_iters == 0:
-                    print(f"{i} images processed")
                 img_mov = img_stack[:, :, channel_ref, z, t]
                 transform_parameters = calculateSingleTransform(img_fix, img_mov, dict_params)
                 dict_transform_parameters[f"z{z}_t{t}"] = transform_parameters
-                i += 1
+                print("calculating", "z:", z, "t:", t)
     elif axis == "z": # register z-axis
         for t in range(img_stack.shape[4]):
             img_fix = img_stack[:, :, channel_ref, idx_ref, t]
             for z in range(img_stack.shape[3]):
-                if i % display_iters == 0:
-                    print(f"{i} images processed")
                 img_mov = img_stack[:, :, channel_ref, z, t]
                 transform_parameters = calculateSingleTransform(img_fix, img_mov, dict_params)
                 dict_transform_parameters[f"z{z}_t{t}"] = transform_parameters
-                i += 1
+                print("calculating", "z:", z, "t:", t)
     print("transform parameters calculation completed")
     return dict_transform_parameters
 
@@ -89,6 +84,7 @@ def applyStackTransform(
                 img_mov = img_stack[:, :, c, z, t]
                 img_res = applySingleTransform(img_mov, transform_parameters)
                 img_stack_reg[:, :, c, z, t] = img_res
+                print("applying", "c", c, "z:", z, "t:", t)
     print("image transformation completed")
     return img_stack_reg
 

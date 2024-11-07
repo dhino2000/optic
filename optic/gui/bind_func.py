@@ -273,14 +273,23 @@ def bindFuncCheckboxShowRegisteredImage(
 def bindFuncButtonRunElastixForSingleStack(
         q_button: 'QPushButton',
         data_manager: 'DataManager',
+        config_manager: 'ConfigManager',
         key_app: str,
-        dict_params: Dict[str, Any],
-        channel_ref: int,
-        idx_ref: int,
+        combobox_elastix_method: QComboBox,
+        combobox_channel_ref: QComboBox,
+        combobox_idx_ref: QComboBox,
         axis: Literal["t", "z"],
 ) -> None:
     def _runElastix():
+        elastix_method = combobox_elastix_method.currentText()
+        channel_ref = int(combobox_channel_ref.currentText())
+        idx_ref = int(combobox_idx_ref.currentText())
+        print(f"{elastix_method} transform")
+        print("Reference channel:", channel_ref)
+        print(f"Reference {axis} plane:", idx_ref)
         img_stack = data_manager.getTiffStack(key_app)
+        dict_params = config_manager.json_config.get("elastix_params")[elastix_method]
+        print("Elastix Parameters", dict_params)
         img_stack_reg = runStackRegistration(img_stack, dict_params, channel_ref, idx_ref, axis, display_iters=10)
         data_manager.dict_tiff_reg[key_app] = img_stack_reg
     q_button.clicked.connect(lambda: _runElastix())
