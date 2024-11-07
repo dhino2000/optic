@@ -73,12 +73,12 @@ class Suite2pROICheckGUI(QMainWindow):
 
     def loadData(self):
         success = self.data_manager.loadFallMat(
-            key_app=self.app_key_pri, 
+            app_key=self.app_key_pri, 
             path_fall=self.widget_manager.dict_lineedit[f"{self.app_key_pri}_path_fall"].text()
         )
         if self.widget_manager.dict_lineedit[f"{self.app_key_pri}_path_reftif"].text() != "":
             success = self.data_manager.loadTifImage(
-                key_app=self.app_key_pri,
+                app_key=self.app_key_pri,
                 path_image=self.widget_manager.dict_lineedit[f"{self.app_key_pri}_path_reftif"].text(), 
             )
         return success
@@ -90,7 +90,7 @@ class Suite2pROICheckGUI(QMainWindow):
 
     def setupControls(self):
         self.control_manager.table_controls[self.app_key_pri] = TableControl(
-            key_app=self.app_key_pri,
+            app_key=self.app_key_pri,
             q_table=self.widget_manager.dict_table[self.app_key_pri],
             data_manager=self.data_manager,
             widget_manager=self.widget_manager,
@@ -100,7 +100,7 @@ class Suite2pROICheckGUI(QMainWindow):
         
         self.control_manager.table_controls[self.app_key_pri].setupWidgetROITable(self.app_key_pri)
         self.control_manager.view_controls[self.app_key_pri] = ViewControl(
-            key_app=self.app_key_pri,
+            app_key=self.app_key_pri,
             q_view=self.widget_manager.dict_view[self.app_key_pri], 
             q_scene=self.widget_manager.dict_scene[self.app_key_pri], 
             data_manager=self.data_manager, 
@@ -110,7 +110,7 @@ class Suite2pROICheckGUI(QMainWindow):
         )
         self.control_manager.view_controls[self.app_key_pri].setViewSize()
         self.control_manager.canvas_controls[self.app_key_pri] = CanvasControl(
-            key_app=self.app_key_pri,
+            app_key=self.app_key_pri,
             figure=self.widget_manager.dict_figure[self.app_key_pri], 
             canvas=self.widget_manager.dict_canvas[self.app_key_pri], 
             data_manager=self.data_manager, 
@@ -280,7 +280,7 @@ class Suite2pROICheckGUI(QMainWindow):
             self.widget_manager, 
             key_figure=self.app_key_pri, 
             key_canvas=self.app_key_pri, 
-            key_app=self.app_key_pri
+            app_key=self.app_key_pri
         ), stretch=1)
         layout.addLayout(self.makeLayoutComponentPlotProperty())
         layout.addLayout(self.makeLayoutComponentEventFilePlot())
@@ -310,10 +310,10 @@ class Suite2pROICheckGUI(QMainWindow):
     """
     make SubWindow, Dialog Function
     """
-    def showSubWindowTableColumnConfig(self, key_app):
+    def showSubWindowTableColumnConfig(self, app_key):
         config_window = TableColumnConfigDialog(
             self, 
-            self.control_manager.table_controls[key_app].table_columns, 
+            self.control_manager.table_controls[app_key].table_columns, 
             self.config_manager.gui_defaults
         )
         if config_window.exec_():
@@ -450,5 +450,5 @@ class Suite2pROICheckGUI(QMainWindow):
             data_manager=self.data_manager,
             control_manager=self.control_manager,
             canvas_control=self.control_manager.canvas_controls[self.app_key_pri],
-            key_app=self.app_key_pri,
+            app_key=self.app_key_pri,
         )

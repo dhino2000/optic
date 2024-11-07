@@ -10,16 +10,16 @@ class ControlManager:
         self.canvas_controls : Dict[str, CanvasControl] = {}
         """
         Dictionary to hold attributes shared between controls
-        The first level key is `key_app`: "pri", "sec", etc.
+        The first level key is `app_key`: "pri", "sec", etc.
         The second level key is `key_attr`: "selected_roi", etc.
         """
         self.shared_attr = defaultdict(dict)
 
-    def setSharedAttr(self, key_app: str, key_attr: str, value: Any) -> None:
-        self.shared_attr[key_app][key_attr] = value
+    def setSharedAttr(self, app_key: str, key_attr: str, value: Any) -> None:
+        self.shared_attr[app_key][key_attr] = value
 
-    def getSharedAttr(self, key_app: str, key_attr: str) -> Any:
-        return self.shared_attr[key_app].get(key_attr)
+    def getSharedAttr(self, app_key: str, key_attr: str) -> Any:
+        return self.shared_attr[app_key].get(key_attr)
 
-    def getAllSharedAttrs(self, key_app: str) -> Dict[str, Any]:
-        return self.shared_attr[key_app]
+    def getAllSharedAttrs(self, app_key: str) -> Dict[str, Any]:
+        return self.shared_attr[app_key]

@@ -79,7 +79,7 @@ class TIFStackExplorerGUI(QMainWindow):
 
     def loadData(self):
         success = self.data_manager.loadTiffStack(
-            key_app=self.app_key_pri,
+            app_key=self.app_key_pri,
             path_tiff=self.widget_manager.dict_lineedit[f"{self.app_key_pri}_path_tiff"].text(),
             )
         return success
@@ -90,7 +90,7 @@ class TIFStackExplorerGUI(QMainWindow):
 
     def setupControls(self):
         self.control_manager.view_controls[self.app_key_pri] = ViewControl(
-            key_app=self.app_key_pri,
+            app_key=self.app_key_pri,
             q_view=self.widget_manager.dict_view[self.app_key_pri], 
             q_scene=self.widget_manager.dict_scene[self.app_key_pri], 
             data_manager=self.data_manager, 
@@ -140,8 +140,8 @@ class TIFStackExplorerGUI(QMainWindow):
         return layout
 
     "Upper Right"
-    def makeLayoutComponentImageRegistration(self):
-        layout = makeLayoutImageRegistration(
+    def makeLayoutComponenStackRegistration(self):
+        layout = makeLayoutStackRegistration(
             self.widget_manager,
             key_label=f"{self.app_key_pri}_registration",
             key_combobox=f"{self.app_key_pri}_registration",
@@ -151,8 +151,8 @@ class TIFStackExplorerGUI(QMainWindow):
         )
         return layout
     
-    def makeLayoutComponentImageNormalization(self):
-        layout = makeLayoutImageNormalization(
+    def makeLayoutComponentStackNormalization(self):
+        layout = makeLayoutStackNormalization(
             self.widget_manager,
             key_label=f"{self.app_key_pri}_normalization",
             key_label_area=f"{self.app_key_pri}_normalization_area",
@@ -197,8 +197,8 @@ class TIFStackExplorerGUI(QMainWindow):
     
     def makeLayoutSectionRightUpper(self):
         layout = QVBoxLayout()
-        layout.addLayout(self.makeLayoutComponentImageRegistration())
-        layout.addLayout(self.makeLayoutComponentImageNormalization())
+        layout.addLayout(self.makeLayoutComponenStackRegistration())
+        layout.addLayout(self.makeLayoutComponentStackNormalization())
         return layout
 
     def makeLayoutSectionBottom(self):

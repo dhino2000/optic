@@ -87,22 +87,22 @@ def loadEventFileNPY(
         q_window        : QMainWindow, 
         data_manager    : DataManager, 
         control_manager : ControlManager, 
-        key_app         : str
+        app_key         : str
         ) -> None | np.array:
     path_eventfile = openFileDialog(q_widget=q_window, file_type="npy", title="Open Eventfile npy File").replace("\\", "/")
 
     if path_eventfile:
         eventfile = np.load(path_eventfile)
         len_eventfile = len(eventfile)
-        len_Fall = data_manager.getLengthOfData(key_app)
+        len_Fall = data_manager.getLengthOfData(app_key)
         eventfile_name = path_eventfile.split("/")[-1].split(".")[0]
-        control_manager.setSharedAttr(key_app, "eventfile_name", eventfile_name)
+        control_manager.setSharedAttr(app_key, "eventfile_name", eventfile_name)
         if not len_eventfile == len_Fall:
             QMessageBox.warning(q_window, "File load failed", f"Length of data does not match! \nFall: {len_Fall}, eventfile: {len_eventfile}")
             return None
         else:
-            data_manager.dict_eventfile[key_app] = eventfile
-            return data_manager.dict_eventfile[key_app]
+            data_manager.dict_eventfile[app_key] = eventfile
+            return data_manager.dict_eventfile[app_key]
     else:
         return
 

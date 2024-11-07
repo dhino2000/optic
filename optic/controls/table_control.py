@@ -9,33 +9,33 @@ from ..utils.info_utils import extractRangeValues
 class TableControl:
     def __init__(
             self, 
-            key_app         : str, 
+            app_key         : str, 
             q_table         : QTableWidget,             
             data_manager    : DataManager, 
             widget_manager  : WidgetManager, 
             config_manager  : ConfigManager, 
             control_manager : ControlManager,
         ):
-        self.key_app                                    = key_app
+        self.app_key                                    = app_key
         self.q_table                                    = q_table
         self.data_manager                               = data_manager
         self.widget_manager                             = widget_manager
         self.config_manager                             = config_manager
         self.control_manager                            = control_manager
-        self.table_columns:                TableColumns = self.config_manager.getTableColumns(self.key_app)
-        self.key_function_map:        Dict[Qt.Key, Any] = self.config_manager.getKeyFunctionMap(self.key_app).getAllMappings()
+        self.table_columns:                TableColumns = self.config_manager.getTableColumns(self.app_key)
+        self.key_function_map:        Dict[Qt.Key, Any] = self.config_manager.getKeyFunctionMap(self.app_key).getAllMappings()
         self.groups_celltype:   Dict[int, QButtonGroup] = {}
         self.selected_row:                          int = 0
         self.selected_column:                       int = 0
         self.len_row:                               int = 0
 
-    def setupWidgetROITable(self, key_app: str) -> None:
+    def setupWidgetROITable(self, app_key: str) -> None:
         from ..gui.table_setup import setupWidgetROITable
-        self.setLenRow(len(self.data_manager.getStat(self.key_app))) # for Suite2p
+        self.setLenRow(len(self.data_manager.getStat(self.app_key))) # for Suite2p
         self.q_table, self.groups_celltype = setupWidgetROITable(self.q_table, self.len_row, self.table_columns.getColumns(), key_event_ignore=True)
         self.setKeyPressEvent()
         self.initalizeSharedAttr_ROIDisplay()
-        updateROICountDisplay(self.widget_manager, self.config_manager, self.key_app)
+        updateROICountDisplay(self.widget_manager, self.config_manager, self.app_key)
 
     def updateWidgetROITable(self) -> None:
         from ..gui.table_setup import setupWidgetROITable
@@ -84,29 +84,29 @@ class TableControl:
     shared_attr Functions
     """
     def setSharedAttr_ROISelected(self, roi_id: int) -> None:
-        self.control_manager.setSharedAttr(self.key_app, 'roi_selected_id', roi_id)
-        updateROIPropertyDisplay(self.control_manager, self.data_manager, self.widget_manager, self.key_app)
+        self.control_manager.setSharedAttr(self.app_key, 'roi_selected_id', roi_id)
+        updateROIPropertyDisplay(self.control_manager, self.data_manager, self.widget_manager, self.app_key)
 
     def getSharedAttr_ROISelected(self) -> int:
-        return self.control_manager.getSharedAttr(self.key_app, 'roi_selected_id')
+        return self.control_manager.getSharedAttr(self.app_key, 'roi_selected_id')
     
     def setSharedAttr_ROIDisplay(self, roi_display: Dict[int, bool]) -> None:
-        self.control_manager.setSharedAttr(self.key_app, 'roi_display', roi_display)
+        self.control_manager.setSharedAttr(self.app_key, 'roi_display', roi_display)
 
     def getSharedAttr_ROIDisplay(self) -> Dict[int, bool]:
-        return self.control_manager.getSharedAttr(self.key_app, 'roi_display')
+        return self.control_manager.getSharedAttr(self.app_key, 'roi_display')
 
     def initalizeSharedAttr_ROIDisplay(self) -> None:
         roi_display = {roi_id: True for roi_id in range(self.len_row)}
-        self.control_manager.setSharedAttr(self.key_app, 'roi_display', roi_display)
+        self.control_manager.setSharedAttr(self.app_key, 'roi_display', roi_display)
 
     def setSharedAttr_DisplayCelltype(self, roi_display_type: str) -> None:
-        self.control_manager.setSharedAttr(self.key_app, 'display_celltype', roi_display_type)
+        self.control_manager.setSharedAttr(self.app_key, 'display_celltype', roi_display_type)
 
     def getSharedAttr_DisplayCelltype(self) -> str:
-        return self.control_manager.getSharedAttr(self.key_app, 'display_celltype')
+        return self.control_manager.getSharedAttr(self.app_key, 'display_celltype')
 
-    # with dict_buttongroup["{key_app}_display_celltype"] change
+    # with dict_buttongroup["{app_key}_display_celltype"] change
     def updateROIDisplayWithCelltype(self, roi_display_type: str) -> None:
         roi_display = self.getSharedAttr_ROIDisplay()
         for roi_id in roi_display.keys():
@@ -157,7 +157,7 @@ class TableControl:
         elif action_type == 'toggle':
             col_order = action[1]
             self.toggleColumn(self.selected_row, col_order)
-        updateROICountDisplay(self.widget_manager, self.config_manager, self.key_app)
+        updateROICountDisplay(self.widget_manager, self.config_manager, self.app_key)
 
     """
     Function of executeAction
@@ -279,7 +279,7 @@ class TableControl:
                     if isinstance(button, QRadioButton):
                         button.setChecked(True)
                         self.changeRadiobuttonOfTable(row)
-        updateROICountDisplay(self.widget_manager, self.config_manager, self.key_app)
+        updateROICountDisplay(self.widget_manager, self.config_manager, self.app_key)
 
     def getCheckboxColumns(self) -> List[str]:
         return [col_name for col_name, col_info in self.table_columns.getColumns().items() if col_info['type'] == 'checkbox']
@@ -330,19 +330,19 @@ class TableControl:
             target_column = self.table_columns.getColumns()[target_celltype]['order']
 
             for row in range(self.q_table.rowCount()):
-                roi_stat = self.data_manager.getStat(self.key_app)[row]
+                roi_stat = self.data_manager.getStat(self.app_key)[row]
                 if not all(min_val <= roi_stat[param] <= max_val for param, (min_val, max_val) in thresholds.items()):
                     radio_button: QRadioButton = self.q_table.cellWidget(row, target_column)
                     if radio_button:
                         radio_button.setChecked(True)
                         self.changeRadiobuttonOfTable(row)
-            updateROICountDisplay(self.widget_manager, self.config_manager, self.key_app)
+            updateROICountDisplay(self.widget_manager, self.config_manager, self.app_key)
         else:
             return
     # get thresholds of ROI filter
     def getThresholdsOfROIFilter(self) -> Dict[str, Tuple[float, float]]:
         thresholds = {}
-        q_lineedits = {key: self.widget_manager.dict_lineedit[f"{self.key_app}_roi_filter_{key}"] for key in self.config_manager.gui_defaults["ROI_THRESHOLDS"].keys()}
+        q_lineedits = {key: self.widget_manager.dict_lineedit[f"{self.app_key}_roi_filter_{key}"] for key in self.config_manager.gui_defaults["ROI_THRESHOLDS"].keys()}
         for key, q_lineedit in q_lineedits.items():
             thresholds[key] = extractRangeValues(q_lineedit.text())
         return thresholds

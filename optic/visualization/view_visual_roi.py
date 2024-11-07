@@ -9,17 +9,17 @@ def drawAllROIs(
         pixmap: QPixmap, 
         data_manager: DataManager, 
         control_manager: ControlManager, 
-        key_app: str
+        app_key: str
         ) -> None:
     painter = QPainter(pixmap)
     painter.setRenderHint(QPainter.Antialiasing)
-    roi_display = control_manager.getSharedAttr(key_app, "roi_display")
+    roi_display = control_manager.getSharedAttr(app_key, "roi_display")
     
-    for roiId, roiStat in data_manager.getStat(key_app).items():
+    for roiId, roiStat in data_manager.getStat(app_key).items():
         if roi_display[roiId]:
             drawROI(view_control, painter, roiStat, roiId)
     
-    highlightROISelected(view_control, painter, data_manager, control_manager, key_app)
+    highlightROISelected(view_control, painter, data_manager, control_manager, app_key)
     painter.end()
 
 def drawROI(
@@ -43,11 +43,11 @@ def highlightROISelected(
         painter: QPainter, 
         data_manager: DataManager, 
         control_manager: ControlManager, 
-        key_app: str
+        app_key: str
         ) -> None:
-    ROISelectedId = control_manager.getSharedAttr(key_app, "roi_selected_id")
+    ROISelectedId = control_manager.getSharedAttr(app_key, "roi_selected_id")
     if ROISelectedId is not None:
-        roiStat = data_manager.getStat(key_app)[ROISelectedId]
+        roiStat = data_manager.getStat(app_key)[ROISelectedId]
         xpix, ypix = roiStat["xpix"], roiStat["ypix"]
         color = view_control.getROIColor(ROISelectedId)
         opacity = view_control.getHighlightOpacity()

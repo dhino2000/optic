@@ -15,7 +15,7 @@ def updateViewFall(
         view_control: ViewControl, 
         data_manager: DataManager, 
         control_manager: ControlManager, 
-        key_app: str,
+        app_key: str,
         ) -> None:
     bg_image_chan1 = None
     bg_image_chan2 = None
@@ -25,21 +25,21 @@ def updateViewFall(
     if view_control.getBackgroundVisibility(ChannelKeys.CHAN1):
         image_type = view_control.getBackgroundImageType()
         bg_image_chan1 = adjustChannelContrast(
-            image=data_manager.getDictBackgroundImage(key_app).get(image_type),
+            image=data_manager.getDictBackgroundImage(app_key).get(image_type),
             min_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN1, 'min'),
             max_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN1, 'max'),
             )
     # chan 2
-    if view_control.getBackgroundVisibility(ChannelKeys.CHAN2) and data_manager.getNChannels(key_app) == 2:
+    if view_control.getBackgroundVisibility(ChannelKeys.CHAN2) and data_manager.getNChannels(app_key) == 2:
         bg_image_chan2 = adjustChannelContrast(
-            image=data_manager.getDictBackgroundImageChannel2(key_app).get("meanImg"),
+            image=data_manager.getDictBackgroundImageChannel2(app_key).get("meanImg"),
             min_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN2, 'min'),
             max_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN2, 'max'),
             )
     # optional
-    if view_control.getBackgroundVisibility(ChannelKeys.CHAN3) and isinstance(data_manager.getBackgroundImageOptional(key_app), np.ndarray):
+    if view_control.getBackgroundVisibility(ChannelKeys.CHAN3) and isinstance(data_manager.getBackgroundImageOptional(app_key), np.ndarray):
         bg_image_chan3 = adjustChannelContrast(
-            image=data_manager.getBackgroundImageOptional(key_app),
+            image=data_manager.getBackgroundImageOptional(app_key),
             min_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN3, 'min'),
             max_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN3, 'max'),
             )
@@ -56,7 +56,7 @@ def updateViewFall(
     qimage = QImage(bg_image.data, width, height, width * 3, QImage.Format_RGB888)
     pixmap = QPixmap.fromImage(qimage)
 
-    drawAllROIs(view_control, pixmap, data_manager, control_manager, key_app)
+    drawAllROIs(view_control, pixmap, data_manager, control_manager, app_key)
 
     q_scene.clear()
     q_scene.addPixmap(pixmap)
@@ -70,19 +70,19 @@ def updateViewTiff(
         view_control: ViewControl, 
         data_manager: DataManager, 
         control_manager: ControlManager, 
-        key_app: str,
+        app_key: str,
         ) -> None:
     bg_image_chan1 = None
     bg_image_chan2 = None
     bg_image_chan3 = None 
     plane_z = view_control.getPlaneZ()
     plane_t = view_control.getPlaneT()
-    min_val_image = np.min(data_manager.getTiffStack(key_app))
-    max_val_image = np.max(data_manager.getTiffStack(key_app))
+    min_val_image = np.min(data_manager.getTiffStack(app_key))
+    max_val_image = np.max(data_manager.getTiffStack(app_key))
 
     if view_control.getBackgroundVisibility(ChannelKeys.CHAN1):
         bg_image_chan1 = adjustChannelContrast(
-            image=data_manager.getImageFromXYCZTTiffStack(key_app, plane_z, plane_t, 0, view_control.show_reg),
+            image=data_manager.getImageFromXYCZTTiffStack(app_key, plane_z, plane_t, 0, view_control.show_reg),
             min_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN1, 'min'),
             max_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN1, 'max'),
             min_val_image=min_val_image,
@@ -90,7 +90,7 @@ def updateViewTiff(
             )
     if view_control.getBackgroundVisibility(ChannelKeys.CHAN2):
         bg_image_chan2 = adjustChannelContrast(
-            image=data_manager.getImageFromXYCZTTiffStack(key_app, plane_z, plane_t, 1, view_control.show_reg),
+            image=data_manager.getImageFromXYCZTTiffStack(app_key, plane_z, plane_t, 1, view_control.show_reg),
             min_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN2, 'min'),
             max_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN2, 'max'),
             min_val_image=min_val_image,
@@ -98,7 +98,7 @@ def updateViewTiff(
             )
     if view_control.getBackgroundVisibility(ChannelKeys.CHAN3):
         bg_image_chan3 = adjustChannelContrast(
-            image=data_manager.getImageFromXYCZTTiffStack(key_app, plane_z, plane_t, 2, view_control.show_reg),
+            image=data_manager.getImageFromXYCZTTiffStack(app_key, plane_z, plane_t, 2, view_control.show_reg),
             min_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN3, 'min'),
             max_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN3, 'max'),
             min_val_image=min_val_image,

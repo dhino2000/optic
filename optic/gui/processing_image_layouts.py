@@ -3,11 +3,54 @@ from ..type_definitions import *
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout
 from ..gui.base_layouts import makeLayoutComboBoxLabel
 
-# Image Registration config
-def makeLayoutImageRegistration(
+# Fall Image Registration config
+def makeLayoutFallRegistration(
         widget_manager              : WidgetManager, 
         data_manager                : DataManager,
-        key_app                     : str,
+        app_key                     : str,
+        key_label_elastix_method    : str, 
+        key_label_ref_c             : str,
+        key_combobox_elastix_method : str, 
+        key_combobox_ref_c          : str,
+        key_button_config           : str,
+        key_button_run              : str,
+        key_checkbox_show_reg       : str,
+        ) -> QVBoxLayout:
+    layout = QVBoxLayout()
+    layout.addWidget(widget_manager.makeWidgetLabel(key=key_label_elastix_method, label="Image Registration", bold=True, italic=True, use_global_style=False))
+    layout_elastix = QHBoxLayout()
+    layout_elastix.addLayout(makeLayoutComboBoxLabel(
+        widget_manager, 
+        key_label_elastix_method, 
+        key_combobox_elastix_method, 
+        "Elastix method:", 
+        axis="horizontal", 
+        items=["rigid", "affine", "bspline"]
+        ))
+    layout_elastix.addLayout(makeLayoutComboBoxLabel(
+        widget_manager, 
+        key_label_ref_c, 
+        key_combobox_ref_c, 
+        "Reference channel:", 
+        axis="horizontal",
+        items=[str(i) for i in range(data_manager.getNChannels(app_key))]
+        ))
+    layout_run = QHBoxLayout()
+    layout_run.addLayout(makeLayoutElastixConfig(widget_manager, key_button_config))
+    layout_run.addWidget(widget_manager.makeWidgetButton(key=key_button_run, label="Run Elastix"))
+    layout_checkbox = QHBoxLayout()
+    layout_checkbox.addWidget(widget_manager.makeWidgetCheckBox(key=key_checkbox_show_reg, label="Show Registered Image"))
+
+    layout.addLayout(layout_elastix)
+    layout.addLayout(layout_run)
+    layout.addLayout(layout_checkbox)
+    return layout
+
+# Stack Image Registration config
+def makeLayoutStackRegistration(
+        widget_manager              : WidgetManager, 
+        data_manager                : DataManager,
+        app_key                     : str,
         key_label_elastix_method    : str, 
         key_label_ref_c             : str,
         key_label_ref_t             : str,
@@ -41,7 +84,7 @@ def makeLayoutImageRegistration(
         key_combobox_ref_c, 
         "Reference channel:", 
         axis="horizontal",
-        items=[str(i) for i in range(data_manager.getSizeOfC(key_app))]
+        items=[str(i) for i in range(data_manager.getSizeOfC(app_key))]
         ))
     layout_ref_plane.addLayout(makeLayoutComboBoxLabel(
         widget_manager, 
@@ -49,7 +92,7 @@ def makeLayoutImageRegistration(
         key_combobox_ref_t, 
         "Reference T plane:", 
         axis="horizontal",
-        items=[str(i) for i in range(data_manager.getSizeOfT(key_app))]
+        items=[str(i) for i in range(data_manager.getSizeOfT(app_key))]
         ))
     layout_ref_plane.addLayout(makeLayoutComboBoxLabel(
         widget_manager, 
@@ -57,7 +100,7 @@ def makeLayoutImageRegistration(
         key_combobox_ref_z, 
         "Reference Z plane:", 
         axis="horizontal",
-        items=[str(i) for i in range(data_manager.getSizeOfZ(key_app))]
+        items=[str(i) for i in range(data_manager.getSizeOfZ(app_key))]
         ))
     layout_run = QHBoxLayout()
     layout_run.addWidget(widget_manager.makeWidgetButton(key=key_button_run_t, label="Run Elastix (t-axis)"))
@@ -78,8 +121,8 @@ def makeLayoutElastixConfig(widget_manager: WidgetManager, key_button: str) -> Q
     layout.addWidget(widget_manager.makeWidgetButton(key=key_button, label="Elastix Config"))
     return layout
 
-# Image Normalization config
-def makeLayoutImageNormalization(
+# Stack Image Normalization config
+def makeLayoutStackNormalization(
         widget_manager      : WidgetManager,
         key_label           : str,
         key_label_area      : str,

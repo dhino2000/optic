@@ -49,7 +49,7 @@ def bindFuncViewMouseEvent(
 ) -> None:
     def onViewPressed(event) -> None:
         view_control.mousePressEvent(event)
-        roi_selected_id = view_control.control_manager.getSharedAttr(view_control.key_app, 'roi_selected_id')
+        roi_selected_id = view_control.control_manager.getSharedAttr(view_control.app_key, 'roi_selected_id')
         table_control.updateSelectedROI(roi_selected_id)
         table_control.q_table.setFocus()
     
@@ -69,7 +69,7 @@ def bindFuncViewMouseEventForTIFF(
             elif table_control:
                 scene_pos = q_view.mapToScene(event.pos())
                 view_control.getROIwithClick(int(scene_pos.x()), int(scene_pos.y()))
-                roi_selected_id = view_control.control_manager.getSharedAttr(view_control.key_app, 'roi_selected_id')
+                roi_selected_id = view_control.control_manager.getSharedAttr(view_control.app_key, 'roi_selected_id')
                 table_control.updateSelectedROI(roi_selected_id)
 
     def onViewMoved(event: QMouseEvent) -> None:
@@ -124,13 +124,13 @@ def bindFuncButtonEventfileIO(
     data_manager: 'DataManager', 
     control_manager: 'ControlManager', 
     canvas_control: 'CanvasControl', 
-    key_app: str
+    app_key: str
 ) -> None:
     def _loadEventFileNPY() -> None:
-        loadEventFileNPY(q_window, data_manager, control_manager, key_app)
+        loadEventFileNPY(q_window, data_manager, control_manager, app_key)
         canvas_control.updatePlotWithROISelect()
     q_button_load.clicked.connect(_loadEventFileNPY)
-    q_button_clear.clicked.connect(lambda: data_manager.clearEventfile(key_app))
+    q_button_clear.clicked.connect(lambda: data_manager.clearEventfile(app_key))
 
 """
 io_layouts
@@ -164,7 +164,7 @@ def bindFuncROICheckIO(
 """
 processing_image_layouts
 """
-# -> processing_image_layouts.makeLayoutImageNormalization
+# -> processing_image_layouts.makeLayoutStackNormalization
 def bindFuncButtonSetRectangeRange(
     q_widget: 'QWidget',
     q_button: 'QPushButton', 
@@ -185,7 +185,7 @@ def bindFuncButtonSetRectangeRange(
             QMessageBox.warning(q_widget, "Invalid Input", "Please enter 8 integer values separated by commas.\nEx) 100, 200, 100, 200, 1, 2, 0, 0")
     q_button.clicked.connect(onButtonClicked)
 
-# -> processing_image_layouts.makeLayoutImageNormalization
+# -> processing_image_layouts.makeLayoutStackNormalization
 def bindFuncButtonManageRectangleRangeForListWidget(
     q_widget: 'QWidget',
     q_button_add: 'QPushButton', 
@@ -258,7 +258,7 @@ def bindFuncButtonRunImageNormalization(
 
     q_button.clicked.connect(_bindFuncButtonRunImageNormalization)
 
-# -> processing_image_layouts.makeLayoutImageRegistration
+# -> processing_image_layouts.makeLayoutStackRegistration
 def bindFuncCheckboxShowRegisteredImage(
     q_checkbox: 'QCheckBox',
     view_control: 'ViewControl'
@@ -269,12 +269,12 @@ def bindFuncCheckboxShowRegisteredImage(
         view_control.updateView()
     q_checkbox.stateChanged.connect(onVisibilityChanged)
 
-# -> processing_image_layouts.makeLayoutImageRegistration
+# -> processing_image_layouts.makeLayoutStackRegistration
 def bindFuncButtonRunElastixForSingleStack(
         q_button: 'QPushButton',
         data_manager: 'DataManager',
         config_manager: 'ConfigManager',
-        key_app: str,
+        app_key: str,
         combobox_elastix_method: QComboBox,
         combobox_channel_ref: QComboBox,
         combobox_idx_ref: QComboBox,
@@ -287,11 +287,11 @@ def bindFuncButtonRunElastixForSingleStack(
         print(f"{elastix_method} transform")
         print("Reference channel:", channel_ref)
         print(f"Reference {axis} plane:", idx_ref)
-        img_stack = data_manager.getTiffStack(key_app)
+        img_stack = data_manager.getTiffStack(app_key)
         dict_params = config_manager.json_config.get("elastix_params")[elastix_method]
         print("Elastix Parameters", dict_params)
         img_stack_reg = runStackRegistration(img_stack, dict_params, channel_ref, idx_ref, axis, display_iters=10)
-        data_manager.dict_tiff_reg[key_app] = img_stack_reg
+        data_manager.dict_tiff_reg[app_key] = img_stack_reg
     q_button.clicked.connect(lambda: _runElastix())
 
 def bindFuncButtonRunElastixForDoubleImages(
@@ -301,18 +301,18 @@ def bindFuncButtonRunElastixForDoubleImages(
 ) -> None:
     pass
 
-# -> processing_image_layouts.makeLayoutImageRegistration
+# -> processing_image_layouts.makeLayoutStackRegistration
 def bindFuncButtonSaveRegisterdImage(
     q_widget: 'QWidget',
     q_button: 'QPushButton',
     data_manager: 'DataManager',
-    key_app: str,
+    app_key: str,
     path_tif_src: str
 ) -> None:
     def _saveRegisteredImage():
         path_tif_dst = generateSavePath(path_tif_src, suffix="_reg", new_extension=".tif")
-        metadata = data_manager.getTiffMetadata(key_app)
-        saveTiffStack(q_widget, path_tif_dst, data_manager.getTiffStackRegistered(key_app), imagej=True, metadata=metadata)
+        metadata = data_manager.getTiffMetadata(app_key)
+        saveTiffStack(q_widget, path_tif_dst, data_manager.getTiffStackRegistered(app_key), imagej=True, metadata=metadata)
     q_button.clicked.connect(_saveRegisteredImage)
 
 """
@@ -431,7 +431,7 @@ def bindFuncButtonSetAllROISameCelltype(
 ) -> None:
     list_celltype = [key for key, value in table_control.table_columns.getColumns().items() if value['type'] == 'celltype']
     for celltype in list_celltype:
-        widget_manager.dict_button[f"{table_control.key_app}_roi_set_{celltype}"].clicked.connect(
+        widget_manager.dict_button[f"{table_control.app_key}_roi_set_{celltype}"].clicked.connect(
             lambda checked, ct=celltype: table_control.setAllROISameCelltype(ct)
         )
     view_control.updateView()
@@ -445,7 +445,7 @@ def bindFuncCheckboxToggleAllROI(
     list_checkbox = [key for key, value in table_control.table_columns.getColumns().items() if value['type'] == 'checkbox']
     for checkbox in list_checkbox:
         for label, toggle in zip(["check", "uncheck"], [True, False]):
-            widget_manager.dict_button[f"{table_control.key_app}_roi_{label}_{checkbox}"].clicked.connect(
+            widget_manager.dict_button[f"{table_control.app_key}_roi_{label}_{checkbox}"].clicked.connect(
                 lambda checked, ck=checkbox, tg=toggle: table_control.toggleAllROICheckbox(ck, tg)
             )
     view_control.updateView()

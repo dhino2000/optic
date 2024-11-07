@@ -10,7 +10,7 @@ import numpy as np
 
 class CanvasControl:
     def __init__(self, 
-                 key_app         : str, 
+                 app_key         : str, 
                  figure          : Figure, 
                  canvas          : FigureCanvasQTAgg, 
                  data_manager    : DataManager, 
@@ -18,7 +18,7 @@ class CanvasControl:
                  config_manager  : ConfigManager, 
                  control_manager : ControlManager, 
                  ax_layout       : Literal["triple", "single"] ='triple'):
-        self.key_app                                    = key_app
+        self.app_key                                    = app_key
         self.figure                                     = figure
         self.canvas                                     = canvas
         self.data_manager                               = data_manager
@@ -28,8 +28,8 @@ class CanvasControl:
         self.ax_layout                                  = ax_layout
 
         self.axes:                       Dict[str, Any] = {}
-        self.fs:                                  float = self.data_manager.getFs(self.key_app)
-        self.plot_data_points:                      int = self.data_manager.getLengthOfData(self.key_app)
+        self.fs:                                  float = self.data_manager.getFs(self.app_key)
+        self.plot_data_points:                      int = self.data_manager.getLengthOfData(self.app_key)
         self.downsample_threshold:                  int = 1000
         self.time_array:                       np.array = np.arange(self.plot_data_points) / self.fs
         self.plot_range:                 List[int, int] = [0, self.plot_data_points]
@@ -57,13 +57,13 @@ class CanvasControl:
         self.updatePlotWidth()
         self.updateDownsampleThreshold()
 
-        roi_selected_id = self.control_manager.getSharedAttr(self.key_app, 'roi_selected_id')
-        self.full_traces = self.data_manager.getTracesOfSelectedROI(self.key_app, roi_selected_id, n_channels=self.data_manager.getNChannels(self.key_app))
+        roi_selected_id = self.control_manager.getSharedAttr(self.app_key, 'roi_selected_id')
+        self.full_traces = self.data_manager.getTracesOfSelectedROI(self.app_key, roi_selected_id, n_channels=self.data_manager.getNChannels(self.app_key))
         
-        if self.data_manager.getNChannels(self.key_app) == 1:
+        if self.data_manager.getNChannels(self.app_key) == 1:
             self.colors = {key: getattr(PlotColors, key.upper()) for key in ["F", "Fneu", "spks"]}
             self.labels = {key: getattr(PlotLabels, key.upper()) for key in ["F", "Fneu", "spks"]}
-        elif self.data_manager.getNChannels(self.key_app) == 2:
+        elif self.data_manager.getNChannels(self.app_key) == 2:
             self.colors = {key: getattr(PlotColors, key.upper()) for key in ["F", "Fneu", "spks", "F_chan2", "Fneu_chan2"]}
             self.labels = {key: getattr(PlotLabels, key.upper()) for key in ["F", "Fneu", "spks", "F_chan2", "Fneu_chan2"]}
         
@@ -72,7 +72,7 @@ class CanvasControl:
         self.ylim = (self.y_max * ylim_config[0], self.y_max * ylim_config[1])
 
         # eventfileの取得と処理
-        self.eventfile = self.data_manager.getEventfile(self.key_app)
+        self.eventfile = self.data_manager.getEventfile(self.app_key)
         if self.eventfile is not None:
             self.full_traces['event'] = self.eventfile * self.y_max
             self.colors['event'] = PlotColors.EVENT
@@ -84,7 +84,7 @@ class CanvasControl:
 
         event_indices = extractEventOnsetIndices(self.eventfile)
         
-        range_str = self.widget_manager.dict_lineedit[f"{self.key_app}_plot_eventfile_range"].text()
+        range_str = self.widget_manager.dict_lineedit[f"{self.app_key}_plot_eventfile_range"].text()
         pre_sec, post_sec = map(int, range_str.strip('()').split(','))
         pre_frames, post_frames = int(pre_sec * self.fs), int(post_sec * self.fs)
 
@@ -108,7 +108,7 @@ class CanvasControl:
         self.prepareTraceData()
         self.plotTracesZoomed()
         self.plotTracesOverall()
-        if self.widget_manager.dict_checkbox[f"{self.key_app}_plot_eventfile"].isChecked():
+        if self.widget_manager.dict_checkbox[f"{self.app_key}_plot_eventfile"].isChecked():
             self.plotEventAlignedTrace()
         self.canvas.draw_idle()
 
@@ -125,7 +125,7 @@ class CanvasControl:
         xticks = np.linspace(0, len(next(iter(traces.values()))) - 1, num_ticks, dtype=int)
         xticklabels = np.linspace(start_time, end_time, num_ticks).astype(int)
 
-        roi_selected_id = self.control_manager.getSharedAttr(self.key_app, 'roi_selected_id')
+        roi_selected_id = self.control_manager.getSharedAttr(self.app_key, 'roi_selected_id')
 
         default_kwargs = {
             'title'       : f'ROI {roi_selected_id}, Traces ({title_suffix})',
@@ -151,7 +151,7 @@ class CanvasControl:
         if event_segments is None or trace_segments is None:
             return
 
-        range_str = self.widget_manager.dict_lineedit[f"{self.key_app}_plot_eventfile_range"].text()
+        range_str = self.widget_manager.dict_lineedit[f"{self.app_key}_plot_eventfile_range"].text()
         pre_sec, post_sec = map(float, range_str.strip('()').split(','))
         pre_frame, post_frame = pre_sec * self.fs, post_sec * self.fs
 
@@ -212,7 +212,7 @@ class CanvasControl:
         self.axes[AxisKeys.MID].add_patch(rect)
     # bottom axis
     def plotTracesMean(self):
-        traces = self.data_manager.getTraces(self.key_app, n_channels=self.data_manager.getNChannels(self.key_app))
+        traces = self.data_manager.getTraces(self.app_key, n_channels=self.data_manager.getNChannels(self.app_key))
         mean_traces = {key: np.mean(trace, axis=0) for key, trace in traces.items()}
         self.plotTraces(AxisKeys.BOT, mean_traces, "Average", 0, self.plot_data_points, ylim=None, title="Average Traces")
 
@@ -223,7 +223,7 @@ class CanvasControl:
         return traces
 
     def updatePlotWidth(self):
-        min_width_seconds = float(self.widget_manager.dict_lineedit[f"{self.key_app}_plot_min_width"].text())
+        min_width_seconds = float(self.widget_manager.dict_lineedit[f"{self.app_key}_plot_min_width"].text())
         self.min_plot_width = int(min_width_seconds * self.fs)
     def updateDownsampleThreshold(self):
         self.downsample_threshold = int(self.widget_manager.dict_lineedit["light_plot_mode_threshold"].text())
@@ -275,7 +275,7 @@ class CanvasControl:
         return corr
     
     def getTitleOfEventAlignedTrace(self):
-        eventfile_name = self.control_manager.getSharedAttr(self.key_app, "eventfile_name")
+        eventfile_name = self.control_manager.getSharedAttr(self.app_key, "eventfile_name")
         corr = self.calculateCorrelationTraceEvent()
         title = f"Event-aligned Data\n{eventfile_name}\n(r: {corr:.2f})"
         return title

@@ -13,7 +13,7 @@ import numpy as np
 class ViewControl:
     def __init__(
             self, 
-            key_app         : str, 
+            app_key         : str, 
             q_view          : QGraphicsView, 
             q_scene         : QGraphicsScene, 
             data_manager    : DataManager, 
@@ -21,7 +21,7 @@ class ViewControl:
             config_manager  : ConfigManager, 
             control_manager : ControlManager,
         ):
-        self.key_app         = key_app
+        self.app_key         = app_key
         self.q_view          = q_view
         self.q_scene         = q_scene
         self.data_manager    = data_manager
@@ -73,19 +73,19 @@ class ViewControl:
 
     def updateView(self) -> None:
         if self.data_dtype == Extension.MAT:
-            updateViewFall(self.q_scene, self.q_view, self, self.data_manager, self.control_manager, self.key_app)
+            updateViewFall(self.q_scene, self.q_view, self, self.data_manager, self.control_manager, self.app_key)
         elif self.data_dtype == Extension.TIFF:
-            updateViewTiff(self.q_scene, self.q_view, self, self.data_manager, self.control_manager, self.key_app)
+            updateViewTiff(self.q_scene, self.q_view, self, self.data_manager, self.control_manager, self.app_key)
         
 
     """
     initialize Functions
     """
     def setDataType(self) -> None:
-        self.data_dtype = self.data_manager.getDataType(self.key_app)
+        self.data_dtype = self.data_manager.getDataType(self.app_key)
 
     def setImageDataType(self) -> None:
-        self.im_dtype = self.data_manager.getDataTypeOfTiffStack(self.key_app)
+        self.im_dtype = self.data_manager.getDataTypeOfTiffStack(self.app_key)
 
     def setViewSize(self, use_self_size: bool=True) -> None:
         if use_self_size:
@@ -94,15 +94,15 @@ class ViewControl:
 
     def setTIFFShape(self) -> None:
         self.tiff_shape = (
-            self.data_manager.getSizeOfX(self.key_app),
-            self.data_manager.getSizeOfY(self.key_app),
-            self.data_manager.getSizeOfC(self.key_app),
-            self.data_manager.getSizeOfZ(self.key_app),
-            self.data_manager.getSizeOfT(self.key_app)
+            self.data_manager.getSizeOfX(self.app_key),
+            self.data_manager.getSizeOfY(self.app_key),
+            self.data_manager.getSizeOfC(self.app_key),
+            self.data_manager.getSizeOfZ(self.app_key),
+            self.data_manager.getSizeOfT(self.app_key)
         )
 
     def initializeROIColors(self):
-        for roi_id in self.data_manager.getStat(self.key_app).keys():
+        for roi_id in self.data_manager.getStat(self.app_key).keys():
             self.roi_colors[roi_id] = self.generateRandomColor()
 
     def generateRandomColor(self) -> Tuple[int, int, int]:
@@ -160,11 +160,11 @@ class ViewControl:
     """
     def setPlaneZ(self, plane_z: int) -> None:
         self.plane_z = plane_z
-        updateZPlaneDisplay(self.widget_manager, self.key_app, plane_z)
+        updateZPlaneDisplay(self.widget_manager, self.app_key, plane_z)
 
     def setPlaneT(self, plane_t: int) -> None:
         self.plane_t = plane_t
-        updateTPlaneDisplay(self.widget_manager, self.key_app, plane_t)
+        updateTPlaneDisplay(self.widget_manager, self.app_key, plane_t)
 
     def setRect(self, rect: Optional[QGraphicsRectItem]) -> None:
         self.rect = rect
@@ -196,7 +196,7 @@ class ViewControl:
             self.bg_visibility[channel] = is_visible
 
     def setImageSize(self) -> None:
-        self.image_sizes = self.data_manager.getImageSize(self.key_app)
+        self.image_sizes = self.data_manager.getImageSize(self.app_key)
 
     def setShowReg(self, show_reg: bool) -> None:
         self.show_reg = show_reg
@@ -205,10 +205,10 @@ class ViewControl:
     shared_attr Functions
     """
     def setSharedAttr_ROISelected(self, roi_id: int) -> None:
-        self.control_manager.setSharedAttr(self.key_app, 'roi_selected_id', roi_id)
+        self.control_manager.setSharedAttr(self.app_key, 'roi_selected_id', roi_id)
 
     def getSharedAttr_ROISelected(self):
-        return self.control_manager.getSharedAttr(self.key_app, 'roi_selected_id')
+        return self.control_manager.getSharedAttr(self.app_key, 'roi_selected_id')
     
     """
     event Functions
@@ -267,17 +267,17 @@ class ViewControl:
 
 
     def getROIwithClick(self, x:int, y:int):
-        dict_Fall_stat = self.data_manager.getStat(self.key_app)
+        dict_Fall_stat = self.data_manager.getStat(self.app_key)
         dict_roi_med = {roi_id: dict_Fall_stat[roi_id]["med"] for roi_id in dict_Fall_stat.keys()}
-        skip_checkboxes = [checkbox for key, checkbox in self.widget_manager.dict_checkbox.items() if key.startswith(f"{self.key_app}_skip_choose_")]
+        skip_checkboxes = [checkbox for key, checkbox in self.widget_manager.dict_checkbox.items() if key.startswith(f"{self.app_key}_skip_choose_")]
         dict_roi_skip = {roi_id: shouldSkipROI(roi_id, 
-                                               self.config_manager.getTableColumns(self.key_app).getColumns(),
-                                               self.widget_manager.dict_table[self.key_app],
+                                               self.config_manager.getTableColumns(self.app_key).getColumns(),
+                                               self.widget_manager.dict_table[self.app_key],
                                                skip_checkboxes) 
                         for roi_id in dict_roi_med.keys()}
         closest_roi_id = findClosestROI(x, y, dict_roi_med, dict_roi_skip)
         if closest_roi_id is not None:
-            self.control_manager.setSharedAttr(self.key_app, 'roi_selected_id', closest_roi_id)
+            self.control_manager.setSharedAttr(self.app_key, 'roi_selected_id', closest_roi_id)
             self.updateView()
 
     def getRectRangeFromQRectF(self, rect: QRectF) -> List[int, int, int, int, int, int, int, int]:

@@ -26,34 +26,34 @@ class DataManager:
     IO Functions
     """
     # load Fall.mat data
-    def loadFallMat(self, key_app: str, path_fall: str, preprocessing: bool=True) -> bool:
+    def loadFallMat(self, app_key: str, path_fall: str, preprocessing: bool=True) -> bool:
         try:
             dict_Fall = loadFallMat(path_fall)
-            self.dict_Fall[key_app] = dict_Fall
-            self.dict_data_dtype[key_app] = Extension.MAT
-            self.dict_im_bg[key_app] = getBGImageFromFall(self, key_app)
-            if self.getNChannels(key_app) == 2:
-                self.dict_im_bg_chan2[key_app] = getBGImageChannel2FromFall(self, key_app)
+            self.dict_Fall[app_key] = dict_Fall
+            self.dict_data_dtype[app_key] = Extension.MAT
+            self.dict_im_bg[app_key] = getBGImageFromFall(self, app_key)
+            if self.getNChannels(app_key) == 2:
+                self.dict_im_bg_chan2[app_key] = getBGImageChannel2FromFall(self, app_key)
             return True
         except Exception as e:
             return False
         
     # load tiff image data (for optional)
-    def loadTifImage(self, key_app: str, path_image: str) -> bool:
+    def loadTifImage(self, app_key: str, path_image: str) -> bool:
         try:
-            self.dict_im_bg_optional[key_app] = loadTifImage(path_image)
+            self.dict_im_bg_optional[app_key] = loadTifImage(path_image)
             return True
         except Exception as e:
             return False
         
     # load tiff stack data
-    def loadTiffStack(self, key_app: str, path_tiff: str) -> bool:
+    def loadTiffStack(self, app_key: str, path_tiff: str) -> bool:
         try:
             tiff, metadata = loadTiffStack(path_tiff)
-            self.dict_data_dtype[key_app] = Extension.TIFF
-            self.dict_tiff[key_app] = tiff
-            self.dict_tiff_metadata[key_app] = metadata
-            self.dict_tiff_reg[key_app] = tiff
+            self.dict_data_dtype[app_key] = Extension.TIFF
+            self.dict_tiff[app_key] = tiff
+            self.dict_tiff_metadata[app_key] = metadata
+            self.dict_tiff_reg[app_key] = tiff
             return True
         except Exception as e:
             return False
@@ -62,107 +62,104 @@ class DataManager:
     get Functions
     """
     "Fall data"
-    def getDictFall(self, key_app: str) -> Dict[str, Any]:
-        return self.dict_Fall[key_app]
+    def getDictFall(self, app_key: str) -> Dict[str, Any]:
+        return self.dict_Fall[app_key]
     
     # get F, Fneu, spks
-    def getTraces(self, key_app: str, n_channels: int=1) -> Dict[str, np.ndarray[np.float32]]: # 2d array
+    def getTraces(self, app_key: str, n_channels: int=1) -> Dict[str, np.ndarray[np.float32]]: # 2d array
         dict_traces = {
-            "F": self.dict_Fall[key_app]["F"],
-            "Fneu": self.dict_Fall[key_app]["Fneu"],
-            "spks": self.dict_Fall[key_app]["spks"],
+            "F": self.dict_Fall[app_key]["F"],
+            "Fneu": self.dict_Fall[app_key]["Fneu"],
+            "spks": self.dict_Fall[app_key]["spks"],
         }
         if n_channels == 2:
-            dict_traces["F_chan2"] = self.dict_Fall[key_app]["F_chan2"]
-            dict_traces["Fneu_chan2"] = self.dict_Fall[key_app]["Fneu_chan2"]
+            dict_traces["F_chan2"] = self.dict_Fall[app_key]["F_chan2"]
+            dict_traces["Fneu_chan2"] = self.dict_Fall[app_key]["Fneu_chan2"]
         return dict_traces
-    def getTracesOfSelectedROI(self, key_app: str, roi_id: int, n_channels: int=1) -> Dict[str, np.ndarray[np.float32]]: # 1d array
+    def getTracesOfSelectedROI(self, app_key: str, roi_id: int, n_channels: int=1) -> Dict[str, np.ndarray[np.float32]]: # 1d array
         dict_traces = {
-            "F": self.dict_Fall[key_app]["F"][roi_id],
-            "Fneu": self.dict_Fall[key_app]["Fneu"][roi_id],
-            "spks": self.dict_Fall[key_app]["spks"][roi_id]
+            "F": self.dict_Fall[app_key]["F"][roi_id],
+            "Fneu": self.dict_Fall[app_key]["Fneu"][roi_id],
+            "spks": self.dict_Fall[app_key]["spks"][roi_id]
         }
         if n_channels == 2:
-            dict_traces["F_chan2"] = self.dict_Fall[key_app]["F_chan2"][roi_id]
-            dict_traces["Fneu_chan2"] = self.dict_Fall[key_app]["Fneu_chan2"][roi_id]
+            dict_traces["F_chan2"] = self.dict_Fall[app_key]["F_chan2"][roi_id]
+            dict_traces["Fneu_chan2"] = self.dict_Fall[app_key]["Fneu_chan2"][roi_id]
         return dict_traces
     
     # get stat
-    def getStat(self, key_app) -> Dict[int, Dict[str, Any]]:
-        return self.dict_Fall[key_app]["stat"]
-    
+    def getStat(self, app_key) -> Dict[int, Dict[str, Any]]:
+        return self.dict_Fall[app_key]["stat"]
     # get fs
-    def getFs(self, key_app: str) -> float:
-        return self.dict_Fall[key_app]["ops"]["fs"].flatten()[0]
-
+    def getFs(self, app_key: str) -> float:
+        return self.dict_Fall[app_key]["ops"]["fs"].flatten()[0]
     # get data length
-    def getLengthOfData(self, key_app: str) -> int:
-        if self.dict_data_dtype[key_app] == Extension.MAT:
-            return len(self.dict_Fall[key_app]["ops"]["xoff1"])
-        
+    def getLengthOfData(self, app_key: str) -> int:
+        if self.dict_data_dtype[app_key] == Extension.MAT:
+            return len(self.dict_Fall[app_key]["ops"]["xoff1"])
     # get nchannels
-    def getNChannels(self, key_app: str) -> int:
-        return self.dict_Fall[key_app]["ops"]["nchannels"].flatten()[0]
+    def getNChannels(self, app_key: str) -> int:
+        return self.dict_Fall[app_key]["ops"]["nchannels"].flatten()[0]
         
     "Tiff data"
-    def getTiffStack(self, key_app: str) -> np.ndarray[np.uint8, Tuple[int, int, int, int, int]]:
-        return self.dict_tiff.get(key_app, None)
-    def getTiffMetadata(self, key_app: str) -> Dict[str, Any]:
-        return self.dict_tiff_metadata.get(key_app, None)
-    def getTiffStackRegistered(self, key_app: str) -> np.ndarray[np.uint8, Tuple[int, int, int, int, int]]:
-        return self.dict_tiff_reg.get(key_app, None)
+    def getTiffStack(self, app_key: str) -> np.ndarray[np.uint8, Tuple[int, int, int, int, int]]:
+        return self.dict_tiff.get(app_key, None)
+    def getTiffMetadata(self, app_key: str) -> Dict[str, Any]:
+        return self.dict_tiff_metadata.get(app_key, None)
+    def getTiffStackRegistered(self, app_key: str) -> np.ndarray[np.uint8, Tuple[int, int, int, int, int]]:
+        return self.dict_tiff_reg.get(app_key, None)
 
-    def getSizeOfX(self, key_app: str) -> int:
-        return self.dict_tiff[key_app].shape[0]
-    def getSizeOfY(self, key_app: str) -> int:
-        return self.dict_tiff[key_app].shape[1]
-    def getSizeOfC(self, key_app: str) -> int:
-        return self.dict_tiff[key_app].shape[2]
-    def getSizeOfZ(self, key_app: str) -> int:
-        return self.dict_tiff[key_app].shape[3]
-    def getSizeOfT(self, key_app: str) -> int:
-        return self.dict_tiff[key_app].shape[4]
+    def getSizeOfX(self, app_key: str) -> int:
+        return self.dict_tiff[app_key].shape[0]
+    def getSizeOfY(self, app_key: str) -> int:
+        return self.dict_tiff[app_key].shape[1]
+    def getSizeOfC(self, app_key: str) -> int:
+        return self.dict_tiff[app_key].shape[2]
+    def getSizeOfZ(self, app_key: str) -> int:
+        return self.dict_tiff[app_key].shape[3]
+    def getSizeOfT(self, app_key: str) -> int:
+        return self.dict_tiff[app_key].shape[4]
 
     # get attibutes
-    def getDataType(self, key_app: str) -> str:
-        return self.dict_data_dtype.get(key_app)
+    def getDataType(self, app_key: str) -> str:
+        return self.dict_data_dtype.get(app_key)
     
-    def getDataTypeOfTiffStack(self, key_app: str) -> str:
-        return self.dict_tiff[key_app].dtype
+    def getDataTypeOfTiffStack(self, app_key: str) -> str:
+        return self.dict_tiff[app_key].dtype
 
     # get image size, change return with dtype
-    def getImageSize(self, key_app: str) -> Tuple[int, int]:
-        if self.dict_data_dtype[key_app] == Extension.MAT:
-            return (self.dict_Fall[key_app]["ops"]["Lx"].item(), self.dict_Fall[key_app]["ops"]["Ly"].item())
-        elif self.dict_data_dtype[key_app] == Extension.TIFF:
-            return (self.dict_tiff[key_app].shape[0], self.dict_tiff[key_app].shape[1])
+    def getImageSize(self, app_key: str) -> Tuple[int, int]:
+        if self.dict_data_dtype[app_key] == Extension.MAT:
+            return (self.dict_Fall[app_key]["ops"]["Lx"].item(), self.dict_Fall[app_key]["ops"]["Ly"].item())
+        elif self.dict_data_dtype[app_key] == Extension.TIFF:
+            return (self.dict_tiff[app_key].shape[0], self.dict_tiff[app_key].shape[1])
         
-    def getImageFromXYCZTTiffStack(self, key_app: str, plane_z: int, plane_t: int, channel: int, get_reg: bool = False) -> np.ndarray[np.uint8, Tuple[int, int]]:
+    def getImageFromXYCZTTiffStack(self, app_key: str, plane_z: int, plane_t: int, channel: int, get_reg: bool = False) -> np.ndarray[np.uint8, Tuple[int, int]]:
         # use registered image if get_reg is True
         if get_reg:
-            img_stack = self.getTiffStackRegistered(key_app)
+            img_stack = self.getTiffStackRegistered(app_key)
         else:
-            img_stack = self.getTiffStack(key_app)
+            img_stack = self.getTiffStack(app_key)
         try:
             return img_stack[:, :, channel, plane_z, plane_t]
         except IndexError:
             # out of index, return black image
             return np.zeros(img_stack.shape[:2], dtype=np.uint8)
     
-    def getDictBackgroundImage(self, key_app: str) -> Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]: # 2d array
-        return self.dict_im_bg.get(key_app)
+    def getDictBackgroundImage(self, app_key: str) -> Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]: # 2d array
+        return self.dict_im_bg.get(app_key)
     
-    def getDictBackgroundImageChannel2(self, key_app: str) -> Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]:
-        return self.dict_im_bg_chan2.get(key_app)
+    def getDictBackgroundImageChannel2(self, app_key: str) -> Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]:
+        return self.dict_im_bg_chan2.get(app_key)
     
-    def getBackgroundImageOptional(self, key_app: str) -> np.ndarray[np.uint8, Tuple[int, int]]:
-        return self.dict_im_bg_optional.get(key_app)
+    def getBackgroundImageOptional(self, app_key: str) -> np.ndarray[np.uint8, Tuple[int, int]]:
+        return self.dict_im_bg_optional.get(app_key)
     
-    def getEventfile(self, key_app: str) -> np.array:
-        return self.dict_eventfile.get(key_app)
+    def getEventfile(self, app_key: str) -> np.array:
+        return self.dict_eventfile.get(app_key)
     
     # clear attributes
-    def clearEventfile(self, key_app: str) -> None:
-        if key_app in self.dict_eventfile:
-            del self.dict_eventfile[key_app]
+    def clearEventfile(self, app_key: str) -> None:
+        if app_key in self.dict_eventfile:
+            del self.dict_eventfile[app_key]
     

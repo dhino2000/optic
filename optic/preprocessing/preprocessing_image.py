@@ -27,22 +27,22 @@ def resizeImageShape(img, shape_tgt) -> np.ndarray:
     return new_img
 
 # get Background Images from Fall.mat
-def getBGImageFromFall(data_manager: DataManager, key_app: str, dtype: str="uint8") -> Dict[str, np.ndarray]:
+def getBGImageFromFall(data_manager: DataManager, app_key: str, dtype: str="uint8") -> Dict[str, np.ndarray]:
     # get image shape from meanImg
     dict_im_bg = {}
-    base_shape = data_manager.dict_Fall[key_app]["ops"]["meanImg"].shape
+    base_shape = data_manager.dict_Fall[app_key]["ops"]["meanImg"].shape
     for key_im in BGImageTypeList.FALL:
-        img = convertImageDtypeToINT(data_manager.dict_Fall[key_app]["ops"][key_im], dtype=dtype)
+        img = convertImageDtypeToINT(data_manager.dict_Fall[app_key]["ops"][key_im], dtype=dtype)
         img = resizeImageShape(img, base_shape)
         dict_im_bg[key_im] = img
     return dict_im_bg
 
 # get chan2 Background Images from Fall.mat
 # but chan2 background images are only "meanImg" and "meanImg corrected"
-def getBGImageChannel2FromFall(data_manager: DataManager, key_app: str, dtype: str="uint8") -> Dict[str, np.ndarray]:
+def getBGImageChannel2FromFall(data_manager: DataManager, app_key: str, dtype: str="uint8") -> Dict[str, np.ndarray]:
     # get image shape from meanImg
     dict_im_bg = {}
-    dict_im_bg["meanImg"] = convertImageDtypeToINT(data_manager.dict_Fall[key_app]["ops"]["meanImg_chan2"], dtype=dtype)
-    dict_im_bg["meanImg_corrected"] = convertImageDtypeToINT(data_manager.dict_Fall[key_app]["ops"]["meanImg_chan2_corrected"], dtype=dtype)
+    dict_im_bg["meanImg"] = convertImageDtypeToINT(data_manager.dict_Fall[app_key]["ops"]["meanImg_chan2"], dtype=dtype)
+    dict_im_bg["meanImg_corrected"] = convertImageDtypeToINT(data_manager.dict_Fall[app_key]["ops"]["meanImg_chan2_corrected"], dtype=dtype)
     return dict_im_bg
         

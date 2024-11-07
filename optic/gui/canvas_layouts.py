@@ -5,7 +5,7 @@ from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
 from .base_layouts import makeLayoutLineEditLabel
 
 # F, Fneu, spks, eventのプロットプロット用のcanvas Layout
-def makeLayoutCanvasTracePlot(widget_manager: WidgetManager, key_figure: str, key_canvas: str, key_app: str, toolbar: bool=False) -> QVBoxLayout:
+def makeLayoutCanvasTracePlot(widget_manager: WidgetManager, key_figure: str, key_canvas: str, app_key: str, toolbar: bool=False) -> QVBoxLayout:
     # プロットウィジェットの設定
     layout = QVBoxLayout()
     widget_manager.makeWidgetFigure(key_figure)
@@ -18,13 +18,13 @@ def makeLayoutCanvasTracePlot(widget_manager: WidgetManager, key_figure: str, ke
     return layout
 
 # Canvas plot, plot range
-def makeLayoutMinimumPlotRange(widget_manager: WidgetManager, config_manager: ConfigManager, key_app: str) -> QHBoxLayout:
+def makeLayoutMinimumPlotRange(widget_manager: WidgetManager, config_manager: ConfigManager, app_key: str) -> QHBoxLayout:
     layout = QHBoxLayout()
     layout.addLayout(makeLayoutLineEditLabel
                      (
                     widget_manager, 
-                    key_label=f"{key_app}_plot_min_width", 
-                    key_lineedit=f"{key_app}_plot_min_width", 
+                    key_label=f"{app_key}_plot_min_width", 
+                    key_lineedit=f"{app_key}_plot_min_width", 
                     label="Minimum plot range (sec)", 
                     axis="vertical",
                     text_set=f"{config_manager.gui_defaults['CANVAS_SETTINGS']['MIN_PLOT_WIDTH_SEC']}",
@@ -49,18 +49,18 @@ def makeLayoutLightPlotMode(widget_manager: WidgetManager, config_manager: Confi
     return layout
 
 # Eventfile plot, Eventfile plot range
-def makeLayoutEventFilePlot(widget_manager: WidgetManager, key_app: str) -> QVBoxLayout:
+def makeLayoutEventFilePlot(widget_manager: WidgetManager, app_key: str) -> QVBoxLayout:
     layout = QVBoxLayout()
-    layout.addWidget(widget_manager.makeWidgetCheckBox(key=f"{key_app}_plot_eventfile", 
+    layout.addWidget(widget_manager.makeWidgetCheckBox(key=f"{app_key}_plot_eventfile", 
                                                        label="plot EventFile trace", 
                                                        checked=True,
                                                        ))
     layout.addLayout(makeLayoutLineEditLabel(widget_manager,
-                                                key_label=f"{key_app}_plot_eventfile_range",
-                                                key_lineedit=f"{key_app}_plot_eventfile_range",
+                                                key_label=f"{app_key}_plot_eventfile_range",
+                                                key_lineedit=f"{app_key}_plot_eventfile_range",
                                                 label="plot range from Event start (pre, post; sec)",
                                                 text_set="(10, 10)"))
-    layout.addWidget(widget_manager.makeWidgetButton(key=f"{key_app}_load_eventfile", label="Load EventFile npy file"))
-    layout.addWidget(widget_manager.makeWidgetButton(key=f"{key_app}_clear_eventfile", label="Clear"))
+    layout.addWidget(widget_manager.makeWidgetButton(key=f"{app_key}_load_eventfile", label="Load EventFile npy file"))
+    layout.addWidget(widget_manager.makeWidgetButton(key=f"{app_key}_clear_eventfile", label="Clear"))
     return layout
 

@@ -3,7 +3,7 @@ from .app_style import setAppStyle, applyAppStyle
 from .base_layouts import makeLayoutLineEditLabel, makeLayoutButtonGroup, makeLayoutSliderLabel, makeLayoutComboBoxLabel
 from .info_layouts import makeLayoutROIProperty, makeLayoutROICount
 from .io_layouts import makeLayoutLoadFileWidget, makeLayoutROICheckIO, makeLayoutLoadFileExitHelp
-from .processing_image_layouts import makeLayoutElastixConfig, makeLayoutImageRegistration, makeLayoutImageNormalization
+from .processing_image_layouts import makeLayoutElastixConfig, makeLayoutStackRegistration, makeLayoutStackNormalization, makeLayoutFallRegistration
 from .canvas_layouts import makeLayoutCanvasTracePlot, makeLayoutMinimumPlotRange, makeLayoutLightPlotMode, makeLayoutEventFilePlot
 from .slider_layouts import makeLayoutContrastSlider, makeLayoutOpacitySlider
 from .info_layouts import makeLayoutROIProperty
