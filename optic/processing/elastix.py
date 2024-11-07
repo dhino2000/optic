@@ -18,3 +18,12 @@ def runElastix(
 
     img_res, result_transform_parameters = itk.elastix_registration_method(img_fix, img_mov, parameter_object=parameter_object, output_dir=output_dir)
     return img_res, result_transform_parameters
+
+def registerImageElastix(
+    img_fix: np.ndarray[np.uint8, Tuple[int, int]], 
+    img_mov: np.ndarray[np.uint8, Tuple[int, int]], 
+    dict_params: Dict[str, Any], 
+    output_dir: str = None
+) -> Tuple[np.ndarray[np.uint8, Tuple[int, int]], Any]:
+    parameter_map = convertDictToElastixFormat(dict_params)
+    return runElastix(img_fix, img_mov, parameter_map, output_dir)
