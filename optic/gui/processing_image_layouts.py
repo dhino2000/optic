@@ -10,8 +10,10 @@ def makeLayoutFallRegistration(
         app_key                     : str,
         key_label_elastix_method    : str, 
         key_label_ref_c             : str,
+        key_label_vis_c             : str,
         key_combobox_elastix_method : str, 
         key_combobox_ref_c          : str,
+        key_combobox_vis_c          : str,
         key_button_config           : str,
         key_button_run              : str,
         key_checkbox_show_reg       : str,
@@ -40,6 +42,14 @@ def makeLayoutFallRegistration(
     layout_run.addWidget(widget_manager.makeWidgetButton(key=key_button_run, label="Run Elastix"))
     layout_checkbox = QHBoxLayout()
     layout_checkbox.addWidget(widget_manager.makeWidgetCheckBox(key=key_checkbox_show_reg, label="Show Registered Image"))
+    layout_checkbox.addLayout(makeLayoutComboBoxLabel(
+        widget_manager, 
+        key_label_vis_c, 
+        key_combobox_vis_c, 
+        "Registered image channel:", 
+        axis="horizontal",
+        items=[str(i) for i in range(3)],
+        ))
 
     layout.addLayout(layout_elastix)
     layout.addLayout(layout_run)

@@ -405,7 +405,8 @@ def bindFuncTableSelectionChanged(
         if selected.indexes():
             table_control.onSelectionChanged(selected, deselected)
             view_control.updateView()
-            canvas_control.updatePlotWithROISelect()
+            if canvas_control: # for canvas_control
+                canvas_control.updatePlotWithROISelect()
     q_table.selectionModel().selectionChanged.connect(_onSelectionChanged)
 
 # -> table_layouts.makeLayoutTableROICountLabel

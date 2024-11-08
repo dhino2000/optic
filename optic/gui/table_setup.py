@@ -32,6 +32,9 @@ def setupWidgetROITable(q_table: QTableWidget, len_row: int, table_columns: Tabl
                 cell = QTableWidgetItem(str(cellid))
                 cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)
                 q_table.setItem(cellid, col_info['order'], cell)
+            elif cell_type == "id_match":
+                cell = QTableWidgetItem()
+                q_table.setItem(cellid, col_info['order'], cell)
             elif cell_type == "celltype":
                 cell = QRadioButton()
                 if col_info.get("default", False):

@@ -19,6 +19,7 @@ class DataManager:
         self.dict_im_bg:           Dict[str, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
         self.dict_im_bg_chan2:     Dict[str, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
         self.dict_im_bg_optional:  Dict[str, np.ndarray[np.uint8, Tuple[int, int]]] = defaultdict(dict)
+        self.dict_im_bg_reg:       Dict[str, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
         self.dict_eventfile:       Dict[str, np.ndarray[Tuple[int]]] = {}
         self.dict_roicheck:        Dict[str, Any] = {}
 
@@ -32,6 +33,7 @@ class DataManager:
             self.dict_Fall[app_key] = dict_Fall
             self.dict_data_dtype[app_key] = Extension.MAT
             self.dict_im_bg[app_key] = getBGImageFromFall(self, app_key)
+            self.dict_im_bg_reg[app_key] = self.dict_im_bg[app_key]
             if self.getNChannels(app_key) == 2:
                 self.dict_im_bg_chan2[app_key] = getBGImageChannel2FromFall(self, app_key)
             return True
@@ -154,6 +156,9 @@ class DataManager:
     
     def getBackgroundImageOptional(self, app_key: str) -> np.ndarray[np.uint8, Tuple[int, int]]:
         return self.dict_im_bg_optional.get(app_key)
+    
+    def getBackgroundImageRegistered(self, app_key: str) -> Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]:
+        return self.dict_im_bg_reg.get(app_key)
     
     def getEventfile(self, app_key: str) -> np.array:
         return self.dict_eventfile.get(app_key)
