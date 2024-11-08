@@ -2,8 +2,10 @@ from __future__ import annotations
 from ..type_definitions import *
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPen, QColor, QPainter
+from ..preprocessing.preprocessing_roi import getROIContour
 import numpy as np
 
+# draw all ROIs
 def drawAllROIs(
         view_control: ViewControl, 
         pixmap: QPixmap, 
@@ -22,6 +24,31 @@ def drawAllROIs(
     highlightROISelected(view_control, painter, data_manager, control_manager, app_key)
     painter.end()
 
+# draw all ROIs and contour of selected ROI
+def drawAllROIsWithTracking(
+        view_control: ViewControl, 
+        pixmap: QPixmap, 
+        data_manager: DataManager, 
+        control_manager: ControlManager, 
+        app_key_pri: str,
+        app_key_sec: str,
+        ) -> None:
+    painter = QPainter(pixmap)
+    painter.setRenderHint(QPainter.Antialiasing)
+    roi_display = control_manager.getSharedAttr(app_key_pri, "roi_display")
+    
+    for roiId, roiStat in data_manager.getStat(app_key_pri).items():
+        if roi_display[roiId]:
+            drawROI(view_control, painter, roiStat, roiId)
+    
+    highlightROISelected(view_control, painter, data_manager, control_manager, app_key_pri)
+    # draw contour of selected ROI of "sec"
+    ROIMatchedId = 0
+    drawROIContour(view_control, painter, data_manager.getStat(app_key_sec), ROIMatchedId)
+
+    painter.end()
+
+# draw single ROI
 def drawROI(
         view_control: ViewControl, 
         painter: QPainter, 
@@ -36,6 +63,24 @@ def drawROI(
     painter.setPen(pen)
     
     for x, y in zip(xpix, ypix):
+        painter.drawPoint(int(x), int(y))
+
+# draw single ROI contour
+def drawROIContour(
+        view_control: ViewControl, 
+        painter: QPainter, 
+        roiStat: Dict[str, Any],
+        roiId: int
+        ) -> None:
+    xpix, ypix = roiStat["xpix"], roiStat["ypix"]
+    xpix_contour, ypix_contour = getROIContour(xpix, ypix)
+    color = view_control.getROIColor(roiId)
+    opacity = view_control.getROIOpacity()
+    
+    pen = QPen(QColor(*color, opacity))
+    painter.setPen(pen)
+    
+    for x, y in zip(xpix_contour, ypix_contour):
         painter.drawPoint(int(x), int(y))
 
 def highlightROISelected(

@@ -82,6 +82,9 @@ class TableControl:
         self.table_columns = table_columns
     """
     shared_attr Functions
+    roi_selected_id: Current selected ROI ID
+    roi_display: Which ROIs should be displayed
+    display_celltype: Which celltype should be displayed
     """
     def setSharedAttr_ROISelected(self, roi_id: int) -> None:
         self.control_manager.setSharedAttr(self.app_key, 'roi_selected_id', roi_id)
