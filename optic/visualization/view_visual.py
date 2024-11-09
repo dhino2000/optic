@@ -70,8 +70,8 @@ def updateViewFallWithTracking(
         view_control: ViewControl, 
         data_manager: DataManager, 
         control_manager: ControlManager, 
-        app_key_pri: str,
-        app_key_sec: str,
+        app_key: str,
+        app_key_sec: str = None,
         ) -> None:
     bg_image_chan1 = None
     bg_image_chan2 = None
@@ -81,24 +81,27 @@ def updateViewFallWithTracking(
     if view_control.getBackgroundVisibility(ChannelKeys.CHAN1):
         image_type = view_control.getBackgroundImageType()
         bg_image_chan1 = adjustChannelContrast(
-            image=data_manager.getDictBackgroundImage(app_key_pri).get(image_type),
+            image=data_manager.getDictBackgroundImage(app_key).get(image_type),
             min_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN1, 'min'),
             max_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN1, 'max'),
             )
     # chan 2
-    if view_control.getBackgroundVisibility(ChannelKeys.CHAN2) and data_manager.getNChannels(app_key_pri) == 2:
+    if view_control.getBackgroundVisibility(ChannelKeys.CHAN2) and data_manager.getNChannels(app_key) == 2:
         bg_image_chan2 = adjustChannelContrast(
-            image=data_manager.getDictBackgroundImageChannel2(app_key_pri).get("meanImg"),
+            image=data_manager.getDictBackgroundImageChannel2(app_key).get("meanImg"),
             min_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN2, 'min'),
             max_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN2, 'max'),
             )
-    # optional
-    if view_control.getBackgroundVisibility(ChannelKeys.CHAN3) and isinstance(data_manager.getBackgroundImageOptional(app_key_pri), np.ndarray):
-        bg_image_chan3 = adjustChannelContrast(
-            image=data_manager.getBackgroundImageOptional(app_key_pri),
-            min_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN3, 'min'),
-            max_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN3, 'max'),
-            )
+    # Registered ROI image, only "pri" view
+    if app_key_sec:
+        if view_control.getBackgroundVisibility(ChannelKeys.CHAN3):
+            bg_image_chan3 = adjustChannelContrast(
+                image=data_manager.getROIImage(app_key_sec).get("reg"),
+                min_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN3, 'min'),
+                max_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN3, 'max'),
+                )
+            
+    print(bg_image_chan3)
 
     (width, height) = view_control.getImageSize()
     bg_image = convertMonoImageToRGBImage(
@@ -112,7 +115,10 @@ def updateViewFallWithTracking(
     qimage = QImage(bg_image.data, width, height, width * 3, QImage.Format_RGB888)
     pixmap = QPixmap.fromImage(qimage)
 
-    drawAllROIsWithTracking(view_control, pixmap, data_manager, control_manager, app_key_pri, app_key_sec)
+    if app_key_sec:
+        drawAllROIsWithTracking(view_control, pixmap, data_manager, control_manager, app_key, app_key_sec)
+    else:
+        drawAllROIs(view_control, pixmap, data_manager, control_manager, app_key)
 
     q_scene.clear()
     q_scene.addPixmap(pixmap)

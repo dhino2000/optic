@@ -1,6 +1,6 @@
 from __future__ import annotations
 from ..type_definitions import *
-from ..visualization.view_visual import updateViewFall, updateViewTiff
+from ..visualization.view_visual import updateViewFall, updateViewTiff, updateViewFallWithTracking
 from ..visualization.view_visual_roi import findClosestROI, shouldSkipROI
 from ..visualization.view_visual_rectangle import initializeDragRectangle, updateDragRectangle, clipRectangleRange
 from ..visualization.info_visual import updateZPlaneDisplay, updateTPlaneDisplay
@@ -20,8 +20,10 @@ class ViewControl:
             widget_manager  : WidgetManager, 
             config_manager  : ConfigManager, 
             control_manager : ControlManager,
+            app_key_sec     : str=None,
         ):
         self.app_key         = app_key
+        self.app_key_sec     = app_key_sec
         self.q_view          = q_view
         self.q_scene         = q_scene
         self.data_manager    = data_manager
@@ -72,9 +74,11 @@ class ViewControl:
 
 
     def updateView(self) -> None:
-        if self.data_dtype == Extension.MAT:
+        if self.config_manager.current_app == "SUITE2P_ROI_CHECK":
             updateViewFall(self.q_scene, self.q_view, self, self.data_manager, self.control_manager, self.app_key)
-        elif self.data_dtype == Extension.TIFF:
+        elif self.config_manager.current_app == "SUITE2P_ROI_TRACKING":
+            updateViewFallWithTracking(self.q_scene, self.q_view, self, self.data_manager, self.control_manager, self.app_key, self.app_key_sec)
+        elif self.config_manager.current_app == "TIFSTACK_EXPLORER":
             updateViewTiff(self.q_scene, self.q_view, self, self.data_manager, self.control_manager, self.app_key)
         
 

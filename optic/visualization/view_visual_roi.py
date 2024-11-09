@@ -44,7 +44,7 @@ def drawAllROIsWithTracking(
     highlightROISelected(view_control, painter, data_manager, control_manager, app_key_pri)
     # draw contour of selected ROI of "sec"
     ROIMatchedId = 0
-    drawROIContour(view_control, painter, data_manager.getStat(app_key_sec), ROIMatchedId)
+    drawROIContour(view_control, painter, data_manager.getStat(app_key_sec)[ROIMatchedId], ROIMatchedId)
 
     painter.end()
 

@@ -45,4 +45,14 @@ def getBGImageChannel2FromFall(data_manager: DataManager, app_key: str, dtype: s
     dict_im_bg["meanImg"] = convertImageDtypeToINT(data_manager.dict_Fall[app_key]["ops"]["meanImg_chan2"], dtype=dtype)
     dict_im_bg["meanImg_corrected"] = convertImageDtypeToINT(data_manager.dict_Fall[app_key]["ops"]["meanImg_chan2_corrected"], dtype=dtype)
     return dict_im_bg
-        
+
+# make ROI Image from Fall.mat
+def getROIImageFromFall(data_manager: DataManager, app_key: str, dtype: str="uint8", value: int=50) -> Dict[str, np.ndarray]:
+    dict_im_roi = {}
+    roi_img = np.zeros(data_manager.getImageSize(app_key), dtype=dtype)
+    for roiId, roiStat in data_manager.getStat(app_key).items():
+        xpix, ypix = roiStat["xpix"], roiStat["ypix"]
+        roi_img[ypix, xpix] = value
+    dict_im_roi["raw"] = roi_img
+    dict_im_roi["reg"] = roi_img
+    return dict_im_roi
