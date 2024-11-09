@@ -99,9 +99,9 @@ def updateViewFallWithTracking(
                 image=data_manager.getROIImage(app_key_sec).get("reg"),
                 min_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN3, 'min'),
                 max_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN3, 'max'),
+                scaling=False,
                 )
             
-    print(bg_image_chan3)
 
     (width, height) = view_control.getImageSize()
     bg_image = convertMonoImageToRGBImage(
@@ -260,28 +260,42 @@ def adjustChannelContrast(
         min_val_slider: float,  # 0-255の範囲
         max_val_slider: float,  # 0-255の範囲
         min_val_image: float = None,
-        max_val_image: float = None
+        max_val_image: float = None,
+        scaling: bool = True,
         ) -> np.ndarray:
     try:
-        # 画像の最小値と最大値を取得または計算
+        # Get image min/max values if not provided
         if min_val_image is None:
             min_val_image = np.min(image)
         if max_val_image is None:
             max_val_image = np.max(image)
 
-        # スライダーの値を入力画像の型に応じた範囲にスケーリング
-        min_val = min_val_image + (min_val_slider / 255) * (max_val_image - min_val_image)
-        max_val = min_val_image + (max_val_slider / 255) * (max_val_image - min_val_image)
-
-        # 入力範囲を0-1にスケーリング
         image_float = image.astype(np.float32)
-        image_scaled = (image_float - min_val) / (max_val - min_val)
 
-        # 0-1の範囲にクリップ
-        image_clipped = np.clip(image_scaled, 0, 1)
-
-        # 0-255の範囲にスケーリングしてuint8に変換
-        image_uint8 = (image_clipped * 255).astype(np.uint8)
+        if scaling:
+            # Scale slider values to image range
+            min_val = min_val_image + (min_val_slider / 255) * (max_val_image - min_val_image)
+            max_val = min_val_image + (max_val_slider / 255) * (max_val_image - min_val_image)
+            
+            # Scale to 0-1 range
+            image_scaled = (image_float - min_val) / (max_val - min_val)
+            
+            # Clip to 0-1 and scale to 0-255
+            image_clipped = np.clip(image_scaled, 0, 1)
+            image_uint8 = (image_clipped * 255).astype(np.uint8)
+            
+        else:
+            # Use slider values directly as thresholds
+            image_scaled = np.clip(image_float, min_val_slider, max_val_slider)
+            
+            # Scale the clipped values to maintain relative intensities
+            if max_val_slider > min_val_slider:
+                image_scaled = ((image_scaled - min_val_slider) / 
+                              (max_val_slider - min_val_slider) * 255)
+            else:
+                image_scaled = np.zeros_like(image_float)
+                
+            image_uint8 = np.clip(image_scaled, 0, 255).astype(np.uint8)
 
         return image_uint8
 
