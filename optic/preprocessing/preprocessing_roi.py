@@ -8,12 +8,16 @@ def getROIContour(xpix: np.ndarray, ypix: np.ndarray) -> Tuple[np.ndarray, np.nd
     x_min, x_max = np.min(xpix), np.max(xpix)
     y_min, y_max = np.min(ypix), np.max(ypix)
 
-    mask = np.zeros((y_max - y_min + 1, x_max - x_min + 1), dtype=np.uint8)
-    mask[ypix - y_min, xpix - x_min] = 255
+    margin = 2
+    mask = np.zeros((y_max - y_min + 1 + 2*margin, x_max - x_min + 1 + 2*margin), dtype=np.uint8)
+    mask[ypix - y_min + margin, xpix - x_min + margin] = 255
 
-    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    kernel = np.ones((3,3), np.uint8)
+    mask = cv2.dilate(mask, kernel, iterations=1)
+
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     contour = contours[0].squeeze()
 
-    xpix_contour = contour[:, 0] + x_min
-    ypix_contour = contour[:, 1] + y_min
+    xpix_contour = contour[:, 0] + x_min - margin
+    ypix_contour = contour[:, 1] + y_min - margin
     return xpix_contour, ypix_contour

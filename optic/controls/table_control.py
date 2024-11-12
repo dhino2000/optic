@@ -51,6 +51,10 @@ class TableControl:
             self.setSelectedRow(row)
             self.setSelectedColumn(column)
             self.setSharedAttr_ROISelected(row)
+            # for ROI tracking
+            id_roi_match = self.getMatchId(row)
+            self.setSharedAttr_ROIMatch(id_roi_match)
+
     """
     get Functions
     """
@@ -62,6 +66,15 @@ class TableControl:
     
     def getLenRow(self) -> int:
         return self.len_row
+    
+    # if "Cell ID Match" column is empty, return None
+    def getMatchId(self, roi_id: int) -> Optional[int]:
+        try:
+            col_id_match = self.table_columns.getColumns()['Cell ID Match']['order']
+            id = int(self.q_table.item(roi_id, col_id_match).text())
+            return id
+        except (KeyError, AttributeError, ValueError):
+            return None
 
     """
     set Functions
@@ -83,6 +96,7 @@ class TableControl:
     """
     shared_attr Functions
     roi_selected_id: Current selected ROI ID
+    roi_match_id: Current matched ROI ID
     roi_display: Which ROIs should be displayed
     display_celltype: Which celltype should be displayed
     """
@@ -92,6 +106,12 @@ class TableControl:
 
     def getSharedAttr_ROISelected(self) -> int:
         return self.control_manager.getSharedAttr(self.app_key, 'roi_selected_id')
+    
+    def setSharedAttr_ROIMatch(self, roi_id: int) -> None:
+        self.control_manager.setSharedAttr(self.app_key, 'roi_match_id', roi_id)
+
+    def getSharedAttr_ROISelected(self) -> int:
+        return self.control_manager.getSharedAttr(self.app_key, 'roi_match_id')
     
     def setSharedAttr_ROIDisplay(self, roi_display: Dict[int, bool]) -> None:
         self.control_manager.setSharedAttr(self.app_key, 'roi_display', roi_display)
