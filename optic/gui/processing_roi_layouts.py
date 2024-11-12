@@ -1,0 +1,49 @@
+from __future__ import annotations
+from ..type_definitions import *
+from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout
+from ..gui.base_layouts import makeLayoutComboBoxLabel, makeLayoutLineEditLabel
+
+# Optimal transport ROI Matching config
+def makeLayoutROIMatching(
+        widget_manager              : WidgetManager, 
+        key_label_roi_matching    : str, 
+        key_label_ot_method         : str,
+        key_label_fgwd_alpha        : str,
+        key_label_wd_exp            : str, 
+        key_lineedit_fgwd_alpha     : str,
+        key_lineedit_wd_exp         : str,
+        key_combobox_ot_method      : str,
+        key_button_run              : str,
+        ) -> QVBoxLayout:
+    layout = QVBoxLayout()
+    layout.addWidget(widget_manager.makeWidgetLabel(key=key_label_roi_matching, label="ROI Matching", bold=True, italic=True, use_global_style=False))
+    layout_ot = QHBoxLayout()
+    layout_ot.addLayout(makeLayoutComboBoxLabel(
+        widget_manager, 
+        key_label_ot_method, 
+        key_combobox_ot_method, 
+        "Optimal Transport method:", 
+        axis="horizontal", 
+        items=["WD-shape", "WD-distance", "WD-distance-exp", "GWD", "FGWD"]
+        ))
+    layout_ot.addLayout(makeLayoutLineEditLabel(
+        widget_manager, 
+        key_label_fgwd_alpha, 
+        key_lineedit_fgwd_alpha,
+        label="FGWD alpha:", 
+        text_set="0.1", 
+        axis="horizontal"
+        ))
+    layout_ot.addLayout(makeLayoutLineEditLabel(
+        widget_manager, 
+        key_label_wd_exp, 
+        key_lineedit_wd_exp,
+        label="WD-distance exponent:", 
+        text_set="2", 
+        axis="horizontal"
+        ))
+    layout_run = QHBoxLayout()
+    layout_run.addWidget(widget_manager.makeWidgetButton(key=key_button_run, label="Run Optimal Transport"))
+    layout.addLayout(layout_ot)
+    layout.addLayout(layout_run)
+    return layout

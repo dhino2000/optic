@@ -64,13 +64,15 @@ def getScalingFactor() -> float:
     screen = QDesktopWidget().screenNumber(QDesktopWidget().cursor().pos())
     width = QDesktopWidget().screenGeometry(screen).width()
     
-    if width < 2400:
+    if width < 1920:
         return 1
-    elif width < 2880:
+    elif width < 2400:
         return 1.25
-    elif width < 3360:
+    elif width < 2880:
         return 1.5
-    elif width < 3840:
+    elif width < 3360:
         return 1.75
-    else:
+    elif width < 3840:
         return 2
+    else:
+        return 2.5
