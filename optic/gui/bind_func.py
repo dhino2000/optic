@@ -269,6 +269,40 @@ def bindFuncCheckboxShowRegisteredImage(
         view_control.updateView()
     q_checkbox.stateChanged.connect(onVisibilityChanged)
 
+# -> processing_image_layouts.makeLayoutFallRegistration
+def bindFuncButtonRunElastixForFall(
+        q_button: 'QPushButton',
+        data_manager: 'DataManager',
+        config_manager: 'ConfigManager',
+        control_manager: 'ControlManager',
+        app_key: str,
+        app_key_sec: str,
+        combobox_elastix_method: QComboBox,
+) -> None:
+    def _runElastix():
+        elastix_method = combobox_elastix_method.currentText()
+        print(f"{elastix_method} transform")
+        dict_params = config_manager.json_config.get("elastix_params")[elastix_method]
+        print("Elastix Parameters", dict_params)
+        # get fixed image and moving image, (meanImg, meanImgE, max_proj, Vcorr)
+        img_type_pri = control_manager.view_controls[app_key].getBackgroundImageType()
+        img_fix= data_manager.getDictBackgroundImage(app_key).get(img_type_pri)
+        img_type_sec = control_manager.view_controls[app_key_sec].getBackgroundImageType()
+        img_mov = data_manager.getDictBackgroundImage(app_key_sec).get(img_type_sec)
+        # run elastix
+        transform_parameters = calculateSingleTransform(img_fix, img_mov, dict_params)
+        # apply transform parameters to image
+        dict_im_bg_reg_mov = {}
+        for key_im in data_manager.getDictBackgroundImage(app_key_sec).keys():
+            dict_im_bg_reg_mov[key_im] = applySingleTransform(data_manager.getDictBackgroundImage(app_key_sec).get(key_im), transform_parameters)
+        data_manager.dict_im_bg_reg[app_key_sec] = dict_im_bg_reg_mov
+
+        control_manager.view_controls[app_key].updateView()
+        control_manager.view_controls[app_key_sec].updateView()
+        print("Registration Finished !")
+
+    q_button.clicked.connect(lambda: _runElastix())
+
 # -> processing_image_layouts.makeLayoutStackRegistration
 def bindFuncButtonRunElastixForSingleStack(
         q_button: 'QPushButton',
@@ -292,14 +326,8 @@ def bindFuncButtonRunElastixForSingleStack(
         print("Elastix Parameters", dict_params)
         img_stack_reg = runStackRegistration(img_stack, dict_params, channel_ref, idx_ref, axis, display_iters=10)
         data_manager.dict_tiff_reg[app_key] = img_stack_reg
+        print("Registration Fnisihed !")
     q_button.clicked.connect(lambda: _runElastix())
-
-def bindFuncButtonRunElastixForDoubleImages(
-        q_button: 'QPushButton',
-        data_manager: 'DataManager',
-        config_manager: 'ConfigManager',
-) -> None:
-    pass
 
 # -> processing_image_layouts.makeLayoutStackRegistration
 def bindFuncButtonSaveRegisterdImage(

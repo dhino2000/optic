@@ -43,11 +43,13 @@ def drawAllROIsWithTracking(
     
     highlightROISelected(view_control, painter, data_manager, control_manager, app_key_pri)
     # draw contour of selected ROI of "sec"
-    roiId_match = control_manager.getSharedAttr(app_key_pri, "roi_match_id")
-    if roiId_match is not None:
+    try:
+        roiId_match = control_manager.getSharedAttr(app_key_pri, "roi_match_id")
         view_control_sec = control_manager.view_controls[app_key_sec]
         roiStat_sec = data_manager.getStat(app_key_sec)[roiId_match]
         drawROIContour(view_control_sec, painter, roiStat_sec, roiId_match)
+    except KeyError:
+        pass
 
     painter.end()
 

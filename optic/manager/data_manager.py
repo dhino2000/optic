@@ -10,27 +10,31 @@ from ..io.data_io import loadFallMat, loadTiffStack, loadTifImage
 
 class DataManager:
     def __init__(self):
-        self.dict_data_dtype:      Dict[str, str] = {}
-        self.dict_Fall:            Dict[str, Any] = {}
-        self.dict_tiff:            Dict[str, np.ndarray[Tuple[int, int, int, int, int]]] = {}
-        self.dict_tiff_metadata:   Dict[str, Dict[str, Any]] = {}
-        self.dict_tiff_reg:        Dict[str, np.ndarray[Tuple[int, int, int, int, int]]] = {}
+        self.dict_data_dtype:          Dict[str, str] = {}
+        self.dict_Fall:                Dict[str, Any] = {}
+        self.dict_tiff:                Dict[str, np.ndarray[Tuple[int, int, int, int, int]]] = {}
+        self.dict_tiff_metadata:       Dict[str, Dict[str, Any]] = {}
+        self.dict_tiff_reg:            Dict[str, np.ndarray[Tuple[int, int, int, int, int]]] = {}
 
         # background image
-        self.dict_im_bg:           Dict[str, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
-        self.dict_im_bg_chan2:     Dict[str, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
-        self.dict_im_bg_optional:  Dict[str, np.ndarray[np.uint8, Tuple[int, int]]] = defaultdict(dict)
-        # ROI image
-        self.dict_im_roi:          Dict[str, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
+        self.dict_im_bg:               Dict[str, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
+        self.dict_im_bg_chan2:         Dict[str, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
+        self.dict_im_bg_optional:      Dict[str, np.ndarray[np.uint8, Tuple[int, int]]] = defaultdict(dict)
+        # for ROI tracking
+        self.dict_im_bg_reg:           Dict[str, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
+        self.dict_im_bg_chan2_reg:     Dict[str, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
 
-        self.dict_eventfile:       Dict[str, np.ndarray[Tuple[int]]] = {}
-        self.dict_roicheck:        Dict[str, Any] = {}
+        # ROI image
+        self.dict_im_roi:              Dict[str, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
+
+        self.dict_eventfile:           Dict[str, np.ndarray[Tuple[int]]] = {}
+        self.dict_roicheck:            Dict[str, Any] = {}
 
     """
     IO Functions
     """
     # load Fall.mat data
-    def loadFallMat(self, app_key: str, path_fall: str, preprocessing: bool=True) -> bool:
+    def loadFallMat(self, app_key: str, path_fall: str, preprocessing: bool=True, config_manager: ConfigManager=None) -> bool:
         try:
             dict_Fall = loadFallMat(path_fall)
             self.dict_Fall[app_key] = dict_Fall
@@ -39,6 +43,12 @@ class DataManager:
             self.dict_im_roi[app_key] = getROIImageFromFall(self, app_key)
             if self.getNChannels(app_key) == 2:
                 self.dict_im_bg_chan2[app_key] = getBGImageChannel2FromFall(self, app_key)
+            # Suite2pROITracking
+            if config_manager:
+                if config_manager.current_app == "SUITE2P_ROI_TRACKING":
+                    self.dict_im_bg_reg[app_key] = self.dict_im_bg[app_key]
+                    if self.getNChannels(app_key) == 2:
+                        self.dict_im_bg_chan2_reg[app_key] = self.dict_im_bg_chan2[app_key]
             return True
         except Exception as e:
             return False
@@ -159,6 +169,12 @@ class DataManager:
     
     def getBackgroundImageOptional(self, app_key: str) -> np.ndarray[np.uint8, Tuple[int, int]]:
         return self.dict_im_bg_optional.get(app_key)
+    
+    def getDictBackgroundImageRegistered(self, app_key: str) -> Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]: # 2d array
+        return self.dict_im_bg_reg.get(app_key)
+    
+    def getDictBackgroundImageChannel2Registered(self, app_key: str) -> Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]:
+        return self.dict_im_bg_chan2_reg.get(app_key)
     
     def getROIImage(self, app_key: str) -> Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]:
         return self.dict_im_roi.get(app_key)

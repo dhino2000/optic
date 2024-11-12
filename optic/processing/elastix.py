@@ -40,6 +40,16 @@ def applySingleTransform(
     img_res = itk.array_from_image(img_res)
     return img_res
 
+# run elastix registration for single image
+def runSingleRegistration(
+    img_fix: np.ndarray[np.uint8, Tuple[int, int]], 
+    img_mov: np.ndarray[np.uint8, Tuple[int, int]], 
+    dict_params: Dict[str, Any],
+) -> np.ndarray[np.uint8, Tuple[int, int]]:
+    transform_parameters = calculateStackTransform(img_fix, img_mov, dict_params)
+    img_reg = applyStackTransform(img_mov, transform_parameters)
+    return img_reg
+
 # calculate transform parameters from image stack
 def calculateStackTransform(
     img_stack: np.ndarray[np.uint8, Tuple[int, int, int, int, int]], # XYCZT

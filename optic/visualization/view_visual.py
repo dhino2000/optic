@@ -81,14 +81,14 @@ def updateViewFallWithTracking(
     if view_control.getBackgroundVisibility(ChannelKeys.CHAN1):
         image_type = view_control.getBackgroundImageType()
         bg_image_chan1 = adjustChannelContrast(
-            image=data_manager.getDictBackgroundImage(app_key).get(image_type),
+            image=data_manager.getDictBackgroundImageRegistered(app_key).get(image_type),
             min_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN1, 'min'),
             max_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN1, 'max'),
             )
     # chan 2
     if view_control.getBackgroundVisibility(ChannelKeys.CHAN2) and data_manager.getNChannels(app_key) == 2:
         bg_image_chan2 = adjustChannelContrast(
-            image=data_manager.getDictBackgroundImageChannel2(app_key).get("meanImg"),
+            image=data_manager.getDictBackgroundImageChannel2Registered(app_key).get("meanImg"),
             min_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN2, 'min'),
             max_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN2, 'max'),
             )
