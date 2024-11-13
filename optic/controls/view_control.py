@@ -43,7 +43,10 @@ class ViewControl:
                 'max': config_manager.gui_defaults["VIEW_SETTINGS"]["DEFAULT_CONTRAST_MAX"]
             }
             self.bg_visibility[channel] = True
-        self.show_reg:              bool                        = False # show or hide registration image
+        # show or hide registration image
+        self.show_reg_stack:        bool                        = True 
+        self.show_reg_im_roi:       bool                        = True
+        self.show_reg_im_bg:        bool                        = True
 
         # for tiff view
         self.tiff_shape:            Tuple[int, int, int, int, int]  = ()
@@ -156,8 +159,14 @@ class ViewControl:
     def getImageSize(self) -> Tuple[int, int]:
         return self.image_sizes
     
-    def getShowReg(self) -> bool:
-        return self.show_reg
+    def getShowRegStack(self) -> bool:
+        return self.show_reg_stack
+    
+    def getShowRegImROI(self) -> bool:
+        return self.show_reg_im_roi
+    
+    def getShowRegImBG(self) -> bool:
+        return self.show_reg_im_bg
     
     """
     set Functions
@@ -202,8 +211,12 @@ class ViewControl:
     def setImageSize(self) -> None:
         self.image_sizes = self.data_manager.getImageSize(self.app_key)
 
-    def setShowReg(self, show_reg: bool) -> None:
-        self.show_reg = show_reg
+    def setShowRegStack(self, show_reg: bool) -> None:
+        self.show_reg_stack = show_reg
+    def setShowRegImROI(self, show_reg: bool) -> None:
+        self.show_reg_im_roi = show_reg
+    def setShowRegImBG(self, show_reg: bool) -> None:
+        self.show_reg_im_bg = show_reg
 
     """
     shared_attr Functions

@@ -80,23 +80,35 @@ def updateViewFallWithTracking(
     # chan 1
     if view_control.getBackgroundVisibility(ChannelKeys.CHAN1):
         image_type = view_control.getBackgroundImageType()
+        if view_control.getShowRegImBG():
+            image = data_manager.getDictBackgroundImageRegistered(app_key).get(image_type) 
+        else:
+            image = data_manager.getDictBackgroundImage(app_key).get(image_type)
         bg_image_chan1 = adjustChannelContrast(
-            image=data_manager.getDictBackgroundImageRegistered(app_key).get(image_type),
+            image=image,
             min_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN1, 'min'),
             max_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN1, 'max'),
             )
     # chan 2
     if view_control.getBackgroundVisibility(ChannelKeys.CHAN2) and data_manager.getNChannels(app_key) == 2:
+        if view_control.getShowRegImBG():
+            image = data_manager.getDictBackgroundImageChannel2Registered(app_key).get("meanImg")
+        else:
+            image = data_manager.getDictBackgroundImageChannel2(app_key).get("meanImg")
         bg_image_chan2 = adjustChannelContrast(
-            image=data_manager.getDictBackgroundImageChannel2Registered(app_key).get("meanImg"),
+            image=image,
             min_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN2, 'min'),
             max_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN2, 'max'),
             )
     # Registered ROI image, only "pri" view
     if app_key_sec:
         if view_control.getBackgroundVisibility(ChannelKeys.CHAN3):
+            if view_control.getShowRegImROI():
+                image = data_manager.getROIImage(app_key_sec).get("reg")
+            else:
+                image = data_manager.getROIImage(app_key_sec).get("raw")
             bg_image_chan3 = adjustChannelContrast(
-                image=data_manager.getROIImage(app_key_sec).get("reg"),
+                image=image,
                 min_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN3, 'min'),
                 max_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN3, 'max'),
                 scaling=False,
@@ -144,7 +156,7 @@ def updateViewTiff(
 
     if view_control.getBackgroundVisibility(ChannelKeys.CHAN1):
         bg_image_chan1 = adjustChannelContrast(
-            image=data_manager.getImageFromXYCZTTiffStack(app_key, plane_z, plane_t, 0, view_control.show_reg),
+            image=data_manager.getImageFromXYCZTTiffStack(app_key, plane_z, plane_t, 0, view_control.show_reg_stack),
             min_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN1, 'min'),
             max_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN1, 'max'),
             min_val_image=min_val_image,
@@ -152,7 +164,7 @@ def updateViewTiff(
             )
     if view_control.getBackgroundVisibility(ChannelKeys.CHAN2):
         bg_image_chan2 = adjustChannelContrast(
-            image=data_manager.getImageFromXYCZTTiffStack(app_key, plane_z, plane_t, 1, view_control.show_reg),
+            image=data_manager.getImageFromXYCZTTiffStack(app_key, plane_z, plane_t, 1, view_control.show_reg_stack),
             min_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN2, 'min'),
             max_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN2, 'max'),
             min_val_image=min_val_image,
@@ -160,7 +172,7 @@ def updateViewTiff(
             )
     if view_control.getBackgroundVisibility(ChannelKeys.CHAN3):
         bg_image_chan3 = adjustChannelContrast(
-            image=data_manager.getImageFromXYCZTTiffStack(app_key, plane_z, plane_t, 2, view_control.show_reg),
+            image=data_manager.getImageFromXYCZTTiffStack(app_key, plane_z, plane_t, 2, view_control.show_reg_stack),
             min_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN3, 'min'),
             max_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN3, 'max'),
             min_val_image=min_val_image,

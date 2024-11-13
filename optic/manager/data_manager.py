@@ -123,6 +123,8 @@ class DataManager:
     # get ROI coordinates
     def getROICoords(self, app_key: str) -> Dict[int, Dict[Literal["xpix", "ypix"], np.ndarray[np.int32], Tuple[int]]]:
         return self.dict_roi_coords.get(app_key)
+    def getROICoordsRegistered(self, app_key: str) -> Dict[int, Dict[Literal["xpix", "ypix"], np.ndarray[np.int32], Tuple[int]]]:
+        return self.dict_roi_coords_reg.get(app_key)
         
     "Tiff data"
     def getTiffStack(self, app_key: str) -> np.ndarray[np.uint8, Tuple[int, int, int, int, int]]:

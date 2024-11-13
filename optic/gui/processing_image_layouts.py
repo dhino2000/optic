@@ -5,19 +5,20 @@ from ..gui.base_layouts import makeLayoutComboBoxLabel
 
 # Fall Image Registration config
 def makeLayoutFallRegistration(
-        widget_manager              : WidgetManager, 
-        data_manager                : DataManager,
-        app_key                     : str,
-        key_label_elastix_method    : str, 
-        key_label_ref_c             : str,
-        key_label_vis_c             : str,
-        key_combobox_elastix_method : str, 
-        key_combobox_ref_c          : str,
-        key_combobox_vis_c          : str,
-        key_button_config           : str,
-        key_button_run              : str,
-        key_checkbox_show_roi_match : str,
-        key_checkbox_show_reg       : str,
+        widget_manager               : WidgetManager, 
+        data_manager                 : DataManager,
+        app_key                      : str,
+        key_label_elastix_method     : str, 
+        key_label_ref_c              : str,
+        key_label_vis_c              : str,
+        key_combobox_elastix_method  : str, 
+        key_combobox_ref_c           : str,
+        key_combobox_vis_c           : str,
+        key_button_config            : str,
+        key_button_run               : str,
+        key_checkbox_show_roi_match  : str,
+        key_checkbox_show_reg_im_bg  : str,
+        key_checkbox_show_reg_im_roi : str,
         ) -> QVBoxLayout:
     layout = QVBoxLayout()
     layout.addWidget(widget_manager.makeWidgetLabel(key=key_label_elastix_method, label="Image Registration", bold=True, italic=True, use_global_style=False))
@@ -42,8 +43,9 @@ def makeLayoutFallRegistration(
     layout_run.addLayout(makeLayoutElastixConfig(widget_manager, key_button_config))
     layout_run.addWidget(widget_manager.makeWidgetButton(key=key_button_run, label="Run Elastix"))
     layout_checkbox = QHBoxLayout()
-    layout_checkbox.addWidget(widget_manager.makeWidgetCheckBox(key=key_checkbox_show_roi_match, label="Show Matched ROI"))
-    layout_checkbox.addWidget(widget_manager.makeWidgetCheckBox(key=key_checkbox_show_reg, label="Show Registered Image"))
+    layout_checkbox.addWidget(widget_manager.makeWidgetCheckBox(key=key_checkbox_show_roi_match, label="Show Matched ROI", checked=True))
+    layout_checkbox.addWidget(widget_manager.makeWidgetCheckBox(key=key_checkbox_show_reg_im_bg, label="Show Registered Image", checked=True))
+    layout_checkbox.addWidget(widget_manager.makeWidgetCheckBox(key=key_checkbox_show_reg_im_roi, label="Show Registered ROI", checked=True))
     layout_checkbox.addLayout(makeLayoutComboBoxLabel(
         widget_manager, 
         key_label_vis_c, 

@@ -258,14 +258,38 @@ def bindFuncButtonRunImageNormalization(
 
     q_button.clicked.connect(_bindFuncButtonRunImageNormalization)
 
+# -> processing_image_layouts.makeLayoutFallRegistration
+def bindFuncCheckboxShowRegisteredBGImage(
+    q_checkbox: 'QCheckBox',
+    view_controls: Dict[AppKeys, ViewControl]
+) -> None:
+    def onVisibilityChanged(state: int) -> None:
+        is_visible = (state == Qt.Checked)
+        for view_control in view_controls.values():
+            view_control.setShowRegImBG(is_visible)
+            view_control.updateView()
+    q_checkbox.stateChanged.connect(onVisibilityChanged)
+
+# -> processing_image_layouts.makeLayoutFallRegistration
+def bindFuncCheckboxShowRegisteredROIImage(
+    q_checkbox: 'QCheckBox',
+    view_controls: Dict[AppKeys, ViewControl]
+) -> None:
+    def onVisibilityChanged(state: int) -> None:
+        is_visible = (state == Qt.Checked)
+        for view_control in view_controls.values():
+            view_control.setShowRegImROI(is_visible)
+            view_control.updateView()
+    q_checkbox.stateChanged.connect(onVisibilityChanged)
+
 # -> processing_image_layouts.makeLayoutStackRegistration
-def bindFuncCheckboxShowRegisteredImage(
+def bindFuncCheckboxShowRegisteredStack(
     q_checkbox: 'QCheckBox',
     view_control: 'ViewControl'
 ) -> None:
     def onVisibilityChanged(state: int) -> None:
         is_visible = (state == Qt.Checked)
-        view_control.setShowReg(is_visible)
+        view_control.setShowRegStack(is_visible)
         view_control.updateView()
     q_checkbox.stateChanged.connect(onVisibilityChanged)
 
