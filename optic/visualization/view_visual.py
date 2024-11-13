@@ -104,9 +104,9 @@ def updateViewFallWithTracking(
     if app_key_sec:
         if view_control.getBackgroundVisibility(ChannelKeys.CHAN3):
             if view_control.getShowRegImROI():
-                image = data_manager.getROIImage(app_key_sec).get("reg")
+                image = data_manager.getDictROIImage(app_key_sec).get("reg")
             else:
-                image = data_manager.getROIImage(app_key_sec).get("raw")
+                image = data_manager.getDictROIImage(app_key_sec).get("raw")
             bg_image_chan3 = adjustChannelContrast(
                 image=image,
                 min_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN3, 'min'),

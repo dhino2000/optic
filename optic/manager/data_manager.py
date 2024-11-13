@@ -186,7 +186,7 @@ class DataManager:
     def getDictBackgroundImageChannel2Registered(self, app_key: str) -> Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]:
         return self.dict_im_bg_chan2_reg.get(app_key)
     
-    def getROIImage(self, app_key: str) -> Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]:
+    def getDictROIImage(self, app_key: str) -> Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]:
         return self.dict_im_roi.get(app_key)
     
     def getEventfile(self, app_key: str) -> np.array:

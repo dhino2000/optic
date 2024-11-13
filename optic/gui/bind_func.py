@@ -316,10 +316,16 @@ def bindFuncButtonRunElastixForFall(
         # run elastix
         transform_parameters = calculateSingleTransform(img_fix, img_mov, dict_params)
         # apply transform parameters to image
+        # background image
         dict_im_bg_reg_mov = {}
         for key_im in data_manager.getDictBackgroundImage(app_key_sec).keys():
             dict_im_bg_reg_mov[key_im] = applySingleTransform(data_manager.getDictBackgroundImage(app_key_sec).get(key_im), transform_parameters)
         data_manager.dict_im_bg_reg[app_key_sec] = dict_im_bg_reg_mov
+        # ROI image
+        img_roi_mov = data_manager.getDictROIImage(app_key_sec).get("raw")
+        img_roi_mov_reg = applySingleTransform(img_roi_mov, transform_parameters)
+        data_manager.dict_im_roi[app_key_sec]["reg"] = img_roi_mov_reg
+        # ROI coordinates
 
         control_manager.view_controls[app_key].updateView()
         control_manager.view_controls[app_key_sec].updateView()
