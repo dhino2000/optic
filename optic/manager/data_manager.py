@@ -1,9 +1,8 @@
 from __future__ import annotations
 from ..type_definitions import *
 from collections import defaultdict
-from scipy.io import loadmat
 import numpy as np
-import tifffile
+from itk.elxParameterObjectPython import elastixParameterObject
 from ..preprocessing.preprocessing_image import getBGImageFromFall, getBGImageChannel2FromFall, getROIImageFromFall
 from ..preprocessing.preprocessing_fall import getROICoordsFromDictFall
 from ..config.constants import Extension
@@ -28,7 +27,7 @@ class DataManager:
         self.dict_im_bg_reg:            Dict[AppKeys, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
         self.dict_im_bg_chan2_reg:      Dict[AppKeys, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
         # Image Registration parameters
-        self.dict_transform_parameters: Dict[AppKeys, Dict[str, Any]] = {}
+        self.dict_transform_parameters: Dict[AppKeys, elastixParameterObject] = {}
 
         # ROI image
         self.dict_im_roi:               Dict[AppKeys, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
@@ -190,6 +189,9 @@ class DataManager:
     
     def getDictROIImage(self, app_key: AppKeys) -> Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]:
         return self.dict_im_roi.get(app_key)
+    
+    def getTransformParameters(self, app_key: AppKeys) -> elastixParameterObject:
+        return self.dict_transform_parameters.get(app_key)
     
     def getEventfile(self, app_key: AppKeys) -> np.array:
         return self.dict_eventfile.get(app_key)

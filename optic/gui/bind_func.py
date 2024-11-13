@@ -315,6 +315,7 @@ def bindFuncButtonRunElastixForFall(
         img_mov = data_manager.getDictBackgroundImage(app_key_sec).get(img_type_sec)
         # run elastix
         transform_parameters = calculateSingleTransform(img_fix, img_mov, dict_params)
+        data_manager.dict_transform_parameters[app_key] = transform_parameters
         # apply transform parameters to image
         # background image
         dict_im_bg_reg_mov = {}

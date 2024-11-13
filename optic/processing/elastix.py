@@ -3,7 +3,8 @@ from ..type_definitions import *
 import numpy as np
 import itk
 from itk.elxParameterObjectPython import elastixParameterObject
-
+from itk.itkElastixRegistrationMethodPython import elastix_registration_method
+from itk.itkTransformixFilterPython import transformix_filter
 
 def convertDictToElastixFormat(dict_params: Dict[str, Any]) -> Dict[str, Tuple[str]]:
     return {k: tuple(v) if isinstance(v, list) else (str(v),) for k, v in dict_params.items()}
@@ -13,7 +14,7 @@ def calculateSingleTransform(
     img_fix: np.ndarray[np.uint8, Tuple[int, int]], 
     img_mov: np.ndarray[np.uint8, Tuple[int, int]], 
     dict_params: Dict[str, Any], 
-) -> Tuple[np.ndarray[np.uint8, Tuple[int, int]], Any]:
+) -> elastixParameterObject:
     
     img_fix = np.ascontiguousarray(img_fix)
     img_mov = np.ascontiguousarray(img_mov)
@@ -21,10 +22,10 @@ def calculateSingleTransform(
     img_mov = itk.image_view_from_array(img_mov)
 
     parameter_map = convertDictToElastixFormat(dict_params)
-    parameter_object = itk.ParameterObject.New()
+    parameter_object = elastixParameterObject.New()
     parameter_object.AddParameterMap(parameter_map)
 
-    img_res, transform_parameters = itk.elastix_registration_method(img_fix, img_mov, parameter_object=parameter_object, output_directory="")
+    img_res, transform_parameters = elastix_registration_method(img_fix, img_mov, parameter_object=parameter_object, output_directory="")
     return transform_parameters
 
 # apply transform parameters to single image
@@ -36,7 +37,7 @@ def applySingleTransform(
     img_mov = np.ascontiguousarray(img_mov)
     img_mov = itk.image_view_from_array(img_mov)
 
-    img_res = itk.transformix_filter(img_mov, transform_parameters, output_directory="")
+    img_res = transformix_filter(img_mov, transform_parameters, output_directory="")
     img_res = itk.array_from_image(img_res)
     return img_res
 
@@ -57,7 +58,6 @@ def calculateStackTransform(
     channel_ref: int,
     idx_ref: int,
     axis: Literal["t", "z"],
-    display_iters: int = 10
 ) -> Dict[str, elastixParameterObject]:
     dict_transform_parameters = {}
 
