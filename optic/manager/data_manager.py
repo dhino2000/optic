@@ -5,30 +5,34 @@ from scipy.io import loadmat
 import numpy as np
 import tifffile
 from ..preprocessing.preprocessing_image import getBGImageFromFall, getBGImageChannel2FromFall, getROIImageFromFall
+from ..preprocessing.preprocessing_fall import getROICoordsFromDictFall
 from ..config.constants import Extension
 from ..io.data_io import loadFallMat, loadTiffStack, loadTifImage
 
 class DataManager:
     def __init__(self):
-        self.dict_data_dtype:          Dict[str, str] = {}
-        self.dict_Fall:                Dict[str, Any] = {}
-        self.dict_tiff:                Dict[str, np.ndarray[Tuple[int, int, int, int, int]]] = {}
-        self.dict_tiff_metadata:       Dict[str, Dict[str, Any]] = {}
-        self.dict_tiff_reg:            Dict[str, np.ndarray[Tuple[int, int, int, int, int]]] = {}
+        self.dict_data_dtype:          Dict[AppKeys, str] = {}
+        self.dict_Fall:                Dict[AppKeys, Any] = {}
+        self.dict_tiff:                Dict[AppKeys, np.ndarray[Tuple[int, int, int, int, int]]] = {}
+        self.dict_tiff_metadata:       Dict[AppKeys, Dict[str, Any]] = {}
+        self.dict_tiff_reg:            Dict[AppKeys, np.ndarray[Tuple[int, int, int, int, int]]] = {}
 
+        # ROI coordinates
+        self.dict_roi_coords:          Dict[AppKeys, Dict[int, Dict[Literal["xpix", "ypix"], np.ndarray[np.int32], Tuple[int]]]] = {}
+        self.dict_roi_coords_reg:      Dict[AppKeys, Dict[int, Dict[Literal["xpix", "ypix"], np.ndarray[np.int32], Tuple[int]]]] = {}
         # background image
-        self.dict_im_bg:               Dict[str, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
-        self.dict_im_bg_chan2:         Dict[str, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
-        self.dict_im_bg_optional:      Dict[str, np.ndarray[np.uint8, Tuple[int, int]]] = defaultdict(dict)
+        self.dict_im_bg:               Dict[AppKeys, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
+        self.dict_im_bg_chan2:         Dict[AppKeys, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
+        self.dict_im_bg_optional:      Dict[AppKeys, np.ndarray[np.uint8, Tuple[int, int]]] = defaultdict(dict)
         # for ROI tracking
-        self.dict_im_bg_reg:           Dict[str, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
-        self.dict_im_bg_chan2_reg:     Dict[str, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
+        self.dict_im_bg_reg:           Dict[AppKeys, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
+        self.dict_im_bg_chan2_reg:     Dict[AppKeys, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
 
         # ROI image
-        self.dict_im_roi:              Dict[str, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
+        self.dict_im_roi:              Dict[AppKeys, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
 
-        self.dict_eventfile:           Dict[str, np.ndarray[Tuple[int]]] = {}
-        self.dict_roicheck:            Dict[str, Any] = {}
+        self.dict_eventfile:           Dict[AppKeys, np.ndarray[Tuple[int]]] = {}
+        self.dict_roicheck:            Dict[AppKeys, Any] = {}
 
     """
     IO Functions
@@ -41,6 +45,7 @@ class DataManager:
             self.dict_data_dtype[app_key] = Extension.MAT
             self.dict_im_bg[app_key] = getBGImageFromFall(self, app_key)
             self.dict_im_roi[app_key] = getROIImageFromFall(self, app_key)
+            self.dict_roi_coords[app_key] = getROICoordsFromDictFall(dict_Fall)
             if self.getNChannels(app_key) == 2:
                 self.dict_im_bg_chan2[app_key] = getBGImageChannel2FromFall(self, app_key)
             # Suite2pROITracking
@@ -115,6 +120,9 @@ class DataManager:
     # get nchannels
     def getNChannels(self, app_key: str) -> int:
         return self.dict_Fall[app_key]["ops"]["nchannels"].flatten()[0]
+    # get ROI coordinates
+    def getROICoords(self, app_key: str) -> Dict[int, Dict[Literal["xpix", "ypix"], np.ndarray[np.int32], Tuple[int]]]:
+        return self.dict_roi_coords.get(app_key)
         
     "Tiff data"
     def getTiffStack(self, app_key: str) -> np.ndarray[np.uint8, Tuple[int, int, int, int, int]]:

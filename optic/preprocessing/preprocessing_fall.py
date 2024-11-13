@@ -1,7 +1,11 @@
-# Fallデータの前処理関数
+from __future__ import annotations
+from ..type_definitions import *
+import numpy as np
+
+# preprocessing for Fall.mat data
 
 # Fall.matをdict_Fallに変換
-def convertMatToDictFall(Fall):
+def convertMatToDictFall(Fall) -> Dict[str, Any]:
     Fall_stat = Fall["stat"]
     Fall_iscell = Fall["iscell"][:,0]
     
@@ -39,3 +43,12 @@ def convertMatToDictROICheck(mat):
     mat_dtype = list(mat[0].dtype.fields)
     dict_ = dict(zip(mat_dtype, list(mat[0][0])))
     return dict_
+
+# get ROI coordination from dict_Fall
+def getROICoordsFromDictFall(dict_Fall: Dict[str, Any]) -> Dict[int, Dict[Literal["xpix", "ypix"], np.ndarray[np.int32], Tuple[int]]]:
+    dict_roi_coords = {}
+    for roi_id in dict_Fall["stat"].keys():
+        xpix = dict_Fall["stat"][roi_id]["xpix"]
+        ypix = dict_Fall["stat"][roi_id]["ypix"]
+        dict_roi_coords[roi_id] = {"xpix": xpix, "ypix": ypix}
+    return dict_roi_coords

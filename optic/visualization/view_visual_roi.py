@@ -17,9 +17,10 @@ def drawAllROIs(
     painter.setRenderHint(QPainter.Antialiasing)
     roi_display = control_manager.getSharedAttr(app_key, "roi_display")
     
-    for roiId, roiStat in data_manager.getStat(app_key).items():
+    dict_roi_coords = data_manager.getROICoords(app_key)
+    for roiId, dict_roi_coords_single in dict_roi_coords.items():
         if roi_display[roiId]:
-            drawROI(view_control, painter, roiStat, roiId)
+            drawROI(view_control, painter, dict_roi_coords_single, roiId)
     
     highlightROISelected(view_control, painter, data_manager, control_manager, app_key)
     painter.end()
@@ -37,9 +38,10 @@ def drawAllROIsWithTracking(
     painter.setRenderHint(QPainter.Antialiasing)
     roi_display = control_manager.getSharedAttr(app_key_pri, "roi_display")
     
-    for roiId, roiStat in data_manager.getStat(app_key_pri).items():
+    dict_roi_coords = data_manager.getROICoords(app_key_pri)
+    for roiId, dict_roi_coords_single in dict_roi_coords.items():
         if roi_display[roiId]:
-            drawROI(view_control, painter, roiStat, roiId)
+            drawROI(view_control, painter, dict_roi_coords_single, roiId)
     
     highlightROISelected(view_control, painter, data_manager, control_manager, app_key_pri)
     # draw contour of selected ROI of "sec"
@@ -57,10 +59,10 @@ def drawAllROIsWithTracking(
 def drawROI(
         view_control: ViewControl, 
         painter: QPainter, 
-        roiStat: Dict[str, Any],
+        dict_roi_coords_single: Dict[Literal["xpix", "ypix"], np.ndarray[np.int32], Tuple[int]],
         roiId: int
         ) -> None:
-    xpix, ypix = roiStat["xpix"], roiStat["ypix"]
+    xpix, ypix = dict_roi_coords_single["xpix"], dict_roi_coords_single["ypix"]
     color = view_control.getROIColor(roiId)
     opacity = view_control.getROIOpacity()
     

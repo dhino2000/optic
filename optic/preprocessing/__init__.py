@@ -1,4 +1,4 @@
 from .preprocessing_image import convertImageDtypeToINT, resizeImageShape
-from .preprocessing_fall import convertMatToDictFall, convertMatToDictROICheck
+from .preprocessing_fall import convertMatToDictFall, convertMatToDictROICheck, getROICoordsFromDictFall
 from .preprocessing_table import convertTableDataToDictROICheck, convertDictROICheckToMatROICheck, convertMatROICheckToDictROICheck
 from .preprocessing_tiff import standardizeTIFFStack, extractTIFFStack, getTiffStackShape
