@@ -59,7 +59,7 @@ def drawAllROIsWithTracking(
 def drawROI(
         view_control: ViewControl, 
         painter: QPainter, 
-        dict_roi_coords_single: Dict[Literal["xpix", "ypix"], np.ndarray[np.int32], Tuple[int]],
+        dict_roi_coords_single: Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32], Tuple[int]],
         roiId: int
         ) -> None:
     xpix, ypix = dict_roi_coords_single["xpix"], dict_roi_coords_single["ypix"]

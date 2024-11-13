@@ -282,10 +282,12 @@ class ViewControl:
         self.is_dragging = False
         self.rect = None
 
-
-    def getROIwithClick(self, x:int, y:int):
-        dict_Fall_stat = self.data_manager.getStat(self.app_key)
-        dict_roi_med = {roi_id: dict_Fall_stat[roi_id]["med"] for roi_id in dict_Fall_stat.keys()}
+    def getROIwithClick(self, x:int, y:int, reg=False) -> None:
+        if reg:
+            dict_roi_coords = self.data_manager.getROICoordsRegistered(self.app_key)
+        else:
+            dict_roi_coords = self.data_manager.getROICoords(self.app_key)
+        dict_roi_med = {roi_id: dict_roi_coords[roi_id]["med"] for roi_id in dict_roi_coords.keys()}
         skip_checkboxes = [checkbox for key, checkbox in self.widget_manager.dict_checkbox.items() if key.startswith(f"{self.app_key}_skip_choose_")]
         dict_roi_skip = {roi_id: shouldSkipROI(roi_id, 
                                                self.config_manager.getTableColumns(self.app_key).getColumns(),

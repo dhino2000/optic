@@ -45,10 +45,11 @@ def convertMatToDictROICheck(mat):
     return dict_
 
 # get ROI coordination from dict_Fall
-def getROICoordsFromDictFall(dict_Fall: Dict[str, Any]) -> Dict[int, Dict[Literal["xpix", "ypix"], np.ndarray[np.int32], Tuple[int]]]:
+def getROICoordsFromDictFall(dict_Fall: Dict[str, Any]) -> Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32], Tuple[int]]]:
     dict_roi_coords = {}
     for roi_id in dict_Fall["stat"].keys():
         xpix = dict_Fall["stat"][roi_id]["xpix"]
         ypix = dict_Fall["stat"][roi_id]["ypix"]
-        dict_roi_coords[roi_id] = {"xpix": xpix, "ypix": ypix}
+        med = dict_Fall["stat"][roi_id]["med"]
+        dict_roi_coords[roi_id] = {"xpix": xpix, "ypix": ypix, "med": med}
     return dict_roi_coords
