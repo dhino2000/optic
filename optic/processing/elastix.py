@@ -1,5 +1,6 @@
 from __future__ import annotations
 from ..type_definitions import *
+import os
 import numpy as np
 import itk
 from itk.elxParameterObjectPython import elastixParameterObject
@@ -110,3 +111,67 @@ def runStackRegistration(
     dict_transform_parameters = calculateStackTransform(img_stack, dict_params, channel_ref, idx_ref, axis, display_iters)
     img_stack_reg = applyStackTransform(img_stack, dict_transform_parameters)
     return img_stack_reg
+
+# generate point's coordination file for elastix registration
+def generateTmpTextforRegistration(coords: np.ndarray[np.uint8, Tuple[int, int]], path_dst: str):
+    np.savetxt(path_dst, coords, fmt = "%.5f")
+    # Modify the file
+    with open(path_dst, 'r') as f:
+        l = f.readlines()
+
+    l.insert(0, 'point\n')
+    l.insert(1, f'{len(coords)}\n')
+
+    with open(path_dst, 'w') as f:
+        f.writelines(l)
+
+# apply transform parameters to points
+def applyPointTransform(
+    img_mov: np.ndarray[np.uint8, Tuple[int, int]], 
+    transform_parameters: elastixParameterObject, 
+    points: np.ndarray[np.int32, Tuple[int, int]],
+    path_txt: str= "./points_tmp.txt",
+
+) -> np.ndarray[np.int32, Tuple[int, int]]:
+    
+    img_mov = np.ascontiguousarray(img_mov)
+    img_mov = itk.image_view_from_array(img_mov)
+
+    generateTmpTextforRegistration(points, path_txt)
+    reg = transformix_filter(
+        moving_image,
+        transform_parameters,
+        fixed_point_set_file_name=path_txt
+    )
+
+    points_reg = np.loadtxt('outputpoints.txt', dtype='str')
+    if points_reg.ndim == 2: # for xy coords
+        points_reg = points_reg[:,27:29].astype('float64').astype("uint32")
+    elif points_reg.ndim == 1: # for med coords
+        points_reg = points_reg[27:29].astype('float64').astype("uint32")
+
+    os.remove(path_txt)
+    os.remove("outputpoints.txt")
+    return points_reg
+
+# apply transform parameters to dict_roi_coords
+def applyDictROICoordsTransform(
+    img_mov: np.ndarray[np.uint8, Tuple[int, int]], 
+    transform_parameters: elastixParameterObject, 
+    dict_roi_coords: Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32], Tuple[int]]],
+    path_txt: str= "./points_tmp.txt",
+) -> Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32], Tuple[int]]]:
+    dict_roi_coords_reg = {}
+    x_max, x_min, y_max, y_min = img_mov.shape[1], 0, img_mov.shape[0], 0
+    
+    for roi_id, dict_coords in dict_roi_coords.items():
+        med = np.array([dict_coords["med"]])
+        xpix_ypix = np.array([dict_coords["xpix"], dict_coords["ypix"]]).T
+        med_reg = applyPointTransform(img_mov, transform_parameters, med, path_txt)
+        xpix_ypix_reg = applyPointTransform(img_mov, transform_parameters, xpix_ypix, path_txt)
+        # clip the coords
+        med_reg = np.clip(med_reg, 0, [x_max, y_max])
+        xpix_ypix_reg = np.clip(xpix_ypix_reg, [x_min, y_min], [x_max, y_max])
+
+        dict_roi_coords_reg[roi_id] = {"xpix": xpix_ypix_reg[:,0], "ypix": xpix_ypix_reg[:, 1], "med": med_reg}
+    return dict_roi_coords_reg
