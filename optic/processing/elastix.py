@@ -139,7 +139,7 @@ def applyPointTransform(
 
     generateTmpTextforRegistration(points, path_txt)
     reg = transformix_filter(
-        moving_image,
+        img_mov,
         transform_parameters,
         fixed_point_set_file_name=path_txt
     )
@@ -163,8 +163,12 @@ def applyDictROICoordsTransform(
 ) -> Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32], Tuple[int]]]:
     dict_roi_coords_reg = {}
     x_max, x_min, y_max, y_min = img_mov.shape[1], 0, img_mov.shape[0], 0
-    
+
+    i = 0
     for roi_id, dict_coords in dict_roi_coords.items():
+        if i % 10 == 0:
+            print(f"processing {i}/{len(dict_roi_coords)}")
+        i += 1
         med = np.array([dict_coords["med"]])
         xpix_ypix = np.array([dict_coords["xpix"], dict_coords["ypix"]]).T
         med_reg = applyPointTransform(img_mov, transform_parameters, med, path_txt)

@@ -53,6 +53,7 @@ class DataManager:
             if config_manager:
                 if config_manager.current_app == "SUITE2P_ROI_TRACKING":
                     self.dict_im_bg_reg[app_key] = self.dict_im_bg[app_key]
+                    self.dict_roi_coords_reg[app_key] = self.dict_roi_coords[app_key]
                     if self.getNChannels(app_key) == 2:
                         self.dict_im_bg_chan2_reg[app_key] = self.dict_im_bg_chan2[app_key]
             return True

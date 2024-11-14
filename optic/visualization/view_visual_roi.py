@@ -37,8 +37,12 @@ def drawAllROIsWithTracking(
     painter = QPainter(pixmap)
     painter.setRenderHint(QPainter.Antialiasing)
     roi_display = control_manager.getSharedAttr(app_key_pri, "roi_display")
-    
-    dict_roi_coords = data_manager.getDictROICoords(app_key_pri)
+
+    if view_control.show_reg_im_roi:
+        dict_roi_coords = data_manager.getDictROICoordsRegistered(app_key_pri)
+    else:
+        dict_roi_coords = data_manager.getDictROICoords(app_key_pri)
+
     for roiId, dict_roi_coords_single in dict_roi_coords.items():
         if roi_display[roiId]:
             drawROI(view_control, painter, dict_roi_coords_single, roiId)
@@ -48,8 +52,8 @@ def drawAllROIsWithTracking(
     try:
         roiId_match = control_manager.getSharedAttr(app_key_pri, "roi_match_id")
         view_control_sec = control_manager.view_controls[app_key_sec]
-        roiStat_sec = data_manager.getStat(app_key_sec)[roiId_match]
-        drawROIContour(view_control_sec, painter, roiStat_sec, roiId_match)
+        dict_roi_coords_single = dict_roi_coords[roiId_match]
+        drawROIContour(view_control_sec, painter, dict_roi_coords_single, roiId_match)
     except KeyError:
         pass
 
@@ -76,10 +80,10 @@ def drawROI(
 def drawROIContour(
         view_control: ViewControl, 
         painter: QPainter, 
-        roiStat: Dict[str, Any],
+        dict_roi_coords_single: Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32], Tuple[int]],
         roiId: int
         ) -> None:
-    xpix, ypix = roiStat["xpix"], roiStat["ypix"]
+    xpix, ypix = dict_roi_coords_single["xpix"], dict_roi_coords_single["ypix"]
     xpix_contour, ypix_contour = getROIContour(xpix, ypix)
     color = view_control.getROIColor(roiId)
     opacity = view_control.getROIOpacity()

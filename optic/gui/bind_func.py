@@ -308,6 +308,7 @@ def bindFuncButtonRunElastixForFall(
         print(f"{elastix_method} transform")
         dict_params = config_manager.json_config.get("elastix_params")[elastix_method]
         print("Elastix Parameters", dict_params)
+
         # get fixed image and moving image, (meanImg, meanImgE, max_proj, Vcorr)
         img_type_pri = control_manager.view_controls[app_key].getBackgroundImageType()
         img_fix= data_manager.getDictBackgroundImage(app_key).get(img_type_pri)
@@ -327,9 +328,13 @@ def bindFuncButtonRunElastixForFall(
         img_roi_mov_reg = applySingleTransform(img_roi_mov, transform_parameters)
         data_manager.dict_im_roi[app_key_sec]["reg"] = img_roi_mov_reg
         # ROI coordinates
+        dict_roi_coords = data_manager.getDictROICoords(app_key_sec)
+        dict_roi_coords_reg = applyDictROICoordsTransform(img_mov, transform_parameters, dict_roi_coords)
+        data_manager.dict_roi_coords_reg[app_key_sec] = dict_roi_coords_reg
 
         control_manager.view_controls[app_key].updateView()
         control_manager.view_controls[app_key_sec].updateView()
+
         print("Registration Finished !")
 
     q_button.clicked.connect(lambda: _runElastix())

@@ -1,2 +1,2 @@
 from .normalization import normalizeImageStackWithReferenceAreas
-from .elastix import convertDictToElastixFormat, calculateSingleTransform, applySingleTransform, calculateStackTransform, applyStackTransform, runStackRegistration
+from .elastix import convertDictToElastixFormat, calculateSingleTransform, applySingleTransform, calculateStackTransform, applyStackTransform, runStackRegistration, applyPointTransform, applyDictROICoordsTransform
