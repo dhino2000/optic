@@ -15,7 +15,7 @@ def updateViewFall(
         view_control: ViewControl, 
         data_manager: DataManager, 
         control_manager: ControlManager, 
-        app_key: str,
+        app_key: AppKeys,
         ) -> None:
     bg_image_chan1 = None
     bg_image_chan2 = None
@@ -70,8 +70,8 @@ def updateViewFallWithTracking(
         view_control: ViewControl, 
         data_manager: DataManager, 
         control_manager: ControlManager, 
-        app_key: str,
-        app_key_sec: str = None,
+        app_key: AppKeys,
+        app_key_sec: AppKeys = None,
         ) -> None:
     bg_image_chan1 = None
     bg_image_chan2 = None
@@ -104,9 +104,9 @@ def updateViewFallWithTracking(
     if app_key_sec:
         if view_control.getBackgroundVisibility(ChannelKeys.CHAN3):
             if view_control.getShowRegImROI():
-                image = data_manager.getDictROIImage(app_key_sec).get("reg")
+                image = data_manager.getDictROIImageRegistered(app_key_sec)
             else:
-                image = data_manager.getDictROIImage(app_key_sec).get("raw")
+                image = data_manager.getDictROIImage(app_key_sec)
             bg_image_chan3 = adjustChannelContrast(
                 image=image,
                 min_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN3, 'min'),
@@ -127,10 +127,7 @@ def updateViewFallWithTracking(
     qimage = QImage(bg_image.data, width, height, width * 3, QImage.Format_RGB888)
     pixmap = QPixmap.fromImage(qimage)
 
-    if app_key_sec:
-        drawAllROIsWithTracking(view_control, pixmap, data_manager, control_manager, app_key, app_key_sec)
-    else:
-        drawAllROIs(view_control, pixmap, data_manager, control_manager, app_key)
+    drawAllROIsWithTracking(view_control, pixmap, data_manager, control_manager, app_key, app_key_sec)
 
     q_scene.clear()
     q_scene.addPixmap(pixmap)
@@ -144,7 +141,7 @@ def updateViewTiff(
         view_control: ViewControl, 
         data_manager: DataManager, 
         control_manager: ControlManager, 
-        app_key: str,
+        app_key: AppKeys,
         ) -> None:
     bg_image_chan1 = None
     bg_image_chan2 = None
@@ -269,8 +266,8 @@ def convertMonoImageToRGBImage(
 
 def adjustChannelContrast(
         image: np.ndarray, 
-        min_val_slider: float,  # 0-255の範囲
-        max_val_slider: float,  # 0-255の範囲
+        min_val_slider: float,  # 0-255
+        max_val_slider: float,  # 0-255
         min_val_image: float = None,
         max_val_image: float = None,
         scaling: bool = True,

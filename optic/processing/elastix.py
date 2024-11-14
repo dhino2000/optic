@@ -26,7 +26,12 @@ def calculateSingleTransform(
     parameter_object = elastixParameterObject.New()
     parameter_object.AddParameterMap(parameter_map)
 
-    img_res, transform_parameters = elastix_registration_method(img_fix, img_mov, parameter_object=parameter_object, output_directory="")
+    img_reg, transform_parameters = elastix_registration_method(
+        img_fix, 
+        img_mov, 
+        parameter_object, 
+        output_directory=""
+        )
     return transform_parameters
 
 # apply transform parameters to single image
@@ -38,9 +43,13 @@ def applySingleTransform(
     img_mov = np.ascontiguousarray(img_mov)
     img_mov = itk.image_view_from_array(img_mov)
 
-    img_res = transformix_filter(img_mov, transform_parameters, output_directory="")
-    img_res = itk.array_from_image(img_res)
-    return img_res
+    img_reg = transformix_filter(
+        img_mov, 
+        transform_parameters, 
+        output_directory=""
+        )
+    img_reg = itk.array_from_image(img_reg)
+    return img_reg
 
 # run elastix registration for single image
 def runSingleRegistration(
@@ -93,8 +102,8 @@ def applyStackTransform(
             for t in range(num_t):
                 transform_parameters = dict_transform_parameters[f"z{z}_t{t}"]
                 img_mov = img_stack[:, :, c, z, t]
-                img_res = applySingleTransform(img_mov, transform_parameters)
-                img_stack_reg[:, :, c, z, t] = img_res
+                img_reg = applySingleTransform(img_mov, transform_parameters)
+                img_stack_reg[:, :, c, z, t] = img_reg
                 print("applying", "c", c, "z:", z, "t:", t)
     print("image transformation completed")
     return img_stack_reg
@@ -141,17 +150,16 @@ def applyPointTransform(
     reg = transformix_filter(
         img_mov,
         transform_parameters,
-        fixed_point_set_file_name=path_txt
+        moving_point_set_file_name=path_txt,
+        output_directory="",
     )
 
-    points_reg = np.loadtxt('outputpoints.txt', dtype='str')
+    points_reg = np.loadtxt('outputpoints.txt', dtype='str') # hardcoded, need to change
     if points_reg.ndim == 2: # for xy coords
         points_reg = points_reg[:,27:29].astype('float64').astype("uint32")
     elif points_reg.ndim == 1: # for med coords
         points_reg = points_reg[27:29].astype('float64').astype("uint32")
 
-    os.remove(path_txt)
-    os.remove("outputpoints.txt")
     return points_reg
 
 # apply transform parameters to dict_roi_coords
@@ -178,4 +186,6 @@ def applyDictROICoordsTransform(
         xpix_ypix_reg = np.clip(xpix_ypix_reg, [x_min, y_min], [x_max, y_max])
 
         dict_roi_coords_reg[roi_id] = {"xpix": xpix_ypix_reg[:,0], "ypix": xpix_ypix_reg[:, 1], "med": med_reg}
+    os.remove(path_txt)
+    os.remove('outputpoints.txt') # hardcoded, need to change
     return dict_roi_coords_reg

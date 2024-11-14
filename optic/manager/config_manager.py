@@ -16,8 +16,8 @@ class ConfigManager:
     def __init__(self):
         self.current_app       : str = None
         self.gui_defaults      : GuiDefaults = None
-        self.table_columns     : Dict[str: TableColumns] = {}
-        self.key_function_maps : Dict[str: KeyFunctionMap] = {}
+        self.table_columns     : Dict[AppKeys: TableColumns] = {}
+        self.key_function_maps : Dict[AppKeys: KeyFunctionMap] = {}
         self.json_config       : JsonConfig = JsonConfig()
 
     def setCurrentApp(self, app_name: str) -> None:
@@ -31,14 +31,14 @@ class ConfigManager:
         for app_key, key_map in self.gui_defaults["KEY_FUNCTION_MAP"].items():
             self.key_function_maps[app_key] = KeyFunctionMap(key_map)
 
-    def getTableColumns(self, app_key: str) -> TableColumns:
+    def getTableColumns(self, app_key: AppKeys) -> TableColumns:
         return self.table_columns[app_key]
 
-    def getKeyFunctionMap(self, app_key: str) -> KeyFunctionMap:
+    def getKeyFunctionMap(self, app_key: AppKeys) -> KeyFunctionMap:
         return self.key_function_maps.get(app_key)
 
-    def setTableColumns(self, app_key: str, new_table_columns: TableColumns):
+    def setTableColumns(self, app_key: AppKeys, new_table_columns: TableColumns):
         self.table_columns[app_key] = TableColumns(new_table_columns)
 
-    def setKeyFunctionMap(self, app_key: str, new_key_map: KeyFunctionMap):
+    def setKeyFunctionMap(self, app_key: AppKeys, new_key_map: KeyFunctionMap):
         self.key_function_maps[app_key] = KeyFunctionMap(new_key_map)

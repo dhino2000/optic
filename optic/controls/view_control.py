@@ -48,6 +48,8 @@ class ViewControl:
         self.show_reg_im_roi:       bool                        = True
         self.show_reg_im_bg:        bool                        = True
 
+        self.show_roi_match:        bool                        = True
+
         # for tiff view
         self.tiff_shape:            Tuple[int, int, int, int, int]  = ()
         self.plane_z:               int                             = 0
@@ -161,12 +163,12 @@ class ViewControl:
     
     def getShowRegStack(self) -> bool:
         return self.show_reg_stack
-    
     def getShowRegImROI(self) -> bool:
         return self.show_reg_im_roi
-    
     def getShowRegImBG(self) -> bool:
         return self.show_reg_im_bg
+    def getShowROIMatch(self) -> bool:
+        return self.show_roi_match
     
     """
     set Functions
@@ -217,6 +219,8 @@ class ViewControl:
         self.show_reg_im_roi = show_reg
     def setShowRegImBG(self, show_reg: bool) -> None:
         self.show_reg_im_bg = show_reg
+    def setShowROIMatch(self, show_match: bool) -> None:
+        self.show_roi_match = show_match
 
     """
     shared_attr Functions

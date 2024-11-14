@@ -31,6 +31,7 @@ class DataManager:
 
         # ROI image
         self.dict_im_roi:               Dict[AppKeys, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
+        self.dict_im_roi_reg:           Dict[AppKeys, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
 
         self.dict_eventfile:            Dict[AppKeys, np.ndarray[Tuple[int]]] = {}
         self.dict_roicheck:             Dict[AppKeys, Any] = {}
@@ -54,6 +55,7 @@ class DataManager:
                 if config_manager.current_app == "SUITE2P_ROI_TRACKING":
                     self.dict_im_bg_reg[app_key] = self.dict_im_bg[app_key]
                     self.dict_roi_coords_reg[app_key] = self.dict_roi_coords[app_key]
+                    self.dict_im_roi_reg[app_key] = self.dict_im_roi[app_key]
                     if self.getNChannels(app_key) == 2:
                         self.dict_im_bg_chan2_reg[app_key] = self.dict_im_bg_chan2[app_key]
             return True
@@ -125,7 +127,7 @@ class DataManager:
     # get ROI coordinates
     def getDictROICoords(self, app_key: AppKeys) -> Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32], Tuple[int]]]:
         return self.dict_roi_coords.get(app_key)
-    def getDictROICoordsRegistered(self, app_key: str) -> Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32], Tuple[int]]]:
+    def getDictROICoordsRegistered(self, app_key: AppKeys) -> Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32], Tuple[int]]]:
         return self.dict_roi_coords_reg.get(app_key)
         
     "Tiff data"
@@ -190,6 +192,9 @@ class DataManager:
     
     def getDictROIImage(self, app_key: AppKeys) -> Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]:
         return self.dict_im_roi.get(app_key)
+    
+    def getDictROIImageRegistered(self, app_key: AppKeys) -> Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]:
+        return self.dict_im_roi_reg.get(app_key)
     
     def getTransformParameters(self, app_key: AppKeys) -> elastixParameterObject:
         return self.dict_transform_parameters.get(app_key)

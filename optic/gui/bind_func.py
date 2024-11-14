@@ -55,6 +55,22 @@ def bindFuncViewMouseEvent(
     
     q_view.mousePressEvent = onViewPressed
 
+# -> makeWidgetView, mousePressEvent
+def bindFuncViewMouseEventWithTracking(
+    q_view: 'QGraphicsView', 
+    view_control: 'ViewControl', 
+    table_control: 'TableControl',
+    app_key: AppKeys,
+    app_key_sec: AppKeys,
+) -> None:
+    def onViewPressed(event) -> None:
+        view_control.mousePressEvent(event)
+        roi_selected_id = view_control.control_manager.getSharedAttr(view_control.app_key, 'roi_selected_id')
+        table_control.updateSelectedROI(roi_selected_id)
+        table_control.q_table.setFocus()
+    
+    q_view.mousePressEvent = onViewPressed
+
 # -> makeWidgetView, mouseMoveEvent
 def bindFuncViewMouseEventForTIFF(
     q_view: 'QGraphicsView',
@@ -259,6 +275,18 @@ def bindFuncButtonRunImageNormalization(
     q_button.clicked.connect(_bindFuncButtonRunImageNormalization)
 
 # -> processing_image_layouts.makeLayoutFallRegistration
+def bindFuncCheckboxShowMatchedROI(
+    q_checkbox: 'QCheckBox',
+    view_controls: Dict[AppKeys, ViewControl]
+) -> None:
+    def onVisibilityChanged(state: int) -> None:
+        is_visible = (state == Qt.Checked)
+        for view_control in view_controls.values():
+            view_control.setShowROIMatch(is_visible)
+            view_control.updateView()
+    q_checkbox.stateChanged.connect(onVisibilityChanged)
+
+# -> processing_image_layouts.makeLayoutFallRegistration
 def bindFuncCheckboxShowRegisteredBGImage(
     q_checkbox: 'QCheckBox',
     view_controls: Dict[AppKeys, ViewControl]
@@ -324,7 +352,7 @@ def bindFuncButtonRunElastixForFall(
             dict_im_bg_reg_mov[key_im] = applySingleTransform(data_manager.getDictBackgroundImage(app_key_sec).get(key_im), transform_parameters)
         data_manager.dict_im_bg_reg[app_key_sec] = dict_im_bg_reg_mov
         # ROI image
-        img_roi_mov = data_manager.getDictROIImage(app_key_sec).get("raw")
+        img_roi_mov = data_manager.getDictROIImage(app_key_sec).get("raw").copy()
         img_roi_mov_reg = applySingleTransform(img_roi_mov, transform_parameters)
         data_manager.dict_im_roi[app_key_sec]["reg"] = img_roi_mov_reg
         # ROI coordinates

@@ -11,7 +11,7 @@ def drawAllROIs(
         pixmap: QPixmap, 
         data_manager: DataManager, 
         control_manager: ControlManager, 
-        app_key: str
+        app_key: AppKeys
         ) -> None:
     painter = QPainter(pixmap)
     painter.setRenderHint(QPainter.Antialiasing)
@@ -31,8 +31,8 @@ def drawAllROIsWithTracking(
         pixmap: QPixmap, 
         data_manager: DataManager, 
         control_manager: ControlManager, 
-        app_key_pri: str,
-        app_key_sec: str,
+        app_key_pri: AppKeys,
+        app_key_sec: AppKeys,
         ) -> None:
     painter = QPainter(pixmap)
     painter.setRenderHint(QPainter.Antialiasing)
@@ -49,13 +49,18 @@ def drawAllROIsWithTracking(
     
     highlightROISelected(view_control, painter, data_manager, control_manager, app_key_pri)
     # draw contour of selected ROI of "sec"
-    try:
-        roiId_match = control_manager.getSharedAttr(app_key_pri, "roi_match_id")
-        view_control_sec = control_manager.view_controls[app_key_sec]
-        dict_roi_coords_single = dict_roi_coords[roiId_match]
-        drawROIContour(view_control_sec, painter, dict_roi_coords_single, roiId_match)
-    except KeyError:
-        pass
+    if view_control.show_roi_match:
+        try:
+            roiId_match = control_manager.getSharedAttr(app_key_pri, "roi_match_id")
+            view_control_sec = control_manager.view_controls[app_key_sec]
+            if view_control_sec.show_reg_im_roi:
+                dict_roi_coords_sec = data_manager.getDictROICoordsRegistered(app_key_sec)
+            else:
+                dict_roi_coords_sec = data_manager.getDictROICoords(app_key_sec)
+            dict_roi_coords_sec_single = dict_roi_coords_sec[roiId_match]
+            drawROIContour(view_control_sec, painter, dict_roi_coords_sec_single, roiId_match)
+        except KeyError:
+            pass
 
     painter.end()
 
@@ -99,7 +104,7 @@ def highlightROISelected(
         painter: QPainter, 
         data_manager: DataManager, 
         control_manager: ControlManager, 
-        app_key: str
+        app_key: AppKeys
         ) -> None:
     ROISelectedId = control_manager.getSharedAttr(app_key, "roi_selected_id")
     if ROISelectedId is not None:
