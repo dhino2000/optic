@@ -17,7 +17,7 @@ def drawAllROIs(
     painter.setRenderHint(QPainter.Antialiasing)
     roi_display = control_manager.getSharedAttr(app_key, "roi_display")
     
-    dict_roi_coords = data_manager.getROICoords(app_key)
+    dict_roi_coords = data_manager.getDictROICoords(app_key)
     for roiId, dict_roi_coords_single in dict_roi_coords.items():
         if roi_display[roiId]:
             drawROI(view_control, painter, dict_roi_coords_single, roiId)
@@ -38,7 +38,7 @@ def drawAllROIsWithTracking(
     painter.setRenderHint(QPainter.Antialiasing)
     roi_display = control_manager.getSharedAttr(app_key_pri, "roi_display")
     
-    dict_roi_coords = data_manager.getROICoords(app_key_pri)
+    dict_roi_coords = data_manager.getDictROICoords(app_key_pri)
     for roiId, dict_roi_coords_single in dict_roi_coords.items():
         if roi_display[roiId]:
             drawROI(view_control, painter, dict_roi_coords_single, roiId)

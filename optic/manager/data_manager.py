@@ -122,9 +122,9 @@ class DataManager:
     def getNChannels(self, app_key: AppKeys) -> int:
         return self.dict_Fall[app_key]["ops"]["nchannels"].flatten()[0]
     # get ROI coordinates
-    def getROICoords(self, app_key: AppKeys) -> Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32], Tuple[int]]]:
+    def getDictROICoords(self, app_key: AppKeys) -> Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32], Tuple[int]]]:
         return self.dict_roi_coords.get(app_key)
-    def getROICoordsRegistered(self, app_key: str) -> Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32], Tuple[int]]]:
+    def getDictROICoordsRegistered(self, app_key: str) -> Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32], Tuple[int]]]:
         return self.dict_roi_coords_reg.get(app_key)
         
     "Tiff data"
