@@ -50,8 +50,8 @@ class ElastixParamsConfigDialog(QDialog):
         layout_params = QGridLayout()
         for i, (key_param, value_param) in enumerate(self.elastix_params[elastix_method].items()):
             key_label = f"{key_param}_{elastix_method}"
-            row = i % 7
-            column = i // 7
+            row = i // 4
+            column = i % 4
             layout_params.addLayout(makeLayoutLineEditLabel(self.widget_manager, key_label, key_label, key_param, text_set=str(value_param)), row, column)
         layout.addLayout(layout_params)
         return layout

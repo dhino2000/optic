@@ -92,6 +92,7 @@ def drawROIContour(
     xpix_contour, ypix_contour = getROIContour(xpix, ypix)
     color = view_control.getROIColor(roiId)
     opacity = view_control.getROIOpacity()
+    print("contour id", roiId)
     
     pen = QPen(QColor(*color, opacity))
     painter.setPen(pen)

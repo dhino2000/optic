@@ -121,6 +121,18 @@ def runStackRegistration(
     img_stack_reg = applyStackTransform(img_stack, dict_transform_parameters)
     return img_stack_reg
 
+# get inversed transform parameters for point registration
+def getInverseTransformParameters(transform_parameters: elastixParameterObject) -> elastixParameterObject:
+    # 変換パラメータを逆にして適用
+    parameter_map = transform_parameters.GetParameterMap(0)
+    values = [float(v) for v in parameter_map["TransformParameters"][0].split()]
+    parameter_map["TransformParameters"] = (" ".join(map(str, [-v for v in values])),)
+    
+    inverse_transform_parameters = elastixParameterObject.New()
+    inverse_transform_parameters.SetParameterMap(parameter_map)
+    
+    return inverse_transform_parameters
+
 # generate point's coordination file for elastix registration
 def generateTmpTextforRegistration(coords: np.ndarray[np.uint8, Tuple[int, int]], path_dst: str):
     np.savetxt(path_dst, coords, fmt = "%.5f")
@@ -135,6 +147,11 @@ def generateTmpTextforRegistration(coords: np.ndarray[np.uint8, Tuple[int, int]]
         f.writelines(l)
 
 # apply transform parameters to points
+"""
+WARNING!!!
+point transform is only fixed -> moving
+so, transform parameters should be inversed
+"""
 def applyPointTransform(
     img_mov: np.ndarray[np.uint8, Tuple[int, int]], 
     transform_parameters: elastixParameterObject, 
@@ -147,11 +164,14 @@ def applyPointTransform(
     img_mov = itk.image_view_from_array(img_mov)
 
     generateTmpTextforRegistration(points, path_txt)
+    transform_parameters_inversed = getInverseTransformParameters(transform_parameters)
     reg = transformix_filter(
         img_mov,
-        transform_parameters,
-        moving_point_set_file_name=path_txt,
+        transform_parameters_inversed,
+        fixed_point_set_file_name=path_txt,
         output_directory="",
+        log_to_console=True,
+        log_to_file=True,
     )
 
     points_reg = np.loadtxt('outputpoints.txt', dtype='str') # hardcoded, need to change
