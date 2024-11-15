@@ -11,6 +11,8 @@ from matplotlib.backend_bases import Event
 from PyQt5.QtWidgets import QPushButton, QWidget, QLineEdit, QTableWidget, QButtonGroup, QCheckBox, QGraphicsView, QSlider, QMessageBox
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 import numpy as np
+import os
+import shutil
 
 """
 This module uses the following type annotations:
@@ -330,8 +332,12 @@ def bindFuncButtonRunElastixForFall(
         app_key: str,
         app_key_sec: str,
         combobox_elastix_method: QComboBox,
+        path_txt: str="points_tmp.txt",
+        output_directory: str="./elastix"
 ) -> None:
     def _runElastix():
+        os.makedirs(output_directory, exist_ok=True)
+
         elastix_method = combobox_elastix_method.currentText()
         print(f"{elastix_method} transform")
         dict_params = config_manager.json_config.get("elastix_params")[elastix_method]
@@ -343,27 +349,29 @@ def bindFuncButtonRunElastixForFall(
         img_type_sec = control_manager.view_controls[app_key_sec].getBackgroundImageType()
         img_mov = data_manager.getDictBackgroundImage(app_key_sec).get(img_type_sec)
         # run elastix
-        transform_parameters = calculateSingleTransform(img_fix, img_mov, dict_params)
+        transform_parameters = calculateSingleTransform(img_fix, img_mov, dict_params, output_directory)
         data_manager.dict_transform_parameters[app_key] = transform_parameters
         # apply transform parameters to image
         # background image
         dict_im_bg_reg_mov = {}
         for key_im in data_manager.getDictBackgroundImage(app_key_sec).keys():
-            dict_im_bg_reg_mov[key_im] = applySingleTransform(data_manager.getDictBackgroundImage(app_key_sec).get(key_im), transform_parameters)
+            dict_im_bg_reg_mov[key_im] = applySingleTransform(data_manager.getDictBackgroundImage(app_key_sec).get(key_im), transform_parameters, output_directory)
         data_manager.dict_im_bg_reg[app_key_sec] = dict_im_bg_reg_mov
         # ROI image
         img_roi_mov = data_manager.getDictROIImage(app_key_sec).get("all").copy()
-        img_roi_mov_reg = applySingleTransform(img_roi_mov, transform_parameters)
+        img_roi_mov_reg = applySingleTransform(img_roi_mov, transform_parameters, output_directory)
         data_manager.dict_im_roi_reg[app_key_sec]["all"] = img_roi_mov_reg
         # ROI coordinates
-        dict_roi_coords = data_manager.getDictROICoords(app_key_sec)
-        dict_roi_coords_reg = applyDictROICoordsTransform(img_mov, transform_parameters, dict_roi_coords)
-        data_manager.dict_roi_coords_reg[app_key_sec] = dict_roi_coords_reg
+        # dict_roi_coords = data_manager.getDictROICoords(app_key_sec)
+        # dict_roi_coords_reg = applyDictROICoordsTransform(img_fix, img_mov, dict_roi_coords, path_txt, output_directory)
+        # data_manager.dict_roi_coords_reg[app_key_sec] = dict_roi_coords_reg
 
         control_manager.view_controls[app_key].updateView()
         control_manager.view_controls[app_key_sec].updateView()
 
         print("Registration Finished !")
+        # os.remove(path_txt)
+        # shutil.rmtree(output_directory)
 
     q_button.clicked.connect(lambda: _runElastix())
 

@@ -1,6 +1,7 @@
 from __future__ import annotations
 from ..type_definitions import *
 import os
+import glob
 import numpy as np
 import itk
 from itk.elxParameterObjectPython import elastixParameterObject
@@ -15,6 +16,7 @@ def calculateSingleTransform(
     img_fix: np.ndarray[np.uint8, Tuple[int, int]], 
     img_mov: np.ndarray[np.uint8, Tuple[int, int]], 
     dict_params: Dict[str, Any], 
+    output_directory: str,
 ) -> elastixParameterObject:
     
     img_fix = np.ascontiguousarray(img_fix)
@@ -30,7 +32,7 @@ def calculateSingleTransform(
         img_fix, 
         img_mov, 
         parameter_object, 
-        output_directory=""
+        output_directory=output_directory
         )
     return transform_parameters
 
@@ -38,6 +40,7 @@ def calculateSingleTransform(
 def applySingleTransform(
     img_mov: np.ndarray[np.uint8, Tuple[int, int]], 
     transform_parameters: elastixParameterObject, 
+    output_directory: str,
 ) -> np.ndarray[np.uint8, Tuple[int, int]]:
     
     img_mov = np.ascontiguousarray(img_mov)
@@ -46,7 +49,7 @@ def applySingleTransform(
     img_reg = transformix_filter(
         img_mov, 
         transform_parameters, 
-        output_directory=""
+        output_directory=output_directory
         )
     img_reg = itk.array_from_image(img_reg)
     return img_reg
@@ -56,9 +59,10 @@ def runSingleRegistration(
     img_fix: np.ndarray[np.uint8, Tuple[int, int]], 
     img_mov: np.ndarray[np.uint8, Tuple[int, int]], 
     dict_params: Dict[str, Any],
+    output_directory: str,
 ) -> np.ndarray[np.uint8, Tuple[int, int]]:
-    transform_parameters = calculateStackTransform(img_fix, img_mov, dict_params)
-    img_reg = applyStackTransform(img_mov, transform_parameters)
+    transform_parameters = calculateStackTransform(img_fix, img_mov, dict_params, output_directory)
+    img_reg = applyStackTransform(img_mov, transform_parameters, output_directory)
     return img_reg
 
 # calculate transform parameters from image stack
@@ -68,6 +72,7 @@ def calculateStackTransform(
     channel_ref: int,
     idx_ref: int,
     axis: Literal["t", "z"],
+    output_directory: str,
 ) -> Dict[str, elastixParameterObject]:
     dict_transform_parameters = {}
 
@@ -76,7 +81,7 @@ def calculateStackTransform(
             img_fix = img_stack[:, :, channel_ref, z, idx_ref]
             for t in range(img_stack.shape[4]):
                 img_mov = img_stack[:, :, channel_ref, z, t]
-                transform_parameters = calculateSingleTransform(img_fix, img_mov, dict_params)
+                transform_parameters = calculateSingleTransform(img_fix, img_mov, dict_params, output_directory)
                 dict_transform_parameters[f"z{z}_t{t}"] = transform_parameters
                 print("calculating", "z:", z, "t:", t)
     elif axis == "z": # register z-axis
@@ -84,7 +89,7 @@ def calculateStackTransform(
             img_fix = img_stack[:, :, channel_ref, idx_ref, t]
             for z in range(img_stack.shape[3]):
                 img_mov = img_stack[:, :, channel_ref, z, t]
-                transform_parameters = calculateSingleTransform(img_fix, img_mov, dict_params)
+                transform_parameters = calculateSingleTransform(img_fix, img_mov, dict_params, output_directory)
                 dict_transform_parameters[f"z{z}_t{t}"] = transform_parameters
                 print("calculating", "z:", z, "t:", t)
     print("transform parameters calculation completed")
@@ -94,6 +99,7 @@ def calculateStackTransform(
 def applyStackTransform(
     img_stack: np.ndarray[np.uint8, Tuple[int, int, int, int, int]], # XYCZT
     dict_transform_parameters: Dict[str, elastixParameterObject],
+    output_directory: str,
 ) -> np.ndarray[np.uint8, Tuple[int, int]]:
     img_stack_reg = np.zeros_like(img_stack)
     num_c, num_z, num_t = img_stack.shape[2], img_stack.shape[3], img_stack.shape[4]
@@ -102,7 +108,7 @@ def applyStackTransform(
             for t in range(num_t):
                 transform_parameters = dict_transform_parameters[f"z{z}_t{t}"]
                 img_mov = img_stack[:, :, c, z, t]
-                img_reg = applySingleTransform(img_mov, transform_parameters)
+                img_reg = applySingleTransform(img_mov, transform_parameters, output_directory)
                 img_stack_reg[:, :, c, z, t] = img_reg
                 print("applying", "c", c, "z:", z, "t:", t)
     print("image transformation completed")
@@ -115,23 +121,11 @@ def runStackRegistration(
     channel_ref: int,
     idx_ref: int,
     axis: Literal["t", "z"],
-    display_iters: int = 10
+    output_directory: str,
 ) -> np.ndarray[np.uint8, Tuple[int, int]]:
-    dict_transform_parameters = calculateStackTransform(img_stack, dict_params, channel_ref, idx_ref, axis, display_iters)
-    img_stack_reg = applyStackTransform(img_stack, dict_transform_parameters)
+    dict_transform_parameters = calculateStackTransform(img_stack, dict_params, channel_ref, idx_ref, axis, output_directory)
+    img_stack_reg = applyStackTransform(img_stack, dict_transform_parameters, output_directory)
     return img_stack_reg
-
-# get inversed transform parameters for point registration
-def getInverseTransformParameters(transform_parameters: elastixParameterObject) -> elastixParameterObject:
-    # 変換パラメータを逆にして適用
-    parameter_map = transform_parameters.GetParameterMap(0)
-    values = [float(v) for v in parameter_map["TransformParameters"][0].split()]
-    parameter_map["TransformParameters"] = (" ".join(map(str, [-v for v in values])),)
-    
-    inverse_transform_parameters = elastixParameterObject.New()
-    inverse_transform_parameters.SetParameterMap(parameter_map)
-    
-    return inverse_transform_parameters
 
 # generate point's coordination file for elastix registration
 def generateTmpTextforRegistration(coords: np.ndarray[np.uint8, Tuple[int, int]], path_dst: str):
@@ -153,28 +147,47 @@ point transform is only fixed -> moving
 so, transform parameters should be inversed
 """
 def applyPointTransform(
+    img_fix: np.ndarray[np.uint8, Tuple[int, int]],
     img_mov: np.ndarray[np.uint8, Tuple[int, int]], 
-    transform_parameters: elastixParameterObject, 
     points: np.ndarray[np.int32, Tuple[int, int]],
-    path_txt: str= "./points_tmp.txt",
-
+    path_txt: str,
+    output_directory: str
 ) -> np.ndarray[np.int32, Tuple[int, int]]:
     
     img_mov = np.ascontiguousarray(img_mov)
     img_mov = itk.image_view_from_array(img_mov)
-
+    # Generate a temporary text file for registration
     generateTmpTextforRegistration(points, path_txt)
-    transform_parameters_inversed = getInverseTransformParameters(transform_parameters)
-    reg = transformix_filter(
-        img_mov,
-        transform_parameters_inversed,
-        fixed_point_set_file_name=path_txt,
-        output_directory="",
+
+    # load the last transform parameters file
+    transform_parameters_file = sorted(glob.glob(os.path.join(output_directory,"TransformParameters.*.txt")))[-1]
+
+    inverse_parameter_object = ... # ellipsis
+    result_inverse_image, transform_parameters_inverse = elastix_registration_method(
+        img_fix, img_fix, #  use fixed image for fixed and moving
+        parameter_object=inverse_parameter_object, 
+        output_directory=output_directory,
+        initial_transform_parameter_file_name=transform_parameters_file,
         log_to_console=True,
         log_to_file=True,
-    )
+        )
+    # The result_inverse_transform_parameters should be your inverse transformation but it has always as
+    #  initial transform the result_transform_parameters. It should be set to NoInitialTransform. 
 
-    points_reg = np.loadtxt('outputpoints.txt', dtype='str') # hardcoded, need to change
+    # Set the first transform parameters InitialTransformParametersFileName to NoInitialTransform
+    transform_parameters_inverse.SetParameter(0,"InitialTransformParametersFileName", "NoInitialTransform")
+
+    # Use the transformation in transformix
+
+    result_point_set = transformix_filter(
+        img_mov, 
+        transform_parameters_inverse,
+        fixed_point_set_file_name=path_txt,
+        output_directory=output_directory)
+
+    path_txt_output = os.path.join(output_directory, "outputpoints.txt")
+
+    points_reg = np.loadtxt(path_txt_output, dtype='str') # hardcoded, need to change
     if points_reg.ndim == 2: # for xy coords
         points_reg = points_reg[:,27:29].astype('float64').astype("uint32")
     elif points_reg.ndim == 1: # for med coords
@@ -184,10 +197,11 @@ def applyPointTransform(
 
 # apply transform parameters to dict_roi_coords
 def applyDictROICoordsTransform(
+    img_fix: np.ndarray[np.uint8, Tuple[int, int]],
     img_mov: np.ndarray[np.uint8, Tuple[int, int]], 
-    transform_parameters: elastixParameterObject, 
     dict_roi_coords: Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32], Tuple[int]]],
-    path_txt: str= "./points_tmp.txt",
+    path_txt: str,
+    output_directory: str
 ) -> Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32], Tuple[int]]]:
     dict_roi_coords_reg = {}
     x_max, x_min, y_max, y_min = img_mov.shape[1], 0, img_mov.shape[0], 0
@@ -199,8 +213,8 @@ def applyDictROICoordsTransform(
         i += 1
         med = np.array([dict_coords["med"]])
         xpix_ypix = np.array([dict_coords["xpix"], dict_coords["ypix"]]).T
-        med_reg = applyPointTransform(img_mov, transform_parameters, med, path_txt)
-        xpix_ypix_reg = applyPointTransform(img_mov, transform_parameters, xpix_ypix, path_txt)
+        med_reg = applyPointTransform(img_fix, img_mov, med, path_txt, output_directory)
+        xpix_ypix_reg = applyPointTransform(img_fix, img_mov, xpix_ypix, path_txt, output_directory)
         # clip the coords
         med_reg = np.clip(med_reg, 0, [x_max, y_max])
         xpix_ypix_reg = np.clip(xpix_ypix_reg, [x_min, y_min], [x_max, y_max])
