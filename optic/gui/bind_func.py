@@ -10,6 +10,7 @@ from matplotlib.axes import Axes
 from matplotlib.backend_bases import Event
 from PyQt5.QtWidgets import QPushButton, QWidget, QLineEdit, QTableWidget, QButtonGroup, QCheckBox, QGraphicsView, QSlider, QMessageBox
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
+from copy import deepcopy
 import numpy as np
 import os
 import shutil
@@ -358,9 +359,11 @@ def bindFuncButtonRunElastixForFall(
             dict_im_bg_reg_mov[key_im] = applySingleTransform(data_manager.getDictBackgroundImage(app_key_sec).get(key_im), transform_parameters, output_directory)
         data_manager.dict_im_bg_reg[app_key_sec] = dict_im_bg_reg_mov
         # ROI image
-        img_roi_mov = data_manager.getDictROIImage(app_key_sec).get("all").copy()
+        img_roi_mov = deepcopy(data_manager.getDictROIImage(app_key_sec).get("all"))
+        val_max = np.max(img_roi_mov)
         img_roi_mov_reg = applySingleTransform(img_roi_mov, transform_parameters, output_directory)
-        data_manager.dict_im_roi_reg[app_key_sec]["all"] = img_roi_mov_reg
+        img_roi_mov_reg_clipped = np.minimum(img_roi_mov_reg, val_max) # avoid making contours of ROIs
+        data_manager.dict_im_roi_reg[app_key_sec]["all"] = img_roi_mov_reg_clipped
         # ROI coordinates
         # dict_roi_coords = data_manager.getDictROICoords(app_key_sec)
         # dict_roi_coords_reg = applyDictROICoordsTransform(img_fix, img_mov, dict_roi_coords, path_txt, output_directory)

@@ -208,7 +208,7 @@ def applyDictROICoordsTransform(
 
     i = 0
     for roi_id, dict_coords in dict_roi_coords.items():
-        if i % 10 == 0:
+        if i % 1 == 0:
             print(f"processing {i}/{len(dict_roi_coords)}")
         i += 1
         med = np.array([dict_coords["med"]])

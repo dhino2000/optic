@@ -53,11 +53,11 @@ class DataManager:
             # Suite2pROITracking
             if config_manager:
                 if config_manager.current_app == "SUITE2P_ROI_TRACKING":
-                    self.dict_im_bg_reg[app_key] = self.dict_im_bg[app_key]
-                    self.dict_roi_coords_reg[app_key] = self.dict_roi_coords[app_key]
-                    self.dict_im_roi_reg[app_key] = self.dict_im_roi[app_key]
+                    self.dict_im_bg_reg[app_key] = getBGImageFromFall(self, app_key)
+                    self.dict_im_roi_reg[app_key] = getROIImageFromFall(self, app_key)
+                    self.dict_roi_coords_reg[app_key] = getROICoordsFromDictFall(dict_Fall)
                     if self.getNChannels(app_key) == 2:
-                        self.dict_im_bg_chan2_reg[app_key] = self.dict_im_bg_chan2[app_key]
+                        self.dict_im_bg_chan2_reg[app_key] = getBGImageChannel2FromFall(self, app_key)
             return True
         except Exception as e:
             return False
