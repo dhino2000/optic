@@ -333,7 +333,7 @@ def bindFuncButtonRunElastixForFall(
         app_key: str,
         app_key_sec: str,
         combobox_elastix_method: QComboBox,
-        path_txt: str="points_tmp.txt",
+        path_points_txt: str="points_tmp.txt",
         output_directory: str="./elastix"
 ) -> None:
     def _runElastix():
@@ -367,10 +367,19 @@ def bindFuncButtonRunElastixForFall(
         img_roi_mov_reg = applySingleTransform(img_roi_mov, transform_parameters, output_directory)
         img_roi_mov_reg_clipped = np.minimum(img_roi_mov_reg, val_max) # avoid making contours of ROIs
         data_manager.dict_im_roi_reg[app_key_sec]["all"] = img_roi_mov_reg_clipped
+        
         # ROI coordinates
-        # dict_roi_coords = data_manager.getDictROICoords(app_key_sec)
-        # dict_roi_coords_reg = applyDictROICoordsTransform(img_fix, img_mov, dict_roi_coords, path_txt, output_directory)
-        # data_manager.dict_roi_coords_reg[app_key_sec] = dict_roi_coords_reg
+        path_transform_parameters_file = os.path.join(output_directory,"TransformParameters.0.txt")
+        dict_roi_coords = data_manager.getDictROICoords(app_key_sec)
+        dict_roi_coords_reg = applyDictROICoordsTransform(
+            img_fix, img_mov, 
+            dict_roi_coords, 
+            data_manager.getParameterMap(app_key),
+            path_transform_parameters_file, 
+            path_points_txt, 
+            output_directory
+            )
+        data_manager.dict_roi_coords_reg[app_key_sec] = dict_roi_coords_reg
 
         control_manager.view_controls[app_key].updateView()
         control_manager.view_controls[app_key_sec].updateView()

@@ -3,10 +3,12 @@ from ..type_definitions import *
 import os
 import glob
 import numpy as np
+import time
 import itk
 from itk.elxParameterObjectPython import elastixParameterObject, mapstringvectorstring
 from itk.itkElastixRegistrationMethodPython import elastix_registration_method
 from itk.itkTransformixFilterPython import transformix_filter
+from itk.ElastixPython import transformix_pointset
 
 """
 preprocessing for elastix registration
@@ -30,7 +32,7 @@ def generateTmpTextforRegistration(
     coords: np.ndarray[np.uint8, Tuple[int, int]], 
     path_dst: str
 ) -> None:
-    np.savetxt(path_dst, coords, fmt = "%.5f")
+    np.savetxt(path_dst, coords, fmt = "%d")
     # Modify the file
     with open(path_dst, 'r') as f:
         l = f.readlines()
@@ -177,50 +179,45 @@ so, transform parameters should be inversed
 def applyPointTransform(
     img_fix: np.ndarray[np.uint8, Tuple[int, int]],
     img_mov: np.ndarray[np.uint8, Tuple[int, int]], 
-    points: np.ndarray[np.int32, Tuple[int, int]],
-    path_txt: str,
+    parameter_object_inverse: elastixParameterObject,
+    path_transform_parameters_file: str,
+    path_points_txt: str,
     output_directory: str
 ) -> np.ndarray[np.int32, Tuple[int, int]]:
-    
+    img_fix = np.ascontiguousarray(img_fix)
     img_mov = np.ascontiguousarray(img_mov)
+    img_fix = itk.image_view_from_array(img_fix)
     img_mov = itk.image_view_from_array(img_mov)
-    # Generate a temporary text file for registration
-    generateTmpTextforRegistration(points, path_txt)
 
-    # load the last transform parameters file
-    transform_parameters_file = sorted(glob.glob(os.path.join(output_directory,"TransformParameters.*.txt")))[-1]
+    parameter_map = parameter_object_inverse.GetParameterMap(0)
+    parameter_map["InitialTransformParametersFileName"] = ["NoInitialTransform"]
+    parameter_object_inverse.SetParameterMap(parameter_map)
 
-    inverse_parameter_object = ... # ellipsis
-    result_inverse_image, transform_parameters_inverse = elastix_registration_method(
-        img_fix, img_fix, #  use fixed image for fixed and moving
-        parameter_object=inverse_parameter_object, 
+    img_res_inverse, transform_parameters_inverse = elastix_registration_method(
+        img_fix, img_fix,
+        parameter_object=parameter_object_inverse, 
         output_directory=output_directory,
-        initial_transform_parameter_file_name=transform_parameters_file,
+        initial_transform_parameter_file_name=path_transform_parameters_file,
         log_to_console=True,
-        log_to_file=True,
-        )
-    # The result_inverse_transform_parameters should be your inverse transformation but it has always as
-    #  initial transform the result_transform_parameters. It should be set to NoInitialTransform. 
+        log_to_file=True
+    )
+    transform_parameters_inverse.SetParameter(0,"InitialTransformParameterFileName", "NoInitialTransform")
 
-    # Set the first transform parameters InitialTransformParametersFileName to NoInitialTransform
-    transform_parameters_inverse.SetParameter(0,"InitialTransformParametersFileName", "NoInitialTransform")
-
-    # Use the transformation in transformix
-
-    result_point_set = transformix_filter(
-        img_mov, 
-        transform_parameters_inverse,
-        fixed_point_set_file_name=path_txt,
-        output_directory=output_directory)
-
-    path_txt_output = os.path.join(output_directory, "outputpoints.txt")
+    result_point_set = transformix_pointset(
+        img_mov, transform_parameters_inverse,
+        fixed_point_set_file_name=path_points_txt,
+        output_directory = output_directory,
+        log_to_console=True,
+        log_to_file=True)
+    
+    path_txt_output  = os.path.join(output_directory, "outputpoints.txt")
 
     points_reg = np.loadtxt(path_txt_output, dtype='str') # hardcoded, need to change
     if points_reg.ndim == 2: # for xy coords
         points_reg = points_reg[:,27:29].astype('float64').astype("uint32")
     elif points_reg.ndim == 1: # for med coords
         points_reg = points_reg[27:29].astype('float64').astype("uint32")
-
+    
     return points_reg
 
 # apply transform parameters to dict_roi_coords
@@ -228,7 +225,9 @@ def applyDictROICoordsTransform(
     img_fix: np.ndarray[np.uint8, Tuple[int, int]],
     img_mov: np.ndarray[np.uint8, Tuple[int, int]], 
     dict_roi_coords: Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32], Tuple[int]]],
-    path_txt: str,
+    parameter_map: mapstringvectorstring,
+    path_transform_parameters_file: str,
+    path_points_txt: str,
     output_directory: str
 ) -> Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32], Tuple[int]]]:
     dict_roi_coords_reg = {}
@@ -241,18 +240,34 @@ def applyDictROICoordsTransform(
         i += 1
         med = np.array([dict_coords["med"]])
         xpix_ypix = np.array([dict_coords["xpix"], dict_coords["ypix"]]).T
-        # print("med transforrm")
-        # med_reg = applyPointTransform(img_fix, img_mov, med, path_txt, output_directory)
-        print("med transform finish")
+
         print("xpix_ypix transform")
-        xpix_ypix_reg = applyPointTransform(img_fix, img_mov, xpix_ypix, path_txt, output_directory)
+        generateTmpTextforRegistration(xpix_ypix, path_points_txt)
+        xpix_ypix_reg = applyPointTransform(
+            img_fix, img_mov, 
+            makeElastixParameterObjectInversed(parameter_map),
+            path_transform_parameters_file, 
+            path_points_txt, 
+            output_directory
+            )
         print("xpix_ypix transform finish")
+
+        print("med transform")
+        generateTmpTextforRegistration(med, path_points_txt)
+        med_reg = applyPointTransform(
+            img_fix, img_mov, 
+            makeElastixParameterObjectInversed(parameter_map),
+            path_transform_parameters_file, 
+            path_points_txt, 
+            output_directory
+            )
+        print("med transform finish")
+
         # clip the coords
-        # med_reg = np.clip(med_reg, 0, [x_max, y_max])
+        med_reg = np.clip(med_reg, 0, [x_max, y_max])
         xpix_ypix_reg = np.clip(xpix_ypix_reg, [x_min, y_min], [x_max, y_max])
 
-        med_reg = med
         dict_roi_coords_reg[roi_id] = {"xpix": xpix_ypix_reg[:,0], "ypix": xpix_ypix_reg[:, 1], "med": med_reg}
-    os.remove(path_txt)
-    os.remove('outputpoints.txt') # hardcoded, need to change
+    # os.remove(path_points_txt)
+    # os.remove('outputpoints.txt') # hardcoded, need to change
     return dict_roi_coords_reg
