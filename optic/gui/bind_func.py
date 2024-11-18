@@ -342,6 +342,9 @@ def bindFuncButtonRunElastixForFall(
         elastix_method = combobox_elastix_method.currentText()
         print(f"{elastix_method} transform")
         dict_params = config_manager.json_config.get("elastix_params")[elastix_method]
+        data_manager.dict_parameter_map[app_key] = convertDictToElastixFormat(dict_params)
+        parameter_object = makeElastixParameterObject(data_manager.getParameterMap(app_key))
+        
         print("Elastix Parameters", dict_params)
 
         # get fixed image and moving image, (meanImg, meanImgE, max_proj, Vcorr)
@@ -350,7 +353,7 @@ def bindFuncButtonRunElastixForFall(
         img_type_sec = control_manager.view_controls[app_key_sec].getBackgroundImageType()
         img_mov = data_manager.getDictBackgroundImage(app_key_sec).get(img_type_sec)
         # run elastix
-        transform_parameters = calculateSingleTransform(img_fix, img_mov, dict_params, output_directory)
+        transform_parameters = calculateSingleTransform(img_fix, img_mov, parameter_object, output_directory)
         data_manager.dict_transform_parameters[app_key] = transform_parameters
         # apply transform parameters to image
         # background image

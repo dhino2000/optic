@@ -4,18 +4,63 @@ import os
 import glob
 import numpy as np
 import itk
-from itk.elxParameterObjectPython import elastixParameterObject
+from itk.elxParameterObjectPython import elastixParameterObject, mapstringvectorstring
 from itk.itkElastixRegistrationMethodPython import elastix_registration_method
 from itk.itkTransformixFilterPython import transformix_filter
 
-def convertDictToElastixFormat(dict_params: Dict[str, Any]) -> Dict[str, Tuple[str]]:
+"""
+preprocessing for elastix registration
+"""
+# convert params dictionary to elastix format
+def convertDictToElastixFormat(
+    dict_params: Dict[str, Any]
+) -> Dict[str, Tuple[str]]:
     return {k: tuple(v) if isinstance(v, list) else (str(v),) for k, v in dict_params.items()}
+
+# make elastix parameter object
+def makeElastixParameterObject(
+    parameter_map: mapstringvectorstring
+) -> elastixParameterObject:
+    parameter_object = elastixParameterObject.New()
+    parameter_object.AddParameterMap(parameter_map)
+    return parameter_object
+
+# generate point's coordination file for elastix registration
+def generateTmpTextforRegistration(
+    coords: np.ndarray[np.uint8, Tuple[int, int]], 
+    path_dst: str
+) -> None:
+    np.savetxt(path_dst, coords, fmt = "%.5f")
+    # Modify the file
+    with open(path_dst, 'r') as f:
+        l = f.readlines()
+
+    l.insert(0, 'point\n')
+    l.insert(1, f'{len(coords)}\n')
+
+    with open(path_dst, 'w') as f:
+        f.writelines(l)
+
+# make inversed elastix parameter object
+def makeElastixParameterObjectInversed(
+    parameter_map: mapstringvectorstring,
+) -> elastixParameterObject:
+    inverse_parameter_object = elastixParameterObject.New() # your parameter object for backward registration. 
+    parameter_map["Metric"] = ["DisplacementMagnitudePenalty"]
+    parameter_map["HowToCombineTransforms"] = ["Compose"]
+    inverse_parameter_object.AddParameterMap(parameter_map)
+    return inverse_parameter_object
+    
+    
+"""
+elastix registration
+"""
 
 # calculate transform parameters
 def calculateSingleTransform(
     img_fix: np.ndarray[np.uint8, Tuple[int, int]], 
     img_mov: np.ndarray[np.uint8, Tuple[int, int]], 
-    dict_params: Dict[str, Any], 
+    parameter_object: elastixParameterObject, 
     output_directory: str,
 ) -> elastixParameterObject:
     
@@ -23,10 +68,6 @@ def calculateSingleTransform(
     img_mov = np.ascontiguousarray(img_mov)
     img_fix = itk.image_view_from_array(img_fix)
     img_mov = itk.image_view_from_array(img_mov)
-
-    parameter_map = convertDictToElastixFormat(dict_params)
-    parameter_object = elastixParameterObject.New()
-    parameter_object.AddParameterMap(parameter_map)
 
     img_reg, transform_parameters = elastix_registration_method(
         img_fix, 
@@ -127,19 +168,6 @@ def runStackRegistration(
     img_stack_reg = applyStackTransform(img_stack, dict_transform_parameters, output_directory)
     return img_stack_reg
 
-# generate point's coordination file for elastix registration
-def generateTmpTextforRegistration(coords: np.ndarray[np.uint8, Tuple[int, int]], path_dst: str):
-    np.savetxt(path_dst, coords, fmt = "%.5f")
-    # Modify the file
-    with open(path_dst, 'r') as f:
-        l = f.readlines()
-
-    l.insert(0, 'point\n')
-    l.insert(1, f'{len(coords)}\n')
-
-    with open(path_dst, 'w') as f:
-        f.writelines(l)
-
 # apply transform parameters to points
 """
 WARNING!!!
@@ -213,12 +241,17 @@ def applyDictROICoordsTransform(
         i += 1
         med = np.array([dict_coords["med"]])
         xpix_ypix = np.array([dict_coords["xpix"], dict_coords["ypix"]]).T
-        med_reg = applyPointTransform(img_fix, img_mov, med, path_txt, output_directory)
+        # print("med transforrm")
+        # med_reg = applyPointTransform(img_fix, img_mov, med, path_txt, output_directory)
+        print("med transform finish")
+        print("xpix_ypix transform")
         xpix_ypix_reg = applyPointTransform(img_fix, img_mov, xpix_ypix, path_txt, output_directory)
+        print("xpix_ypix transform finish")
         # clip the coords
-        med_reg = np.clip(med_reg, 0, [x_max, y_max])
+        # med_reg = np.clip(med_reg, 0, [x_max, y_max])
         xpix_ypix_reg = np.clip(xpix_ypix_reg, [x_min, y_min], [x_max, y_max])
 
+        med_reg = med
         dict_roi_coords_reg[roi_id] = {"xpix": xpix_ypix_reg[:,0], "ypix": xpix_ypix_reg[:, 1], "med": med_reg}
     os.remove(path_txt)
     os.remove('outputpoints.txt') # hardcoded, need to change

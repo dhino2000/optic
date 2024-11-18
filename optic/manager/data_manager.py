@@ -2,7 +2,7 @@ from __future__ import annotations
 from ..type_definitions import *
 from collections import defaultdict
 import numpy as np
-from itk.elxParameterObjectPython import elastixParameterObject
+from itk.elxParameterObjectPython import elastixParameterObject, mapstringvectorstring
 from ..preprocessing.preprocessing_image import getBGImageFromFall, getBGImageChannel2FromFall, getROIImageFromFall
 from ..preprocessing.preprocessing_fall import getROICoordsFromDictFall
 from ..config.constants import Extension
@@ -26,7 +26,8 @@ class DataManager:
         # for ROI tracking
         self.dict_im_bg_reg:            Dict[AppKeys, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
         self.dict_im_bg_chan2_reg:      Dict[AppKeys, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
-        # Image Registration parameters
+        # Elastix
+        self.dict_parameter_map:        Dict[AppKeys, mapstringvectorstring] = {}
         self.dict_transform_parameters: Dict[AppKeys, elastixParameterObject] = {}
 
         # ROI image
@@ -196,6 +197,9 @@ class DataManager:
     def getDictROIImageRegistered(self, app_key: AppKeys) -> Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]:
         return self.dict_im_roi_reg.get(app_key)
     
+    # Elastix
+    def getParameterMap(self, app_key: AppKeys) -> mapstringvectorstring:
+        return self.dict_parameter_map.get(app_key)
     def getTransformParameters(self, app_key: AppKeys) -> elastixParameterObject:
         return self.dict_transform_parameters.get(app_key)
     
