@@ -120,7 +120,7 @@ def makeLayoutStackRegistration(
     layout_run.addWidget(widget_manager.makeWidgetButton(key=key_button_run_t, label="Run Elastix (t-axis)"))
     layout_run.addWidget(widget_manager.makeWidgetButton(key=key_button_run_z, label="Run Elastix (z-axis)"))
     layout_checkbox = QHBoxLayout()
-    layout_checkbox.addWidget(widget_manager.makeWidgetCheckBox(key=key_checkbox_show_reg, label="Show Registered Image"))
+    layout_checkbox.addWidget(widget_manager.makeWidgetCheckBox(key=key_checkbox_show_reg, label="Show Registered Image", checked=True))
 
     layout.addLayout(layout_elastix)
     layout.addLayout(layout_ref_plane)

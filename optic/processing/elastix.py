@@ -108,17 +108,17 @@ def applySingleTransform(
 def runSingleRegistration(
     img_fix: np.ndarray[np.uint8, Tuple[int, int]], 
     img_mov: np.ndarray[np.uint8, Tuple[int, int]], 
-    dict_params: Dict[str, Any],
+    parameter_object: elastixParameterObject, 
     output_directory: str,
 ) -> np.ndarray[np.uint8, Tuple[int, int]]:
-    transform_parameters = calculateStackTransform(img_fix, img_mov, dict_params, output_directory)
-    img_reg = applyStackTransform(img_mov, transform_parameters, output_directory)
+    transform_parameters = calculateSingleTransform(img_fix, img_mov, parameter_object, output_directory)
+    img_reg = applySingleTransform(img_mov, transform_parameters, output_directory)
     return img_reg
 
 # calculate transform parameters from image stack
 def calculateStackTransform(
     img_stack: np.ndarray[np.uint8, Tuple[int, int, int, int, int]], # XYCZT
-    dict_params: Dict[str, Any],
+    parameter_object: elastixParameterObject, 
     channel_ref: int,
     idx_ref: int,
     axis: Literal["t", "z"],
@@ -131,7 +131,7 @@ def calculateStackTransform(
             img_fix = img_stack[:, :, channel_ref, z, idx_ref]
             for t in range(img_stack.shape[4]):
                 img_mov = img_stack[:, :, channel_ref, z, t]
-                transform_parameters = calculateSingleTransform(img_fix, img_mov, dict_params, output_directory)
+                transform_parameters = calculateSingleTransform(img_fix, img_mov, parameter_object, output_directory)
                 dict_transform_parameters[f"z{z}_t{t}"] = transform_parameters
                 print("calculating", "z:", z, "t:", t)
     elif axis == "z": # register z-axis
@@ -139,7 +139,7 @@ def calculateStackTransform(
             img_fix = img_stack[:, :, channel_ref, idx_ref, t]
             for z in range(img_stack.shape[3]):
                 img_mov = img_stack[:, :, channel_ref, z, t]
-                transform_parameters = calculateSingleTransform(img_fix, img_mov, dict_params, output_directory)
+                transform_parameters = calculateSingleTransform(img_fix, img_mov, parameter_object, output_directory)
                 dict_transform_parameters[f"z{z}_t{t}"] = transform_parameters
                 print("calculating", "z:", z, "t:", t)
     print("transform parameters calculation completed")
@@ -167,13 +167,13 @@ def applyStackTransform(
 # run elastix registration for image stack
 def runStackRegistration(
     img_stack: np.ndarray[np.uint8, Tuple[int, int, int, int, int]], # XYCZT
-    dict_params: Dict[str, Any],
+    parameter_object: elastixParameterObject,
     channel_ref: int,
     idx_ref: int,
     axis: Literal["t", "z"],
     output_directory: str,
 ) -> np.ndarray[np.uint8, Tuple[int, int]]:
-    dict_transform_parameters = calculateStackTransform(img_stack, dict_params, channel_ref, idx_ref, axis, output_directory)
+    dict_transform_parameters = calculateStackTransform(img_stack, parameter_object, channel_ref, idx_ref, axis, output_directory)
     img_stack_reg = applyStackTransform(img_stack, dict_transform_parameters, output_directory)
     return img_stack_reg
 

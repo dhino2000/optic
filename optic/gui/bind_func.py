@@ -400,6 +400,7 @@ def bindFuncButtonRunElastixForSingleStack(
         combobox_channel_ref: QComboBox,
         combobox_idx_ref: QComboBox,
         axis: Literal["t", "z"],
+        output_directory: str="./elastix"
 ) -> None:
     def _runElastix():
         elastix_method = combobox_elastix_method.currentText()
@@ -410,10 +411,12 @@ def bindFuncButtonRunElastixForSingleStack(
         print(f"Reference {axis} plane:", idx_ref)
         img_stack = data_manager.getTiffStack(app_key)
         dict_params = config_manager.json_config.get("elastix_params")[elastix_method]
+        data_manager.dict_parameter_map[app_key] = convertDictToElastixFormat(dict_params)
+        parameter_object = makeElastixParameterObject(data_manager.getParameterMap(app_key))
         print("Elastix Parameters", dict_params)
-        img_stack_reg = runStackRegistration(img_stack, dict_params, channel_ref, idx_ref, axis, display_iters=10)
+        img_stack_reg = runStackRegistration(img_stack, parameter_object, channel_ref, idx_ref, axis, output_directory)
         data_manager.dict_tiff_reg[app_key] = img_stack_reg
-        print("Registration Fnisihed !")
+        print("Registration Finished !")
     q_button.clicked.connect(lambda: _runElastix())
 
 # -> processing_image_layouts.makeLayoutStackRegistration
