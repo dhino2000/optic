@@ -14,7 +14,6 @@ if TYPE_CHECKING:
     from .config.table_columns import TableColumns
     from .config.key_function_map import KeyFunctionMap
     from .config.json_config import JsonConfig
-    from .config.constants import *
     from typing import List, Tuple, Dict, Optional, Callable, Literal, Any, Union
     from PyQt5.QtWidgets import *
     from PyQt5.QtCore import *

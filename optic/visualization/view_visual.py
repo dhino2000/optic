@@ -3,7 +3,7 @@ from ..type_definitions import *
 from PyQt5.QtGui import QPainter, QPen, QColor, QImage, QPixmap
 from PyQt5.QtCore import Qt
 import numpy as np
-from ..config.constants import ChannelKeys, RectangleColors, DrawingWidth
+from ..config.constants import ChannelKeys, PenColors, PenWidth
 from .view_visual_roi import drawAllROIs, drawAllROIsWithTracking, drawROI, highlightROISelected, findClosestROI, shouldSkipROI
 from .view_visual_rectangle import drawRectangle, drawRectangleIfInRange
 
@@ -201,8 +201,8 @@ def updateViewTiff(
         new_rect = drawRectangleIfInRange(
             q_scene, current_z, current_t,
             x_min, x_max, y_min, y_max, z_min, z_max, t_min, t_max,
-            color=RectangleColors.DRAG,
-            width=DrawingWidth.RECTANGLE,
+            color=PenColors.RECTANGLE_DRAG,
+            width=PenWidth.RECTANGLE,
             existing_rect=existing_rect,
         )
         view_control.setRect(new_rect)
@@ -217,8 +217,8 @@ def updateViewTiff(
         new_rect = drawRectangleIfInRange(
             q_scene, current_z, current_t,
             x_min, x_max, y_min, y_max, z_min, z_max, t_min, t_max,
-            color=RectangleColors.HIGHLIGHT,
-            width=DrawingWidth.RECTANGLE,
+            color=PenColors.RECTANGLE_HIGHLIGHT,
+            width=PenWidth.RECTANGLE,
             existing_rect=existing_rect,
         )
         view_control.setRect(new_rect)

@@ -49,6 +49,7 @@ class ViewControl:
         self.show_reg_im_bg:        bool                        = True
 
         self.show_roi_match:        bool                        = True
+        self.show_roi_pair:         bool                        = True
 
         # for tiff view
         self.tiff_shape:            Tuple[int, int, int, int, int]  = ()
@@ -62,6 +63,7 @@ class ViewControl:
         self.roi_colors:        Dict[int, Tuple[int, int, int]] = {}
         self.roi_opacity:       int                             = int(config_manager.gui_defaults["ROI_VISUAL_SETTINGS"]["DEFAULT_ROI_OPACITY"])
         self.highlight_opacity: int                             = int(config_manager.gui_defaults["ROI_VISUAL_SETTINGS"]["DEFAULT_HIGHLIGHT_OPACITY"])
+        self.roi_pair_opacity:  int                             = 255
 
         # Key pushing state, Mouse dragging state
         self.dict_key_pushed:   Dict[str, bool]                 = {Qt.Key_Control: False, Qt.Key_Shift: False}
@@ -147,6 +149,9 @@ class ViewControl:
     def getHighlightOpacity(self) -> int:
         return self.highlight_opacity
     
+    def getROIPairOpacity(self) -> int:
+        return self.roi_pair_opacity
+    
     def getBackgroundImageType(self) -> str:
         return self.bg_image_type
     
@@ -169,6 +174,8 @@ class ViewControl:
         return self.show_reg_im_bg
     def getShowROIMatch(self) -> bool:
         return self.show_roi_match
+    def getShowROIPair(self) -> bool:
+        return self.show_roi_pair
     
     """
     set Functions
@@ -199,6 +206,9 @@ class ViewControl:
     def setHighlightOpacity(self, opacity: int) -> None:
         self.highlight_opacity = opacity
 
+    def setROIPairOpacity(self, opacity: int) -> None:
+        self.roi_pair_opacity = opacity
+
     def setBackgroundImageType(self, bg_type: str) -> None:
         self.bg_image_type = bg_type
 
@@ -221,6 +231,8 @@ class ViewControl:
         self.show_reg_im_bg = show_reg
     def setShowROIMatch(self, show_match: bool) -> None:
         self.show_roi_match = show_match
+    def setShowROIPair(self, show_pair: bool) -> None:
+        self.show_roi_pair = show_pair
 
     """
     shared_attr Functions

@@ -48,7 +48,7 @@ def makeLayoutFallRegistration(
     layout_checkbox.addWidget(widget_manager.makeWidgetCheckBox(key=key_checkbox_show_reg_im_bg, label="Show Registered Image", checked=True))
     layout_checkbox.addWidget(widget_manager.makeWidgetCheckBox(key=key_checkbox_show_reg_im_roi, label="Show Registered ROI", checked=True))
     layout_slider = QHBoxLayout()
-    layout_slider.addLayout(makeLayoutSliderLabel(widget_manager, key_label_opacity_pair, key_slider_opacity_pair, "Opacity of ROI pair", value_set=50))
+    layout_slider.addLayout(makeLayoutSliderLabel(widget_manager, key_label_opacity_pair, key_slider_opacity_pair, "Opacity of ROI pair", value_set=255))
 
     layout.addLayout(layout_elastix)
     layout.addLayout(layout_checkbox)

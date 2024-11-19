@@ -37,7 +37,7 @@ class BGImageTypeList:
 class ProcessingDefaults:
     RESPONSE_THRESHOLD = 30
 
-# プロットの色
+# canvas plot color
 class PlotColors:
     F = 'cyan'
     FNEU = 'red'
@@ -47,6 +47,7 @@ class PlotColors:
     EVENT = 'green'
     RECTANGLE = "purple"
 
+# canvas plot labels
 class PlotLabels:
     F = "F"
     FNEU = "Fneu"
@@ -65,11 +66,22 @@ class AppKeys:
     SEN = "sen"
     SEP = "sep"
 
-# canvasのchannel key
+# view channel key
 class ChannelKeys:
     CHAN1 = "Green"
     CHAN2 = "Red"
     CHAN3 = "Blue"
+
+# view painter's pen color
+class PenColors:
+    ROI_PAIR = Qt.white
+    RECTANGLE_DRAG = Qt.yellow
+    RECTANGLE_HIGHLIGHT = Qt.cyan
+
+# view painter's pen width
+class PenWidth:
+    RECTANGLE = 2
+    ROI_PAIR = 4
 
 # canvasのplot位置のkey
 class AxisKeys:
@@ -82,11 +94,3 @@ class TableColumnConfigDialog_Config:
     COLUMNS = ['Column Name', 'Type', 'Width']
     COMBO_ITEMS = ['id', 'celltype', 'checkbox', 'string']
     DEFAULT_PARAMS = ["new cell type", "celltype", "80"]
-
-# Rectangle Color
-class RectangleColors:
-    DRAG = Qt.yellow
-    HIGHLIGHT = Qt.cyan
-
-class DrawingWidth:
-    RECTANGLE = 2

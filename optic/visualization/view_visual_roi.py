@@ -3,6 +3,7 @@ from ..type_definitions import *
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPen, QColor, QPainter
 from ..preprocessing.preprocessing_roi import getROIContour
+from ..config.constants import PenColors, PenWidth
 import numpy as np
 
 # draw all ROIs
@@ -62,6 +63,20 @@ def drawAllROIsWithTracking(
         except KeyError:
             pass
 
+    # draw ROI pairs
+    if view_control.show_roi_pair:
+        try:
+            roiId_pri = control_manager.getSharedAttr(app_key_pri, "roi_selected_id")
+            roiId_sec = control_manager.getSharedAttr(app_key_sec, "roi_selected_id")
+            coords_pri = data_manager.getDictROICoords(app_key_pri)[roiId_pri]["med"]
+            if view_control.show_reg_im_roi:
+                coords_sec = data_manager.getDictROICoordsRegistered(app_key_sec)[roiId_sec]["med"]
+            else:
+                coords_sec = data_manager.getDictROICoords(app_key_sec)[roiId_sec]["med"]
+            drawROIPair(view_control, painter, coords_pri, coords_sec)
+        except TypeError or KeyError:
+            pass
+
     painter.end()
 
 # draw single ROI
@@ -100,6 +115,27 @@ def drawROIContour(
     for x, y in zip(xpix_contour, ypix_contour):
         painter.drawPoint(int(x), int(y))
 
+# draw single ROI pair
+def drawROIPair(
+        view_control: ViewControl,
+        painter: QPainter,
+        coords_pri: Tuple[int, int],
+        coords_sec: Tuple[int, int],
+) -> None:
+    x_pri, y_pri = coords_pri
+    x_sec, y_sec = coords_sec
+    color = PenColors.ROI_PAIR
+    opacity = view_control.getROIPairOpacity()
+    width = PenWidth.ROI_PAIR
+    
+    qcolor = QColor(color)
+    qcolor.setAlpha(opacity)
+    pen = QPen(qcolor)
+    pen.setWidth(width)
+    painter.setPen(pen)
+    painter.drawLine(x_pri, y_pri, x_sec, y_sec)
+
+# highlight selected ROI
 def highlightROISelected(
         view_control: ViewControl, 
         painter: QPainter, 
@@ -120,6 +156,7 @@ def highlightROISelected(
         for x, y in zip(xpix, ypix):
             painter.drawPoint(int(x), int(y))
 
+# highlight selected ROI with tracking
 def highlightROISelectedWithTracking(
         view_control: ViewControl, 
         painter: QPainter, 

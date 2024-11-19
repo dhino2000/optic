@@ -288,6 +288,18 @@ def bindFuncCheckboxShowMatchedROI(
     q_checkbox.stateChanged.connect(onVisibilityChanged)
 
 # -> processing_image_layouts.makeLayoutFallRegistration
+def bindFuncCheckboxShowROIPair(
+    q_checkbox: 'QCheckBox',
+    view_controls: Dict[AppKeys, ViewControl]
+) -> None:
+    def onVisibilityChanged(state: int) -> None:
+        is_visible = (state == Qt.Checked)
+        for view_control in view_controls.values():
+            view_control.setShowROIPair(is_visible)
+            view_control.updateView()
+    q_checkbox.stateChanged.connect(onVisibilityChanged)
+
+# -> processing_image_layouts.makeLayoutFallRegistration
 def bindFuncCheckboxShowRegisteredBGImage(
     q_checkbox: 'QCheckBox',
     view_controls: Dict[AppKeys, ViewControl]
@@ -506,6 +518,16 @@ def bindFuncBackgroundVisibilityCheckbox(
         view_control.setBackgroundVisibility(channel, is_visible)
         view_control.updateView()
     q_checkbox.stateChanged.connect(onVisibilityChanged)
+
+# -> processing_image_layouts.makeLayoutFallRegistration
+def bindFuncROIPairOpacitySlider(
+    q_slider: 'QSlider', 
+    view_control: 'ViewControl'
+) -> None:
+    def onOpacityChanged(value: int) -> None:
+        view_control.setROIPairOpacity(value)
+        view_control.updateView()
+    q_slider.valueChanged.connect(onOpacityChanged)
 
 """
 table_layouts
