@@ -47,7 +47,7 @@ def drawAllROIsWithTracking(
         if roi_display[roiId]:
             drawROI(view_control, painter, dict_roi_coords_single, roiId)
     
-    highlightROISelected(view_control, painter, data_manager, control_manager, app_key_pri)
+    highlightROISelectedWithTracking(view_control, painter, data_manager, control_manager, app_key_pri)
     # draw contour of selected ROI of "sec"
     if view_control.show_roi_match:
         try:
@@ -109,8 +109,31 @@ def highlightROISelected(
         ) -> None:
     ROISelectedId = control_manager.getSharedAttr(app_key, "roi_selected_id")
     if ROISelectedId is not None:
-        roiStat = data_manager.getStat(app_key)[ROISelectedId]
-        xpix, ypix = roiStat["xpix"], roiStat["ypix"]
+        dict_roi_coords_single = data_manager.getDictROICoords(app_key)[ROISelectedId]
+        xpix, ypix = dict_roi_coords_single["xpix"], dict_roi_coords_single["ypix"]
+        color = view_control.getROIColor(ROISelectedId)
+        opacity = view_control.getHighlightOpacity()
+        
+        pen = QPen(QColor(*color, opacity))
+        painter.setPen(pen)
+        
+        for x, y in zip(xpix, ypix):
+            painter.drawPoint(int(x), int(y))
+
+def highlightROISelectedWithTracking(
+        view_control: ViewControl, 
+        painter: QPainter, 
+        data_manager: DataManager, 
+        control_manager: ControlManager, 
+        app_key: AppKeys
+        ) -> None:
+    ROISelectedId = control_manager.getSharedAttr(app_key, "roi_selected_id")
+    if ROISelectedId is not None:
+        if view_control.show_reg_im_roi:
+            dict_roi_coords_single = data_manager.getDictROICoordsRegistered(app_key)[ROISelectedId]
+        else:
+            dict_roi_coords_single = data_manager.getDictROICoords(app_key)[ROISelectedId]
+        xpix, ypix = dict_roi_coords_single["xpix"], dict_roi_coords_single["ypix"]
         color = view_control.getROIColor(ROISelectedId)
         opacity = view_control.getHighlightOpacity()
         

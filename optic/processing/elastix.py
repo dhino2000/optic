@@ -258,7 +258,7 @@ def applyDictROICoordsTransform(
 
     i = 0
     for roi_id, dict_coords in dict_roi_coords.items():
-        if i % 1 == 100:
+        if i % 100 == 0:
             print(f"processing {i}/{len(dict_roi_coords)}")
         i += 1
         med = np.array([dict_coords["med"]])
@@ -285,6 +285,4 @@ def applyDictROICoordsTransform(
         xpix_ypix_reg = np.clip(xpix_ypix_reg, [x_min, y_min], [x_max, y_max])
 
         dict_roi_coords_reg[roi_id] = {"xpix": xpix_ypix_reg[:,0], "ypix": xpix_ypix_reg[:, 1], "med": med_reg}
-    os.remove(path_points_txt)
-    os.remove('outputpoints.txt') # hardcoded, need to change
     return dict_roi_coords_reg

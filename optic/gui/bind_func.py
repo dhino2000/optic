@@ -63,11 +63,9 @@ def bindFuncViewMouseEventWithTracking(
     q_view: 'QGraphicsView', 
     view_control: 'ViewControl', 
     table_control: 'TableControl',
-    app_key: AppKeys,
-    app_key_sec: AppKeys,
 ) -> None:
     def onViewPressed(event) -> None:
-        view_control.mousePressEvent(event)
+        view_control.mousePressEventWithTracking(event)
         roi_selected_id = view_control.control_manager.getSharedAttr(view_control.app_key, 'roi_selected_id')
         table_control.updateSelectedROI(roi_selected_id)
         table_control.q_table.setFocus()
@@ -385,9 +383,8 @@ def bindFuncButtonRunElastixForFall(
         control_manager.view_controls[app_key_sec].updateView()
 
         print("Registration Finished !")
-        # os.remove(path_txt)
-        # shutil.rmtree(output_directory)
 
+        shutil.rmtree(output_directory)
     q_button.clicked.connect(lambda: _runElastix())
 
 # -> processing_image_layouts.makeLayoutStackRegistration
@@ -417,6 +414,7 @@ def bindFuncButtonRunElastixForSingleStack(
         img_stack_reg = runStackRegistration(img_stack, parameter_object, channel_ref, idx_ref, axis, output_directory)
         data_manager.dict_tiff_reg[app_key] = img_stack_reg
         print("Registration Finished !")
+        shutil.rmtree(output_directory)
     q_button.clicked.connect(lambda: _runElastix())
 
 # -> processing_image_layouts.makeLayoutStackRegistration
@@ -526,6 +524,35 @@ def bindFuncTableSelectionChanged(
             if canvas_control: # for canvas_control
                 canvas_control.updatePlotWithROISelect()
     q_table.selectionModel().selectionChanged.connect(_onSelectionChanged)
+
+# -> table_layouts.makeLayoutTableROICountLabel
+def bindFuncTableSelectionChangedWithTracking(
+    q_table_pri: 'QTableWidget', 
+    q_table_sec: 'QTableWidget',
+    table_control_pri: 'TableControl', 
+    table_control_sec: 'TableControl',
+    view_control_pri: 'ViewControl', 
+    view_control_sec: 'ViewControl',
+    canvas_control_pri: 'CanvasControl',
+    canvas_control_sec: 'CanvasControl'
+) -> None:
+    def _onSelectionChangedWithTracking(selected, deselected) -> None:
+        if selected.indexes():
+            table_control_pri.onSelectionChangedWithTracking(selected, deselected)
+            row = table_control_pri.getSharedAttr_ROIMatch()
+            table_control_sec.updateSelectedROI(row)
+            view_control_pri.updateView()
+            view_control_sec.updateView()
+            if canvas_control_pri: # for canvas_control
+                canvas_control_pri.updatePlotWithROISelect()
+    def _onSelectionChanged(selected, deselected) -> None:
+        if selected.indexes():
+            table_control_sec.onSelectionChanged(selected, deselected)
+            view_control_sec.updateView()
+            if canvas_control_sec: # for canvas_control
+                canvas_control_sec.updatePlotWithROISelect()
+    q_table_pri.selectionModel().selectionChanged.connect(_onSelectionChangedWithTracking)
+    q_table_sec.selectionModel().selectionChanged.connect(_onSelectionChanged)
 
 # -> table_layouts.makeLayoutTableROICountLabel
 def bindFuncRadiobuttonOfTableChanged(

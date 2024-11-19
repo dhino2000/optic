@@ -1,7 +1,7 @@
 from __future__ import annotations
 from ..type_definitions import *
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout
-from ..gui.base_layouts import makeLayoutComboBoxLabel
+from ..gui.base_layouts import makeLayoutComboBoxLabel, makeLayoutSliderLabel
 
 # Fall Image Registration config
 def makeLayoutFallRegistration(
@@ -10,15 +10,16 @@ def makeLayoutFallRegistration(
         app_key                      : str,
         key_label_elastix_method     : str, 
         key_label_ref_c              : str,
-        key_label_vis_c              : str,
+        key_label_opacity_pair       : str,
         key_combobox_elastix_method  : str, 
         key_combobox_ref_c           : str,
-        key_combobox_vis_c           : str,
         key_button_config            : str,
         key_button_run               : str,
         key_checkbox_show_roi_match  : str,
+        key_checkbox_show_roi_pair   : str,
         key_checkbox_show_reg_im_bg  : str,
         key_checkbox_show_reg_im_roi : str,
+        key_slider_opacity_pair      : str,
         ) -> QVBoxLayout:
     layout = QVBoxLayout()
     layout.addWidget(widget_manager.makeWidgetLabel(key=key_label_elastix_method, label="Image Registration", bold=True, italic=True, use_global_style=False))
@@ -39,25 +40,19 @@ def makeLayoutFallRegistration(
         axis="horizontal",
         items=[str(i) for i in range(data_manager.getNChannels(app_key))]
         ))
-    layout_run = QHBoxLayout()
-    layout_run.addLayout(makeLayoutElastixConfig(widget_manager, key_button_config))
-    layout_run.addWidget(widget_manager.makeWidgetButton(key=key_button_run, label="Run Elastix"))
+    layout_elastix.addLayout(makeLayoutElastixConfig(widget_manager, key_button_config))
+    layout_elastix.addWidget(widget_manager.makeWidgetButton(key=key_button_run, label="Run Elastix"))
     layout_checkbox = QHBoxLayout()
     layout_checkbox.addWidget(widget_manager.makeWidgetCheckBox(key=key_checkbox_show_roi_match, label="Show Matched ROI", checked=True))
+    layout_checkbox.addWidget(widget_manager.makeWidgetCheckBox(key=key_checkbox_show_roi_pair, label="Show ROI pairs", checked=True))
     layout_checkbox.addWidget(widget_manager.makeWidgetCheckBox(key=key_checkbox_show_reg_im_bg, label="Show Registered Image", checked=True))
     layout_checkbox.addWidget(widget_manager.makeWidgetCheckBox(key=key_checkbox_show_reg_im_roi, label="Show Registered ROI", checked=True))
-    layout_checkbox.addLayout(makeLayoutComboBoxLabel(
-        widget_manager, 
-        key_label_vis_c, 
-        key_combobox_vis_c, 
-        "Registered image channel:", 
-        axis="horizontal",
-        items=[str(i) for i in range(3)],
-        ))
+    layout_slider = QHBoxLayout()
+    layout_slider.addLayout(makeLayoutSliderLabel(widget_manager, key_label_opacity_pair, key_slider_opacity_pair, "Opacity of ROI pair", value_set=50))
 
     layout.addLayout(layout_elastix)
-    layout.addLayout(layout_run)
     layout.addLayout(layout_checkbox)
+    layout.addLayout(layout_slider)
     return layout
 
 # Stack Image Registration config

@@ -51,6 +51,15 @@ class TableControl:
             self.setSelectedRow(row)
             self.setSelectedColumn(column)
             self.setSharedAttr_ROISelected(row)
+
+    def onSelectionChangedWithTracking(self, selected: QItemSelection, deselected: QItemSelection) -> None:
+        if selected.indexes():
+            row: int = self.q_table.currentRow()
+            column: int = self.q_table.currentColumn()
+            
+            self.setSelectedRow(row)
+            self.setSelectedColumn(column)
+            self.setSharedAttr_ROISelected(row)
             # for ROI tracking
             id_roi_match = self.getMatchId(row)
             self.setSharedAttr_ROIMatch(id_roi_match)
@@ -80,7 +89,10 @@ class TableControl:
     set Functions
     """
     def setSelectedRow(self, row: int) -> None:
-        self.selected_row = row
+        if not isinstance(row, int) or row < 0 or row >= self.len_row:
+            return
+        else:
+            self.selected_row = row
 
     def setSelectedColumn(self, column: int) -> None:
         self.selected_column = column
@@ -101,8 +113,11 @@ class TableControl:
     display_celltype: Which celltype should be displayed
     """
     def setSharedAttr_ROISelected(self, roi_id: int) -> None:
-        self.control_manager.setSharedAttr(self.app_key, 'roi_selected_id', roi_id)
-        updateROIPropertyDisplay(self.control_manager, self.data_manager, self.widget_manager, self.app_key)
+        if not isinstance(roi_id, int) or roi_id < 0 or roi_id >= self.len_row:
+            return
+        else:
+            self.control_manager.setSharedAttr(self.app_key, 'roi_selected_id', roi_id)
+            updateROIPropertyDisplay(self.control_manager, self.data_manager, self.widget_manager, self.app_key)
 
     def getSharedAttr_ROISelected(self) -> int:
         return self.control_manager.getSharedAttr(self.app_key, 'roi_selected_id')
@@ -110,7 +125,7 @@ class TableControl:
     def setSharedAttr_ROIMatch(self, roi_id: int) -> None:
         self.control_manager.setSharedAttr(self.app_key, 'roi_match_id', roi_id)
 
-    def getSharedAttr_ROISelected(self) -> int:
+    def getSharedAttr_ROIMatch(self) -> int:
         return self.control_manager.getSharedAttr(self.app_key, 'roi_match_id')
     
     def setSharedAttr_ROIDisplay(self, roi_display: Dict[int, bool]) -> None:
