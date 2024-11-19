@@ -384,3 +384,34 @@ class TableControl:
         for key, q_lineedit in q_lineedits.items():
             thresholds[key] = extractRangeValues(q_lineedit.text())
         return thresholds
+    
+    """
+    Other Functions
+    """
+    # if "Match Cell ID" is filled, get ROI pair
+    def getMatchedROIPairs(self) -> List[Tuple[int, int]]:
+        matched_pairs = []
+
+        col_id = self.table_columns.getColumns()['Cell ID']['order']
+        col_id_match = self.table_columns.getColumns()['Cell ID Match']['order']
+        
+        for row in range(self.len_row):
+            try:
+                cell_id = int(self.q_table.item(row, col_id).text())
+                cell_id_match_item = self.q_table.item(row, col_id_match)
+                
+                if not cell_id_match_item or not cell_id_match_item.text().strip():
+                    continue
+                    
+                cell_id_match = int(cell_id_match_item.text())
+                
+                # Skip invalid values
+                if (cell_id_match < 0 or cell_id_match >= self.len_row):
+                    continue
+                
+                matched_pairs.append((cell_id, cell_id_match))
+                
+            except (ValueError, AttributeError):
+                continue
+                
+        return matched_pairs

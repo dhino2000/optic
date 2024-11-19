@@ -64,17 +64,19 @@ def drawAllROIsWithTracking(
             pass
 
     # draw ROI pairs
-    if view_control.show_roi_pair:
+    if view_control.show_roi_pair and app_key_sec is not None:
         try:
-            roiId_pri = control_manager.getSharedAttr(app_key_pri, "roi_selected_id")
-            roiId_sec = control_manager.getSharedAttr(app_key_sec, "roi_selected_id")
-            coords_pri = data_manager.getDictROICoords(app_key_pri)[roiId_pri]["med"]
-            if view_control.show_reg_im_roi:
-                coords_sec = data_manager.getDictROICoordsRegistered(app_key_sec)[roiId_sec]["med"]
-            else:
-                coords_sec = data_manager.getDictROICoords(app_key_sec)[roiId_sec]["med"]
-            drawROIPair(view_control, painter, coords_pri, coords_sec)
-        except TypeError or KeyError:
+            table_control_pri = control_manager.table_controls[app_key_pri]
+            roiId_pairs = table_control_pri.getMatchedROIPairs()
+            # all ROI pairs
+            for roiId_pri, roiId_sec in roiId_pairs:
+                coords_pri = data_manager.getDictROICoords(app_key_pri)[roiId_pri]["med"]
+                if view_control.show_reg_im_roi:
+                    coords_sec = data_manager.getDictROICoordsRegistered(app_key_sec)[roiId_sec]["med"]
+                else:
+                    coords_sec = data_manager.getDictROICoords(app_key_sec)[roiId_sec]["med"]
+                drawROIPair(view_control, painter, coords_pri, coords_sec)
+        except (TypeError, KeyError):
             pass
 
     painter.end()
@@ -84,7 +86,7 @@ def drawROI(
         view_control: ViewControl, 
         painter: QPainter, 
         dict_roi_coords_single: Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32], Tuple[int]],
-        roiId: int
+        roiId: int,
         ) -> None:
     xpix, ypix = dict_roi_coords_single["xpix"], dict_roi_coords_single["ypix"]
     color = view_control.getROIColor(roiId)
@@ -107,7 +109,6 @@ def drawROIContour(
     xpix_contour, ypix_contour = getROIContour(xpix, ypix)
     color = view_control.getROIColor(roiId)
     opacity = view_control.getROIOpacity()
-    print("contour id", roiId)
     
     pen = QPen(QColor(*color, opacity))
     painter.setPen(pen)
@@ -121,11 +122,13 @@ def drawROIPair(
         painter: QPainter,
         coords_pri: Tuple[int, int],
         coords_sec: Tuple[int, int],
+        opacity: int = None,
 ) -> None:
     x_pri, y_pri = coords_pri
     x_sec, y_sec = coords_sec
     color = PenColors.ROI_PAIR
-    opacity = view_control.getROIPairOpacity()
+    if opacity is None:
+        opacity = view_control.getROIPairOpacity()
     width = PenWidth.ROI_PAIR
     
     qcolor = QColor(color)
