@@ -65,6 +65,8 @@ def drawAllROIsWithTracking(
 
     # draw ROI pairs
     if view_control.show_roi_pair and app_key_sec is not None:
+        roi_display_pri = control_manager.getSharedAttr(app_key_pri, "roi_display")
+        roi_display_sec = control_manager.getSharedAttr(app_key_sec, "roi_display")
         try:
             table_control_pri = control_manager.table_controls[app_key_pri]
             roiId_pairs = table_control_pri.getMatchedROIPairs()
@@ -75,7 +77,9 @@ def drawAllROIsWithTracking(
                     coords_sec = data_manager.getDictROICoordsRegistered(app_key_sec)[roiId_sec]["med"]
                 else:
                     coords_sec = data_manager.getDictROICoords(app_key_sec)[roiId_sec]["med"]
-                drawROIPair(view_control, painter, coords_pri, coords_sec)
+                # show only if both ROIs are displayed
+                if roi_display_pri[roiId_pri] and roi_display_sec[roiId_sec]:
+                    drawROIPair(view_control, painter, coords_pri, coords_sec)
         except (TypeError, KeyError):
             pass
 
