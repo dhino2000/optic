@@ -247,7 +247,7 @@ def applyDictROICoordsTransform(
     output_directory: str
 ) -> Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32], Tuple[int]]]:
     dict_roi_coords_reg = {}
-    x_max, x_min, y_max, y_min = img_mov.shape[1], 0, img_mov.shape[0], 0
+    x_max, x_min, y_max, y_min = img_mov.shape[1]-1, 0, img_mov.shape[0]-1, 0
     parameter_object_inverse = makeElastixParameterObjectInversed(parameter_map)
     transform_parameters_inverse = calculateSingleTransformInverse(
         img_fix, img_mov, 

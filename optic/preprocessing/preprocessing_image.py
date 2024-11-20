@@ -5,7 +5,10 @@ from ..config.constants import BGImageTypeList
 from typing import Dict
 
 # 画像をint型に変換 型は指定可能
-def convertImageDtypeToINT(img, dtype="uint8") -> np.ndarray:
+def convertImageDtypeToINT(
+        img: np.ndarray, 
+        dtype: str="uint8"
+        ) -> np.ndarray:
     img = img.astype("float")
     img -= np.min(img)
     img /= np.max(img)
@@ -14,7 +17,10 @@ def convertImageDtypeToINT(img, dtype="uint8") -> np.ndarray:
     return img
 
 # 大きさが異なる画像をそろえる, max_proj, Vcorr用
-def resizeImageShape(img, shape_tgt) -> np.ndarray:
+def resizeImageShape(
+        img: np.ndarray, 
+        shape_tgt: Tuple[int, int]
+        ) -> np.ndarray:
     if img.shape == shape_tgt:
         return img
     # 新しい黒い画像を作成
@@ -27,7 +33,11 @@ def resizeImageShape(img, shape_tgt) -> np.ndarray:
     return new_img
 
 # get Background Images from Fall.mat
-def getBGImageFromFall(data_manager: DataManager, app_key: str, dtype: str="uint8") -> Dict[str, np.ndarray]:
+def getBGImageFromFall(
+        data_manager: DataManager, 
+        app_key: AppKeys, 
+        dtype: str="uint8"
+        ) -> Dict[str, np.ndarray]:
     # get image shape from meanImg
     dict_im_bg = {}
     base_shape = data_manager.dict_Fall[app_key]["ops"]["meanImg"].shape
@@ -39,7 +49,11 @@ def getBGImageFromFall(data_manager: DataManager, app_key: str, dtype: str="uint
 
 # get chan2 Background Images from Fall.mat
 # but chan2 background images are only "meanImg" and "meanImg corrected"
-def getBGImageChannel2FromFall(data_manager: DataManager, app_key: str, dtype: str="uint8") -> Dict[str, np.ndarray]:
+def getBGImageChannel2FromFall(
+        data_manager: DataManager, 
+        app_key: AppKeys, 
+        dtype: str="uint8"
+        ) -> Dict[str, np.ndarray]:
     # get image shape from meanImg
     dict_im_bg = {}
     dict_im_bg["meanImg"] = convertImageDtypeToINT(data_manager.dict_Fall[app_key]["ops"]["meanImg_chan2"], dtype=dtype)
@@ -47,11 +61,16 @@ def getBGImageChannel2FromFall(data_manager: DataManager, app_key: str, dtype: s
     return dict_im_bg
 
 # make ROI Image from Fall.mat
-def getROIImageFromFall(data_manager: DataManager, app_key: str, dtype: str="uint8", value: int=50) -> Dict[str, np.ndarray]:
+def getROIImageFromFall(
+        data_manager: DataManager, 
+        app_key: AppKeys, 
+        dtype: str="uint8", 
+        value: int=50
+        ) -> Dict[str, np.ndarray]:
     dict_im_roi = {}
     roi_img = np.zeros(data_manager.getImageSize(app_key), dtype=dtype)
-    for roiId, roiStat in data_manager.getStat(app_key).items():
-        xpix, ypix = roiStat["xpix"], roiStat["ypix"]
+    for coords in data_manager.getDictROICoords(app_key).values():
+        xpix, ypix = coords["xpix"], coords["ypix"]
         roi_img[ypix, xpix] = value
     dict_im_roi["all"] = roi_img
     return dict_im_roi

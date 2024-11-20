@@ -4,7 +4,10 @@ import cv2
 import numpy as np
 
 # get ROI contour from the ROI's xpix array and ypix array
-def getROIContour(xpix: np.ndarray, ypix: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+def getROIContour(
+        xpix: np.ndarray, 
+        ypix: np.ndarray
+        ) -> Tuple[np.ndarray, np.ndarray]:
     x_min, x_max = np.min(xpix), np.max(xpix)
     y_min, y_max = np.min(ypix), np.max(ypix)
 
@@ -21,3 +24,33 @@ def getROIContour(xpix: np.ndarray, ypix: np.ndarray) -> Tuple[np.ndarray, np.nd
     xpix_contour = contour[:, 0] + x_min - margin
     ypix_contour = contour[:, 1] + y_min - margin
     return xpix_contour, ypix_contour
+
+# update ROI Image, show only choosed celltype, show registered ROI image or not
+def updateROIImage(
+        data_manager: DataManager, 
+        control_manager: ControlManager, 
+        app_key: str, 
+        dtype: str="uint8", 
+        value: int=50, 
+        reg: bool=False
+        ) -> Dict[str, np.ndarray]:
+    dict_im_roi, dict_im_roi_reg = {}, {}
+    roi_display = control_manager.getSharedAttr(app_key, "roi_display")
+
+    roi_img = np.zeros(data_manager.getImageSize(app_key), dtype=dtype)
+    for roiId, coords in data_manager.getDictROICoords(app_key).items():
+        if roi_display[roiId]:
+            xpix, ypix = coords["xpix"], coords["ypix"]
+            roi_img[ypix, xpix] = value
+    dict_im_roi["all"] = roi_img
+    # for registered ROI image
+    if reg:
+        roi_img = np.zeros(data_manager.getImageSize(app_key), dtype=dtype)
+        for roiId, coords in data_manager.getDictROICoordsRegistered(app_key).items():
+            if roi_display[roiId]:
+                xpix, ypix = coords["xpix"], coords["ypix"]
+                roi_img[ypix, xpix] = value
+        dict_im_roi_reg["all"] = roi_img
+        return dict_im_roi, dict_im_roi_reg
+    else:
+        return dict_im_roi

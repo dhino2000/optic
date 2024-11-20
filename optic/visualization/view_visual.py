@@ -6,6 +6,7 @@ import numpy as np
 from ..config.constants import ChannelKeys, PenColors, PenWidth
 from .view_visual_roi import drawAllROIs, drawAllROIsWithTracking, drawROI, highlightROISelected, findClosestROI, shouldSkipROI
 from .view_visual_rectangle import drawRectangle, drawRectangleIfInRange
+from ..preprocessing.preprocessing_roi import updateROIImage
 
 # q_view widget visualization
 # update view for Fall data
@@ -100,9 +101,10 @@ def updateViewFallWithTracking(
             min_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN2, 'min'),
             max_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN2, 'max'),
             )
-    # Registered ROI image, only "pri" view
+    # ROI image, only "pri" view
     if app_key_sec:
         if view_control.getBackgroundVisibility(ChannelKeys.CHAN3):
+            control_manager.view_controls[app_key_sec].updateROIImage()
             if view_control.getShowRegImROI():
                 image = data_manager.getDictROIImageRegistered(app_key_sec).get("all")
             else:
@@ -310,4 +312,5 @@ def adjustChannelContrast(
 
     except Exception as e:
         print(f"Error in adjustChannelContrast: {str(e)}")
+        raise e
         return None
