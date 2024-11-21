@@ -112,3 +112,13 @@ class OTParams:
         "skew", 
         "std"
             ]
+    
+# ROI Matching Test Dialog Config
+class ROIMatchingTest_Config:
+    COLOR_PRI = "red"
+    COLOR_SEC = "blue"
+    COLOR_PAIR = "green"
+    ALPHA = 0.5
+    FONTSIZE = 12
+    LABEL_PRI = "Primary"
+    LABEL_SEC = "Secondary"

@@ -5,6 +5,7 @@ from ..utils.data_utils import downSampleTrace, extractEventOnsetIndices, extrac
 from ..visualization.canvas_visual import plotTraces, zoomXAxis, moveXAxis, moveToPlotCenter, plotEventAlignedTrace
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
+from matplotlib.axes import Axes
 import matplotlib.patches as patches
 import numpy as np
 
@@ -28,7 +29,7 @@ class CanvasControl:
         self.control_manager                            = control_manager
         self.ax_layout                                  = ax_layout
 
-        self.axes:                       Dict[str, Any] = {}
+        self.axes:                      Dict[str, Axes] = {}
         self.setupAxes()
         # F, Fneu, spks plotting
         if plot_trace:

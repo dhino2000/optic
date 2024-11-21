@@ -5,7 +5,7 @@ from ..manager.widget_manager import WidgetManager
 from ..manager.init_managers import initManagers
 from ..controls.canvas_control import CanvasControl
 from ..gui.processing_roi_layouts import makeLayoutROIMatching
-from ..config.constants import OTParams
+from ..config.constants import OTParams, AxisKeys, ROIMatchingTest_Config
 import numpy as np
 
 # ROI Matching Test
@@ -41,6 +41,9 @@ class ROIMatchingTestDialog(QDialog):
         self.getROIIndexes()
         self.getMedCoords()
         self.getROIParams()
+
+        # canvas update
+        self.updateCanvas()
 
     def initUI(self):
         self.setWindowTitle('ROI Matching Test')
@@ -90,12 +93,37 @@ class ROIMatchingTestDialog(QDialog):
     # get ROI shape parameters
     def getROIParams(self):
         key_params = OTParams.SHAPE
-        self.roi_params_pri = np.concatenate([[self.data_manager.getStat(self.app_key_pri)[cellid][key] for cellid in self.idx_roi_pri] for key in key_params], axis=1)
-        self.roi_params_sec = np.concatenate([[self.data_manager.getStat(self.app_key_sec)[cellid][key] for cellid in self.idx_roi_sec] for key in key_params], axis=1)
+        try:
+            self.roi_params_pri = np.concatenate([[self.data_manager.getStat(self.app_key_pri)[cellid][key] for cellid in self.idx_roi_pri] for key in key_params], axis=1)
+            self.roi_params_sec = np.concatenate([[self.data_manager.getStat(self.app_key_sec)[cellid][key] for cellid in self.idx_roi_sec] for key in key_params], axis=1)
+        except np.AxisError:
+            pass
 
     def updateCanvas(self):
-        pass
+        ax = self.canvas_control.axes[AxisKeys.TOP]
+        xsize, ysize = self.data_manager.getImageSize(self.app_key_pri)
+        ax.clear()
 
+        color_pri  = ROIMatchingTest_Config.COLOR_PRI
+        color_sec  = ROIMatchingTest_Config.COLOR_SEC
+        color_pair = ROIMatchingTest_Config.COLOR_PAIR
+        alpha      = ROIMatchingTest_Config.ALPHA
+        fontsize   = ROIMatchingTest_Config.FONTSIZE
+        label_pri  = ROIMatchingTest_Config.LABEL_PRI
+        label_sec  = ROIMatchingTest_Config.LABEL_SEC
+
+        try:
+            ax.scatter(self.med_coords_pri[:, 0], self.med_coords_pri[:, 1], c=color_pri, label=label_pri, alpha=alpha)
+            ax.scatter(self.med_coords_sec[:, 0], self.med_coords_sec[:, 1], c=color_sec, label=label_sec, alpha=alpha)
+            for idx, med in zip(self.idx_roi_pri, self.med_coords_pri):
+                ax.text(med[0], med[1], idx, fontsize=fontsize, color=color_pri)
+            for idx, med in zip(self.idx_roi_sec, self.med_coords_sec):
+                ax.text(med[0], med[1], idx, fontsize=fontsize, color=color_sec)
+
+            ax.set_xlim((0, xsize))
+            ax.set_ylim((0, ysize))
+        except IndexError:
+            pass
 
     def bindFuncAllWidget(self):
         pass
