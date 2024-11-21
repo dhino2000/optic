@@ -122,6 +122,14 @@ class GuiDefaults:
             # "MAX_WIDTH": 1920,
             # "MAX_HEIGHT": 1080,
         },
+        "WINDOW_SETTINGS_ROI_MATCHING_TEST": {
+            "INIT_POSITION_X": 100, 
+            "INIT_POSITION_Y": 100,
+            "WIDTH": 1000,
+            "HEIGHT": 1000,
+            # "MAX_WIDTH": 1920,
+            # "MAX_HEIGHT": 1080,
+        },
         "WINDOW_SETTINGS_DIALOG": {
             "INIT_POSITION_X": 100, 
             "INIT_POSITION_Y": 100,

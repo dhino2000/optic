@@ -94,3 +94,21 @@ class TableColumnConfigDialog_Config:
     COLUMNS = ['Column Name', 'Type', 'Width']
     COMBO_ITEMS = ['id', 'celltype', 'checkbox', 'string']
     DEFAULT_PARAMS = ["new cell type", "celltype", "80"]
+
+# Optimal Transport Parameters
+class OTParams:
+    SHAPE = [
+        "footprint", 
+        "mrs", 
+        "mrs0", 
+        "compact", 
+        "solidity", 
+        "npix", 
+        "npix_soma", 
+        "radius", 
+        "aspect_ratio", 
+        "npix_norm_no_crop", 
+        "npix_norm", 
+        "skew", 
+        "std"
+            ]

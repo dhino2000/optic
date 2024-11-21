@@ -17,7 +17,8 @@ class CanvasControl:
                  widget_manager  : WidgetManager, 
                  config_manager  : ConfigManager, 
                  control_manager : ControlManager, 
-                 ax_layout       : Literal["triple", "single"] ='triple'):
+                 ax_layout       : Literal["triple", "single"] ='triple',
+                 plot_trace      : bool = True):
         self.app_key                                    = app_key
         self.figure                                     = figure
         self.canvas                                     = canvas
@@ -28,18 +29,18 @@ class CanvasControl:
         self.ax_layout                                  = ax_layout
 
         self.axes:                       Dict[str, Any] = {}
-        self.fs:                                  float = self.data_manager.getFs(self.app_key)
-        self.plot_data_points:                      int = self.data_manager.getLengthOfData(self.app_key)
-        self.downsample_threshold:                  int = 1000
-        self.time_array:                       np.array = np.arange(self.plot_data_points) / self.fs
-        self.plot_range:                 List[int, int] = [0, self.plot_data_points]
-        self.downsampled_range:          List[int, int] = [0, 0]
-        self.is_dragging:                          bool = False
-        self.drag_start_x:                        float = None
-
-
         self.setupAxes()
-        self.initializePlot()
+        # F, Fneu, spks plotting
+        if plot_trace:
+            self.fs:                                  float = self.data_manager.getFs(self.app_key)
+            self.plot_data_points:                      int = self.data_manager.getLengthOfData(self.app_key)
+            self.downsample_threshold:                  int = 1000
+            self.time_array:                       np.array = np.arange(self.plot_data_points) / self.fs
+            self.plot_range:                 List[int, int] = [0, self.plot_data_points]
+            self.downsampled_range:          List[int, int] = [0, 0]
+            self.is_dragging:                          bool = False
+            self.drag_start_x:                        float = None  
+            self.initializePlot()
 
     def setupAxes(self):
         axes_config = {

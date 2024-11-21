@@ -2,3 +2,4 @@ from .date_select import DateSelectDialog
 from .user_select import UserSelectDialog
 from .table_columns_config import TableColumnConfigDialog
 from .elastix_params_config import ElastixParamsConfigDialog
+from .roi_matching_test import ROIMatchingTestDialog
