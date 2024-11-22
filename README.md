@@ -1,12 +1,58 @@
 # OPTIC
-OPTIC(OPtimized Tools for Image-based Cellular analysis)
+## OPTIC(OPtimized Toolbox for Image-based Cellular analysis)
+
+OPTIC consists of four specialized applications:
+### 1. Suite2pROICheck
+#### Input Format
+- Fall.mat: Suite2p output file containing ROI information  
+- Reference tiff image (optional)  
+- Event npy file (optional): for stimulus timing analysis  
+#### Features
+- Efficient ROI classification (Neurons, Noise, etc.)
+- Supports multiple cell types (Astrocytes, Microglia)
+- Event-aligned trace analysis
+- Real-time ROI selection with trace visualization
+
+### 2. Suite2pROITracking
+#### Input Format
+- Two Fall.mat files from different imaging sessions
+#### Features
+- Manual ROI tracking between sessions
+- Automated tracking assistance:
+  - Image registration (Elastix)
+  - Optimal transport algorithms
+- Visualization of matched ROI pairs
+
+### 3. MicrogliaTracking
+#### Input Format
+- TIFF stack (dimensions: XYCT)  
+X, Y: spatial dimensions  
+C: channels for multichannel imaging  
+T: time points for time-lapse imaging  
+#### Features
+- CellPose integration for Microglia ROI detection
+- Time-series ROI tracking
+- Migration distance calculation
+- Path trajectory analysis
+
+### 4. TIFStackExplorer
+#### Input Format
+- TIFF stack (dimensions: XYCZT)  
+X, Y: spatial dimensions  
+C: channels (1-3)  
+Z: z-planes  
+T: time points
+#### Features
+- Multi-channel visualization
+- Z-stack navigation
+- Time series playback
+- ROI-based analysis
+- Image registration across time points or z-planes
 
 ## Installation
+1. Install [Anaconda](https://www.anaconda.com/download/success)
 
-1. Environment settings
-Anaconda環境の作り方を書く。
-
-(ex) conda env create -f "optic.yaml"
+- Install Anaconda distribution and prepare Python environment
 
 2. Install optic package
 
@@ -17,10 +63,15 @@ Anaconda環境の作り方を書く。
 
 (ex) "C:/Users/dhino2000/optic"
 
+3. Environment settings
+
+- open "Anaconda Prompt" and move to OPTIC directory
+- create OPTIC environment with `conda env create -f optic.yml`
+
 ## How to use
 ### Suite2pROICheck
 1. Open the Anaconda Prompt and switch to the desired environment.
-- activate {env_name}
+- activate optic
   
 2. Execute the "suite2p_roi_check.py" script
 - python {path_of_suite2p_roi_check.py}
