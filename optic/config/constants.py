@@ -81,7 +81,7 @@ class PenColors:
 # view painter's pen width
 class PenWidth:
     RECTANGLE = 2
-    ROI_PAIR = 4
+    ROI_PAIR = 2
 
 # canvasのplot位置のkey
 class AxisKeys:
