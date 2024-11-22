@@ -5,6 +5,7 @@ from ..manager.widget_manager import WidgetManager
 from ..manager.init_managers import initManagers
 from ..controls.canvas_control import CanvasControl
 from ..gui.processing_roi_layouts import makeLayoutROIMatching
+from ..processing.optimal_transport import calculateROIMatching
 from ..config.constants import OTParams, AxisKeys, ROIMatchingTest_Config
 import numpy as np
 
@@ -27,6 +28,8 @@ class ROIMatchingTestDialog(QDialog):
         self.control_manager = control_manager
         self.app_key_pri = app_key_pri
         self.app_key_sec = app_key_sec
+
+        self.roi_matching = None
 
         window_settings = gui_defaults.get("WINDOW_SETTINGS_ROI_MATCHING_TEST", {})
         self.setGeometry(
@@ -107,23 +110,41 @@ class ROIMatchingTestDialog(QDialog):
         color_pri  = ROIMatchingTest_Config.COLOR_PRI
         color_sec  = ROIMatchingTest_Config.COLOR_SEC
         color_pair = ROIMatchingTest_Config.COLOR_PAIR
+        linewidth  = ROIMatchingTest_Config.LINEWIDTH_PAIR
         alpha      = ROIMatchingTest_Config.ALPHA
         fontsize   = ROIMatchingTest_Config.FONTSIZE
         label_pri  = ROIMatchingTest_Config.LABEL_PRI
         label_sec  = ROIMatchingTest_Config.LABEL_SEC
 
-        try:
-            ax.scatter(self.med_coords_pri[:, 0], self.med_coords_pri[:, 1], c=color_pri, label=label_pri, alpha=alpha)
-            ax.scatter(self.med_coords_sec[:, 0], self.med_coords_sec[:, 1], c=color_sec, label=label_sec, alpha=alpha)
-            for idx, med in zip(self.idx_roi_pri, self.med_coords_pri):
-                ax.text(med[0], med[1], idx, fontsize=fontsize, color=color_pri)
-            for idx, med in zip(self.idx_roi_sec, self.med_coords_sec):
-                ax.text(med[0], med[1], idx, fontsize=fontsize, color=color_sec)
+        ax.invert_yaxis() # upper left corner is (0, 0)
+        ax.scatter(self.med_coords_pri[:, 0], self.med_coords_pri[:, 1], c=color_pri, label=label_pri, alpha=alpha)
+        ax.scatter(self.med_coords_sec[:, 0], self.med_coords_sec[:, 1], c=color_sec, label=label_sec, alpha=alpha)
+        for idx, med in zip(self.idx_roi_pri, self.med_coords_pri):
+            ax.text(med[0], med[1], idx, fontsize=fontsize, color=color_pri)
+        for idx, med in zip(self.idx_roi_sec, self.med_coords_sec):
+            ax.text(med[0], med[1], idx, fontsize=fontsize, color=color_sec)
+        if self.roi_matching is not None:
+            for idx_src, idx_tgt in self.roi_matching.items():
+                idx_src, idx_tgt = int(idx_src), int(idx_tgt)
+                ax.plot([self.med_coords_pri[idx_src, 0], self.med_coords_sec[idx_tgt, 0]], 
+                        [self.med_coords_pri[idx_src, 1], self.med_coords_sec[idx_tgt, 1]], 
+                        c=color_pair, alpha=alpha, linewidth=linewidth)
 
-            ax.set_xlim((0, xsize))
-            ax.set_ylim((0, ysize))
-        except IndexError:
-            pass
+        ax.set_xlim((0, xsize))
+        ax.set_ylim((ysize, 0))
+        ax.legend()
+        self.canvas_control.canvas.draw()
+
+    def runROIMatching(self):
+        self.roi_matching = calculateROIMatching(
+            self.med_coords_pri,
+            self.med_coords_sec,
+            self.widget_manager.dict_combobox["ot_method"].currentText(),
+            loss_fun="square_loss",
+            alpha=float(self.widget_manager.dict_lineedit["fgwd_alpha"].text()),
+        )
+        print("ROI Matching:", self.roi_matching)
+        self.updateCanvas()
 
     def bindFuncAllWidget(self):
-        pass
+        self.widget_manager.dict_button["ot_run"].clicked.connect(self.runROIMatching)

@@ -118,6 +118,7 @@ class ROIMatchingTest_Config:
     COLOR_PRI = "red"
     COLOR_SEC = "blue"
     COLOR_PAIR = "green"
+    LINEWIDTH_PAIR = 4
     ALPHA = 0.5
     FONTSIZE = 12
     LABEL_PRI = "Primary"

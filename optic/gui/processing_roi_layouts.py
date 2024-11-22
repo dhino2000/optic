@@ -24,7 +24,7 @@ def makeLayoutROIMatching(
         key_combobox_ot_method, 
         "Optimal Transport method:", 
         axis="horizontal", 
-        items=["WD-shape", "WD-distance", "WD-distance-exp", "GWD", "FGWD"]
+        items=["WD-shape", "WD-distance", "GWD", "FGWD"]
         ))
     layout_ot.addLayout(makeLayoutLineEditLabel(
         widget_manager, 
