@@ -1,12 +1,58 @@
 # OPTIC
-OPTIC(OPtimized Tools for Image-based Cellular analysis)
+## OPTIC(OPtimized Toolbox for Image-based Cellular analysis)
+
+OPTIC consists of four specialized applications:
+### 1. Suite2pROICheck
+#### Input Format
+- Fall.mat: Suite2p output file containing ROI information  
+- Reference tiff image (optional)  
+- Event npy file (optional): for stimulus timing analysis  
+#### Features
+- Efficient ROI classification (Neurons, Noise, etc.)
+- Supports multiple cell types (Astrocytes, Microglia)
+- Event-aligned trace analysis
+- Real-time ROI selection with trace visualization
+
+### 2. Suite2pROITracking
+#### Input Format
+- Two Fall.mat files from different imaging sessions
+#### Features
+- Manual ROI tracking between sessions
+- Automated tracking assistance:
+  - Image registration (Elastix)
+  - Optimal transport algorithms
+- Visualization of matched ROI pairs
+
+### 3. MicrogliaTracking
+#### Input Format
+- TIFF stack (dimensions: XYCT)  
+X, Y: spatial dimensions  
+C: channels for multichannel imaging  
+T: time points for time-lapse imaging  
+#### Features
+- CellPose integration for Microglia ROI detection
+- Time-series ROI tracking
+- Migration distance calculation
+- Path trajectory analysis
+
+### 4. TIFStackExplorer
+#### Input Format
+- TIFF stack (dimensions: XYCZT)  
+X, Y: spatial dimensions  
+C: channels (1-3)  
+Z: z-planes  
+T: time points
+#### Features
+- Multi-channel visualization
+- Z-stack navigation
+- Time series playback
+- ROI-based analysis
+- Image registration across time points or z-planes
 
 ## Installation
+1. Install [Anaconda](https://www.anaconda.com/download/success)
 
-1. Environment settings
-Anaconda環境の作り方を書く。
-
-(ex) conda env create -f "optic.yaml"
+- Install Anaconda distribution and prepare Python environment
 
 2. Install optic package
 
@@ -17,10 +63,15 @@ Anaconda環境の作り方を書く。
 
 (ex) "C:/Users/dhino2000/optic"
 
+3. Environment settings
+
+- open "Anaconda Prompt" and move to OPTIC directory
+- create OPTIC environment with `conda env create -f optic.yml`
+
 ## How to use
 ### Suite2pROICheck
 1. Open the Anaconda Prompt and switch to the desired environment.
-- activate {env_name}
+- activate optic
   
 2. Execute the "suite2p_roi_check.py" script
 - python {path_of_suite2p_roi_check.py}
@@ -42,6 +93,25 @@ Anaconda環境の作り方を書く。
 ## Dependencies and External Libraries
 
 This project includes the following external libraries:
+
+### Suite2p
+
+- Original Repository: https://github.com/MouseLand/suite2p
+
+```bibtex
+@article {Pachitariu061507,
+	author = {Pachitariu, Marius and Stringer, Carsen and Dipoppa, Mario and Schr{\"o}der, Sylvia and Rossi, L. Federico and Dalgleish, Henry and Carandini, Matteo and Harris, Kenneth D.},
+	title = {Suite2p: beyond 10,000 neurons with standard two-photon microscopy},
+	elocation-id = {061507},
+	year = {2017},
+	doi = {10.1101/061507},
+	publisher = {Cold Spring Harbor Laboratory},
+	abstract = {Two-photon microscopy of calcium-dependent sensors has enabled unprecedented recordings from vast populations of neurons. While the sensors and microscopes have matured over several generations of development, computational methods to process the resulting movies remain inefficient and can give results that are hard to interpret. Here we introduce Suite2p: a fast, accurate and complete pipeline that registers raw movies, detects active cells, extracts their calcium traces and infers their spike times. Suite2p runs on standard workstations, operates faster than real time, and recovers ~2 times more cells than the previous state-of-the-art method. Its low computational load allows routine detection of ~10,000 cells simultaneously with standard two-photon resonant-scanning microscopes. Recordings at this scale promise to reveal the fine structure of activity in large populations of neurons or large populations of subcellular structures such as synaptic boutons.},
+	URL = {https://www.biorxiv.org/content/early/2017/07/20/061507},
+	eprint = {https://www.biorxiv.org/content/early/2017/07/20/061507.full.pdf},
+	journal = {bioRxiv}
+}
+```
 
 ### ITKElastix
 
@@ -87,17 +157,19 @@ This project includes the following external libraries:
 ```
 
 ## References
-[1] S. Klein, M. Staring, K. Murphy, M.A. Viergever, J.P.W. Pluim, "elastix: a toolbox for intensity based medical image registration," IEEE Transactions on Medical Imaging, vol. 29, no. 1, pp. 196 - 205, January 2010.
+[1] Marius Pachitariu, Carsen Stringer, Mario Dipoppa, Sylvia Schröder, L. Federico Rossi, Henry Dalgleish, Matteo Carandini, Kenneth D. Harris. "Suite2p: beyond 10,000 neurons with standard two-photon microscopy", bioRxiv, 2016.
 
-[2] D.P. Shamonin, E.E. Bron, B.P.F. Lelieveldt, M. Smits, S. Klein and M. Staring, "Fast Parallel Image Registration on CPU and GPU for Diagnostic Classification of Alzheimer's Disease", Frontiers in Neuroinformatics, vol. 7, no. 50, pp. 1-15, January 2014.
+[2] S. Klein, M. Staring, K. Murphy, M.A. Viergever, J.P.W. Pluim, "elastix: a toolbox for intensity based medical image registration", IEEE Transactions on Medical Imaging, vol. 29, no. 1, pp. 196 - 205, January 2010.
 
-[3] Kasper Marstal, Floris Berendsen, Marius Staring and Stefajkn Klein, "SimpleElastix: A user-friendly, multi-lingual library for medical image registration", International Workshop on Biomedical Image Registration (WBIR), Las Vegas, Nevada, USA, 2016.
+[3] D.P. Shamonin, E.E. Bron, B.P.F. Lelieveldt, M. Smits, S. Klein and M. Staring, "Fast Parallel Image Registration on CPU and GPU for Diagnostic Classification of Alzheimer's Disease", Frontiers in Neuroinformatics, vol. 7, no. 50, pp. 1-15, January 2014.
 
-[4] K. Ntatsis, N. Dekker, V. Valk, T. Birdsong, D. Zukić, S. Klein, M Staring, M McCormick, "itk-elastix: Medical image registration in Python", Proceedings of the 22nd Python in Science Conference, pp. 101 - 105, 2023, https://doi.org/10.25080/gerudo-f2bc6f59-00d.
+[4] Kasper Marstal, Floris Berendsen, Marius Staring and Stefajkn Klein, "SimpleElastix: A user-friendly, multi-lingual library for medical image registration", International Workshop on Biomedical Image Registration (WBIR), Las Vegas, Nevada, USA, 2016.
 
-[5] Rémi Flamary, Nicolas Courty, Alexandre Gramfort, Mokhtar Z. Alaya, Aurélie Boisbunon, Stanislas Chambon, Laetitia Chapel, Adrien Corenflos, Kilian Fatras, Nemo Fournier, Léo Gautheron, Nathalie T.H. Gayraud, Hicham Janati, Alain Rakotomamonjy, Ievgen Redko, Antoine Rolet, Antony Schutz, Vivien Seguy, Danica J. Sutherland, Romain Tavenard, Alexander Tong, Titouan Vayer, POT Python Optimal Transport library, Journal of Machine Learning Research, 22(78):1−8, 2021.
+[5] K. Ntatsis, N. Dekker, V. Valk, T. Birdsong, D. Zukić, S. Klein, M Staring, M McCormick, "itk-elastix: Medical image registration in Python", Proceedings of the 22nd Python in Science Conference, pp. 101 - 105, 2023, https://doi.org/10.25080/gerudo-f2bc6f59-00d.
 
-[6] Titouan Vayer, Laetitia Chapel, Rémi Flamary, Romain Tavenard, Nicolas Courty, Optimal Transport for structured data with application on graphs, Proceedings of the 36th International Conference on Machine Learning, pp.6275-6284, PMLR 97, 2019.
+[6] Rémi Flamary, Nicolas Courty, Alexandre Gramfort, Mokhtar Z. Alaya, Aurélie Boisbunon, Stanislas Chambon, Laetitia Chapel, Adrien Corenflos, Kilian Fatras, Nemo Fournier, Léo Gautheron, Nathalie T.H. Gayraud, Hicham Janati, Alain Rakotomamonjy, Ievgen Redko, Antoine Rolet, Antony Schutz, Vivien Seguy, Danica J. Sutherland, Romain Tavenard, Alexander Tong, Titouan Vayer, POT Python Optimal Transport library, Journal of Machine Learning Research, 22(78):1−8, 2021.
+
+[7] Titouan Vayer, Laetitia Chapel, Rémi Flamary, Romain Tavenard, Nicolas Courty, Optimal Transport for structured data with application on graphs, Proceedings of the 36th International Conference on Machine Learning, pp.6275-6284, PMLR 97, 2019.
 
 
 
