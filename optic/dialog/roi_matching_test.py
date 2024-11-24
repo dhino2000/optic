@@ -65,6 +65,7 @@ class ROIMatchingTestDialog(QDialog):
             "ot_method",
             "ot_run",
         ))
+        layout.addWidget(self.widget_manager.makeWidgetCheckBox(key="plot_ot_plan", label="Plot Transport Plan", checked=True), stretch=1)
         self.setLayout(layout)
 
         self.setupControls()
@@ -123,17 +124,37 @@ class ROIMatchingTestDialog(QDialog):
             ax.text(med[0], med[1], idx, fontsize=fontsize, color=color_pri)
         for idx, med in zip(self.idx_roi_sec, self.med_coords_sec):
             ax.text(med[0], med[1], idx, fontsize=fontsize, color=color_sec)
+
         if self.roi_matching is not None:
-            for idx_src, idx_tgt in self.roi_matching.items():
-                idx_src, idx_tgt = int(idx_src), int(idx_tgt)
-                ax.plot([self.med_coords_pri[idx_src, 0], self.med_coords_sec[idx_tgt, 0]], 
-                        [self.med_coords_pri[idx_src, 1], self.med_coords_sec[idx_tgt, 1]], 
-                        c=color_pair, alpha=alpha, linewidth=linewidth)
+            if self.widget_manager.dict_checkbox["plot_ot_plan"].isChecked():
+                self.plotTransportPlan(ax, color_pair, alpha, linewidth)
+            else:
+                self.plotROIMatching(ax, color_pair, alpha, linewidth)
 
         ax.set_xlim((0, xsize))
         ax.set_ylim((ysize, 0))
         ax.legend()
         self.canvas_control.canvas.draw()
+
+    def plotROIMatching(self, ax, color_pair, alpha, linewidth):
+        for idx_src, idx_tgt in self.roi_matching.items():
+            idx_src, idx_tgt = int(idx_src), int(idx_tgt)
+            ax.plot([self.med_coords_pri[idx_src, 0], self.med_coords_sec[idx_tgt, 0]], 
+                    [self.med_coords_pri[idx_src, 1], self.med_coords_sec[idx_tgt, 1]], 
+                    c=color_pair, alpha=alpha, linewidth=linewidth)
+            
+    def plotTransportPlan(self, ax, color_pair, alpha, linewidth):
+        num_src, num_tgt = self.roi_matching.shape
+        for idx_src in range(num_src):
+            for idx_tgt in range(num_tgt):
+                value = self.roi_matching[idx_src, idx_tgt] * num_src
+                if value < 0.001:
+                    pass
+                else:
+                    print(value)
+                    ax.plot([self.med_coords_pri[idx_src, 0], self.med_coords_sec[idx_tgt, 0]], 
+                            [self.med_coords_pri[idx_src, 1], self.med_coords_sec[idx_tgt, 1]], 
+                            c=color_pair, alpha=alpha, linewidth=linewidth*value)
 
     def runROIMatching(self):
         self.roi_matching = calculateROIMatching(
@@ -142,8 +163,8 @@ class ROIMatchingTestDialog(QDialog):
             self.widget_manager.dict_combobox["ot_method"].currentText(),
             loss_fun="square_loss",
             alpha=float(self.widget_manager.dict_lineedit["fgwd_alpha"].text()),
+            return_plan=self.widget_manager.dict_checkbox["plot_ot_plan"].isChecked()
         )
-        print("ROI Matching:", self.roi_matching)
         self.updateCanvas()
 
     def bindFuncAllWidget(self):

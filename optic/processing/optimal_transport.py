@@ -102,7 +102,8 @@ def calculateROIMatching(
         loss_fun: str="square_loss",
         alpha: float=0.1,
         threshold: float=1e-6,
-        max_cost: float=float('inf')
+        max_cost: float=float('inf'),
+        return_plan: bool=False # return transport plan matrix
         ) -> Dict[int, int]:
     C = calculateDistanceMatrix(array_src, array_tgt)
     C1 = calculateDistanceMatrix(array_src)
@@ -117,5 +118,8 @@ def calculateROIMatching(
     elif method == "FGWD":
         method = "FGW"
     G = getOptimalTransportPlan(C, C1, C2, a, b, method, loss_fun, alpha)
-    matches = getOneToOneMatching(G, C, threshold, max_cost)
-    return matches
+    if return_plan:
+        return G
+    else:
+        matches = getOneToOneMatching(G, C, threshold, max_cost)
+        return matches
