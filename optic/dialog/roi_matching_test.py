@@ -169,7 +169,7 @@ class ROIMatchingTestDialog(QDialog):
             metric="minkowski",
             p=float(self.widget_manager.dict_lineedit["wd_exp"].text()),
             alpha=float(self.widget_manager.dict_lineedit["fgwd_alpha"].text()),
-            threshold=float(self.widget_manager.dict_lineedit["ot_threshold_dist"].text()),
+            threshold=float(self.widget_manager.dict_lineedit["ot_threshold_transport"].text()),
             max_cost=float(self.widget_manager.dict_lineedit["ot_threshold_cost"].text()),
             return_plan=self.widget_manager.dict_checkbox["plot_ot_plan"].isChecked()
         )

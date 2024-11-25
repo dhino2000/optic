@@ -123,6 +123,9 @@ class DataManager:
     def getLengthOfData(self, app_key: AppKeys) -> int:
         if self.dict_data_dtype[app_key] == Extension.MAT:
             return len(self.dict_Fall[app_key]["ops"]["xoff1"])
+    # get nROIs
+    def getNROIs(self, app_key: AppKeys) -> int:
+        return len(self.dict_Fall[app_key]["stat"])
     # get nchannels
     def getNChannels(self, app_key: AppKeys) -> int:
         return self.dict_Fall[app_key]["ops"]["nchannels"].flatten()[0]

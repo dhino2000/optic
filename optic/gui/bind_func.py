@@ -3,6 +3,7 @@ from ..type_definitions import *
 from ..io.file_dialog import openFileDialogAndSetLineEdit, saveFileDialog
 from ..io.data_io import saveROICheck, loadROICheck, loadEventFileNPY, generateSavePath, saveTiffStack
 from ..visualization.view_visual_rectangle import clipRectangleRange
+from ..visualization.info_visual import updateROICountDisplay
 from ..processing import *
 from ..utils import *
 from PyQt5.QtCore import Qt
@@ -169,14 +170,21 @@ def bindFuncROICheckIO(
     q_window: 'QWidget', 
     q_lineedit: 'QLineEdit', 
     q_table: 'QTableWidget', 
-    gui_defaults: GuiDefaults,
-    table_columns: List[str], 
-    json_config: JsonConfig,
-    table_control: 'TableControl',
+    widget_manager: 'WidgetManager',
+    config_manager: 'ConfigManager',
+    control_manager: 'ControlManager',
+    app_key: str,
     local_var: bool = True
 ) -> None:
+    gui_defaults = config_manager.gui_defaults
+    table_columns = config_manager.table_columns[app_key].getColumns()
+    json_config = config_manager.json_config
+    table_control = control_manager.table_controls[app_key]
+    def _loadROICheck() -> None:
+        loadROICheck(q_window, q_table, gui_defaults, table_columns, table_control)
+        updateROICountDisplay(widget_manager, config_manager, app_key)
     q_button_save.clicked.connect(lambda: saveROICheck(q_window, q_lineedit, q_table, gui_defaults, table_columns, json_config, local_var))
-    q_button_load.clicked.connect(lambda: loadROICheck(q_window, q_table, gui_defaults, table_columns, table_control))
+    q_button_load.clicked.connect(lambda: _loadROICheck())
 
 """
 processing_image_layouts
@@ -336,6 +344,7 @@ def bindFuncCheckboxShowRegisteredStack(
 
 # -> processing_image_layouts.makeLayoutFallRegistration
 def bindFuncButtonRunElastixForFall(
+        q_widget: 'QWidget',
         q_button: 'QPushButton',
         data_manager: 'DataManager',
         config_manager: 'ConfigManager',
@@ -394,13 +403,13 @@ def bindFuncButtonRunElastixForFall(
         control_manager.view_controls[app_key].updateView()
         control_manager.view_controls[app_key_sec].updateView()
 
-        print("Registration Finished !")
-
         shutil.rmtree(output_directory)
+        QMessageBox.information(q_widget, "ROI Matching Finish", "ROI Matching Finished!")
     q_button.clicked.connect(lambda: _runElastix())
 
 # -> processing_image_layouts.makeLayoutStackRegistration
 def bindFuncButtonRunElastixForSingleStack(
+        q_widget: 'QWidget',
         q_button: 'QPushButton',
         data_manager: 'DataManager',
         config_manager: 'ConfigManager',
@@ -412,6 +421,8 @@ def bindFuncButtonRunElastixForSingleStack(
         output_directory: str="./elastix"
 ) -> None:
     def _runElastix():
+        os.makedirs(output_directory, exist_ok=True)
+
         elastix_method = combobox_elastix_method.currentText()
         channel_ref = int(combobox_channel_ref.currentText())
         idx_ref = int(combobox_idx_ref.currentText())
@@ -423,10 +434,12 @@ def bindFuncButtonRunElastixForSingleStack(
         data_manager.dict_parameter_map[app_key] = convertDictToElastixFormat(dict_params)
         parameter_object = makeElastixParameterObject(data_manager.getParameterMap(app_key))
         print("Elastix Parameters", dict_params)
+
         img_stack_reg = runStackRegistration(img_stack, parameter_object, channel_ref, idx_ref, axis, output_directory)
         data_manager.dict_tiff_reg[app_key] = img_stack_reg
-        print("Registration Finished !")
         shutil.rmtree(output_directory)
+
+        QMessageBox.information(q_widget, "ROI Matching Finish", "ROI Matching Finished!")
     q_button.clicked.connect(lambda: _runElastix())
 
 # -> processing_image_layouts.makeLayoutStackRegistration
@@ -442,6 +455,56 @@ def bindFuncButtonSaveRegisterdImage(
         metadata = data_manager.getTiffMetadata(app_key)
         saveTiffStack(q_widget, path_tif_dst, data_manager.getTiffStackRegistered(app_key), imagej=True, metadata=metadata)
     q_button.clicked.connect(_saveRegisteredImage)
+
+"""
+processing_roi_layouts
+"""
+def bindFuncButtonRunROIMatching(
+    q_widget: 'QWidget',
+    q_button: 'QPushButton',
+    q_buttongroup_celltype_pri: 'QButtonGroup',
+    q_buttongroup_celltype_sec: 'QButtonGroup',
+    widget_manager: 'WidgetManager',
+    data_manager: 'DataManager',
+    control_manager: 'ControlManager',
+    app_key_pri: str,
+    app_key_sec: str,
+):
+    def _runROIMatching():
+        roi_display_type_pri = q_buttongroup_celltype_pri.checkedButton().text()
+        roi_display_type_sec = q_buttongroup_celltype_sec.checkedButton().text()
+        result = showConfirmationDialog(
+            q_widget,
+            'Confirmation',
+            f"Match only displayed ROIs? \nYes: Match {roi_display_type_pri} ROIs and {roi_display_type_sec} ROIs \nNo: Match all ROIs \nCancel: Cancel"
+        )
+        array_src = np.array([data_manager.getDictROICoords(app_key_pri)[idx]["med"] for idx in range(data_manager.getNROIs(app_key_pri))])
+        array_tgt = np.array([data_manager.getDictROICoords(app_key_sec)[idx]["med"] for idx in range(data_manager.getNROIs(app_key_sec))])
+        if result == QMessageBox.Yes:
+            pass
+        elif result == QMessageBox.Cancel:
+            return 
+        else:
+            roi_display_pri = control_manager.getSharedAttr(app_key_pri, "roi_display")
+            roi_display_sec = control_manager.getSharedAttr(app_key_sec, "roi_display")
+            array_src = array_src[roi_display_pri]
+            array_tgt = array_tgt[roi_display_sec]
+
+        roi_matching = calculateROIMatching(
+                    array_src=array_src,
+                    array_tgt=array_tgt,
+                    method=widget_manager.dict_combobox["ot_method"].currentText(),
+                    loss_fun="square_loss",
+                    metric="minkowski",
+                    p=float(widget_manager.dict_lineedit["wd_exp"].text()),
+                    alpha=float(widget_manager.dict_lineedit["fgwd_alpha"].text()),
+                    threshold=float(widget_manager.dict_lineedit["ot_threshold_transport"].text()),
+                    max_cost=float(widget_manager.dict_lineedit["ot_threshold_cost"].text()),
+                    return_plan=widget_manager.dict_checkbox["plot_ot_plan"].isChecked()
+                )
+        print(roi_matching)
+        QMessageBox.information(q_widget, "ROI Matching Finish", "ROI Matching Finished!")
+    q_button.clicked.connect(_runROIMatching)
 
 """
 slider_layouts
