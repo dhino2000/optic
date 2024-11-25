@@ -23,7 +23,7 @@ def calculateDistanceMatrix(
     else:
         return ot.dist(array_src, array_tgt, metric=metric, p=p) # inter group
         
-# get uniform weight
+# get uniform weight (1, 1, 1,...)
 def getUniformWeight(n: int) -> np.ndarray[Tuple[float]]:
     return ot.unif(n)
 
@@ -100,14 +100,16 @@ def calculateROIMatching(
         array_tgt: np.ndarray,
         method: str,
         loss_fun: str="square_loss",
+        metric: str="minkowski",
+        p: float=2.0,
         alpha: float=0.1,
         threshold: float=1e-6,
         max_cost: float=float('inf'),
         return_plan: bool=False # return transport plan matrix
         ) -> Dict[int, int]:
-    C = calculateDistanceMatrix(array_src, array_tgt)
-    C1 = calculateDistanceMatrix(array_src)
-    C2 = calculateDistanceMatrix(array_tgt)
+    C = calculateDistanceMatrix(array_src, array_tgt, metric=metric, p=p)
+    C1 = calculateDistanceMatrix(array_src, metric=metric, p=p)
+    C2 = calculateDistanceMatrix(array_tgt, metric=metric, p=p)
     a = getUniformWeight(len(array_src))
     b = getUniformWeight(len(array_tgt))
 

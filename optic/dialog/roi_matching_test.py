@@ -60,8 +60,12 @@ class ROIMatchingTestDialog(QDialog):
             "ot_method",
             "fgwd_alpha",
             "wd_exp",
+            "ot_threshold_transport",
+            "ot_threshold_cost",
             "fgwd_alpha",
             "wd_exp",
+            "ot_threshold_transport",
+            "ot_threshold_cost",
             "ot_method",
             "ot_run",
         ))
@@ -162,7 +166,11 @@ class ROIMatchingTestDialog(QDialog):
             self.med_coords_sec,
             self.widget_manager.dict_combobox["ot_method"].currentText(),
             loss_fun="square_loss",
+            metric="minkowski",
+            p=float(self.widget_manager.dict_lineedit["wd_exp"].text()),
             alpha=float(self.widget_manager.dict_lineedit["fgwd_alpha"].text()),
+            threshold=float(self.widget_manager.dict_lineedit["ot_threshold_dist"].text()),
+            max_cost=float(self.widget_manager.dict_lineedit["ot_threshold_cost"].text()),
             return_plan=self.widget_manager.dict_checkbox["plot_ot_plan"].isChecked()
         )
         self.updateCanvas()
