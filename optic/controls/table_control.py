@@ -216,8 +216,8 @@ class TableControl:
             self.moveSkippingChecked(self.selected_row, step, True)
         elif move_type == 'skip_unchecked':
             self.moveSkippingChecked(self.selected_row, step, False)
-        # elif move_type == 'selected_type':
-            # self.moveToSelectedType(self.selected_row, step)
+        elif move_type == 'selected_type':
+            self.moveToSelectedType(self.selected_row, step)
 
     # toggle radiobutton, checkbox
     def toggleColumn(self, row: int, col_order: int) -> None:
@@ -261,6 +261,20 @@ class TableControl:
             if new_row == start_row:
                 break
             if self.getRowChecked(new_row) != skip_checked:
+                self.selected_row = new_row
+                return
+            
+    # if "Neuron" is checked, move to next "Neuron"
+    def moveToSelectedType(self, start_row: int, direction: Literal[-1, 1]) -> None:
+        roi_display = self.getSharedAttr_ROIDisplay()
+        total_rows = self.q_table.rowCount()
+        new_row = start_row
+
+        while True:
+            new_row = (new_row + direction) % total_rows
+            if new_row == start_row:
+                break
+            if roi_display[new_row]:
                 self.selected_row = new_row
                 return
             
