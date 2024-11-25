@@ -481,14 +481,14 @@ def bindFuncButtonRunROIMatching(
         array_src = np.array([data_manager.getDictROICoords(app_key_pri)[idx]["med"] for idx in range(data_manager.getNROIs(app_key_pri))])
         array_tgt = np.array([data_manager.getDictROICoords(app_key_sec)[idx]["med"] for idx in range(data_manager.getNROIs(app_key_sec))])
         if result == QMessageBox.Yes:
-            pass
+            roi_display_pri = list(control_manager.getSharedAttr(app_key_pri, "roi_display").values())
+            roi_display_sec = list(control_manager.getSharedAttr(app_key_sec, "roi_display").values())
+            array_src = array_src[roi_display_pri]
+            array_tgt = array_tgt[roi_display_sec]
         elif result == QMessageBox.Cancel:
             return 
         else:
-            roi_display_pri = control_manager.getSharedAttr(app_key_pri, "roi_display")
-            roi_display_sec = control_manager.getSharedAttr(app_key_sec, "roi_display")
-            array_src = array_src[roi_display_pri]
-            array_tgt = array_tgt[roi_display_sec]
+            pass
 
         roi_matching = calculateROIMatching(
                     array_src=array_src,
@@ -500,9 +500,14 @@ def bindFuncButtonRunROIMatching(
                     alpha=float(widget_manager.dict_lineedit["fgwd_alpha"].text()),
                     threshold=float(widget_manager.dict_lineedit["ot_threshold_transport"].text()),
                     max_cost=float(widget_manager.dict_lineedit["ot_threshold_cost"].text()),
-                    return_plan=widget_manager.dict_checkbox["plot_ot_plan"].isChecked()
                 )
-        print(roi_matching)
+        # convert roi_matching id to original id
+        true_idxs_pri = np.nonzero(roi_display_pri)[0][list(roi_matching.keys())]
+        true_idxs_sec = np.nonzero(roi_display_sec)[0][list(roi_matching.values())]
+        roi_matching = dict(zip(true_idxs_pri, true_idxs_sec))
+
+        control_manager.table_controls[app_key_pri].updateMatchedROIPairs(roi_matching)
+        control_manager.view_controls[app_key_pri].updateView()
         QMessageBox.information(q_widget, "ROI Matching Finish", "ROI Matching Finished!")
     q_button.clicked.connect(_runROIMatching)
 

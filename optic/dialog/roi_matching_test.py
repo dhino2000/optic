@@ -155,7 +155,6 @@ class ROIMatchingTestDialog(QDialog):
                 if value < 0.001:
                     pass
                 else:
-                    print(value)
                     ax.plot([self.med_coords_pri[idx_src, 0], self.med_coords_sec[idx_tgt, 0]], 
                             [self.med_coords_pri[idx_src, 1], self.med_coords_sec[idx_tgt, 1]], 
                             c=color_pair, alpha=alpha, linewidth=linewidth*value)

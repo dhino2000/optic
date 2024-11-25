@@ -1,6 +1,6 @@
 from __future__ import annotations
 from ..type_definitions import *
-from PyQt5.QtWidgets import QRadioButton, QButtonGroup, QMessageBox, QAbstractItemView, QTableWidget
+from PyQt5.QtWidgets import QRadioButton, QButtonGroup, QMessageBox, QAbstractItemView, QTableWidget, QTableWidgetItem
 from PyQt5.QtCore import Qt
 from ..visualization.info_visual import updateROIPropertyDisplay, updateROICountDisplay
 from ..utils.dialog_utils import showConfirmationDialog
@@ -402,6 +402,24 @@ class TableControl:
     """
     Other Functions
     """
+    # update Cell ID Match column values based on matching dictionary
+    def updateMatchedROIPairs(self, matches: Dict[int, int]) -> None:
+        col_id = self.table_columns.getColumns()['Cell ID']['order']
+        col_id_match = self.table_columns.getColumns()['Cell ID Match']['order']
+        
+        for row in range(self.q_table.rowCount()):
+            try:
+                cell_id = int(self.q_table.item(row, col_id).text())
+                if cell_id in matches:
+                    # Create new item with the matching ID
+                    match_item = QTableWidgetItem(str(matches[cell_id]))
+                    self.q_table.setItem(row, col_id_match, match_item)
+                else:
+                    # Clear the match if no matching exists
+                    self.q_table.setItem(row, col_id_match, QTableWidgetItem(""))
+            except (ValueError, AttributeError):
+                continue
+
     # if "Match Cell ID" is filled, get ROI pair
     def getMatchedROIPairs(self) -> List[Tuple[int, int]]:
         matched_pairs = []
@@ -418,13 +436,11 @@ class TableControl:
                     continue
                     
                 cell_id_match = int(cell_id_match_item.text())
-                
                 # Skip invalid values
                 if (cell_id_match < 0 or cell_id_match >= self.len_row):
                     continue
                 
                 matched_pairs.append((cell_id, cell_id_match))
-                
             except (ValueError, AttributeError):
                 continue
                 
