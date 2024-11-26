@@ -53,6 +53,10 @@ def getMatchedPaths(list_path, list_str_include=None, list_str_exclude=None, mat
     if list_str_exclude is None:
         list_str_exclude = []
 
+    # 空文字列を除外
+    list_str_include = [s for s in list_str_include if s]
+    list_str_exclude = [s for s in list_str_exclude if s]
+
     # case_sensitiveがTrueの場合、大文字小文字を区別する
     re_flags = 0 if case_sensitive else re.IGNORECASE
     list_str_include = [re.compile(s, re_flags) for s in list_str_include]

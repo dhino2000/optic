@@ -275,6 +275,17 @@ class GuiDefaults:
         },
         "REGISTRATION_METHOD": ["None", "affine", "bspline"],
     }
+
+    SUITE2P_AUTO_RUN = {
+        "WINDOW_SETTINGS": {
+            "INIT_POSITION_X": 100, 
+            "INIT_POSITION_Y": 100,
+            "WIDTH": 1300,
+            "HEIGHT": 900,
+        },
+        "TITLE": "Suite2pAutoRunGUI",
+        "APP_KEYS": [AppKeys.PRI],
+    }
     
     @classmethod
     def getROIDisplayOptions(cls, app_name, table_columns):

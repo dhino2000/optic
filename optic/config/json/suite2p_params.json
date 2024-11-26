@@ -1,0 +1,109 @@
+{
+    "suite2p_parameters": {
+        "Main settings": {
+            "grid_position": [0, 0],
+            "parameters": {
+                "nplanes": {"grid_position": [1, 0], "value_default": 1},
+                "nchannels": {"grid_position": [2, 0], "value_default": 1},
+                "functional_chan": {"grid_position": [3, 0], "value_default": 1},
+                "tau": {"grid_position": [4, 0], "value_default": 1.0},
+                "fs": {"grid_position": [5, 0], "value_default": 30.0},
+                "do_bidiphase": {"grid_position": [6, 0], "value_default": false},
+                "bidiphase": {"grid_position": [7, 0], "value_default": 0},
+                "multiplane_parallel": {"grid_position": [8, 0], "value_default": false},
+                "ignore_flyback": {"grid_position": [9, 0], "value_default": null}
+            }
+        },
+        "Output settings": {
+            "grid_position": [0, 1],
+            "parameters": {
+                "preclassify": {"grid_position": [1, 1], "value_default": 0.0},
+                "save_mat": {"grid_position": [2, 1], "value_default": false},
+                "save_NWB": {"grid_position": [3, 1], "value_default": false},
+                "combined": {"grid_position": [4, 1], "value_default": true},
+                "reg_tif": {"grid_position": [5, 1], "value_default": false},
+                "reg_tif_chan2": {"grid_position": [6, 1], "value_default": false},
+                "aspect": {"grid_position": [7, 1], "value_default": 1.0},
+                "delete_bin": {"grid_position": [8, 1], "value_default": false},
+                "move_bin": {"grid_position": [9, 1], "value_default": true}
+            }
+        },
+        "Registration": {
+            "grid_position": [0, 2],
+            "parameters": {
+                "do_registration": {"grid_position": [1, 2], "value_default": true},
+                "align_by_chan": {"grid_position": [2, 2], "value_default": 1},
+                "nimg_init": {"grid_position": [3, 2], "value_default": 300},
+                "batch_size": {"grid_position": [4, 2], "value_default": 500},
+                "smooth_sigma": {"grid_position": [5, 2], "value_default": 1.15},
+                "smooth_sigma_time": {"grid_position": [6, 2], "value_default": 0},
+                "maxregshift": {"grid_position": [7, 2], "value_default": 0.1},
+                "th_badframes": {"grid_position": [8, 2], "value_default": 1.0},
+                "keep_movie_raw": {"grid_position": [9, 2], "value_default": false},
+                "two_step_registration": {"grid_position": [10, 2], "value_default": false}
+            }
+        },
+        "Nonrigid": {
+            "grid_position": [0, 3],
+            "parameters": {
+                "nonrigid": {"grid_position": [1, 3], "value_default": true},
+                "block_size": {"grid_position": [2, 3], "value_default": [128, 128]},
+                "snr_thresh": {"grid_position": [3, 3], "value_default": 1.2},
+                "maxregshiftNR": {"grid_position": [4, 3], "value_default": 5}
+            }
+        },
+        "1P": {
+            "grid_position": [0, 4],
+            "parameters": {
+                "1Preg": {"grid_position": [1, 4], "value_default": false},
+                "spatial_hp_reg": {"grid_position": [2, 4], "value_default": 42},
+                "pre_smooth": {"grid_position": [3, 4], "value_default": 2},
+                "spatial_taper": {"grid_position": [4, 4], "value_default": 40}
+            }
+        },
+        "Functional detect": {
+            "grid_position": [0, 5],
+            "parameters": {
+                "roidetect": {"grid_position": [1, 5], "value_default": true},
+                "sparse_mode": {"grid_position": [2, 5], "value_default": false},
+                "denoise": {"grid_position": [3, 5], "value_default": false},
+                "spatial_scale": {"grid_position": [4, 5], "value_default": 0},
+                "threshold_scaling": {"grid_position": [5, 5], "value_default": 1.0},
+                "max_overlap": {"grid_position": [6, 5], "value_default": 0.75},
+                "max_iterations": {"grid_position": [7, 5], "value_default": 20},
+                "high_pass": {"grid_position": [8, 5], "value_default": 100},
+                "spatial_hp_detect": {"grid_position": [9, 5], "value_default": 25}
+            }
+        },
+        "Anat detect": {
+            "grid_position": [0, 6],
+            "parameters": {
+                "anatomical_only": {"grid_position": [1, 6], "value_default": false},
+                "diameter": {"grid_position": [2, 6], "value_default": 0},
+                "cellprob_threshold": {"grid_position": [3, 6], "value_default": 0.0},
+                "flow_threshold": {"grid_position": [4, 6], "value_default": 1.5},
+                "pretrained_model": {"grid_position": [5, 6], "value_default": "cyto2"},
+                "spatial_hp_cp": {"grid_position": [6, 6], "value_default": 30}
+            }
+        },
+        "Extraction/Neuropil": {
+            "grid_position": [0, 7],
+            "parameters": {
+                "neuropil_extract": {"grid_position": [1, 7], "value_default": true},
+                "allow_overlap": {"grid_position": [2, 7], "value_default": false},
+                "inner_neuropil_radius": {"grid_position": [3, 7], "value_default": 2},
+                "min_neuropil_pixels": {"grid_position": [4, 7], "value_default": 350}
+            }
+        },
+        "Classify/Deconv": {
+            "grid_position": [0, 8],
+            "parameters": {
+                "soma_crop": {"grid_position": [1, 8], "value_default": true},
+                "spikedetect": {"grid_position": [2, 8], "value_default": true},
+                "win_baseline": {"grid_position": [3, 8], "value_default": 60.0},
+                "sig_baseline": {"grid_position": [4, 8], "value_default": 10.0},
+                "neucoeff": {"grid_position": [5, 8], "value_default": 0.7}
+            }
+        }
+    }
+}

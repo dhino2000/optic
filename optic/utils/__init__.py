@@ -3,5 +3,5 @@ from .path_utils import getAllSubDirectories, getAllSubFiles, getMatchedPaths, g
 from .app_utils import exitApp
 from .layout_utils import clearLayout
 from .info_utils import extractRangeValues
-from .listwidget_utils import clearListWidget, addItemToListWidget, addItemToListWidgetFromLineEdit, removeSelectedItemsFromListWidget
+from .listwidget_utils import clearListWidget, getAllItemsFromListWidget, getIndexedItemsFromListWidget, getSelectedItemsFromListWidget, removeIndexedItemsFromListWidget, removeSelectedItemsFromListWidget, addItemToListWidgetFromLineEdit
 from .dialog_utils import showConfirmationDialog, showProgressDialog
