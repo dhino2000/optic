@@ -1,3 +1,5 @@
+from PyQt5.QtWidgets import QMainWindow, QWidget, QGridLayout, QVBoxLayout, QHBoxLayout, QMessageBox, QDialog
+from functools import partial
 from optic.config import *
 from optic.controls import *
 from optic.dialog import *
@@ -228,11 +230,16 @@ class Suite2pROITrackingGUI(QMainWindow):
             "ot_method",
             "fgwd_alpha",
             "wd_exp",
+            "ot_threshold_transport",
+            "ot_threshold_cost",
             "fgwd_alpha",
             "wd_exp",
+            "ot_threshold_transport",
+            "ot_threshold_cost",
             "ot_method",
             "ot_run",
         )
+        layout.addWidget(self.widget_manager.makeWidgetButton("roi_matching_test", "ROI Matching Test"))
         return layout
 
     "Bottom"
@@ -285,6 +292,7 @@ class Suite2pROITrackingGUI(QMainWindow):
     """
     make SubWindow, Dialog Function
     """
+    # Table Column Config Dialog
     def showSubWindowTableColumnConfig(self, app_key):
         config_window = TableColumnConfigDialog(
             self, 
@@ -294,6 +302,7 @@ class Suite2pROITrackingGUI(QMainWindow):
         if config_window.exec_():
             self.loadFilePathsandInitialize()
 
+    # Elastix Params Config Dialog
     def showSubWindowElastixParamsConfig(self):
         config_window = ElastixParamsConfigDialog(
             self, 
@@ -302,6 +311,20 @@ class Suite2pROITrackingGUI(QMainWindow):
         )
         if config_window.exec_() == QDialog.Accepted:
             self.config_manager.json_config.set("elastix_params", config_window.elastix_params)
+
+    # ROI Matching Test Dialog
+    def showSubWindowROIMatchingTest(self):
+        config_window = ROIMatchingTestDialog(
+            self, 
+            self.config_manager.gui_defaults,
+            self.data_manager,
+            self.config_manager,
+            self.control_manager,
+            self.app_keys[0],
+            self.app_keys[1],
+        )
+        if config_window.exec_() == QDialog.Accepted:
+            pass
 
     """
     bindFunc Function
@@ -319,6 +342,19 @@ class Suite2pROITrackingGUI(QMainWindow):
 
     def bindFuncAllWidget(self):
         for app_key in self.app_keys:
+            # ROICheck save load
+            bindFuncROICheckIO(
+                q_window=self, 
+                q_lineedit=self.widget_manager.dict_lineedit[f"{app_key}_path_fall"], 
+                q_button_save=self.widget_manager.dict_button[f"{app_key}_save_roicheck"], 
+                q_button_load=self.widget_manager.dict_button[f"{app_key}_load_roicheck"], 
+                q_table=self.widget_manager.dict_table[f"{app_key}"], 
+                widget_manager=self.widget_manager,
+                config_manager=self.config_manager,
+                control_manager=self.control_manager,
+                app_key=app_key,
+                local_var=False
+            )
             # View MousePressEvent
             bindFuncViewMouseEventWithTracking(
                 q_view=self.widget_manager.dict_view[app_key],
@@ -407,6 +443,7 @@ class Suite2pROITrackingGUI(QMainWindow):
 
         # Elastix Run
         bindFuncButtonRunElastixForFall(
+                self,
                 q_button=self.widget_manager.dict_button['elastix_run'],
                 data_manager=self.data_manager,
                 config_manager=self.config_manager,
@@ -420,4 +457,21 @@ class Suite2pROITrackingGUI(QMainWindow):
         # Elastix config
         self.widget_manager.dict_button[f"elastix_config"].clicked.connect(
             lambda: self.showSubWindowElastixParamsConfig()
+        )
+
+        # ROI Matching Run
+        bindFuncButtonRunROIMatching(
+            self,
+            q_button=self.widget_manager.dict_button['ot_run'],
+            q_buttongroup_celltype_pri=self.widget_manager.dict_buttongroup[f"{self.app_keys[0]}_display_celltype"],
+            q_buttongroup_celltype_sec=self.widget_manager.dict_buttongroup[f"{self.app_keys[1]}_display_celltype"],
+            widget_manager=self.widget_manager,
+            data_manager=self.data_manager,
+            control_manager=self.control_manager,
+            app_key_pri=self.app_keys[0],
+            app_key_sec=self.app_keys[1],
+        )
+        # ROI Matching Test
+        self.widget_manager.dict_button[f"roi_matching_test"].clicked.connect(
+            lambda: self.showSubWindowROIMatchingTest()
         )
