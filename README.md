@@ -50,6 +50,14 @@ T: time points
 - Image registration across time points or z-planes
 
 ## Installation
+
+### Requirements
+- OS: Windows 11
+- Python: 3.8.19
+- CPU: > 24 cores
+- RAM: > 128 GB
+
+### Installation
 1. Install [Anaconda](https://www.anaconda.com/download/success)
 
 - Install Anaconda distribution and prepare Python environment
