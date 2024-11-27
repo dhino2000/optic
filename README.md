@@ -78,18 +78,25 @@ T: time points
 
 ## How to use
 ### Suite2pROICheck
-1. Open the Anaconda Prompt and switch to the desired environment.
-- activate optic
+1. Open the Anaconda Prompt and switch to the desired environment.  
+`activate optic`
   
 2. Execute the "suite2p_roi_check.py" script
-- python {path_of_suite2p_roi_check.py}
 
-(ex) python C:/Users/dhino2000/optic/scripts/suite2p_roi_check.py
+(ex) `python C:/Users/dhino2000/optic/scripts/suite2p_roi_check.py`
 
 3. Sort and Check ROIs!
 ([Suite2pROICheck Tutorial](https://github.com/dhino2000/optic/blob/main/docs/Suite2pROICheck/tutorial.md))
 
 ### Suite2pROITracking
+1. Open the Anaconda Prompt and switch to the desired environment.  
+`activate optic`
+  
+2. Execute the "suite2p_roi_tracking.py" script  
+
+(ex) `python C:/Users/dhino2000/optic/scripts/suite2p_roi_tracking.py`
+
+3. Track ROIs!
 ([Suite2pROITracking Tutorial](https://github.com/dhino2000/optic/blob/main/docs/Suite2pROITracking/tutorial.md))
 
 ### MicrogliaTracking

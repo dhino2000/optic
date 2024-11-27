@@ -164,19 +164,10 @@ class Suite2pROICheckGUI(QMainWindow):
         layout = makeLayoutViewWithZTSlider(self.widget_manager, self.app_key_pri)
         return layout
 
-    # ROI property label, threshold lineedit
+    # ROI property label
     def makeLayoutComponentROIPropertyDisplay_Threshold(self):
         layout = QVBoxLayout()
-
         layout.addLayout(makeLayoutROIProperty(self.widget_manager, key_label=f"{self.app_key_pri}_roi_prop"))
-        # layout.addLayout(makeLayoutROIThresholds(
-        #     self.widget_manager, 
-        #     key_label=f"{self.app_key_pri}_roi_threshold", 
-        #     key_lineedit=f"{self.app_key_pri}_roi_threshold", 
-        #     key_button=f"{self.app_key_pri}_roi_threshold", 
-        #     label_button="Update ROI Display", 
-        #     dict_roi_threshold=self.config_manager.gui_defaults["ROI_THRESHOLDS"],
-        # ))
         return layout
 
     # ROI display, background image button group, checkbox
@@ -346,9 +337,11 @@ class Suite2pROICheckGUI(QMainWindow):
             q_table=self.widget_manager.dict_table[f"{self.app_key_pri}"], 
             q_button_save=self.widget_manager.dict_button[f"{self.app_key_pri}_save_roicheck"], 
             q_button_load=self.widget_manager.dict_button[f"{self.app_key_pri}_load_roicheck"], 
-            gui_defaults=self.config_manager.gui_defaults,
-            table_columns=self.config_manager.table_columns[self.app_key_pri].getColumns(),
-            table_control=self.control_manager.table_controls[self.app_key_pri],
+            q_table=self.widget_manager.dict_table[f"{self.app_key_pri}"], 
+            widget_manager=self.widget_manager,
+            config_manager=self.config_manager,
+            control_manager=self.control_manager,
+            app_key=self.app_key_pri,
             local_var=False
         )
         # Table Column Config
