@@ -214,6 +214,7 @@ def loadROICheck(
             
             # select saved date
             dict_roicheck = mat_roicheck["manualROIcheck"][date]
+            dict_roicheck = {k.replace(" ", "_"): v for k, v in dict_roicheck.items()} # this is temporary fix for old ROIcheck files !!!
             
             applyDictROICheckToTable(q_table, table_columns, dict_roicheck)
             QMessageBox.information(q_window, "File load", "ROICheck file loaded!")
