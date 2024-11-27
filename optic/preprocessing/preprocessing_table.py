@@ -9,7 +9,7 @@ from PyQt5.QtCore import Qt
 def convertTableDataToDictROICheck(
         q_table: QTableWidget, 
         table_columns: TableColumns, 
-        local_var: bool=True
+        local_var: bool=False
         ) -> Dict[str, Any]:
     if local_var:
         cell_type_keys = ROICheckMatKeysLocal.cell_type_keys # local variables
@@ -85,7 +85,7 @@ def convertMatROICheckToDictROICheck(mat_roicheck: Dict[str, Any]) -> Dict[str, 
 def convertTableDataToDictROITracking(
         q_table: QTableWidget, 
         table_columns: TableColumns, 
-        local_var: bool=True
+        local_var: bool=False
         ) -> Dict[str, np.ndarray]:
     # celltype, checkbox, string
     dict_roi_tracking = convertTableDataToDictROICheck(q_table, table_columns, local_var)
@@ -96,7 +96,7 @@ def convertTableDataToDictROITracking(
             values = []
             for row in range(row_count):
                 item = q_table.item(row, col_info['order'])
-                value = int(item.text()) if item else None
+                value = int(item.text()) if item else np.nan
                 values.append([value])
             dict_roi_tracking[col_name] = np.array(values)
         # Cell ID Match
@@ -105,13 +105,13 @@ def convertTableDataToDictROITracking(
             for row in range(row_count):
                 item = q_table.item(row, col_info['order'])
                 try:
-                    value = int(item.text()) if item else None
+                    value = int(item.text()) if item else np.nan
                     if value >= 0 and value < row_count:
                         values.append([value])
                     else:
-                        values.append([None])
+                        values.append([np.nan])
                 except (ValueError, AttributeError):
-                    values.append([None])
+                    values.append([np.nan])
             dict_roi_tracking[col_name] = np.array(values)
     return dict_roi_tracking
 

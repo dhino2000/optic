@@ -231,7 +231,7 @@ def saveROITracking(
         table_column_pri : TableColumns,
         table_column_sec : TableColumns,
         json_config      : JsonConfig, 
-        local_var        : bool=True
+        local_var        : bool=False
         ) -> None:
     path_src_pri = q_lineedit_pri.text()
     path_src_sec = q_lineedit_sec.text()
@@ -259,6 +259,8 @@ def saveROITracking(
                     )
             else:
                 dict_roi_tracking_pri = convertTableDataToDictROITracking(q_table_pri, table_column_pri, local_var)
+                print(dict_roi_tracking_pri.keys())
+                print(dict_roi_tracking_pri["Cell ID"])
                 dict_roi_check_sec = convertTableDataToDictROICheck(q_table_sec, table_column_sec)
                 mat_roi_tracking = convertDictROITrackingToMatROITracking(
                     dict_roi_tracking_pri,
@@ -270,10 +272,12 @@ def saveROITracking(
                     path_fall_pri=path_src_pri,
                     path_fall_sec=path_src_sec
                     )
+            
             savemat(path_dst, mat_roi_tracking)
             QMessageBox.information(q_window, "File save", f"ROI Tracking file saved!\nuser: {user}, date: {now}")
         except Exception as e:
-            QMessageBox.warning(q_window, "File save failed", f"Error saving ROI Tracking file: {e}")
+            raise e
+            # QMessageBox.warning(q_window, "File save failed", f"Error saving ROI Tracking file: {e}")
 
 # load ROITracking.mat
 def loadROITracking(

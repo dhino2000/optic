@@ -59,10 +59,10 @@ class GuiDefaults:
         },
         "TABLE_COLUMNS": {
             AppKeys.PRI: {
-                "Cell ID"   : {"order": 0, "type": "id",       "width": 80},
+                "Cell_ID"   : {"order": 0, "type": "id",       "width": 80},
                 "Astrocyte" : {"order": 1, "type": "celltype", "width": 80, "default": False},
                 "Neuron"    : {"order": 2, "type": "celltype", "width": 80, "default": True},
-                "Not Cell"  : {"order": 3, "type": "celltype", "width": 80, "default": False},
+                "Not_Cell"  : {"order": 3, "type": "celltype", "width": 80, "default": False},
                 "Check"     : {"order": 4, "type": "checkbox", "width": 80, "default": False},
                 "Tracking"  : {"order": 5, "type": "checkbox", "width": 80, "default": False},
                 "Memo"      : {"order": 6, "type": "string",   "width": 200}
@@ -160,20 +160,20 @@ class GuiDefaults:
         "ROI_MATCHING_METHOD": ["None", "affine", "bspline"],
         "TABLE_COLUMNS": {
             AppKeys.PRI: {
-                "Cell ID"       : {"order": 0, "type": "id",       "width": 80},
-                "Cell ID Match" : {"order": 1, "type": "id_match", "width": 80},
+                "Cell_ID"       : {"order": 0, "type": "id",       "width": 80},
+                "Cell_ID_Match" : {"order": 1, "type": "id_match", "width": 80},
                 "Astrocyte"     : {"order": 2, "type": "celltype", "width": 80, "default": False},
                 "Neuron"        : {"order": 3, "type": "celltype", "width": 80, "default": True},
-                "Not Cell"      : {"order": 4, "type": "celltype", "width": 80, "default": False},
+                "Not_Cell"      : {"order": 4, "type": "celltype", "width": 80, "default": False},
                 "Check"         : {"order": 5, "type": "checkbox", "width": 80, "default": False},
                 "Tracking"      : {"order": 6, "type": "checkbox", "width": 80, "default": False},
                 "Memo"          : {"order": 7, "type": "string",   "width": 200}
             },
             AppKeys.SEC: {
-                "Cell ID"   : {"order": 0, "type": "id",       "width": 80},
+                "Cell_ID"   : {"order": 0, "type": "id",       "width": 80},
                 "Astrocyte" : {"order": 1, "type": "celltype", "width": 80, "default": False},
                 "Neuron"    : {"order": 2, "type": "celltype", "width": 80, "default": True},
-                "Not Cell"  : {"order": 3, "type": "celltype", "width": 80, "default": False},
+                "Not_Cell"  : {"order": 3, "type": "celltype", "width": 80, "default": False},
                 "Check"     : {"order": 4, "type": "checkbox", "width": 80, "default": False},
                 "Tracking"  : {"order": 5, "type": "checkbox", "width": 80, "default": False},
                 "Memo"      : {"order": 6, "type": "string",   "width": 200}

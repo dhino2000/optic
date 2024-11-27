@@ -199,7 +199,7 @@ def bindFuncROITrackingIO(
     control_manager: 'ControlManager',
     app_key_pri: str,
     app_key_sec: str,
-    local_var: bool = True
+    local_var: bool = False
 ) -> None:
     gui_defaults = config_manager.gui_defaults
     json_config = config_manager.json_config
@@ -214,8 +214,8 @@ def bindFuncROITrackingIO(
         q_table_pri, 
         q_table_sec,
         gui_defaults, 
-        control_manager.table_controls[app_key_pri], 
-        control_manager.table_controls[app_key_sec], 
+        control_manager.table_controls[app_key_pri].table_columns, 
+        control_manager.table_controls[app_key_sec].table_columns, 
         json_config, 
         local_var
         ))
