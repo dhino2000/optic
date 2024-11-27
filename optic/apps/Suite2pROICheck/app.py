@@ -74,7 +74,7 @@ class Suite2pROICheckGUI(QMainWindow):
     def loadData(self):
         success = self.data_manager.loadFallMat(
             app_key=self.app_key_pri, 
-            path_fall=self.widget_manager.dict_lineedit[f"{self.app_key_pri}_path_fall"].text()
+            path_fall=self.widget_manager.dict_lineedit[f"path_fall_{self.app_key_pri}"].text()
         )
         if self.widget_manager.dict_lineedit[f"{self.app_key_pri}_path_reftif"].text() != "":
             success = self.data_manager.loadTifImage(
@@ -133,7 +133,7 @@ class Suite2pROICheckGUI(QMainWindow):
 
         # LineEdit
         list_label = ["Fall mat file path", "Reference Tiff image file path (optional)"]
-        list_key = [f"{self.app_key_pri}_path_fall", f"{self.app_key_pri}_path_reftif"]
+        list_key = [f"path_fall_{self.app_key_pri}", f"{self.app_key_pri}_path_reftif"]
         for label, key in zip(list_label, list_key):
             layout.addLayout(makeLayoutLoadFileWidget(
                 self.widget_manager, 
@@ -325,7 +325,7 @@ class Suite2pROICheckGUI(QMainWindow):
     配置したwidgetに関数を紐づけ
     """
     def bindFuncFileLoadUI(self):        
-        list_key = [f"{self.app_key_pri}_path_fall", f"{self.app_key_pri}_path_reftif"]
+        list_key = [f"path_fall_{self.app_key_pri}", f"{self.app_key_pri}_path_reftif"]
         list_filetype = [Extension.MAT, Extension.TIFF]
         for key, filetype in zip(list_key, list_filetype):
             bindFuncLoadFileWidget(
@@ -342,7 +342,7 @@ class Suite2pROICheckGUI(QMainWindow):
         # ROICheck save load
         bindFuncROICheckIO(
             q_window=self, 
-            q_lineedit=self.widget_manager.dict_lineedit[f"{self.app_key_pri}_path_fall"], 
+            q_lineedit=self.widget_manager.dict_lineedit[f"path_fall_{self.app_key_pri}"], 
             q_table=self.widget_manager.dict_table[f"{self.app_key_pri}"], 
             q_button_save=self.widget_manager.dict_button[f"{self.app_key_pri}_save_roicheck"], 
             q_button_load=self.widget_manager.dict_button[f"{self.app_key_pri}_load_roicheck"], 

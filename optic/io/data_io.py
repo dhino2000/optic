@@ -9,7 +9,7 @@ import numpy as np
 from ..gui.table_setup import applyDictROICheckToTable
 from ..preprocessing.preprocessing_fall import convertMatToDictFall, convertMatToDictROICheck
 from ..preprocessing.preprocessing_image import getBGImageFromFall, convertImageDtypeToINT
-from ..preprocessing.preprocessing_table import convertTableDataToDictROICheck, convertDictROICheckToMatROICheck, convertMatROICheckToDictROICheck
+from ..preprocessing.preprocessing_table import convertTableDataToDictROICheck, convertDictROICheckToMatROICheck, convertMatROICheckToDictROICheck, convertTableDataToDictROITracking, convertDictROITrackingToMatROITracking
 from ..preprocessing.preprocessing_tiff import standardizeTIFFStack
 from .file_dialog import openFileDialog, saveFileDialog
 
@@ -194,7 +194,7 @@ def loadROICheck(
         q_window        : QMainWindow, 
         q_table         : QTableWidget, 
         gui_defaults    : GuiDefaults,
-        table_columns   : Dict[str, Dict[str, Any]], 
+        table_columns   : TableColumns,
         table_control   : TableControl,
         ) -> Union[Dict[str, Any], None]:
     path_roicheck = openFileDialog(q_widget=q_window, file_type="mat", title="Open ROIcheck mat File")
@@ -219,3 +219,64 @@ def loadROICheck(
             QMessageBox.information(q_window, "File load", "ROICheck file loaded!")
         except Exception as e:
             QMessageBox.warning(q_window, "File load failed", f"Error loading ROICheck file: {e}")
+
+# save table content as ROITracking.mat
+def saveROITracking(
+        q_window         : QMainWindow, 
+        q_lineedit_pri   : QLineEdit, 
+        q_lineedit_sec   : QLineEdit,
+        q_table_pri      : QTableWidget, 
+        q_table_sec      : QTableWidget,
+        gui_defaults     : GuiDefaults,
+        table_column_pri : TableColumns,
+        table_column_sec : TableColumns,
+        json_config      : JsonConfig, 
+        local_var        : bool=True
+        ) -> None:
+    path_src_pri = q_lineedit_pri.text()
+    path_src_sec = q_lineedit_sec.text()
+    path_dst = generateSavePath(path_src_pri, prefix="ROItracking_", remove_strings="Fall_")
+    path_dst, is_overwrite = saveFileDialog(q_widget=q_window, file_type="mat", title="Save ROItracking mat File", initial_dir=path_dst)
+    
+    if path_dst:
+        try:
+            from ..dialog.user_select import UserSelectDialog
+            dialog = UserSelectDialog(parent=q_window, gui_defaults=gui_defaults, json_config=json_config)
+            if dialog.exec_() == QDialog.Accepted:
+                dialog.getUser()
+                user = dialog.user
+            now = f"save_{datetime.datetime.now().strftime('%y%m%d_%H%M%S')}"
+            if is_overwrite:
+                mat_roi_tracking = loadmat(path_dst, simplify_cells=True)
+                dict_roi_tracking_pri = convertTableDataToDictROITracking(q_table_pri, table_column_pri, local_var)
+                dict_roi_check_sec = convertTableDataToDictROICheck(q_table_sec, table_column_sec)
+                mat_roi_tracking = convertDictROITrackingToMatROITracking(
+                    dict_roi_tracking_pri,
+                    dict_roi_check_sec,
+                    mat_roi_tracking=mat_roi_tracking,
+                    date=now,
+                    user=user
+                    )
+            else:
+                dict_roi_tracking_pri = convertTableDataToDictROITracking(q_table_pri, table_column_pri, local_var)
+                dict_roi_check_sec = convertTableDataToDictROICheck(q_table_sec, table_column_sec)
+                mat_roi_tracking = convertDictROITrackingToMatROITracking(
+                    dict_roi_tracking_pri,
+                    dict_roi_check_sec,
+                    date=now,
+                    user=user,
+                    n_roi_pri=q_table_pri.rowCount(),
+                    n_roi_sec=q_table_sec.rowCount(),
+                    path_fall_pri=path_src_pri,
+                    path_fall_sec=path_src_sec
+                    )
+            savemat(path_dst, mat_roi_tracking)
+            QMessageBox.information(q_window, "File save", f"ROI Tracking file saved!\nuser: {user}, date: {now}")
+        except Exception as e:
+            QMessageBox.warning(q_window, "File save failed", f"Error saving ROI Tracking file: {e}")
+
+# load ROITracking.mat
+def loadROITracking(
+        
+):
+    pass

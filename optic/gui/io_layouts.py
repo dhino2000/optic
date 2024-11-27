@@ -22,10 +22,25 @@ def makeLayoutLoadFileExitHelp(
     return layout
 
 # Table, ROICheck, ROIMatchのIO
-def makeLayoutROICheckIO(widget_manager: WidgetManager, key_button: str) -> QHBoxLayout:
+def makeLayoutROICheckIO(
+        widget_manager: WidgetManager, 
+        key_button_save: str,
+        key_button_load: str,
+        )-> QHBoxLayout:
     layout = QHBoxLayout()
-    list_key = [f"{key_button}_save_roicheck", f"{key_button}_load_roicheck"]
+    list_key = [key_button_save, key_button_load]
     list_label = ["Save ROICheck", "Load ROICheck"]
     for key, label in zip(list_key, list_label):
         layout.addWidget(widget_manager.makeWidgetButton(key=key, label=label))
+    return layout
+
+# ROI Tracking IO
+def makeLayoutROITrackingIO(
+        widget_manager: WidgetManager,
+        key_button_save_roi_tracking: str,
+        key_button_load_roi_tracking: str
+) -> QHBoxLayout:
+    layout = QHBoxLayout()
+    layout.addWidget(widget_manager.makeWidgetButton(key_button_save_roi_tracking, "Save ROI Tracking"))
+    layout.addWidget(widget_manager.makeWidgetButton(key_button_load_roi_tracking, "Load ROI Tracking"))
     return layout

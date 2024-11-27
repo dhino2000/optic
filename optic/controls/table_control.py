@@ -32,7 +32,7 @@ class TableControl:
     def setupWidgetROITable(self, app_key: str) -> None:
         from ..gui.table_setup import setupWidgetROITable
         self.setLenRow(len(self.data_manager.getStat(self.app_key))) # for Suite2p
-        self.q_table, self.groups_celltype = setupWidgetROITable(self.q_table, self.len_row, self.table_columns.getColumns(), key_event_ignore=True)
+        self.q_table, self.groups_celltype = setupWidgetROITable(self.q_table, self.len_row, self.table_columns, key_event_ignore=True)
         self.setKeyPressEvent()
         self.initalizeSharedAttr_ROIDisplay()
         updateROICountDisplay(self.widget_manager, self.config_manager, self.app_key)
@@ -40,7 +40,7 @@ class TableControl:
     def updateWidgetROITable(self) -> None:
         from ..gui.table_setup import setupWidgetROITable
         self.q_table.clear()
-        self.q_table = setupWidgetROITable(self.q_table, self.len_row, self.table_columns.getColumns(), key_event_ignore=True)
+        self.q_table = setupWidgetROITable(self.q_table, self.len_row, self.table_columns, key_event_ignore=True)
 
     # change table cell selection
     def onSelectionChanged(self, selected: QItemSelection, deselected: QItemSelection) -> None:

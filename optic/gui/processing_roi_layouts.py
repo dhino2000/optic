@@ -69,3 +69,11 @@ def makeLayoutROIMatching(
     layout.addLayout(layout_ot_threshold)
     layout.addLayout(layout_run)
     return layout
+
+def makeLayoutROIMatchingTest(
+        widget_manager: WidgetManager,
+        key_button_roi_matching_test: str
+) -> QHBoxLayout:
+    layout = QHBoxLayout()
+    layout.addWidget(widget_manager.makeWidgetButton(key_button_roi_matching_test, "ROI Matching Test"))
+    return layout

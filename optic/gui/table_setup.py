@@ -4,12 +4,17 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QAbstractItemView, QTableWidgetItem, QRadioButton, QButtonGroup
 from ..controls.event_filters import applyKeyPressEventIgnore
 
-def setupWidgetROITable(q_table: QTableWidget, len_row: int, table_columns: TableColumns, key_event_ignore: bool=True):
+def setupWidgetROITable(
+        q_table: QTableWidget, 
+        len_row: int, 
+        table_columns: TableColumns, 
+        key_event_ignore: bool=True
+        ):
     q_table.clearSelection() # テーブルの選択初期化
 
     q_table.setRowCount(len_row)
     # 列を順序に基づいてソート
-    col_sorted = sorted(table_columns.items(), key=lambda x: x[1]['order'])
+    col_sorted = sorted(table_columns.getColumns().items(), key=lambda x: x[1]['order'])
     q_table.setColumnCount(len(col_sorted))
 
     # ヘッダーの設定
@@ -54,10 +59,14 @@ def setupWidgetROITable(q_table: QTableWidget, len_row: int, table_columns: Tabl
     return q_table, groups_celltype
 
 # dict_roicheckの内容をtableに反映
-def applyDictROICheckToTable(q_table: QTableWidget, table_columns: TableColumns, dict_roicheck: Dict[str, List[Tuple[Any]]]):
+def applyDictROICheckToTable(
+        q_table: QTableWidget, 
+        table_columns: TableColumns, 
+        dict_roicheck: Dict[str, List[Tuple[Any]]]
+        ):
     row_count = q_table.rowCount()
 
-    for col_name, col_info in table_columns.items():
+    for col_name, col_info in table_columns.getColumns().items():
         # radio button
         if col_info['type'] == 'celltype':
             if col_name in dict_roicheck:

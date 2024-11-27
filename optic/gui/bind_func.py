@@ -1,7 +1,7 @@
 from __future__ import annotations
 from ..type_definitions import *
 from ..io.file_dialog import openFileDialogAndSetLineEdit, saveFileDialog
-from ..io.data_io import saveROICheck, loadROICheck, loadEventFileNPY, generateSavePath, saveTiffStack
+from ..io.data_io import saveROICheck, loadROICheck, loadEventFileNPY, generateSavePath, saveTiffStack, saveROITracking, loadROITracking
 from ..visualization.view_visual_rectangle import clipRectangleRange
 from ..visualization.info_visual import updateROICountDisplay
 from ..processing import *
@@ -162,7 +162,6 @@ def bindFuncLoadFileWidget(
 ) -> None:
     q_button.clicked.connect(lambda: openFileDialogAndSetLineEdit(q_widget, filetype, q_lineedit))
 
-
 # -> io_layouts.makeLayoutROICheckIO
 def bindFuncROICheckIO(
     q_button_save: 'QPushButton', 
@@ -177,13 +176,49 @@ def bindFuncROICheckIO(
     local_var: bool = True
 ) -> None:
     gui_defaults = config_manager.gui_defaults
-    table_columns = config_manager.table_columns[app_key].getColumns()
+    table_columns = config_manager.table_columns[app_key]
     json_config = config_manager.json_config
     table_control = control_manager.table_controls[app_key]
     def _loadROICheck() -> None:
         loadROICheck(q_window, q_table, gui_defaults, table_columns, table_control)
         updateROICountDisplay(widget_manager, config_manager, app_key)
     q_button_save.clicked.connect(lambda: saveROICheck(q_window, q_lineedit, q_table, gui_defaults, table_columns, json_config, local_var))
+    q_button_load.clicked.connect(lambda: _loadROICheck())
+
+# -> io_layouts.makeLayoutROITrackingIO
+def bindFuncROITrackingIO(
+    q_button_save: 'QPushButton', 
+    q_button_load: 'QPushButton', 
+    q_window: 'QWidget', 
+    q_lineedit_pri: 'QLineEdit', 
+    q_lineedit_sec: 'QLineEdit',
+    q_table_pri: 'QTableWidget',
+    q_table_sec: 'QTableWidget', 
+    widget_manager: 'WidgetManager',
+    config_manager: 'ConfigManager',
+    control_manager: 'ControlManager',
+    app_key_pri: str,
+    app_key_sec: str,
+    local_var: bool = True
+) -> None:
+    gui_defaults = config_manager.gui_defaults
+    json_config = config_manager.json_config
+    def _loadROICheck() -> None:
+        loadROITracking()
+        updateROICountDisplay(widget_manager, config_manager, app_key_pri)
+        updateROICountDisplay(widget_manager, config_manager, app_key_sec)
+    q_button_save.clicked.connect(lambda: saveROITracking(
+        q_window, 
+        q_lineedit_pri,
+        q_lineedit_sec,
+        q_table_pri, 
+        q_table_sec,
+        gui_defaults, 
+        control_manager.table_controls[app_key_pri], 
+        control_manager.table_controls[app_key_sec], 
+        json_config, 
+        local_var
+        ))
     q_button_load.clicked.connect(lambda: _loadROICheck())
 
 """

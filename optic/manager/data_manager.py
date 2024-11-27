@@ -61,7 +61,6 @@ class DataManager:
                         self.dict_im_bg_chan2_reg[app_key] = getBGImageChannel2FromFall(self, app_key)
             return True
         except Exception as e:
-            raise e
             return False
         
     # load tiff image data (for optional)
