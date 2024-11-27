@@ -3,6 +3,7 @@ from ..type_definitions import *
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QAbstractItemView, QTableWidgetItem, QRadioButton, QButtonGroup
 from ..controls.event_filters import applyKeyPressEventIgnore
+import numpy as np
 
 def setupWidgetROITable(
         q_table: QTableWidget, 
@@ -62,7 +63,7 @@ def setupWidgetROITable(
 def applyDictROICheckToTable(
         q_table: QTableWidget, 
         table_columns: TableColumns, 
-        dict_roicheck: Dict[str, List[Tuple[Any]]]
+        dict_roicheck: Dict[str, Any]
         ):
     row_count = q_table.rowCount()
 
@@ -90,3 +91,24 @@ def applyDictROICheckToTable(
                             if value == '[]' or value == '':
                                 value = ''
                             item.setText(value)
+
+# apply dict_roi_tracking to table
+def applyDictROITrackingToTable(
+        q_table: QTableWidget, 
+        table_columns: TableColumns, 
+        dict_roi_tracking: Dict[str, Any]
+        ):
+    applyDictROICheckToTable(q_table, table_columns, dict_roi_tracking)
+    row_count = q_table.rowCount()
+
+    # Cell_ID_Match
+    for col_name, col_info in table_columns.getColumns().items():
+        if col_info['type'] == 'id_match':
+            if col_name in dict_roi_tracking:
+                data = dict_roi_tracking[col_name]
+                for row in range(min(row_count, len(data))):
+                    item = q_table.item(row, col_info['order'])
+                    if item:
+                        value = data[row]
+                        if not np.isnan(value):
+                            item.setText(str(int(value)))

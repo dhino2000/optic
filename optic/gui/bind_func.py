@@ -203,8 +203,17 @@ def bindFuncROITrackingIO(
 ) -> None:
     gui_defaults = config_manager.gui_defaults
     json_config = config_manager.json_config
-    def _loadROICheck() -> None:
-        loadROITracking()
+    def _loadROITracking() -> None:
+        loadROITracking(
+            q_window, 
+            q_table_pri, 
+            q_table_sec, 
+            gui_defaults, 
+            control_manager.table_controls[app_key_pri].table_columns, 
+            control_manager.table_controls[app_key_sec].table_columns, 
+            control_manager.table_controls[app_key_pri], 
+            control_manager.table_controls[app_key_sec]
+        )
         updateROICountDisplay(widget_manager, config_manager, app_key_pri)
         updateROICountDisplay(widget_manager, config_manager, app_key_sec)
     q_button_save.clicked.connect(lambda: saveROITracking(
@@ -219,7 +228,7 @@ def bindFuncROITrackingIO(
         json_config, 
         local_var
         ))
-    q_button_load.clicked.connect(lambda: _loadROICheck())
+    q_button_load.clicked.connect(lambda: _loadROITracking())
 
 """
 processing_image_layouts

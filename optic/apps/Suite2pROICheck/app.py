@@ -76,10 +76,10 @@ class Suite2pROICheckGUI(QMainWindow):
             app_key=self.app_key_pri, 
             path_fall=self.widget_manager.dict_lineedit[f"path_fall_{self.app_key_pri}"].text()
         )
-        if self.widget_manager.dict_lineedit[f"{self.app_key_pri}_path_reftif"].text() != "":
+        if self.widget_manager.dict_lineedit[f"path_reftif_{self.app_key_pri}"].text() != "":
             success = self.data_manager.loadTifImage(
                 app_key=self.app_key_pri,
-                path_image=self.widget_manager.dict_lineedit[f"{self.app_key_pri}_path_reftif"].text(), 
+                path_image=self.widget_manager.dict_lineedit[f"path_reftif_{self.app_key_pri}"].text(), 
             )
         return success
 
@@ -133,7 +133,7 @@ class Suite2pROICheckGUI(QMainWindow):
 
         # LineEdit
         list_label = ["Fall mat file path", "Reference Tiff image file path (optional)"]
-        list_key = [f"path_fall_{self.app_key_pri}", f"{self.app_key_pri}_path_reftif"]
+        list_key = [f"path_fall_{self.app_key_pri}", f"path_reftif_{self.app_key_pri}"]
         for label, key in zip(list_label, list_key):
             layout.addLayout(makeLayoutLoadFileWidget(
                 self.widget_manager, 
@@ -239,7 +239,8 @@ class Suite2pROICheckGUI(QMainWindow):
         ))
         layout.addLayout(makeLayoutROICheckIO(
             self.widget_manager, 
-            key_button=self.app_key_pri
+            key_button_save=f"roicheck_save_{self.app_key_pri}",
+            key_button_load=f"roicheck_load_{self.app_key_pri}",
         ))
         return layout
 
@@ -316,7 +317,7 @@ class Suite2pROICheckGUI(QMainWindow):
     配置したwidgetに関数を紐づけ
     """
     def bindFuncFileLoadUI(self):        
-        list_key = [f"path_fall_{self.app_key_pri}", f"{self.app_key_pri}_path_reftif"]
+        list_key = [f"path_fall_{self.app_key_pri}", f"path_reftif_{self.app_key_pri}"]
         list_filetype = [Extension.MAT, Extension.TIFF]
         for key, filetype in zip(list_key, list_filetype):
             bindFuncLoadFileWidget(
@@ -334,9 +335,8 @@ class Suite2pROICheckGUI(QMainWindow):
         bindFuncROICheckIO(
             q_window=self, 
             q_lineedit=self.widget_manager.dict_lineedit[f"path_fall_{self.app_key_pri}"], 
-            q_table=self.widget_manager.dict_table[f"{self.app_key_pri}"], 
-            q_button_save=self.widget_manager.dict_button[f"{self.app_key_pri}_save_roicheck"], 
-            q_button_load=self.widget_manager.dict_button[f"{self.app_key_pri}_load_roicheck"], 
+            q_button_save=self.widget_manager.dict_button[f"roicheck_save_{self.app_key_pri}"], 
+            q_button_load=self.widget_manager.dict_button[f"roicheck_load_{self.app_key_pri}"], 
             q_table=self.widget_manager.dict_table[f"{self.app_key_pri}"], 
             widget_manager=self.widget_manager,
             config_manager=self.config_manager,

@@ -6,7 +6,7 @@ from scipy.io import loadmat, savemat
 import tifffile
 import datetime
 import numpy as np
-from ..gui.table_setup import applyDictROICheckToTable
+from ..gui.table_setup import applyDictROICheckToTable, applyDictROITrackingToTable
 from ..preprocessing.preprocessing_fall import convertMatToDictFall, convertMatToDictROICheck
 from ..preprocessing.preprocessing_image import getBGImageFromFall, convertImageDtypeToINT
 from ..preprocessing.preprocessing_table import convertTableDataToDictROICheck, convertDictROICheckToMatROICheck, convertMatROICheckToDictROICheck, convertTableDataToDictROITracking, convertDictROITrackingToMatROITracking
@@ -260,8 +260,6 @@ def saveROITracking(
                     )
             else:
                 dict_roi_tracking_pri = convertTableDataToDictROITracking(q_table_pri, table_column_pri, local_var)
-                print(dict_roi_tracking_pri.keys())
-                print(dict_roi_tracking_pri["Cell ID"])
                 dict_roi_check_sec = convertTableDataToDictROICheck(q_table_sec, table_column_sec)
                 mat_roi_tracking = convertDictROITrackingToMatROITracking(
                     dict_roi_tracking_pri,
@@ -282,6 +280,41 @@ def saveROITracking(
 
 # load ROITracking.mat
 def loadROITracking(
-        
-):
-    pass
+        q_window           : QMainWindow, 
+        q_table_pri        : QTableWidget, 
+        q_table_sec        : QTableWidget,
+        gui_defaults       : GuiDefaults,
+        table_column_pri   : TableColumns,
+        table_column_sec   : TableColumns,
+        table_control_pri  : TableControl,
+        table_control_sec  : TableControl,
+        ) -> Union[Dict[str, Any], None]:
+    path_roi_tracking = openFileDialog(q_widget=q_window, file_type="mat", title="Open ROItracking mat File")
+    if path_roi_tracking:
+        try:
+            mat_roi_tracking = loadmat(path_roi_tracking, simplify_cells=True)
+            # check number of ROIs between of Fall file and of ROI tracking file
+            if table_control_pri.len_row != mat_roi_tracking["NumberOfROI_pri"]:
+                QMessageBox.warning(q_window, "File load failed", f"Length of data does not match! \npri Table: {table_control_pri.len_row}, pri ROICheck: {mat_roi_tracking['NumberOfROI_pri']}")
+                return
+            if table_control_sec.len_row != mat_roi_tracking["NumberOfROI_sec"]:
+                QMessageBox.warning(q_window, "File load failed", f"Length of data does not match! \nsec Table: {table_control_sec.len_row}, sec ROICheck: {mat_roi_tracking['NumberOfROI_pri']}")
+                return
+
+            from ..dialog.date_select import DateSelectDialog
+            list_date = list(mat_roi_tracking["ROITracking"].keys())
+            dialog = DateSelectDialog(parent=q_window, gui_defaults=gui_defaults, list_date=list_date)
+            if dialog.exec_() == QDialog.Accepted:
+                date = dialog.date
+            
+            # select saved date
+            dict_roi_tracking_pri = mat_roi_tracking["ROITracking"][date]["pri"]
+            dict_roi_check_sec = mat_roi_tracking["ROITracking"][date]["sec"]
+            dict_roi_tracking_pri = {k.replace(" ", "_"): v for k, v in dict_roi_tracking_pri.items()} # this is temporary fix for old ROIcheck files !!!
+            dict_roi_check_sec = {k.replace(" ", "_"): v for k, v in dict_roi_check_sec.items()} # this is temporary fix for old ROIcheck files !!!
+            
+            applyDictROITrackingToTable(q_table_pri, table_column_pri, dict_roi_tracking_pri)
+            applyDictROICheckToTable(q_table_sec, table_column_sec, dict_roi_check_sec)
+            QMessageBox.information(q_window, "File load", "ROICheck file loaded!")
+        except Exception as e:
+            QMessageBox.warning(q_window, "File load failed", f"Error loading ROICheck file: {e}")

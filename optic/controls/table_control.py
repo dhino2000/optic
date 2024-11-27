@@ -79,7 +79,7 @@ class TableControl:
     # if "Cell ID Match" column is empty, return None
     def getMatchId(self, roi_id: int) -> Optional[int]:
         try:
-            col_id_match = self.table_columns.getColumns()['Cell ID Match']['order']
+            col_id_match = self.table_columns.getColumns()['Cell_ID_Match']['order'] # hardcoded !!!
             id = int(self.q_table.item(roi_id, col_id_match).text())
             return id
         except (KeyError, AttributeError, ValueError):
@@ -313,7 +313,7 @@ class TableControl:
             result = showConfirmationDialog(
                 self.q_table,
                 'Confirmation',
-                f"Skip {column} checked ROI?"
+                f"Skip {column} checked ROI ?"
             )
             if result == QMessageBox.Yes:
                 skip_states[column] = self.getCheckboxStates(column)
@@ -404,8 +404,8 @@ class TableControl:
     """
     # update Cell ID Match column values based on matching dictionary
     def updateMatchedROIPairs(self, matches: Dict[int, int]) -> None:
-        col_id = self.table_columns.getColumns()['Cell ID']['order']
-        col_id_match = self.table_columns.getColumns()['Cell ID Match']['order']
+        col_id = self.table_columns.getColumns()['Cell_ID']['order'] # hardcoded !!!
+        col_id_match = self.table_columns.getColumns()['Cell_ID_Match']['order'] # hardcoded !!!
         
         for row in range(self.q_table.rowCount()):
             try:
@@ -424,8 +424,8 @@ class TableControl:
     def getMatchedROIPairs(self) -> List[Tuple[int, int]]:
         matched_pairs = []
 
-        col_id = self.table_columns.getColumns()['Cell ID']['order']
-        col_id_match = self.table_columns.getColumns()['Cell ID Match']['order']
+        col_id = self.table_columns.getColumns()['Cell_ID']['order'] # hardcoded !!!
+        col_id_match = self.table_columns.getColumns()['Cell_ID_Match']['order'] # hardcoded !!!
         
         for row in range(self.len_row):
             try:
