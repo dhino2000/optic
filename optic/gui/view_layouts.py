@@ -20,7 +20,7 @@ def makeLayoutViewWithZTSlider(
 ) -> QVBoxLayout:
     layout = QVBoxLayout()
 
-    q_view = widget_manager.makeWidgetView(key=key_view)
+    q_view = widget_manager.makeWidgetView(key=key_view, width_min=256, height_min=256)
     layout.addWidget(q_view)
 
     # add z slider

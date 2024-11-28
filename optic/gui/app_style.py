@@ -51,7 +51,7 @@ def setAppStyle(app: QApplication, font_name: str, base_font_size: int, base_wid
         }}
     """)
 
-def applyAppStyle(app: QApplication, font_name: str = "Arial", base_font_size: int = 6, base_widget_height: int = 6, base_widget_margin: int = 2) -> None:
+def applyAppStyle(app: QApplication, font_name: str = "Arial", base_font_size: int = 8, base_widget_height: int = 6, base_widget_margin: int = 0) -> None:
     """
     アプリケーションにデフォルトのスタイルを適用する。
     """

@@ -194,6 +194,10 @@ def makeWidgetView(
         widget.setMinimumWidth(height_min)
     widget.setStyleSheet(f"background-color: {color};")  # 背景色を黒に設定
     widget.setViewportUpdateMode(QGraphicsView.FullViewportUpdate)
+    widget.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
+    # widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+    widget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+    widget.setAlignment(Qt.AlignCenter)
     if anti_aliasing:
         widget.setRenderHint(QPainter.Antialiasing)  # アンチエイリアシングを有効化
     if smooth_pixmap_transform:
