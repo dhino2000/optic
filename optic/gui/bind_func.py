@@ -644,6 +644,14 @@ def bindFuncROIPairOpacitySlider(
 """
 table_layouts
 """
+# -> table_layouts
+def bindFuncButtonClearColumnCells(
+    q_button: 'QPushButton', 
+    q_table: 'QTableWidget', 
+    idx_col: int
+) -> None:
+    q_button.clicked.connect(lambda: clearColumnCells(q_table, idx_col))
+
 # -> table_layouts.makeLayoutTableROICountLabel
 def bindFuncTableSelectionChanged(
     q_table: 'QTableWidget', 
@@ -733,12 +741,12 @@ def bindFuncCheckboxToggleAllROI(
 # -> table_layouts.makeLayoutROIFilterButton
 def bindFuncButtonFilterROI(
     q_button: 'QPushButton',
+    dict_q_lineedit: Dict[str, 'QLineEdit'],
     table_control: 'TableControl', 
-    view_control: 'ViewControl'
+    view_control: 'ViewControl',
 ) -> None:
-    thresholds = table_control.getThresholdsOfROIFilter()
     q_button.clicked.connect(
-        lambda: table_control.filterROI(thresholds)
+        lambda: table_control.filterROI(getThresholdsOfROIFilter(dict_q_lineedit))
     )
     view_control.updateView()
 

@@ -378,7 +378,7 @@ class TableControl:
         )
         if result == QMessageBox.Yes:
             celltype_columns = [col for col, info in self.table_columns.getColumns().items() if info['type'] == 'celltype']
-            target_celltype = max(celltype_columns, key=lambda col: self.table_columns.getColumns()[col]['order'])
+            target_celltype = max(celltype_columns, key=lambda col: self.table_columns.getColumns()[col]['order']) # Not_Cell column should be the last column of "celltype" columns
             target_column = self.table_columns.getColumns()[target_celltype]['order']
 
             for row in range(self.q_table.rowCount()):
@@ -391,14 +391,6 @@ class TableControl:
             updateROICountDisplay(self.widget_manager, self.config_manager, self.app_key)
         else:
             return
-    # get thresholds of ROI filter
-    def getThresholdsOfROIFilter(self) -> Dict[str, Tuple[float, float]]:
-        thresholds = {}
-        q_lineedits = {key: self.widget_manager.dict_lineedit[f"{self.app_key}_roi_filter_{key}"] for key in self.config_manager.gui_defaults["ROI_THRESHOLDS"].keys()}
-        for key, q_lineedit in q_lineedits.items():
-            thresholds[key] = extractRangeValues(q_lineedit.text())
-        return thresholds
-    
     """
     Other Functions
     """
