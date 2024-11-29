@@ -231,6 +231,57 @@ class GuiDefaults:
         },
     }
 
+    MICROGLIA_TRACKING = {
+        "MIN_PLOT_RANGE": 30,
+        "WINDOW_SETTINGS": {
+            "INIT_POSITION_X": 100, 
+            "INIT_POSITION_Y": 100,
+            "WIDTH": 1200,
+            "HEIGHT": 200,
+            # "MAX_WIDTH": 1920,
+            # "MAX_HEIGHT": 1080,
+        },
+        "WINDOW_SETTINGS_TABLE_COLUMNS_CONFIG": {
+            "INIT_POSITION_X": 100, 
+            "INIT_POSITION_Y": 100,
+            "WIDTH": 800,
+            "HEIGHT": 600,
+            # "MAX_WIDTH": 1920,
+            # "MAX_HEIGHT": 1080,
+        },
+        "WINDOW_SETTINGS_DIALOG": {
+            "INIT_POSITION_X": 100, 
+            "INIT_POSITION_Y": 100,
+            "WIDTH": 300,
+            "HEIGHT": 200,
+        },
+        "TITLE": "MicrogliaTrackingGUI",
+        "APP_KEYS": [AppKeys.PRI, AppKeys.SEC],
+        "CHANNELS": [ChannelKeys.CHAN1, ChannelKeys.CHAN2, ChannelKeys.CHAN3],
+        "VIEW_SETTINGS": {
+            "DEFAULT_CONTRAST_MIN": 0,
+            "DEFAULT_CONTRAST_MAX": 255,
+        },
+        "ROI_VISUAL_SETTINGS": {
+            "COLOR_MIN": 100,
+            "COLOR_MAX": 255,
+            "DEFAULT_ROI_OPACITY": 128,
+            "DEFAULT_HIGHLIGHT_OPACITY": 255,
+        },
+        "ROI_MATCHING_METHOD": ["None", "affine", "bspline"],
+        "TABLE_COLUMNS": {
+            AppKeys.PRI: {
+                "Cell_ID"       : {"order": 0, "type": "id",       "width": 80},
+                "Cell_ID_Match" : {"order": 1, "type": "id_match", "width": 80},
+            },
+            AppKeys.SEC: {
+                "Cell_ID"   : {"order": 0, "type": "id",       "width": 80},
+            },
+        },
+        "KEY_FUNCTION_MAP": {
+        },
+    }
+
     TIFSTACK_EXPLORER = {
         "WINDOW_SETTINGS": {
             "INIT_POSITION_X": 100, 

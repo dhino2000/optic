@@ -4,9 +4,14 @@ from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
 from .base_layouts import makeLayoutLineEditLabel
 
-# F, Fneu, spks, eventのプロットプロット用のcanvas Layout
-def makeLayoutCanvasTracePlot(widget_manager: WidgetManager, key_figure: str, key_canvas: str, app_key: str, toolbar: bool=False) -> QVBoxLayout:
-    # プロットウィジェットの設定
+# F, Fneu, spks, event plotting canvas Layout
+def makeLayoutCanvasTracePlot(
+        widget_manager: WidgetManager, 
+        key_figure: str, 
+        key_canvas: str, 
+        key_button: str,
+        toolbar: bool=False
+        ) -> QVBoxLayout:
     layout = QVBoxLayout()
     widget_manager.makeWidgetFigure(key_figure)
     widget_manager.makeWidgetFigureCanvas(key_canvas, widget_manager.dict_figure[key_figure])
@@ -15,10 +20,15 @@ def makeLayoutCanvasTracePlot(widget_manager: WidgetManager, key_figure: str, ke
     if toolbar:
         layout.addWidget(NavigationToolbar2QT(canvas, None))
     layout.addWidget(canvas)
+    layout.addWidget(widget_manager.makeWidgetButton(key=key_button, label="Export Figure"))
     return layout
 
 # Canvas plot, plot range
-def makeLayoutMinimumPlotRange(widget_manager: WidgetManager, config_manager: ConfigManager, app_key: str) -> QHBoxLayout:
+def makeLayoutMinimumPlotRange(
+        widget_manager: WidgetManager, 
+        config_manager: ConfigManager, 
+        app_key: AppKeys,
+        ) -> QHBoxLayout:
     layout = QHBoxLayout()
     layout.addLayout(makeLayoutLineEditLabel
                      (
@@ -33,7 +43,10 @@ def makeLayoutMinimumPlotRange(widget_manager: WidgetManager, config_manager: Co
     return layout
 
 # Canvas plot, Light mode
-def makeLayoutLightPlotMode(widget_manager: WidgetManager, config_manager: ConfigManager) -> QHBoxLayout:
+def makeLayoutLightPlotMode(
+        widget_manager: WidgetManager, 
+        config_manager: ConfigManager
+        ) -> QHBoxLayout:
     layout = QHBoxLayout()
     layout.addWidget(widget_manager.makeWidgetCheckBox(key="light_plot_mode", label="Light Mode", checked=False))
     layout.addLayout(makeLayoutLineEditLabel
@@ -49,7 +62,10 @@ def makeLayoutLightPlotMode(widget_manager: WidgetManager, config_manager: Confi
     return layout
 
 # Eventfile plot, Eventfile plot range
-def makeLayoutEventFilePlot(widget_manager: WidgetManager, app_key: str) -> QVBoxLayout:
+def makeLayoutEventFilePlot(
+        widget_manager: WidgetManager, 
+        app_key: AppKeys,
+        ) -> QVBoxLayout:
     layout = QVBoxLayout()
     layout.addWidget(widget_manager.makeWidgetCheckBox(key=f"{app_key}_plot_eventfile", 
                                                        label="plot EventFile trace", 
@@ -60,7 +76,9 @@ def makeLayoutEventFilePlot(widget_manager: WidgetManager, app_key: str) -> QVBo
                                                 key_lineedit=f"{app_key}_plot_eventfile_range",
                                                 label="plot range from Event start (pre, post; sec)",
                                                 text_set="(10, 10)"))
-    layout.addWidget(widget_manager.makeWidgetButton(key=f"{app_key}_load_eventfile", label="Load EventFile npy file"))
-    layout.addWidget(widget_manager.makeWidgetButton(key=f"{app_key}_clear_eventfile", label="Clear"))
+    layout_button = QHBoxLayout()
+    layout_button.addWidget(widget_manager.makeWidgetButton(key=f"{app_key}_load_eventfile", label="Load EventFile npy file"))
+    layout_button.addWidget(widget_manager.makeWidgetButton(key=f"{app_key}_clear_eventfile", label="Clear"))
+    layout.addLayout(layout_button)
     return layout
 

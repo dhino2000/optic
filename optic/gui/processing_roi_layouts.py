@@ -18,6 +18,7 @@ def makeLayoutROIMatching(
         key_lineedit_threshold_cost      : str,
         key_combobox_ot_method           : str,
         key_button_run                   : str,
+        key_button_clear                 : str
         ) -> QVBoxLayout:
     layout = QVBoxLayout()
     layout.addWidget(widget_manager.makeWidgetLabel(key=key_label_roi_matching, label="ROI Matching", bold=True, italic=True, use_global_style=False))
@@ -65,6 +66,7 @@ def makeLayoutROIMatching(
         ))
     layout_run = QHBoxLayout()
     layout_run.addWidget(widget_manager.makeWidgetButton(key=key_button_run, label="Run Optimal Transport"))
+    layout_run.addWidget(widget_manager.makeWidgetButton(key=key_button_clear, label="Clear Matching Results"))
     layout.addLayout(layout_ot)
     layout.addLayout(layout_ot_threshold)
     layout.addLayout(layout_run)

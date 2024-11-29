@@ -68,6 +68,7 @@ class ROIMatchingTestDialog(QDialog):
             "ot_threshold_cost",
             "ot_method",
             "ot_run",
+            "ot_clear",
         ))
         layout.addWidget(self.widget_manager.makeWidgetCheckBox(key="plot_ot_plan", label="Plot Transport Plan", checked=True), stretch=1)
         self.setLayout(layout)

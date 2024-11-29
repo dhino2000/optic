@@ -51,7 +51,7 @@ def setAppStyle(app: QApplication, font_name: str, base_font_size: int, base_wid
         }}
     """)
 
-def applyAppStyle(app: QApplication, font_name: str = "Arial", base_font_size: int = 8, base_widget_height: int = 6, base_widget_margin: int = 0) -> None:
+def applyAppStyle(app: QApplication, font_name: str = "Arial", base_font_size: int = 8, base_widget_height: int = 8, base_widget_margin: int = 0) -> None:
     """
     アプリケーションにデフォルトのスタイルを適用する。
     """
@@ -67,10 +67,10 @@ def getScalingFactor() -> float:
     if width < 2400:
         return 1.0
     elif width < 2880:
-        return 1.25
+        return 1.0
     elif width < 3360:
-        return 1.5
+        return 1.25
     elif width < 3840:
-        return 1.75
+        return 1.5
     else:
         return 2.0
