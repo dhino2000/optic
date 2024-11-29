@@ -272,7 +272,7 @@ class Suite2pROICheckGUI(QMainWindow):
             self.widget_manager, 
             key_figure=self.app_key_pri, 
             key_canvas=self.app_key_pri, 
-            app_key=self.app_key_pri
+            key_button=f"export_canvas_{self.app_key_pri}"
         ), stretch=1)
         layout.addLayout(self.makeLayoutComponentPlotProperty())
         layout.addLayout(self.makeLayoutComponentEventFilePlot())
@@ -368,6 +368,7 @@ class Suite2pROICheckGUI(QMainWindow):
         # Filter ROIs
         bindFuncButtonFilterROI(
             q_button=self.widget_manager.dict_button[f"{self.app_key_pri}_roi_filter"],
+            dict_q_lineedit={key: self.widget_manager.dict_lineedit[f"{self.app_key_pri}_roi_filter_{key}"] for key in self.config_manager.gui_defaults["ROI_THRESHOLDS"].keys()},
             table_control=self.control_manager.table_controls[self.app_key_pri],
             view_control=self.control_manager.view_controls[self.app_key_pri],
         )
@@ -434,6 +435,13 @@ class Suite2pROICheckGUI(QMainWindow):
             canvas_control.axes[AxisKeys.MID],
             list_event=['button_press_event'],
             list_func=[canvas_control.onClick]
+        )
+        # export figure
+        bindFuncButtonExportFigure(
+            self.widget_manager.dict_button[f"export_canvas_{self.app_key_pri}"],
+            self,
+            self.widget_manager.dict_figure[self.app_key_pri],
+            path_dst = self.widget_manager.dict_lineedit[f"path_fall_{self.app_key_pri}"].text().replace(".mat", "_traceplot.png")
         )
         # Canvas load EventFile
         bindFuncButtonEventfileIO(

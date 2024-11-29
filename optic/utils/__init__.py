@@ -6,3 +6,4 @@ from .info_utils import extractRangeValues, getThresholdsOfROIFilter
 from .listwidget_utils import clearListWidget, getAllItemsFromListWidget, getIndexedItemsFromListWidget, getSelectedItemsFromListWidget, removeIndexedItemsFromListWidget, removeSelectedItemsFromListWidget, addItemToListWidgetFromLineEdit
 from .dialog_utils import showConfirmationDialog, showProgressDialog
 from .table_utils import deleteSelectedRows, addRow, clearColumnCells
+from .canvas_utils import exportAxes, exportFigure

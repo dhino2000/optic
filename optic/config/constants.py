@@ -8,6 +8,9 @@ class Extension:
     TIFF = ".tif"
     NPY = ".npy"
     HDF5 = ".h5"
+    PNG = ".png"
+    PDF = ".pdf"
+    JSON = ".json"
 
 # ファイル選択時の拡張子
 class FileFilters:
@@ -15,12 +18,14 @@ class FileFilters:
     TIFF = "tiff Files (*.tif *.tiff);;All Files (*)"
     NPY = "npy Files (*.npy);;All Files (*)"
     HDF5 = "h5 Files (*.h5);;All Files (*)"
+    PNG_PDF = "Image Files (*.png *.pdf);;PNG Files (*.png);;PDF Files (*.pdf);;All Files (*)"
 
 FILE_FILTERS = {
     ".mat": "mat Files (*.mat);;All Files (*)",
     ".tif": "tiff Files (*.tif *.tiff);;All Files (*)",
     ".npy": "npy Files (*.npy);;All Files (*)",
     ".h5": "h5 Files (*.h5);;All Files (*)",
+    ".png_pdf": "Image Files (*.png *.pdf);;PNG Files (*.png);;PDF Files (*.pdf);;All Files (*)"
 }
 
 # BackGroungImage Type

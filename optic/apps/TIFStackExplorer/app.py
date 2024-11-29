@@ -143,11 +143,21 @@ class TIFStackExplorerGUI(QMainWindow):
     def makeLayoutComponenStackRegistration(self):
         layout = makeLayoutStackRegistration(
             self.widget_manager,
-            key_label=f"{self.app_key_pri}_registration",
-            key_combobox=f"{self.app_key_pri}_registration",
-            key_button_config=f"{self.app_key_pri}_registration_config",
-            key_button_run=f"{self.app_key_pri}_registration_run",
-            items_combobox=self.config_manager.gui_defaults["REGISTRATION_METHOD"],
+            self.data_manager,
+            self.app_key_pri,                 
+            f"elastix_registration",
+            f"elastix_ref_c",
+            f"elastix_ref_plane_t",
+            f"elastix_ref_plane_z",
+            f"elastix_method",
+            f"elastix_ref_c",
+            f"elastix_ref_plane_t",       
+            f"elastix_ref_plane_z",        
+            f"elastix_config", 
+            f"elastix_run_t",   
+            f"elastix_run_z",    
+            f"export_reg_tiff",
+            f"show_reg_result"
         )
         return layout
     
@@ -204,6 +214,18 @@ class TIFStackExplorerGUI(QMainWindow):
     def makeLayoutSectionBottom(self):
         layout = self.makeLayoutComponentFileLoadUI()
         return layout
+    
+    """
+    make SubWindow, Dialog Function
+    """
+    def showSubWindowElastixParamsConfig(self):
+        config_window = ElastixParamsConfigDialog(
+            self, 
+            self.config_manager.json_config.get("elastix_params"),
+            self.config_manager.gui_defaults,
+        )
+        if config_window.exec_() == QDialog.Accepted:
+            self.config_manager.json_config.set("elastix_params", config_window.elastix_params)
 
     """
     bindFunc Function
@@ -280,4 +302,46 @@ class TIFStackExplorerGUI(QMainWindow):
             q_listwidget=self.widget_manager.dict_listwidget[f"{self.app_key_pri}_normalization_area"],
             tiff_stack=self.data_manager.getTiffStack(self.app_key_pri),
             metadata=self.data_manager.getTiffMetadata(self.app_key_pri),
+        )
+        # Elastix config
+        self.widget_manager.dict_button[f"elastix_config"].clicked.connect(
+            lambda: self.showSubWindowElastixParamsConfig()
+        )
+
+        # show registration result
+        bindFuncCheckboxShowRegisteredStack(
+            q_checkbox=self.widget_manager.dict_checkbox[f"show_reg_result"],
+            view_control=self.control_manager.view_controls[self.app_key_pri]
+        )
+        # run Elastix registration t-axis
+        bindFuncButtonRunElastixForSingleStack(
+                self,
+                q_button=self.widget_manager.dict_button[f"elastix_run_t"],
+                data_manager=self.data_manager,
+                config_manager=self.config_manager,
+                app_key=self.app_key_pri,
+                combobox_elastix_method=self.widget_manager.dict_combobox[f"elastix_method"],
+                combobox_channel_ref=self.widget_manager.dict_combobox[f"elastix_ref_c"],
+                combobox_idx_ref=self.widget_manager.dict_combobox[f"elastix_ref_plane_t"],
+                axis="t"
+        )
+        # run Elastix registration z-axis
+        bindFuncButtonRunElastixForSingleStack(
+                self,
+                q_button=self.widget_manager.dict_button[f"elastix_run_z"],
+                data_manager=self.data_manager,
+                config_manager=self.config_manager,
+                app_key=self.app_key_pri,
+                combobox_elastix_method=self.widget_manager.dict_combobox[f"elastix_method"],
+                combobox_channel_ref=self.widget_manager.dict_combobox[f"elastix_ref_c"],
+                combobox_idx_ref=self.widget_manager.dict_combobox[f"elastix_ref_plane_t"],
+                axis="z"
+        )
+        # export registration result
+        bindFuncButtonSaveRegisterdImage(
+            q_widget=self,
+            q_button=self.widget_manager.dict_button[f"export_reg_tiff"],
+            data_manager=self.data_manager,
+            app_key=self.app_key_pri,
+            path_tif_src=self.widget_manager.dict_lineedit[f"{self.app_key_pri}_path_tiff"].text(),
         )

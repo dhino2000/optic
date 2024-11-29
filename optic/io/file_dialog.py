@@ -32,7 +32,7 @@ def saveFileDialog(
         file_type           : str, 
         title               : str="Save File", 
         initial_dir         : str=""
-        ) -> str:
+        ) -> Tuple[Optional[str], bool]:
     options = QFileDialog.Options()
     file_filter = FILE_FILTERS.get(file_type, "All Files (*)")
     while True:

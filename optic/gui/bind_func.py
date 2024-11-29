@@ -7,6 +7,7 @@ from ..visualization.info_visual import updateROICountDisplay
 from ..processing import *
 from ..utils import *
 from PyQt5.QtCore import Qt
+from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 from matplotlib.backend_bases import Event
 from PyQt5.QtWidgets import QPushButton, QWidget, QLineEdit, QTableWidget, QButtonGroup, QCheckBox, QGraphicsView, QSlider, QMessageBox
@@ -149,6 +150,20 @@ def bindFuncButtonEventfileIO(
         canvas_control.updatePlotWithROISelect()
     q_button_load.clicked.connect(_loadEventFileNPY)
     q_button_clear.clicked.connect(lambda: data_manager.clearEventfile(app_key))
+
+# -> canvas_layouts.makeLayoutCanvasTracePlot
+def bindFuncButtonExportFigure(
+    q_button: 'QPushButton', 
+    q_window: 'QWidget',
+    figure: Figure, 
+    path_dst: str,
+    dpi: int = 300
+) -> None:
+    def onButtonClicked(q_window, figure, path_dst, dpi) -> None:
+        path_dst, is_overwrite = saveFileDialog(q_window, file_type=".png_pdf", initial_dir=path_dst)
+        if path_dst:
+            exportFigure(figure, path_dst, dpi)
+    q_button.clicked.connect(lambda: onButtonClicked(q_window, figure, path_dst, dpi))
 
 """
 io_layouts
