@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import QAbstractItemView, QTableWidgetItem, QRadioButton, Q
 from ..controls.event_filters import applyKeyPressEventIgnore
 import numpy as np
 
+# for Suite2pROICheck, Suite2pROITracking
 def setupWidgetROITable(
         q_table: QTableWidget, 
         len_row: int, 
@@ -54,6 +55,42 @@ def setupWidgetROITable(
                 cell.setCheckState(Qt.Checked if col_info.get("default", False) else Qt.Unchecked)
                 q_table.setItem(cellid, col_info['order'], cell)
             elif cell_type == "string":
+                cell = QTableWidgetItem()
+                q_table.setItem(cellid, col_info['order'], cell)
+
+    return q_table, groups_celltype
+
+# for MicrogliaTracking
+def setupWidgetDynamicTable(
+        q_table: QTableWidget, 
+        table_columns: TableColumns,
+        len_row: int=None,  
+        ):
+    q_table.clearSelection()
+
+    if len_row:
+        q_table.setRowCount(len_row)
+    col_sorted = sorted(table_columns.getColumns().items(), key=lambda x: x[1]['order'])
+    q_table.setColumnCount(len(col_sorted))
+
+    q_table.setHorizontalHeaderLabels([col[0] for col in col_sorted])
+    q_table.setSelectionMode(QAbstractItemView.SingleSelection)
+
+    for col_name, col_info in col_sorted:
+        q_table.setColumnWidth(col_info['order'], col_info['width'])
+
+    groups_celltype = {}
+
+    for cellid in range(len_row):
+        groups_celltype[cellid] = QButtonGroup(q_table)
+        for col_name, col_info in col_sorted:
+            cell_type = col_info["type"]
+            
+            if cell_type == "id":
+                cell = QTableWidgetItem(str(cellid))
+                cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)
+                q_table.setItem(cellid, col_info['order'], cell)
+            elif cell_type == "id_match":
                 cell = QTableWidgetItem()
                 q_table.setItem(cellid, col_info['order'], cell)
 

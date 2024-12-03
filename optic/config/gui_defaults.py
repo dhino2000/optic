@@ -271,11 +271,11 @@ class GuiDefaults:
         "ROI_MATCHING_METHOD": ["None", "affine", "bspline"],
         "TABLE_COLUMNS": {
             AppKeys.PRI: {
-                "Cell_ID"       : {"order": 0, "type": "id",       "width": 80},
-                "Cell_ID_Match" : {"order": 1, "type": "id_match", "width": 80},
+                "Cell_ID"       : {"order": 0, "type": "id",       "width": 160},
+                "Cell_ID_Match" : {"order": 1, "type": "id_match", "width": 160},
             },
             AppKeys.SEC: {
-                "Cell_ID"   : {"order": 0, "type": "id",       "width": 80},
+                "Cell_ID"   : {"order": 0, "type": "id",       "width": 160},
             },
         },
         "KEY_FUNCTION_MAP": {

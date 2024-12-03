@@ -40,6 +40,10 @@ class TableControl:
         self.initalizeSharedAttr_ROIDisplay()
         updateROICountDisplay(self.widget_manager, self.config_manager, self.app_key)
 
+    def setupWidgetDynamicTable(self, app_key: str) -> None:
+        from ..gui.table_setup import setupWidgetDynamicTable
+        self.q_table, self.groups_celltype = setupWidgetDynamicTable(self.q_table, self.table_columns, self.len_row)
+
     def updateWidgetROITable(self) -> None:
         from ..gui.table_setup import setupWidgetROITable
         self.q_table.clear()
