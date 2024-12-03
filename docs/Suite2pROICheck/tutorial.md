@@ -23,9 +23,26 @@ Suite2pROICheck consists of 3 GUI sections, **Canvas**, **View**, and **Table**.
 <tr>
 <td width="50%">
 
-Your text content goes here. You can use regular markdown syntax inside the td tags.
-- List item 1 
-- List item 2
+- **Top Axis**  
+  display zoomed traces (F, Fneu, spks) of the selected ROI.
+  - **mouse drag** : move display area
+  - **mouse scrool** : zoom in/out
+  - **Minimum Plot Range** : set minimum display time in seconds
+
+- **Middle Axis**  
+  display overall traces (F, Fneu, spks) of the selected ROI.  
+  - **mouse click** : centers top axis view on clicked position
+   
+- **Bottom Axis**  
+  display average traces (F, Fneu, spks) across all ROIs.  
+  When event file is loaded, display event-aligned F trace of the selected ROI.  
+
+- **Event File**
+  - **Event File** : The npy file containing containing experimental events. The content must consist of only 0s and 1s in a format like [0, 0, 1, 1, 1, 0, 0, ...].
+  - **Plot Range** : Sets display range (seconds) before/after each event onset. With multiple events, all events are overlaid.
+
+- **Light Mode**  
+  Reduces CPU load by downsampling plot points. When set to 250, plots 1000 points (4x the value).
 
 </td>
 <td width="50%">
