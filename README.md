@@ -128,6 +128,25 @@ This project includes the following external libraries:
 }
 ```
 
+### Cellpose
+
+- Original Repository: https://github.com/MouseLand/cellpose
+
+```bibtex
+@article {Stringer2024.02.10.579780,
+	author = {Stringer, Carsen and Pachitariu, Marius},
+	title = {Cellpose3: one-click image restoration for improved cellular segmentation},
+	elocation-id = {2024.02.10.579780},
+	year = {2024},
+	doi = {10.1101/2024.02.10.579780},
+	publisher = {Cold Spring Harbor Laboratory},
+	abstract = {Generalist methods for cellular segmentation have good out-of-the-box performance on a variety of image types. However, existing methods struggle for images that are degraded by noise, blurred or undersampled, all of which are common in microscopy. We focused the development of Cellpose3 on addressing these cases, and here we demonstrate substantial out-of-the-box gains in segmentation and image quality for noisy, blurry or undersampled images. Unlike previous approaches, which train models to restore pixel values, we trained Cellpose3 to output images that are well-segmented by a generalist segmentation model, while maintaining perceptual similarity to the target images. Furthermore, we trained the restoration models on a large, varied collection of datasets, thus ensuring good generalization to user images. We provide these tools as {\textquotedblleft}one-click{\textquotedblright} buttons inside the graphical interface of Cellpose as well as in the Cellpose API.Competing Interest StatementThe authors have declared no competing interest.},
+	URL = {https://www.biorxiv.org/content/early/2024/02/25/2024.02.10.579780},
+	eprint = {https://www.biorxiv.org/content/early/2024/02/25/2024.02.10.579780.full.pdf},
+	journal = {bioRxiv}
+}
+```
+
 ### ITKElastix
 
 - Original Repository: https://github.com/InsightSoftwareConsortium/ITKElastix
