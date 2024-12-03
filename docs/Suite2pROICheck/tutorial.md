@@ -1,5 +1,17 @@
-# Suite2pROICheck Tutroal
+# Suite2pROICheck Tutorial
 <img src="images/suite2p_roi_check.png">
+
+**Suite2pROICheck** is a specialized tool for quickly and efficiently classifying ROIs extracted by Suite2p into neurons and noise cells. The interface is designed to be intuitive and visually clear. It can be customized to classify cells beyond neurons, allowing users to define their own cell types. By loading event files (.npy) from behavioral experiments simultaneously done with imaging, users can identify event-responsive cells.
+
+
+## Input
+Before using this application, please prepare **Fall.mat**, the result file of Suite2p.  
+- (Required): Fall.mat
+- (Optional): single tif image  
+
+## Output
+The result of ROI checking is exported as **ROICheck~.mat**, containing the ROI celltype information and can store multiple results. About downstream analysis, please check the [notebook for analysis](https://github.com/dhino2000/optic/blob/main/notebook/Chapter1_ExtractTracesWithCheckedROIs.ipynb).
+- ROICheck_{name of the Fall.mat}.mat
 
 ## Load Fall.mat file
 <img src="images/suite2p_roi_check_file_load.png">
@@ -38,11 +50,11 @@ Suite2pROICheck consists of 3 GUI sections, **Canvas**, **View**, and **Table**.
   When event file is loaded, display event-aligned F trace of the selected ROI.  
 
 - **Event File**
-  - **Event File** : The npy file containing containing experimental events. The content must consist of only 0s and 1s in a format like [0, 0, 1, 1, 1, 0, 0, ...].
+  - **Event File** : The npy file containing containing experimental events. The content must consist of only 0 and 1 in a format like [0, 0, 1, 1, 1, 0, 0, ...].
   - **Plot Range** : Sets display range (seconds) before/after each event onset. With multiple events, all events are overlaid.
 
 - **Light Mode**  
-  Reduces CPU load by downsampling plot points. When set to 250, plots 1000 points (4x the value).
+  Reduces CPU load by downsampling plot points. When set to 250, plots 1,000 points (4x the value).
 
 </td>
 <td width="50%">
@@ -58,9 +70,32 @@ Suite2pROICheck consists of 3 GUI sections, **Canvas**, **View**, and **Table**.
 <tr>
 <td width="50%">
 
-Your text content goes here. You can use regular markdown syntax inside the td tags.
-- List item 1 
-- List item 2
+- **View**
+  display ROIs of Fall.mat, and the choosed ROI is highlighted.
+  - **mouse click** : Choose the closest ROI after passing several conditions
+
+- **ROI property**
+  These explanations are derived from the [Suite2p documentation](https://suite2p.readthedocs.io/en/latest/outputs.html).
+  - **med** : (y,x) center of cell
+  - **npix** : number of pixels in ROI
+  - **npix_soma** : number of pixels in ROI's soma
+  - **radius** : estimated radius of cell from 2D Gaussian fit to mask
+  - **aspect_ratio** : ratio between major and minor axes of a 2D Gaussian fit to mask
+  - **compact** : how compact the ROI is (1 is a disk, >1 means less compact)
+  - **solidity** :
+  - **footprint** : spatial extent of an ROI’s functional signal, including pixels not assigned to the ROI; a threshold of 1/5 of the max is used as a threshold, and the average distance of these pixels from the center is defined as the footprint
+  - **skew** : skewness of neuropil-corrected fluorescence trace
+  - **std** : standard deviation of neuropil-corrected fluorescence trace
+ 
+- **ROI Display Setting**
+
+- **Background Image Display Setting**
+
+- **Skip ROIs with choosing**
+
+- **Image Contrast**
+
+- **ROI Opacity**
 
 </td>
 <td width="50%">
