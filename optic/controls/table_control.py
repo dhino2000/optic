@@ -23,7 +23,10 @@ class TableControl:
         self.config_manager                             = config_manager
         self.control_manager                            = control_manager
         self.table_columns:                TableColumns = self.config_manager.getTableColumns(self.app_key)
-        self.key_function_map:        Dict[Qt.Key, Any] = self.config_manager.getKeyFunctionMap(self.app_key).getAllMappings()
+        if not self.config_manager.getKeyFunctionMap(self.app_key) is None:
+            self.key_function_map:    Dict[Qt.Key, Any] = self.config_manager.getKeyFunctionMap(self.app_key).getAllMappings()
+        else:
+            self.key_function_map                       = {}
         self.groups_celltype:   Dict[int, QButtonGroup] = {}
         self.selected_row:                          int = 0
         self.selected_column:                       int = 0

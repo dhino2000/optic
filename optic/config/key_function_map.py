@@ -9,4 +9,7 @@ class KeyFunctionMap:
         return self._key_function_map.get(key)
 
     def getAllMappings(self):
-        return self._key_function_map.copy()
+        if self._key_function_map is None:
+            return {}
+        else:
+            return self._key_function_map.copy()
