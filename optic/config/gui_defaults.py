@@ -23,6 +23,14 @@ class GuiDefaults:
             # "MAX_WIDTH": 1920,
             # "MAX_HEIGHT": 1080,
         },
+        "WINDOW_SETTINGS_ROI_CELLTYPE_SET": {
+            "INIT_POSITION_X": 100, 
+            "INIT_POSITION_Y": 100,
+            "WIDTH": 800,
+            "HEIGHT": 600,
+            # "MAX_WIDTH": 1920,
+            # "MAX_HEIGHT": 1080,
+        },
         "WINDOW_SETTINGS_DIALOG": {
             "INIT_POSITION_X": 100, 
             "INIT_POSITION_Y": 100,

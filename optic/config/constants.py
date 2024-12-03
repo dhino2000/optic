@@ -98,7 +98,7 @@ class AxisKeys:
 class TableColumnConfigDialog_Config:
     COLUMNS = ['Column Name', 'Type', 'Width']
     COMBO_ITEMS = ['id', 'celltype', 'checkbox', 'string']
-    DEFAULT_PARAMS = ["new cell type", "celltype", "80"]
+    DEFAULT_PARAMS = ["new_cell_type", "celltype", "80"]
 
 # Optimal Transport Parameters
 class OTParams:

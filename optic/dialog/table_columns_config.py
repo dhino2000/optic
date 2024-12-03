@@ -1,3 +1,5 @@
+from __future__ import annotations
+from ..type_definitions import *
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QTableWidget, QTableWidgetItem, QComboBox, QLineEdit
 from PyQt5.QtCore import Qt
 from ..manager.widget_manager import WidgetManager
@@ -7,7 +9,12 @@ from ..utils.table_utils import deleteSelectedRows, addRow
 
 # Table Columns Config
 class TableColumnConfigDialog(QDialog):
-    def __init__(self, parent, table_columns, gui_defaults):
+    def __init__(
+            self, 
+            parent: QMainWindow, 
+            table_columns: TableColumns, 
+            gui_defaults: GuiDefaults,
+            ):
         super().__init__(parent)
         self.widget_manager = initManagers(WidgetManager())
         self.table_columns = table_columns
@@ -25,6 +32,7 @@ class TableColumnConfigDialog(QDialog):
         self.setWindowTitle('Table Column Configuration')
         layout = QVBoxLayout()
 
+        layout.addWidget(self.widget_manager.makeWidgetLabel(key="table_columns_config", label="Table Columns Config", font_size=12, bold=True, italic=True, use_global_style=False))
         layout.addWidget(self.widget_manager.makeWidgetTable(key="table_columns"))
         self.widget_manager.dict_table["table_columns"].setColumnCount(3)
         self.widget_manager.dict_table["table_columns"].setHorizontalHeaderLabels(TableColumnConfigDialog_Config.COLUMNS)
@@ -34,7 +42,6 @@ class TableColumnConfigDialog(QDialog):
         layout_column.addWidget(self.widget_manager.makeWidgetButton(key="add_col", label="Add column"))
         layout_column.addWidget(self.widget_manager.makeWidgetButton(key="del_col", label="Delete column"))
         layout_update_exit = QHBoxLayout()
-        layout_update_exit.addWidget(self.widget_manager.makeWidgetButton(key="update", label="Update"))
         layout_update_exit.addWidget(self.widget_manager.makeWidgetButton(key="exit", label="Exit"))
 
         layout.addLayout(layout_column)
