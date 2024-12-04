@@ -227,16 +227,7 @@ class Suite2pROICheckGUI(QMainWindow):
             table_columns=self.config_manager.table_columns[self.app_key_pri].getColumns()
         ))
         layout.addWidget(self.widget_manager.makeWidgetButton(key=f"{self.app_key_pri}_config_table", label="Table Columns Config"))
-        layout.addLayout(makeLayoutSelectedROISetSameCelltype(
-            self.widget_manager, 
-            key_button=self.app_key_pri, 
-            table_columns=self.config_manager.table_columns[self.app_key_pri].getColumns()
-        ))
-        layout.addLayout(makeLayoutSelectedROICheckboxToggle(
-            self.widget_manager, 
-            key_button=self.app_key_pri, 
-            table_columns=self.config_manager.table_columns[self.app_key_pri].getColumns()
-        ))
+        layout.addWidget(self.widget_manager.makeWidgetButton(key=f"{self.app_key_pri}_roi_celltype_set", label="Set ROI Celltype"))
         layout.addLayout(makeLayoutROICheckIO(
             self.widget_manager, 
             key_button_save=f"roicheck_save_{self.app_key_pri}",
@@ -310,6 +301,16 @@ class Suite2pROICheckGUI(QMainWindow):
         )
         if config_window.exec_():
             self.loadFilePathsandInitialize()
+
+    def showSubWindowSetROICellTypeSet(self, app_key):
+        celltype_window = ROICellTypeSetDialog(
+            self, 
+            self.app_key_pri,
+            self.config_manager,
+            self.control_manager.table_controls[app_key],
+            self.config_manager.gui_defaults
+        )
+        celltype_window.show()
             
 
     """
@@ -348,6 +349,10 @@ class Suite2pROICheckGUI(QMainWindow):
         self.widget_manager.dict_button[f"{self.app_key_pri}_config_table"].clicked.connect(
             lambda: self.showSubWindowTableColumnConfig(self.app_key_pri)
         )
+        # Set ROI Celltype
+        self.widget_manager.dict_button[f"{self.app_key_pri}_roi_celltype_set"].clicked.connect(
+            lambda: self.showSubWindowSetROICellTypeSet(self.app_key_pri)
+        )
         # Radiobutton BGImageType buttonChanged
         bindFuncRadiobuttonBGImageTypeChanged(
             q_buttongroup=self.widget_manager.dict_buttongroup[f"{self.app_key_pri}_im_bg_type"], 
@@ -359,22 +364,10 @@ class Suite2pROICheckGUI(QMainWindow):
             view_control=self.control_manager.view_controls[self.app_key_pri],
             table_control=self.control_manager.table_controls[self.app_key_pri],
         )
-        # Set AllROI same celltype
-        bindFuncButtonSetAllROISameCelltype(
-            widget_manager=self.widget_manager,
-            table_control=self.control_manager.table_controls[self.app_key_pri],
-            view_control=self.control_manager.view_controls[self.app_key_pri],
-        )
         # Filter ROIs
         bindFuncButtonFilterROI(
             q_button=self.widget_manager.dict_button[f"{self.app_key_pri}_roi_filter"],
             dict_q_lineedit={key: self.widget_manager.dict_lineedit[f"{self.app_key_pri}_roi_filter_{key}"] for key in self.config_manager.gui_defaults["ROI_THRESHOLDS"].keys()},
-            table_control=self.control_manager.table_controls[self.app_key_pri],
-            view_control=self.control_manager.view_controls[self.app_key_pri],
-        )
-        # Toggle AllROI checkbox
-        bindFuncCheckboxToggleAllROI(
-            widget_manager=self.widget_manager,
             table_control=self.control_manager.table_controls[self.app_key_pri],
             view_control=self.control_manager.view_controls[self.app_key_pri],
         )
