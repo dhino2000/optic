@@ -6,18 +6,18 @@
 
 ## Input
 Before using this application, please prepare **Fall.mat**, the result file of Suite2p.  
-- (Required): Fall.mat
-- (Optional): single tif image  
+- (Required): **Fall.mat**
+- (Optional): **single tif image**  
 
 ## Output
 The result of ROI checking is exported as **ROICheck~.mat**, containing the ROI celltype information and can store multiple results. About downstream analysis, please check the [notebook for analysis](https://github.com/dhino2000/optic/blob/main/notebook/Chapter1_ExtractTracesWithCheckedROIs.ipynb).
-- ROICheck_{name of the Fall.mat}.mat
+- **ROICheck_{name_of_the_Fall_file}.mat**
 
 ## Load Fall.mat file
 <img src="images/suite2p_roi_check_file_load.png">
 
 
-**Fall mat file path (Necessary):**   
+**Fall mat file path (Required):**   
 push "browse" button and choose "Fall.mat" file.  
 Suite2pROICheck supports 2-channel imaging Fall.mat but not support multi-plane imaging data.  
 
@@ -70,11 +70,11 @@ Suite2pROICheck consists of 3 GUI sections, **Canvas**, **View**, and **Table**.
 <tr>
 <td width="50%">
 
-- **View**
+- **View**  
   display ROIs of Fall.mat, and the choosed ROI is highlighted.
   - **mouse click** : Choose the closest ROI after passing several conditions
 
-- **ROI property**
+- **ROI property**  
   These explanations are derived from the [Suite2p documentation](https://suite2p.readthedocs.io/en/latest/outputs.html).
   - **med** : (y,x) center of cell
   - **npix** : number of pixels in ROI
@@ -82,20 +82,27 @@ Suite2pROICheck consists of 3 GUI sections, **Canvas**, **View**, and **Table**.
   - **radius** : estimated radius of cell from 2D Gaussian fit to mask
   - **aspect_ratio** : ratio between major and minor axes of a 2D Gaussian fit to mask
   - **compact** : how compact the ROI is (1 is a disk, >1 means less compact)
-  - **solidity** :
+  - **solidity** : unknown, maybe an parameter similar to compact?
   - **footprint** : spatial extent of an ROI’s functional signal, including pixels not assigned to the ROI; a threshold of 1/5 of the max is used as a threshold, and the average distance of these pixels from the center is defined as the footprint
   - **skew** : skewness of neuropil-corrected fluorescence trace
   - **std** : standard deviation of neuropil-corrected fluorescence trace
  
-- **ROI Display Setting**
+- **ROI Display Setting**  
+  display all ROIs, none at all or only specific celltype ROIs.
+  
+- **Background Image Display Setting**  
+  Suite2p generate four type background images, **meanImg**, **meanImgE**, **max_proj**, and **Vcorr**. you can switch between those images.
 
-- **Background Image Display Setting**
+- **Skip ROIs with choosing**  
+  When choosing ROIs, for example, if all **Neuron** ROIs have already been sorted and you want to concentrate on sorting only **Astrocyte** and **Not_Cell**, you can skip ROIs that are sorted to be **Neuron**. Similarly, it is possible to set skipping for other cell types.
 
-- **Skip ROIs with choosing**
+- **Image Contrast**  
+  - **Green** : Background image (**meanImg**, **meanImgE**, **max_proj**, and **Vcorr**) contrast of primary imaging channel.
+  - **Red** : Background image (**meanImg**) contrast of seconday imaging channel. If the Fall.mat dosen't have secondary channel imaging data, this is meaningless. 
+  - **Blue** : Background image contrast of reference tif image. If reference tif image is not set, this is meaningless. 
 
-- **Image Contrast**
-
-- **ROI Opacity**
+- **ROI Opacity**  
+  Opacity of all and the selected ROI can be changed with the sliders.
 
 </td>
 <td width="50%">
@@ -111,9 +118,13 @@ Suite2pROICheck consists of 3 GUI sections, **Canvas**, **View**, and **Table**.
 <tr>
 <td width="50%">
 
-Your text content goes here. You can use regular markdown syntax inside the td tags.
-- List item 1 
-- List item 2
+- **Table**
+
+- **Table Columns Config**
+
+- **ROI celltype set**
+
+- **Filter ROI**
 
 </td>
 <td width="50%">
@@ -132,6 +143,10 @@ Your text content goes here. You can use regular markdown syntax inside the td t
  - C          : Choose Not_Cell         
  - V          : Check/Uncheck Check     
  - B          : Check/Uncheck Tracking  
+ - Y/H        : Move to previous/next ROI with the celltype selected in the "ROI Display Setting"  
+ - U/J        : Move to previous/next ROI with the same celltype as the currently selected ROI  
+ - I/K        : Move to previous/next ROI whose "Check" is checked  
+ - O/L        : Move to previous/next ROI whose "Check" is unchecked  
  - up-arrow   : Move one row up         
  - down-arrow : Move one row down       
 </pre>
@@ -145,10 +160,12 @@ The default columns configuration of Suite2pROICheck is ["Cell_ID", "Astrocyte",
 <td width="50%">
 
 **Column Name**  
-The name of table column, you can edit it freely.
+The name of table column, you can edit it freely, but with some restrictions.  
 > ⚠️ **WARNING:**  
 > **Please do not contain "space" !!! Please use "_" instead !!!**  
-> NG: "cell A" , OK: "cell_A"
+> NG: "cell A" , OK: "cell_A"  
+> **please set the last "celltype" column as "Not_Cell" !!!**  
+> NG: [Astrocyte, Not_Cell, Neuron] , OK: [Neuron, Astrocyte, Not_Cell]  
 
 **Type**  
 id:  
