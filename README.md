@@ -121,6 +121,9 @@ T: time points
 3. 
 ([TIFStackExplorer Tutorial](https://github.com/dhino2000/optic/blob/main/docs/TIFStackExplorer/tutorial.md))
 
+## Downstream Analysis  
+After analyzing with these applications, some downstream analyses may be required. For guidance on these analyses, please refer to the Jupyter notebooks beginning with **"Chapter"** in the [notebook folder](https://github.com/dhino2000/optic/tree/main/notebook). These notebooks provide step-by-step examples and instructions for some downstream analysis workflows.
+
 ## Dependencies and External Libraries
 
 This project includes the following external libraries:
