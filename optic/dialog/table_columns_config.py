@@ -42,6 +42,7 @@ class TableColumnConfigDialog(QDialog):
         layout_column.addWidget(self.widget_manager.makeWidgetButton(key="add_col", label="Add column"))
         layout_column.addWidget(self.widget_manager.makeWidgetButton(key="del_col", label="Delete column"))
         layout_update_exit = QHBoxLayout()
+        layout_update_exit.addWidget(self.widget_manager.makeWidgetButton(key="update", label="Update"))
         layout_update_exit.addWidget(self.widget_manager.makeWidgetButton(key="exit", label="Exit"))
 
         layout.addLayout(layout_column)

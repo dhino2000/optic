@@ -726,33 +726,6 @@ def bindFuncRadiobuttonOfTableChanged(
         handler = __onButtonClicked(row)
         button_group.buttonClicked.connect(handler)
 
-# -> table_layouts.makeLayoutAllROISetSameCelltype
-def bindFuncButtonSetAllROISameCelltype(
-    widget_manager: 'WidgetManager', 
-    view_control: 'ViewControl', 
-    table_control: 'TableControl'
-) -> None:
-    list_celltype = [key for key, value in table_control.table_columns.getColumns().items() if value['type'] == 'celltype']
-    for celltype in list_celltype:
-        widget_manager.dict_button[f"{table_control.app_key}_roi_set_{celltype}"].clicked.connect(
-            lambda checked, ct=celltype: table_control.setAllROISameCelltype(ct)
-        )
-    view_control.updateView()
-
-# -> table_layouts.makeLayoutAllROICheckboxToggle
-def bindFuncCheckboxToggleAllROI(
-    widget_manager: 'WidgetManager', 
-    view_control: 'ViewControl', 
-    table_control: 'TableControl'
-) -> None:
-    list_checkbox = [key for key, value in table_control.table_columns.getColumns().items() if value['type'] == 'checkbox']
-    for checkbox in list_checkbox:
-        for label, toggle in zip(["check", "uncheck"], [True, False]):
-            widget_manager.dict_button[f"{table_control.app_key}_roi_{label}_{checkbox}"].clicked.connect(
-                lambda checked, ck=checkbox, tg=toggle: table_control.toggleAllROICheckbox(ck, tg)
-            )
-    view_control.updateView()
-
 # -> table_layouts.makeLayoutROIFilterButton
 def bindFuncButtonFilterROI(
     q_button: 'QPushButton',

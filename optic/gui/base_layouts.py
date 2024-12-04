@@ -41,6 +41,7 @@ def makeLayoutComboBoxLabel(
         label          :str, 
         axis           :Literal["vertical", "horizontal"] = "vertical", 
         items          :List[str] = [], 
+        idx_default    :int = 0,
         align          :Qt.AlignmentFlag = Qt.AlignLeft, 
         font_family    :str = "Arial", 
         font_size      :int = 12, 
@@ -55,7 +56,7 @@ def makeLayoutComboBoxLabel(
     else:
         raise ValueError(f"Invalid axis value: {axis}. Expected 'vertical' or 'horizontal'.")
     label_widget = widget_manager.makeWidgetLabel(key_label, label, align, font_family, font_size, color, bold, italic)
-    combobox_widget = widget_manager.makeWidgetComboBox(key_combobox, items)
+    combobox_widget = widget_manager.makeWidgetComboBox(key_combobox, items, idx_default)
     layout.addWidget(label_widget)
     layout.addWidget(combobox_widget)
     return layout

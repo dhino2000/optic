@@ -17,22 +17,22 @@ def makeLayoutTableROICountLabel(widget_manager: WidgetManager, key_label: str, 
     layout.addLayout(layout_label)
     return layout
 
-# 全てのROIを同じcelltypeにそろえる
-def makeLayoutAllROISetSameCelltype(widget_manager: WidgetManager, key_button: str, table_columns: TableColumns) -> QHBoxLayout:
-    layout = QHBoxLayout()
+# set the same celltype for selected ROIs
+def makeLayoutSelectedROISetSameCelltype(widget_manager: WidgetManager, key_button: str, table_columns: TableColumns) -> QVBoxLayout:
+    layout = QVBoxLayout()
 
     list_celltype = [key for key, value in table_columns.items() if value['type'] == 'celltype']
     for celltype in list_celltype:
         layout.addWidget(widget_manager.makeWidgetButton(key=f"{key_button}_roi_set_{celltype}", label=f"Set {celltype}"))
     return layout
 
-# Check, Uncheck "checkbox" of All ROIs
-def makeLayoutAllROICheckboxToggle(widget_manager: WidgetManager, key_button: str, table_columns: TableColumns) -> QHBoxLayout:
-    layout = QHBoxLayout()
+# Check, Uncheck "checkbox" of Selected ROIs
+def makeLayoutSelectedROICheckboxToggle(widget_manager: WidgetManager, key_button: str, table_columns: TableColumns) -> QVBoxLayout:
+    layout = QVBoxLayout()
 
     list_checkbox = [key for key, value in table_columns.items() if value['type'] == 'checkbox']
     for checkbox in list_checkbox:
-        layout_ = QVBoxLayout()
+        layout_ = QHBoxLayout()
         layout_.addWidget(widget_manager.makeWidgetButton(key=f"{key_button}_roi_check_{checkbox}", label=f"Check {checkbox}"))
         layout_.addWidget(widget_manager.makeWidgetButton(key=f"{key_button}_roi_uncheck_{checkbox}", label=f"Uncheck {checkbox}"))
         layout.addLayout(layout_)

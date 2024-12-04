@@ -227,12 +227,12 @@ class Suite2pROICheckGUI(QMainWindow):
             table_columns=self.config_manager.table_columns[self.app_key_pri].getColumns()
         ))
         layout.addWidget(self.widget_manager.makeWidgetButton(key=f"{self.app_key_pri}_config_table", label="Table Columns Config"))
-        layout.addLayout(makeLayoutAllROISetSameCelltype(
+        layout.addLayout(makeLayoutSelectedROISetSameCelltype(
             self.widget_manager, 
             key_button=self.app_key_pri, 
             table_columns=self.config_manager.table_columns[self.app_key_pri].getColumns()
         ))
-        layout.addLayout(makeLayoutAllROICheckboxToggle(
+        layout.addLayout(makeLayoutSelectedROICheckboxToggle(
             self.widget_manager, 
             key_button=self.app_key_pri, 
             table_columns=self.config_manager.table_columns[self.app_key_pri].getColumns()

@@ -311,16 +311,22 @@ class TableControl:
     """
     Button-binding Function
     """
-    # set All ROIs same celltype (Neuron, Not Cell, ...)
-    def setAllROISameCelltype(self, celltype: str) -> None:
+    # set Selected ROIs same celltype (Neuron, Not Cell, ...)
+    def setSelectedROISameCelltype(
+            self, 
+            celltype: str,
+            idx_min: Optional[int] = None,
+            idx_max: Optional[int] = None
+        ) -> None:
         checkbox_columns = self.getCheckboxColumns()
         skip_states = {}
         
+        # Check if user wants to skip checked ROIs for each checkbox column
         for column in checkbox_columns:
             result = showConfirmationDialog(
                 self.q_table,
                 'Confirmation',
-                f"Skip {column} checked ROI ?"
+                f"Skip {column} checked ROI ? (ROI {idx_min} to {idx_max})"
             )
             if result == QMessageBox.Yes:
                 skip_states[column] = self.getCheckboxStates(column)
@@ -328,9 +334,9 @@ class TableControl:
                 return  # 処理を中断
             else:  # No の場合
                 skip_states[column] = [False] * self.len_row
-            
+                
         col_order: int = self.table_columns.getColumns()[celltype]["order"]
-        for row in range(self.len_row):
+        for row in range(idx_min, idx_max+1):
             if all(not skip_states[col][row] for col in checkbox_columns):
                 button_group = self.groups_celltype.get(row)
                 if button_group:
@@ -358,23 +364,27 @@ class TableControl:
         return states
     
     # toggle "Checkbox" of All ROIs
-    def toggleAllROICheckbox(self, checkbox: str, toggle: bool) -> None:
+    def toggleSelectedROICheckbox(
+            self, 
+            checkbox: str, 
+            toggle: bool,
+            idx_min: Optional[int] = None,
+            idx_max: Optional[int] = None
+        ) -> None:
         dict_text = {True: "Check", False: "Uncheck"}
         result = showConfirmationDialog(
             self.q_table,
             'Confirmation',
-            f"{dict_text[toggle]} All {checkbox} ?"
+            f"{dict_text[toggle]} {checkbox} for ROI {idx_min} to {idx_max} ?"
         )
         if result == QMessageBox.Yes:
             col_index = self.table_columns.getColumns()[checkbox]['order']
             check_state = Qt.Checked if toggle else Qt.Unchecked
 
-            for row in range(self.len_row):
+            for row in range(idx_min, idx_max+1):
                 item = self.q_table.item(row, col_index)
                 if item:
                     item.setCheckState(check_state)
-        else:
-            return
         
     # Filter ROIs, set celltype radiobutton "Not Cell" (column with the highest order)
     def filterROI(self, thresholds: Dict[str, Tuple[float, float]]) -> None:

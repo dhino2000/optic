@@ -150,11 +150,14 @@ def makeWidgetListWidget(
 # ComboBox Widget
 def makeWidgetComboBox(
     items: List[Any],
+    idx_default: int,
     use_global_style: bool
 ) -> QComboBox:
     widget = QComboBox()
     if items:
         widget.addItems(items)
+    if idx_default:
+        widget.setCurrentIndex(idx_default)
     if use_global_style:
         widget.setObjectName('use-global')
     return widget
@@ -321,9 +324,10 @@ class WidgetManager:
         self, 
         key: str, 
         items: List[Any]=None,
+        idx_default: int=0,
         use_global_style: bool=True
     ) -> QComboBox:
-        self.dict_combobox[key] = makeWidgetComboBox(items, use_global_style)
+        self.dict_combobox[key] = makeWidgetComboBox(items, idx_default, use_global_style)
         return self.dict_combobox[key]
 
     def makeWidgetFigure(

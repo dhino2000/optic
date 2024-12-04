@@ -5,9 +5,9 @@ from collections import defaultdict
 # Manager controls class
 class ControlManager:
     def __init__(self):
-        self.table_controls  : Dict[AppKeys, TableControl] = {}
-        self.view_controls   : Dict[AppKeys, ViewControl] = {}
-        self.canvas_controls : Dict[AppKeys, CanvasControl] = {}
+        self.table_controls  : Dict[Union[AppKeys, str], TableControl] = {}
+        self.view_controls   : Dict[Union[AppKeys, str], ViewControl] = {}
+        self.canvas_controls : Dict[Union[AppKeys, str], CanvasControl] = {}
         """
         Dictionary to hold attributes shared between controls
         The first level key is `app_key`: "pri", "sec", etc.
@@ -15,11 +15,11 @@ class ControlManager:
         """
         self.shared_attr = defaultdict(dict)
 
-    def setSharedAttr(self, app_key: AppKeys, key_attr: str, value: Any) -> None:
+    def setSharedAttr(self, app_key: Union[AppKeys, str], key_attr: str, value: Any) -> None:
         self.shared_attr[app_key][key_attr] = value
 
-    def getSharedAttr(self, app_key: AppKeys, key_attr: str) -> Any:
+    def getSharedAttr(self, app_key: Union[AppKeys, str], key_attr: str) -> Any:
         return self.shared_attr[app_key].get(key_attr)
 
-    def getAllSharedAttrs(self, app_key: AppKeys) -> Dict[str, Any]:
+    def getAllSharedAttrs(self, app_key: Union[AppKeys, str]) -> Dict[str, Any]:
         return self.shared_attr[app_key]

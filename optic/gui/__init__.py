@@ -10,4 +10,4 @@ from .slider_layouts import makeLayoutContrastSlider, makeLayoutOpacitySlider
 from .info_layouts import makeLayoutROIProperty
 from .view_layouts import makeLayoutViewWithZTSlider, makeLayoutROIThresholds, makeLayoutDislplayCelltype, makeLayoutBGImageTypeDisplay, makeLayoutROIChooseSkip
 from .view_setup import setViewSize
-from .table_layouts import makeLayoutTableROICountLabel, makeLayoutAllROISetSameCelltype, makeLayoutAllROICheckboxToggle, makeLayoutROIFilterThreshold, makeLayoutROIFilterButton
+from .table_layouts import makeLayoutTableROICountLabel, makeLayoutSelectedROISetSameCelltype, makeLayoutSelectedROICheckboxToggle, makeLayoutROIFilterThreshold, makeLayoutROIFilterButton
