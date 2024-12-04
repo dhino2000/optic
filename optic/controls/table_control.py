@@ -271,7 +271,7 @@ class TableControl:
                 self.selected_row = new_row
                 return
             
-    # if "Neuron" is checked, move to next "Neuron"
+    # if "Neuron" radiobutton is checked, move to next "Neuron"
     def moveToSelectedType(self, start_row: int, direction: Literal[-1, 1]) -> None:
         roi_display = self.getSharedAttr_ROIDisplay()
         total_rows = self.q_table.rowCount()
@@ -303,7 +303,7 @@ class TableControl:
     # detect "Check" is checked or not
     def getRowChecked(self, row: int) -> bool:
         for col_name, col_info in self.table_columns.getColumns().items():
-            if col_info['type'] == 'checkbox' and col_name == 'Check':
+            if col_info['type'] == 'checkbox' and col_name == 'Check': # hardcoded !!!
                 check_box_item = self.q_table.item(row, col_info['order'])
                 return check_box_item.checkState() == Qt.Checked if check_box_item else False
         return False
