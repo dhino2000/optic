@@ -128,3 +128,13 @@ class ROIMatchingTest_Config:
     FONTSIZE = 12
     LABEL_PRI = "Primary"
     LABEL_SEC = "Secondary"
+
+# URL with button access
+class AccessURL:
+    HELP = {
+        "SUITE2P_ROI_CHECK": "https://github.com/dhino2000/optic/blob/main/docs/Suite2pROICheck/tutorial.md",
+        "SUITE2P_ROI_TRACKING": "https://github.com/dhino2000/optic/blob/main/docs/Suite2pROITracking/tutorial.md",
+        "MICROGLIA_TRACKING": "https://github.com/dhino2000/optic/blob/main/docs/MicrogliaTracking/tutorial.md",
+        "TIFSTACK_EXPLORER": "https://github.com/dhino2000/optic/blob/main/docs/TIFStackExplorer/tutorial.md",
+    }
+    

@@ -6,7 +6,8 @@ from ..visualization.view_visual_rectangle import clipRectangleRange
 from ..visualization.info_visual import updateROICountDisplay
 from ..processing import *
 from ..utils import *
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QUrl
+from PyQt5.QtGui import QDesktopServices
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 from matplotlib.backend_bases import Event
@@ -45,6 +46,13 @@ def bindFuncExit(
     q_window: 'QWidget'
 ) -> None:
     q_button.clicked.connect(lambda: exitApp(q_window))
+
+# -> widget_manager.dict_button["help"]
+def bindFuncHelp(
+    q_button: 'QPushButton',
+    url: str,
+) -> None:
+    q_button.clicked.connect(lambda: QDesktopServices.openUrl(QUrl(url)))
 
 # -> makeWidgetView, mousePressEvent
 def bindFuncViewMouseEvent(
