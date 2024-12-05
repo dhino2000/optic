@@ -33,7 +33,7 @@ Suite2pROICheck consists of 3 GUI sections, **Canvas**, **View**, and **Table**.
 ### Canvas Section
 <table>
 <tr>
-<td width="40%">
+<td width="50%">
 
 - **Top Axis**  
   display zoomed traces (F, Fneu, spks) of the selected ROI.
@@ -50,19 +50,19 @@ Suite2pROICheck consists of 3 GUI sections, **Canvas**, **View**, and **Table**.
   When event file is loaded, display event-aligned F trace of the selected ROI.  
 
 - **Event File**
-  - **Event File** : The npy file containing containing experimental events. The content must consist of only 0 and 1 in a format like [0, 0, 1, 1, 1, 0, 0, ...].
-  - **Plot Range** : Sets display range (seconds) before/after each event onset. With multiple events, all events are overlaid.
+  - **Event File** : The npy file containing experimental events. The content must consist of only 0 and 1 in a format like [0, 0, 1, 1, 1, 0, 0, ...].
+  - **Plot Range** : Sets display range (seconds) before/after each event onset. With multiple events, all events are overlaid. **r** : Pearson correlation coefficient between trace and event. 
 
 - **Light Mode**  
   Reduces CPU load by downsampling plot points. When set to 250, plots 1,000 points (4x the value).
 
 </td>
-<td width="30%">
+<td width="50%">
 
 <img src="images/suite2p_roi_check_canvas.png">
 
-</td>
-<td width="30%">
+- **With event file load**  
+  1: Whisker stimulation ON, 0: Whisker simulation OFF
 
 <img src="images/suite2p_roi_check_event_canvas.png">
 
@@ -77,7 +77,7 @@ Suite2pROICheck consists of 3 GUI sections, **Canvas**, **View**, and **Table**.
 
 - **View**  
   display ROIs of Fall.mat, and the choosed ROI is highlighted.
-  - **mouse click** : Choose the closest ROI after passing several conditions
+  - **mouse click** : Choose the closest ROI after passing ROI skip conditions
 
 - **ROI property**  
   These explanations are derived from the [Suite2p documentation](https://suite2p.readthedocs.io/en/latest/outputs.html).
@@ -124,8 +124,10 @@ Suite2pROICheck consists of 3 GUI sections, **Canvas**, **View**, and **Table**.
 <td width="50%">
 
 - **Table**
+  The attributes of the columns are "id", "celltype", "check", and "string". The "celltype" determines the ROI's cell type by selecting one from the radio buttons. "check" and "string" are optional and can be left empty.
 
 - **Table Columns Config**
+  Table columns can be customized with [Table Columns Config](#custom-table-columns-configuration).
 
 - **ROI celltype set**
 
@@ -135,6 +137,10 @@ Suite2pROICheck consists of 3 GUI sections, **Canvas**, **View**, and **Table**.
 <td width="50%">
 
 <img src="images/suite2p_roi_check_table.png">
+
+- **Save Dialog**
+
+<img src="images/user_select.png">
 
 </td>
 </tr>
