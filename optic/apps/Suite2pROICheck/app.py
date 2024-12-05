@@ -303,6 +303,7 @@ class Suite2pROICheckGUI(QMainWindow):
             self.loadFilePathsandInitialize()
 
     def showSubWindowSetROICellTypeSet(self, app_key):
+        from optic.dialog.roi_celltype_set import ROICellTypeSetDialog
         celltype_window = ROICellTypeSetDialog(
             self, 
             self.app_key_pri,
