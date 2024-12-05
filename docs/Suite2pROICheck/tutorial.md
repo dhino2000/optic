@@ -10,7 +10,8 @@ Before using this application, please prepare **Fall.mat**, the result file of S
 - (Optional): **single tif image**  
 
 ## Output
-The result of ROI checking is exported as **ROICheck~.mat**, containing the ROI celltype information and can store multiple results. About downstream analysis, please check the [notebook for analysis](https://github.com/dhino2000/optic/blob/main/notebook/Chapter1_ExtractTracesWithCheckedROIs.ipynb).
+The result of ROI checking is exported as **ROICheck~.mat**, containing the ROI celltype information and can store multiple results. About downstream analysis, please check the [notebook for analysis](https://github.com/dhino2000/optic/blob/main/notebook/Chapter1_ExtractTracesWithCheckedROIs.ipynb).  
+If you want to track ROIs between the different dates, please use [**Suite2pROITracking**](https://github.com/dhino2000/optic/blob/main/docs/Suite2pROITracking/tutorial.md).
 - **ROICheck_{name_of_the_Fall_file}.mat**
 
 ## Load Fall.mat file
@@ -123,20 +124,29 @@ Suite2pROICheck consists of 3 GUI sections, **Canvas**, **View**, and **Table**.
 <tr>
 <td width="50%">
 
-- **Table**
+- **Table**  
   The attributes of the columns are "id", "celltype", "check", and "string". The "celltype" determines the ROI's cell type by selecting one from the radio buttons. "check" and "string" are optional and can be left empty.
 
-- **Table Columns Config**
+- **Table Columns Config**  
   Table columns can be customized with [Table Columns Config](#custom-table-columns-configuration).
 
-- **ROI celltype set**
+- **Set ROI celltype**  
+  The celltype, check values of the multiple ROIs from **index_min** to **index_max** can be changed simultaneously. Specifically for "celltype", changes can be configured for each checkbox.  
+ex):
+**index_min**: 100, **index_max**: 300, "Set **Neuron**", "Skip **Check** Checked", "Not Skip **Tracking** Checked"  
+-> Only ROIs between indices 100-300 whose "Check" are unchecked will be changed to Neuron type.
 
-- **Filter ROI**
+- **Filter ROI**  
+  ROIs can be filtered based on six parameters: **npix**, **radius**, **aspect_ratio**, **compact**, **skew**, and **std**. If the all parameters of the ROI are not between the thresholds (min, max), the ROI's cell type will be switched to **Not_Cell**.
 
 </td>
 <td width="50%">
 
 <img src="images/suite2p_roi_check_table.png">
+
+- **ROI celltype set**
+
+<img src="images/suite2p_roi_check_roi_set.png">
 
 - **Save Dialog**
 
@@ -146,7 +156,7 @@ Suite2pROICheck consists of 3 GUI sections, **Canvas**, **View**, and **Table**.
 </tr>
 </table>
 
-#### Key operation
+#### Key operation of table
 ☆ This operation is for table columns ["Cell_ID", "Astrocyte", "Neuron", "Not_Cell", "Check", "Tracking", "Memo"]. The Operation depends on the table columns settings.
 <pre>
  - Z          : Choose Astrocyte        
@@ -179,33 +189,23 @@ The name of table column, you can edit it freely, but with some restrictions.
 > NG: [Astrocyte, Not_Cell, Neuron] , OK: [Neuron, Astrocyte, Not_Cell]  
 
 **Type**  
-id:  
-celltype:  
-checkbox:  
-string:
+<pre>
+id       : ROI number starting from 0. Uneditable.
+celltype : Only one can be selected from multiple radio buttons.
+checkbox : A checkbox value stored as a boolean (0/1).
+string   : Memo, can contain text input. ⚠️: Please use only English or number.
+</pre>
 
-**Width**
+**Width**  
+The Column width. it can be adjusted by dragging.  
 
 </td>
 <td width="50%">
 
+- **Default**  
 <img src="images/suite2p_roi_check_table_config.png">
 
-</td>
-</tr>
-</table>
-
-<table>
-<tr>
-<td width="50%">
-
-Your text content goes here. You can use regular markdown syntax inside the td tags.
-- List item 1 
-- List item 2
-
-</td>
-<td width="50%">
-
+- **After Customization**  
 <img src="images/suite2p_roi_check_table_config_custom.png">
 
 </td>
@@ -213,7 +213,10 @@ Your text content goes here. You can use regular markdown syntax inside the td t
 </table>
 
 
+<img src="images/suite2p_roi_check_custom.png">
 
+#### Key operation of table
+☆ This operation is for table columns ["Cell_ID", "Cell_A", "Cell_B", "Cell_C", "Not_Cell", "Check_A", "Check_B", "Check_C", "Memo"].
 <pre>
  - Z          : Choose Cell_A        
  - X          : Choose Cell_B           
