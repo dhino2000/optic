@@ -33,7 +33,7 @@ Suite2pROICheck consists of 3 GUI sections, **Canvas**, **View**, and **Table**.
 ### Canvas Section
 <table>
 <tr>
-<td width="50%">
+<td width="40%">
 
 - **Top Axis**  
   display zoomed traces (F, Fneu, spks) of the selected ROI.
@@ -57,9 +57,14 @@ Suite2pROICheck consists of 3 GUI sections, **Canvas**, **View**, and **Table**.
   Reduces CPU load by downsampling plot points. When set to 250, plots 1,000 points (4x the value).
 
 </td>
-<td width="50%">
+<td width="30%">
 
 <img src="images/suite2p_roi_check_canvas.png">
+
+</td>
+<td width="30%">
+
+<img src="images/suite2p_roi_check_event_canvas.png">
 
 </td>
 </tr>
