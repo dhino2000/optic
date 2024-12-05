@@ -228,7 +228,68 @@ def updateViewTiff(
     q_view.setScene(q_scene)
     q_view.fitInView(q_scene.sceneRect(), Qt.KeepAspectRatio)
 
-# 白黒画像からカラー画像作成
+# update view for Tiff data, microglia tracking
+def updateViewTiffWithTracking(
+        q_scene: QGraphicsScene, 
+        q_view: QGraphicsView, 
+        view_control: ViewControl, 
+        data_manager: DataManager, 
+        control_manager: ControlManager, 
+        app_key: AppKeys,
+        ) -> None:
+    bg_image_chan1 = None
+    bg_image_chan2 = None
+    bg_image_chan3 = None 
+    plane_z = view_control.getPlaneZ()
+    plane_t = view_control.getPlaneT()
+    min_val_image = np.min(data_manager.getTiffStack(app_key))
+    max_val_image = np.max(data_manager.getTiffStack(app_key))
+
+    if view_control.getBackgroundVisibility(ChannelKeys.CHAN1):
+        bg_image_chan1 = adjustChannelContrast(
+            image=data_manager.getImageFromXYCZTTiffStack(app_key, plane_z, plane_t, 0, view_control.show_reg_stack),
+            min_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN1, 'min'),
+            max_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN1, 'max'),
+            min_val_image=min_val_image,
+            max_val_image=max_val_image
+            )
+    if view_control.getBackgroundVisibility(ChannelKeys.CHAN2):
+        bg_image_chan2 = adjustChannelContrast(
+            image=data_manager.getImageFromXYCZTTiffStack(app_key, plane_z, plane_t, 1, view_control.show_reg_stack),
+            min_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN2, 'min'),
+            max_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN2, 'max'),
+            min_val_image=min_val_image,
+            max_val_image=max_val_image
+            )
+    if view_control.getBackgroundVisibility(ChannelKeys.CHAN3):
+        bg_image_chan3 = adjustChannelContrast(
+            image=data_manager.getImageFromXYCZTTiffStack(app_key, plane_z, plane_t, 2, view_control.show_reg_stack),
+            min_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN3, 'min'),
+            max_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN3, 'max'),
+            min_val_image=min_val_image,
+            max_val_image=max_val_image
+            )
+
+    (width, height) = view_control.getImageSize()
+    bg_image = convertMonoImageToRGBImage(
+        image_g=bg_image_chan1, 
+        image_r=bg_image_chan2, 
+        image_b=bg_image_chan3, 
+        height=height,
+        width=width,
+        )
+
+    # Caution !!! width and height are swapped between TIFF and QImage
+    qimage = QImage(bg_image.data, height, width, height * 3, QImage.Format_RGB888)
+    pixmap = QPixmap.fromImage(qimage)
+
+    q_scene.clear()
+    q_scene.addPixmap(pixmap)
+
+    q_view.setScene(q_scene)
+    q_view.fitInView(q_scene.sceneRect(), Qt.KeepAspectRatio)
+
+# create RGB image from Mono images
 def convertMonoImageToRGBImage(
         image_r: Optional[np.ndarray] = None, 
         image_g: Optional[np.ndarray] = None, 
