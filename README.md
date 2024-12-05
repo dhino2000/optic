@@ -3,6 +3,8 @@
 
 OPTIC consists of four specialized applications:
 ### 1. Suite2pROICheck
+<img src="docs/Suite2pROICheck/images/suite2p_roi_check.png">
+
 #### Input Format
 - Fall.mat: Suite2p output file containing ROI information  
 - Reference tiff image (optional)  
@@ -14,6 +16,8 @@ OPTIC consists of four specialized applications:
 - Real-time ROI selection with trace visualization
 
 ### 2. Suite2pROITracking
+<img src="docs/Suite2pROITracking/images/suite2p_roi_tracking.png">
+
 #### Input Format
 - Two Fall.mat files from different imaging sessions
 #### Features
@@ -24,6 +28,8 @@ OPTIC consists of four specialized applications:
 - Visualization of matched ROI pairs
 
 ### 3. MicrogliaTracking
+<img src="docs/MicrogliaTracking/images/microglia_tracking.png">
+
 #### Input Format
 - TIFF stack (dimensions: XYCT)  
 X, Y: spatial dimensions  
@@ -36,6 +42,8 @@ T: time points for time-lapse imaging
 - Path trajectory analysis
 
 ### 4. TIFStackExplorer
+<img src="docs/TIFStackExplorer/images/tif_stack_explorer.png">
+
 #### Input Format
 - TIFF stack (dimensions: XYCZT)  
 X, Y: spatial dimensions  
