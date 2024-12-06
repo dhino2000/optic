@@ -196,6 +196,18 @@ In this section, automatic ROI matching using Optimal Transport can be performed
 The basic analysis process involves first creating an ROICheck, then conducting automatic ROI matching for specific cell types, and finally manually refining to achieve complete ROI matching. 
 In some cases, assistance from image registration may be utilized.
 
+- **Parameters for Optimal Transport**
+  - **Loss**  
+    Four types of loss functions are available for optimal transport: WD-shape, WD-distance, GWD, and FGWD. The WD-distance exponent is the power applied to the distance during matching; the higher the value, the less likely long-distance transport will occur. FGWD alpha is the coefficient for the shape parameter; the smaller the value, the more emphasis is placed solely on transport distance.
+  - **pruning ROI matching**  
+    The results of optimal transport are initially output as many-to-many matching, but pruning is performed to convert this into one-to-one matching for tracking purposes. This process is executed in two steps: "transport volume pruning" and "transport cost pruning."
+First, combinations where the transport volume to the destination ROI is below the "min transport threshold" are eliminated. Next, the pair with the largest transport volume is selected as the match. However, if the cost for that pair exceeds the "max cost threshold," it is removed, meaning no correspondence is established for that pair.
+
+- **ROI Matching Test Window**
+You can perform a preliminary ROI matching test to simulate how transport occurs between pri and sec. Red dots represent pri, blue dots represent sec, and the matching is depicted by green lines. Additionally, the transport plan obtained through optimal transport is output as a matrix with rows representing the number of samples in the source and columns representing the number of samples in the destination. As a result, the output is originally a many-to-many matching rather than one-to-one. By checking "Plot Transport Plan," you can also visualize the original transport plan.
+
+- **Save, Load ROI Tracking result**
+
 </td>
 <td width="50%">
   
