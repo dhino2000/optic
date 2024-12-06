@@ -34,7 +34,7 @@ About secondary view section and secondary table section, the function is same a
 <td width="50%">
 
 - **View**  
-  display ROIs of Fall.mat, and the choosed ROI is highlighted.
+  display ROIs of Fall.mat, and the choosed ROI is highlighted. If **Macth_Cell_ID** is filled, white line between pri **Cell_ID** ROI and sec **Macth_Cell_ID** ROI is drawn.  
   - **mouse click** : Choose the closest ROI after passing ROI skip conditions
 
 - **ROI property**  
@@ -62,7 +62,7 @@ About secondary view section and secondary table section, the function is same a
 - **Image Contrast**  
   - **Green** : Background image (**meanImg**, **meanImgE**, **max_proj**, and **Vcorr**) contrast of primary imaging channel.
   - **Red** : Background image (**meanImg**) contrast of seconday imaging channel. If the Fall.mat dosen't have secondary channel imaging data, this is meaningless. 
-  - **Blue** : Background image contrast of reference tif image. If reference tif image is not set, this is meaningless. 
+  - **Blue** : Secondary ROIs. Only ROIs of the celltype set in **ROI Display Setting** will be displayed.   
 
 - **ROI Opacity**  
   Opacity of all and the selected ROI can be changed with the sliders.
@@ -81,11 +81,18 @@ About secondary view section and secondary table section, the function is same a
 <tr>
 <td width="50%">
 
-The table has additionaly column, **Cell_ID_Match**, the secondary ROI ID matched to the primary ROI ID.
+The table has additionaly column, **Cell_ID_Match**, the secondary ROI ID matched to the primary ROI ID.   
+Although ROI check is possible in also this application, creating ROICheck files using Suite2pROICheck is recommended for its more comprehensive functionality.  
 
 > ⚠️ **WARNING:**  
 > Before load ROICheck, please match the table columns with the table columns of the ROIcheck file.  
 > ex) NG: app; ["Cell_ID", "Cell_ID_Match", "Neuron", "Not_Cell", "Check"], ROICheck; ["Cell_ID", "Cell_ID_Match", "Astrocyte", "Not_Cell", "Check"]  
+
+Cell_ID_Match is initially blank, but a number is filled, a white line is drawn on the **View**. 
+This indicates which **sec** ROI matches to the **pri** ROI.   
+This number must be a integer value between 0 and the maximum ROI number in sec. 
+Since you typically would like to know the matching relationships of only neurons, you don't need to fill in all the blanks.   
+Also, the matching should basically be **one-to-one**, and you should avoid having one pri ROI matches to multiple sec ROIs, or vice versa.
 
 </td>
 <td width="50%">
@@ -100,6 +107,62 @@ The table has additionaly column, **Cell_ID_Match**, the secondary ROI ID matche
 <table>
 <tr>
 <td width="50%">
+
+**Image registration** supports **manual** ROI matching. 
+While the ROI arrangement pattern is basically similar between the sessions from the same subject, image drifting noise makes ROI matching process difficult. 
+In this section, image registration using [**ITKElastix**](https://github.com/InsightSoftwareConsortium/ITKElastix) is available. 
+It performs registration from **sec (moving)** to **pri (fixed)** based on the background image, and applies the obtained transformation to the ROIs as well, enabling more efficient ROI matching by overlaying pri ROIs and sec ROIs.
+
+<table>
+  <tr>
+    <td></td>
+    <td> <b>Rigid </td>
+    <td> <b>Affine </td>
+    <td> <b>B-Spline </td>
+  </tr>
+  <tr>
+    <td> <b>Computation Speed </td>
+    <td> 0.5 ~ 1 (sec/image) </td>
+    <td> 1 ~ 2 (sec/image) </td>
+    <td> 2 ~ 4 (sec/image) </td>
+  </tr>
+  <tr>
+    <td> <b>Degrees of Freedom </td>
+    <td> Moderate </td>
+    <td> Good </td>
+    <td> Excellent </td>
+  </tr>
+  <tr>
+    <td> <b>Shape Preservation </td>
+    <td> Excellent </td>
+    <td> Good </td>
+    <td> Moderate </td>
+  </tr>
+  <tr>
+    <td> <b>Robustness </td>
+    <td> Good </td>
+    <td> Good </td>
+    <td> Good </td>
+  </tr>
+  <tr>
+    <td> <b>Local Deformation Handling </td>
+    <td> Poor </td>
+    <td> Poor </td>
+    <td> Excellent </td>
+  </tr>
+  <tr>
+    <td> <b>Motion Correction </td>
+    <td> Poor </td>
+    <td> Moderate </td>
+    <td> Excellent </td>
+  </tr>
+  <tr>
+    <td> <b>Registration Accuracy </td>
+    <td> Moderate </td>
+    <td> Good </td>
+    <td> Excellent </td>
+  </tr>
+</table>
 
 </td>
 <td width="50%">
