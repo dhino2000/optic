@@ -30,13 +30,16 @@ class Suite2pROITrackingGUI(QMainWindow):
         self.layout_main = QGridLayout(self.central_widget)
 
         # FileLoadUI用のレイアウト
-        self.layout_file_load = QVBoxLayout()
+        self.layout_file_load = QHBoxLayout()
         self.setupFileLoadUI()
         self.layout_main.addLayout(self.layout_file_load, 1, 0, 1, 1)
 
         # メインUI用のレイアウト
         self.layout_main_ui = QGridLayout()
-        self.layout_main.addLayout(self.layout_main_ui, 0, 0, 1, 1)
+        self.layout_main.addLayout(self.layout_main_ui, 0, 0, 1, 2)
+
+        self.layout_extra_ui = QHBoxLayout()
+        self.layout_main.addLayout(self.layout_extra_ui, 1, 1, 1, 1)
 
     def setupFileLoadUI(self):
         file_load_widget = QWidget()
@@ -62,6 +65,7 @@ class Suite2pROITrackingGUI(QMainWindow):
         if self.setupUI_done:
             # メインUIのクリア
             clearLayout(self.layout_main_ui)
+            clearLayout(self.layout_extra_ui)
         
         # 新しいメインUIの設定
         self.setupMainUILayouts()
@@ -82,7 +86,7 @@ class Suite2pROITrackingGUI(QMainWindow):
     def setupMainUILayouts(self):
         self.layout_main_ui.addLayout(self.makeLayoutSectionLeftUpper(), 0, 0, 1, 1)
         self.layout_main_ui.addLayout(self.makeLayoutSectionRightUpper(), 0, 1, 1, 1)
-        self.layout_main_ui.addLayout(self.makeLayoutSectionCentral(), 1, 0, 1, 2)
+        self.layout_extra_ui.addLayout(self.makeLayoutSectionBottomExtra())
 
     def setupControls(self):
         for app_key in self.app_keys:
@@ -201,7 +205,7 @@ class Suite2pROITrackingGUI(QMainWindow):
         layout.addLayout(self.makeLayoutComponentTable_ROICountLabel_ROISetSameCelltype_ROICheckIO(app_key))
         return layout
 
-    "Central"
+    "Bottom Extra"
     # Image Registration
     def makeLayoutComponenImageRegistration(self):
         layout = makeLayoutFallRegistration(
@@ -240,6 +244,7 @@ class Suite2pROITrackingGUI(QMainWindow):
             "ot_threshold_cost",
             "ot_method",
             "ot_run",
+            "ot_clear",
         ))
         layout.addLayout(makeLayoutROIMatchingTest(
             self.widget_manager,
@@ -256,7 +261,8 @@ class Suite2pROITrackingGUI(QMainWindow):
     # ファイル読み込み用UI Layout
     def makeLayoutComponentFileLoadUI(self):
         layout = QVBoxLayout()
-
+        # Label
+        layout.addWidget(self.widget_manager.makeWidgetLabel(key="load_fall", label="File Load", font_size=12, bold=True, italic=True, use_global_style=False))
         # LineEdit
         for app_key in self.app_keys:
             list_label = [f"Fall mat file path ({app_key} Image)"]
@@ -286,17 +292,17 @@ class Suite2pROITrackingGUI(QMainWindow):
         layout.addLayout(self.makeLayoutComponent_View_Label_Radiobutton_Slider(self.app_keys[1]))
         layout.addLayout(self.makeLayoutComponent_Table_Button(self.app_keys[1]))
         return layout
-    
-    # 中段
-    def makeLayoutSectionCentral(self):
-        layout = QHBoxLayout()
-        layout.addLayout(self.makeLayoutComponenImageRegistration())
-        layout.addLayout(self.makeLayoutComponentROIMatching())
-        return layout
 
     # 下段
     def makeLayoutSectionBottom(self):
         layout = self.makeLayoutComponentFileLoadUI()
+        return layout
+    
+    # 下段, 追加
+    def makeLayoutSectionBottomExtra(self):
+        layout = QHBoxLayout()
+        layout.addLayout(self.makeLayoutComponenImageRegistration())
+        layout.addLayout(self.makeLayoutComponentROIMatching())
         return layout
     
     """
@@ -349,6 +355,7 @@ class Suite2pROITrackingGUI(QMainWindow):
 
         self.widget_manager.dict_button["load_file"].clicked.connect(lambda: self.loadFilePathsandInitialize())
         bindFuncExit(q_window=self, q_button=self.widget_manager.dict_button["exit"])
+        bindFuncHelp(q_button=self.widget_manager.dict_button["help"], url=AccessURL.HELP[self.config_manager.current_app])
 
     def bindFuncAllWidget(self):
         for app_key in self.app_keys:
@@ -494,6 +501,12 @@ class Suite2pROITrackingGUI(QMainWindow):
             control_manager=self.control_manager,
             app_key_pri=self.app_keys[0],
             app_key_sec=self.app_keys[1],
+        )
+        # Clear ROI Matching result
+        bindFuncButtonClearColumnCells(
+            q_button=self.widget_manager.dict_button['ot_clear'],
+            q_table=self.widget_manager.dict_table[self.app_keys[0]],
+            idx_col=self.config_manager.table_columns[self.app_keys[0]].getColumns()["Cell_ID_Match"]["order"], # hardcoded !!!
         )
         # ROI Matching Test
         self.widget_manager.dict_button[f"roi_matching_test"].clicked.connect(
