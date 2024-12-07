@@ -172,10 +172,10 @@ def runStackRegistration(
     idx_ref: int,
     axis: Literal["t", "z"],
     output_directory: str,
-) -> np.ndarray[np.uint8, Tuple[int, int]]:
+) -> Tuple[Dict[str, elastixParameterObject], np.ndarray[np.uint8, Tuple[int, int]]]:
     dict_transform_parameters = calculateStackTransform(img_stack, parameter_object, channel_ref, idx_ref, axis, output_directory)
     img_stack_reg = applyStackTransform(img_stack, dict_transform_parameters, output_directory)
-    return img_stack_reg
+    return dict_transform_parameters, img_stack_reg
 
 # apply transform parameters to points
 """

@@ -502,7 +502,8 @@ def bindFuncButtonRunElastixForSingleStack(
         parameter_object = makeElastixParameterObject(data_manager.getParameterMap(app_key))
         print("Elastix Parameters", dict_params)
 
-        img_stack_reg = runStackRegistration(img_stack, parameter_object, channel_ref, idx_ref, axis, output_directory)
+        dict_transform_parameters, img_stack_reg = runStackRegistration(img_stack, parameter_object, channel_ref, idx_ref, axis, output_directory)
+        data_manager.dict_transform_parameters[app_key] = dict_transform_parameters
         data_manager.dict_tiff_reg[app_key] = img_stack_reg
         shutil.rmtree(output_directory)
 
