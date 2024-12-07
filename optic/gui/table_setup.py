@@ -12,19 +12,20 @@ def setupWidgetROITable(
         table_columns: TableColumns, 
         key_event_ignore: bool=True
         ):
-    q_table.clearSelection() # テーブルの選択初期化
+    # initialize table
+    q_table.clearSelection()
 
     q_table.setRowCount(len_row)
-    # 列を順序に基づいてソート
+    # sort columns by order
     col_sorted = sorted(table_columns.getColumns().items(), key=lambda x: x[1]['order'])
     q_table.setColumnCount(len(col_sorted))
 
-    # ヘッダーの設定
+    # set column names
     q_table.setHorizontalHeaderLabels([col[0] for col in col_sorted])
-    # テーブルの選択モードを単一行選択に設定
+    # set selection mode
     q_table.setSelectionMode(QAbstractItemView.SingleSelection)
 
-    # セルの横幅指定
+    # set column width
     for col_name, col_info in col_sorted:
         q_table.setColumnWidth(col_info['order'], col_info['width'])
 

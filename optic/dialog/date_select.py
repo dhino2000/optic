@@ -26,7 +26,7 @@ class DateSelectDialog(QDialog):
         self.setWindowTitle('Date Selection')
         layout = QVBoxLayout()
         layout.addWidget(self.widget_manager.makeWidgetLabel(key="date", label="Date"))
-        layout.addWidget(self.widget_manager.makeWidgetComboBox(key="date", items=self.list_date))
+        layout.addWidget(self.widget_manager.makeWidgetComboBox(key="date", items=self.list_date, idx_default=len(self.list_date)-1))
         layout.addWidget(self.widget_manager.makeWidgetButton(key="ok", label="OK"))
 
         self.setLayout(layout)

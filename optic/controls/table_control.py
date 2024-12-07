@@ -2,6 +2,7 @@ from __future__ import annotations
 from ..type_definitions import *
 from PyQt5.QtWidgets import QRadioButton, QButtonGroup, QMessageBox, QAbstractItemView, QTableWidget, QTableWidgetItem
 from PyQt5.QtCore import Qt
+import numpy as np
 from ..visualization.info_visual import updateROIPropertyDisplay, updateROICountDisplay
 from ..utils.dialog_utils import showConfirmationDialog
 from ..utils.info_utils import extractRangeValues
@@ -38,6 +39,7 @@ class TableControl:
         self.q_table, self.groups_celltype = setupWidgetROITable(self.q_table, self.len_row, self.table_columns, key_event_ignore=True)
         self.setKeyPressEvent()
         self.initalizeSharedAttr_ROIDisplay()
+        self.setROICellTypeFromArray(self.data_manager.getDictFall("pri")["iscell"][:,0], "Neuron", "Not_Cell") # set celltype with "iscell" array
         updateROICountDisplay(self.widget_manager, self.config_manager, self.app_key)
 
     def setupWidgetDynamicTable(self, app_key: str) -> None:
@@ -411,6 +413,29 @@ class TableControl:
     """
     Other Functions
     """
+    # set ROI celltype with 0/1 array
+    def setROICellTypeFromArray(
+        self,
+        array_bool: np.ndarray[bool],
+        celltype_pos: str = "Neuron",
+        celltype_neg: str = "Not_Cell"
+    ) -> None:
+        # Get column indices
+        columns = self.table_columns.getColumns()
+        pos_col_idx = columns.get(celltype_pos, {}).get('order')
+        neg_col_idx = columns.get(celltype_neg, {}).get('order')
+
+        # Update classifications
+        for row, is_positive in enumerate(array_bool):
+            target_col = pos_col_idx if is_positive else neg_col_idx
+            radio_button = self.q_table.cellWidget(row, target_col)
+            if radio_button:
+                radio_button.setChecked(True)
+                self.changeRadiobuttonOfTable(row)
+                
+        # Update display
+        updateROICountDisplay(self.widget_manager, self.config_manager, self.app_key)
+
     # update Cell ID Match column values based on matching dictionary
     def updateMatchedROIPairs(self, matches: Dict[int, int]) -> None:
         col_id = self.table_columns.getColumns()['Cell_ID']['order'] # hardcoded !!!
