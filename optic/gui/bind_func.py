@@ -776,4 +776,17 @@ def bindFuncRadiobuttonBGImageTypeChanged(
     checked_button = q_buttongroup.checkedButton()
     _onBGImageTypeChanged(q_buttongroup.id(checked_button))
 
+# -> view_layouts.makeLayoutDisplayROIContourNext
+def bindFuncCheckBoxDisplayROIContourNext(
+    q_checkbox_contour: 'QCheckBox', 
+    q_checkbox_next: 'QCheckBox',
+    view_control: 'ViewControl'
+) -> None:
+    def _onCheckBoxChanged(state: int, prop: str) -> None:
+        is_checked = (state == Qt.Checked)
+        view_control.setROIDisplayProp(prop, is_checked)
+        view_control.updateView()
+    q_checkbox_contour.stateChanged.connect(lambda state: _onCheckBoxChanged(state, "contour"))
+    q_checkbox_next.stateChanged.connect(lambda state: _onCheckBoxChanged(state, "next"))
+
 

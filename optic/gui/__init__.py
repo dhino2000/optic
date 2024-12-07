@@ -8,6 +8,6 @@ from .processing_roi_layouts import makeLayoutROIMatching, makeLayoutROIMatching
 from .canvas_layouts import makeLayoutCanvasTracePlot, makeLayoutMinimumPlotRange, makeLayoutLightPlotMode, makeLayoutEventFilePlot
 from .slider_layouts import makeLayoutContrastSlider, makeLayoutOpacitySlider
 from .info_layouts import makeLayoutROIProperty
-from .view_layouts import makeLayoutViewWithZTSlider, makeLayoutROIThresholds, makeLayoutDislplayCelltype, makeLayoutBGImageTypeDisplay, makeLayoutROIChooseSkip
+from .view_layouts import makeLayoutViewWithZTSlider, makeLayoutROIThresholds, makeLayoutDislplayCelltype, makeLayoutBGImageTypeDisplay, makeLayoutROIChooseSkip, makeLayoutDisplayROIContourNext
 from .view_setup import setViewSize
 from .table_layouts import makeLayoutTableROICountLabel, makeLayoutSelectedROISetSameCelltype, makeLayoutSelectedROICheckboxToggle, makeLayoutROIFilterThreshold, makeLayoutROIFilterButton

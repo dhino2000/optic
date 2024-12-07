@@ -38,6 +38,7 @@ class ViewControl:
         self.bg_image_type:         str                         = BGImageTypeList.FALL[0]
         self.bg_contrast:           Dict[str, Dict[str, int]]   = {}
         self.bg_visibility:         Dict[str, bool]             = {} # show or hide background image
+        self.roi_display_prop:      Dict[str, bool]             = {} # ROI display property, contour, next ROI, etc.
         for channel in config_manager.gui_defaults["CHANNELS"]:
             self.bg_contrast[channel] = {
                 'min': config_manager.gui_defaults["VIEW_SETTINGS"]["DEFAULT_CONTRAST_MIN"],
@@ -166,6 +167,9 @@ class ViewControl:
     def getBackgroundVisibility(self, channel: str) -> bool:
         return self.bg_visibility[channel]
     
+    def getROIDisplayProp(self, prop: str) -> bool:
+        return self.roi_display_prop.get(prop)
+    
     def getImageSize(self) -> Tuple[int, int]:
         return self.image_sizes
     
@@ -222,6 +226,9 @@ class ViewControl:
     def setBackgroundVisibility(self, channel: str, is_visible: bool) -> None:
         if channel in self.bg_visibility:
             self.bg_visibility[channel] = is_visible
+
+    def setROIDisplayProp(self, prop: str, value: bool) -> None:
+        self.roi_display_prop[prop] = value
 
     def setImageSize(self) -> None:
         self.image_sizes = self.data_manager.getImageSize(self.app_key)

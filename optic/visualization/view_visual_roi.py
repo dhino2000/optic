@@ -17,13 +17,29 @@ def drawAllROIs(
     painter = QPainter(pixmap)
     painter.setRenderHint(QPainter.Antialiasing)
     roi_display = control_manager.getSharedAttr(app_key, "roi_display")
+    ROISelectedId = control_manager.getSharedAttr(app_key, "roi_selected_id")
     
     dict_roi_coords = data_manager.getDictROICoords(app_key)
     for roiId, dict_roi_coords_single in dict_roi_coords.items():
-        if roi_display[roiId]:
-            drawROI(view_control, painter, dict_roi_coords_single, roiId)
+        if roi_display[roiId] and roiId != ROISelectedId:
+            color = view_control.getROIColor(roiId)
+            opacity = view_control.getROIOpacity()
+            drawROI(painter, dict_roi_coords_single, color, opacity)
     
-    highlightROISelected(view_control, painter, data_manager, control_manager, app_key)
+    dict_roi_coords_selected = dict_roi_coords[ROISelectedId]
+    color_selected = view_control.getROIColor(ROISelectedId)
+    opacity_selected = view_control.getHighlightOpacity()
+    # draw contour of selected ROI
+    if view_control.getROIDisplayProp("contour"):
+        drawROIContour(painter, dict_roi_coords_selected, color_selected, opacity_selected)
+    else:
+        drawROI(painter, dict_roi_coords_selected, color_selected, opacity_selected)
+
+    # draw next ROI of selected ROI, with White color
+    if view_control.getROIDisplayProp("next"):
+        dict_roi_coords_selected_next = dict_roi_coords.get(ROISelectedId+1)
+        if dict_roi_coords_selected_next:
+            drawROIContour(painter, dict_roi_coords_selected_next, (255, 255, 255), opacity_selected)
     painter.end()
 
 # draw all ROIs and contour of selected ROI
@@ -46,7 +62,9 @@ def drawAllROIsWithTracking(
 
     for roiId, dict_roi_coords_single in dict_roi_coords.items():
         if roi_display[roiId]:
-            drawROI(view_control, painter, dict_roi_coords_single, roiId)
+            color = view_control.getROIColor(roiId)
+            opacity = view_control.getROIOpacity()
+            drawROI(painter, dict_roi_coords_single, color, opacity)
     
     highlightROISelectedWithTracking(view_control, painter, data_manager, control_manager, app_key_pri)
     # draw contour of selected ROI of "sec"
@@ -59,7 +77,9 @@ def drawAllROIsWithTracking(
             else:
                 dict_roi_coords_sec = data_manager.getDictROICoords(app_key_sec)
             dict_roi_coords_sec_single = dict_roi_coords_sec[roiId_match]
-            drawROIContour(view_control_sec, painter, dict_roi_coords_sec_single, roiId_match)
+            color = view_control_sec.getROIColor(roiId_match)
+            opacity = view_control_sec.getROIOpacity()
+            drawROIContour(painter, dict_roi_coords_sec_single, color, opacity)
         except KeyError:
             pass
 
@@ -79,7 +99,7 @@ def drawAllROIsWithTracking(
                     coords_sec = data_manager.getDictROICoords(app_key_sec)[roiId_sec]["med"]
                 # show only if both ROIs are displayed
                 if roi_display_pri[roiId_pri] and roi_display_sec[roiId_sec]:
-                    drawROIPair(view_control, painter, coords_pri, coords_sec)
+                    drawROIPair(painter, coords_pri, coords_sec, view_control.getROIPairOpacity())
         except (TypeError, KeyError):
             pass
 
@@ -87,14 +107,12 @@ def drawAllROIsWithTracking(
 
 # draw single ROI
 def drawROI(
-        view_control: ViewControl, 
         painter: QPainter, 
         dict_roi_coords_single: Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32], Tuple[int]],
-        roiId: int,
+        color: Tuple[int, int, int],
+        opacity: int
         ) -> None:
     xpix, ypix = dict_roi_coords_single["xpix"], dict_roi_coords_single["ypix"]
-    color = view_control.getROIColor(roiId)
-    opacity = view_control.getROIOpacity()
     
     pen = QPen(QColor(*color, opacity))
     painter.setPen(pen)
@@ -104,15 +122,13 @@ def drawROI(
 
 # draw single ROI contour
 def drawROIContour(
-        view_control: ViewControl, 
         painter: QPainter, 
         dict_roi_coords_single: Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32], Tuple[int]],
-        roiId: int
+        color: Tuple[int, int, int],
+        opacity: int
         ) -> None:
     xpix, ypix = dict_roi_coords_single["xpix"], dict_roi_coords_single["ypix"]
     xpix_contour, ypix_contour = getROIContour(xpix, ypix)
-    color = view_control.getROIColor(roiId)
-    opacity = view_control.getROIOpacity()
     
     pen = QPen(QColor(*color, opacity))
     painter.setPen(pen)
@@ -122,17 +138,14 @@ def drawROIContour(
 
 # draw single ROI pair
 def drawROIPair(
-        view_control: ViewControl,
         painter: QPainter,
         coords_pri: Tuple[int, int],
         coords_sec: Tuple[int, int],
-        opacity: int = None,
+        opacity: int,
 ) -> None:
     x_pri, y_pri = coords_pri
     x_sec, y_sec = coords_sec
     color = PenColors.ROI_PAIR
-    if opacity is None:
-        opacity = view_control.getROIPairOpacity()
     width = PenWidth.ROI_PAIR
     
     qcolor = QColor(color)
@@ -141,27 +154,6 @@ def drawROIPair(
     pen.setWidth(width)
     painter.setPen(pen)
     painter.drawLine(x_pri, y_pri, x_sec, y_sec)
-
-# highlight selected ROI
-def highlightROISelected(
-        view_control: ViewControl, 
-        painter: QPainter, 
-        data_manager: DataManager, 
-        control_manager: ControlManager, 
-        app_key: AppKeys
-        ) -> None:
-    ROISelectedId = control_manager.getSharedAttr(app_key, "roi_selected_id")
-    if ROISelectedId is not None:
-        dict_roi_coords_single = data_manager.getDictROICoords(app_key)[ROISelectedId]
-        xpix, ypix = dict_roi_coords_single["xpix"], dict_roi_coords_single["ypix"]
-        color = view_control.getROIColor(ROISelectedId)
-        opacity = view_control.getHighlightOpacity()
-        
-        pen = QPen(QColor(*color, opacity))
-        painter.setPen(pen)
-        
-        for x, y in zip(xpix, ypix):
-            painter.drawPoint(int(x), int(y))
 
 # highlight selected ROI with tracking
 def highlightROISelectedWithTracking(

@@ -4,7 +4,7 @@ from PyQt5.QtGui import QPainter, QPen, QColor, QImage, QPixmap
 from PyQt5.QtCore import Qt
 import numpy as np
 from ..config.constants import ChannelKeys, PenColors, PenWidth
-from .view_visual_roi import drawAllROIs, drawAllROIsWithTracking, drawROI, highlightROISelected, findClosestROI, shouldSkipROI
+from .view_visual_roi import drawAllROIs, drawAllROIsWithTracking, drawROI, findClosestROI, shouldSkipROI
 from .view_visual_rectangle import drawRectangle, drawRectangleIfInRange
 from ..preprocessing.preprocessing_roi import updateROIImage
 
