@@ -124,6 +124,28 @@ def makeLayoutStackRegistration(
     layout.addWidget(widget_manager.makeWidgetButton(key=key_button_export, label="Export Image"))
     return layout
 
+# save elastix transform parameter
+def makeLayoutSaveElastixTransform(
+        widget_manager: WidgetManager, 
+        key_button: str
+        ) -> QVBoxLayout:
+    layout = QVBoxLayout()
+    layout.addWidget(widget_manager.makeWidgetButton(key=key_button, label="Save Elastix Transform Parameters"))
+    return layout
+
+# load and apply elastix transform parameter
+def makeLayoutApplyElastixTransform(
+        widget_manager: WidgetManager, 
+        key_label: str,
+        key_button_xyct_xyczt: str
+        ) -> QVBoxLayout:
+    layout = QVBoxLayout()
+    layout.addWidget(widget_manager.makeWidgetLabel(key=key_label, label="Load and Apply Elastix Transform Parameters", font_size=12, bold=True, italic=True, use_global_style=False))
+    layout_button = QHBoxLayout()
+    layout_button.addWidget(widget_manager.makeWidgetButton(key=key_button_xyct_xyczt, label="XYCT -> XYCZT"))
+    layout.addLayout(layout_button)
+    return layout
+
 # Elastix Config
 def makeLayoutElastixConfig(widget_manager: WidgetManager, key_button: str) -> QVBoxLayout:
     layout = QVBoxLayout()

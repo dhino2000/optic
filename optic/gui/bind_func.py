@@ -14,6 +14,7 @@ from matplotlib.backend_bases import Event
 from PyQt5.QtWidgets import QPushButton, QWidget, QLineEdit, QTableWidget, QButtonGroup, QCheckBox, QGraphicsView, QSlider, QMessageBox
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from copy import deepcopy
+from itk.elxParameterObjectPython import elastixParameterObject
 import numpy as np
 import os
 import shutil
@@ -409,6 +410,9 @@ def bindFuncCheckboxShowRegisteredStack(
         view_control.updateView()
     q_checkbox.stateChanged.connect(onVisibilityChanged)
 
+"""
+Elastix
+"""
 # -> processing_image_layouts.makeLayoutFallRegistration
 def bindFuncButtonRunElastixForFall(
         q_widget: 'QWidget',
@@ -523,6 +527,26 @@ def bindFuncButtonSaveRegisterdImage(
         metadata = data_manager.getTiffMetadata(app_key)
         saveTiffStack(q_widget, path_tif_dst, data_manager.getTiffStackRegistered(app_key), imagej=True, metadata=metadata)
     q_button.clicked.connect(_saveRegisteredImage)
+
+# -> processing_image_layouts.makeLayoutSaveElastixTransform
+def bindFuncButtonSaveElastixTransform(
+    q_widget: QWidget,
+    q_button: QPushButton,
+    q_linnedit: QLineEdit,
+    data_manager: DataManager,
+    app_key: AppKeys,
+    gui_defaults: GuiDefaults,
+) -> None:
+    def _saveElastixTransformParameters():
+        transform_parameters = data_manager.dict_transform_parameters.get(app_key)
+        if not transform_parameters:
+            QMessageBox.warning(q_widget, "No Elastix Transform Parameters", "No Elastix Transform Parameters to save!")
+            return
+        initial_dir = f'{q_linnedit.text().split(".")[0]}_TransformParameters'
+
+        saveElastixTransformParameters(q_widget, gui_defaults, initial_dir, transform_parameters)
+        QMessageBox.information(q_widget, "Save Elastix Transform Parameters", "Elastix Transform Parameters saved successfully!")
+    q_button.clicked.connect(_saveElastixTransformParameters)
 
 """
 processing_roi_layouts

@@ -4,3 +4,4 @@ from .table_columns_config import TableColumnConfigDialog
 from .elastix_params_config import ElastixParamsConfigDialog
 from .roi_matching_test import ROIMatchingTestDialog
 from .roi_celltype_set import ROICellTypeSetDialog
+from .save_dir import SaveDirectoryDialog

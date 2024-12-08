@@ -5,6 +5,7 @@ import glob
 import numpy as np
 import time
 import itk
+from PyQt5.QtWidgets import QMainWindow, QDialog
 from itk.elxParameterObjectPython import elastixParameterObject, mapstringvectorstring
 from itk.itkElastixRegistrationMethodPython import elastix_registration_method
 from itk.itkTransformixFilterPython import transformix_filter
@@ -286,3 +287,24 @@ def applyDictROICoordsTransform(
 
         dict_roi_coords_reg[roi_id] = {"xpix": xpix_ypix_reg[:,0], "ypix": xpix_ypix_reg[:, 1], "med": med_reg}
     return dict_roi_coords_reg
+
+"""
+elasitx IO
+"""
+def saveElastixTransformParameters(
+    q_window: QMainWindow,
+    gui_defaults: GuiDefaults,
+    initial_dir: str, 
+    transform_parameters: Dict[str, elastixParameterObject]
+    ):
+    from ..dialog.save_dir import SaveDirectoryDialog
+    dialog = SaveDirectoryDialog(parent=q_window, gui_defaults=gui_defaults, initial_dir=initial_dir)
+    if dialog.exec_() == QDialog.Accepted:
+        dialog.getDirectory()
+        dir_dst = dialog.dir_dst
+        os.makedirs(dir_dst, exist_ok=True)
+
+    for zt_plane in transform_parameters.keys():
+        param = transform_parameters[zt_plane]
+        path_dst = f"{dir_dst}/TransformParameters_{zt_plane}.txt"
+        param.WriteParameterFile(param, path_dst)
