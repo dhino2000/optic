@@ -5,11 +5,13 @@ import glob
 import numpy as np
 import time
 import itk
+from natsort import natsorted
 from PyQt5.QtWidgets import QMainWindow, QDialog
 from itk.elxParameterObjectPython import elastixParameterObject, mapstringvectorstring
 from itk.itkElastixRegistrationMethodPython import elastix_registration_method
 from itk.itkTransformixFilterPython import transformix_filter
 from itk.ElastixPython import transformix_pointset
+from ..io.file_dialog import openFolderDialog
 
 """
 preprocessing for elastix registration
@@ -178,6 +180,32 @@ def runStackRegistration(
     img_stack_reg = applyStackTransform(img_stack, dict_transform_parameters, output_directory)
     return dict_transform_parameters, img_stack_reg
 
+# duplicate transform parameters for apply to image stack ex) XYCT -> XYCZT
+def duplicateTransformParameters(
+    dict_transform_parameters: Dict[str, elastixParameterObject],
+    axis: Literal["t", "z"],
+    num_z: int=None,
+    num_t: int=None,
+) -> Dict[str, elastixParameterObject]:
+    dict_transform_parameters_duplicated = {}
+    list_key = list(dict_transform_parameters.keys())
+    # XYCZ -> XYCZT
+    if axis == "t":
+        t_src = int(list_key[0].split("_")[1].replace("t", ""))
+        num_z = len(dict_transform_parameters.keys())
+        for z in range(num_z):
+            for t in range(num_t):
+                dict_transform_parameters_duplicated[f"z{z}_t{t}"] = dict_transform_parameters[f"z{z}_t{t_src}"]
+    # XYCT -> XYCZT
+    elif axis == "z":
+        z_src = int(list_key[0].split("_")[0].replace("z", ""))
+        num_t = len(dict_transform_parameters.keys())
+        for t in range(num_t):
+            for z in range(num_z):
+                dict_transform_parameters_duplicated[f"z{z}_t{t}"] = dict_transform_parameters[f"z{z_src}_t{t}"]
+    return dict_transform_parameters_duplicated
+
+
 # apply transform parameters to points
 """
 WARNING!!!
@@ -308,3 +336,18 @@ def saveElastixTransformParameters(
         param = transform_parameters[zt_plane]
         path_dst = f"{dir_dst}/TransformParameters_{zt_plane}.txt"
         param.WriteParameterFile(param, path_dst)
+
+def loadElastixTransformParameters(
+    q_window: QMainWindow,
+    ) -> Dict[str, elastixParameterObject]:
+    dir_src = openFolderDialog(q_window)
+    transform_parameters = {}
+
+    list_path_src = natsorted(glob.glob(f"{dir_src}/*.txt"))
+
+    for path_src in list_path_src:
+        zt_plane = path_src.split("\\")[-1].split("_", 1)[-1].split(".")[0]
+        param = elastixParameterObject()
+        param.ReadParameterFile(path_src)
+        transform_parameters[zt_plane] = param
+    return transform_parameters

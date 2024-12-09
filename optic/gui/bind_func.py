@@ -475,7 +475,7 @@ def bindFuncButtonRunElastixForFall(
         control_manager.view_controls[app_key_sec].updateView()
 
         shutil.rmtree(output_directory)
-        QMessageBox.information(q_widget, "ROI Matching Finish", "ROI Matching Finished!")
+        QMessageBox.information(q_widget, "Image Registration Finish", "Image Registration Finished!")
     q_button.clicked.connect(lambda: _runElastix())
 
 # -> processing_image_layouts.makeLayoutStackRegistration
@@ -511,7 +511,7 @@ def bindFuncButtonRunElastixForSingleStack(
         data_manager.dict_tiff_reg[app_key] = img_stack_reg
         shutil.rmtree(output_directory)
 
-        QMessageBox.information(q_widget, "ROI Matching Finish", "ROI Matching Finished!")
+        QMessageBox.information(q_widget, "Image Registration Finish", "Image Registration Finished!")
     q_button.clicked.connect(lambda: _runElastix())
 
 # -> processing_image_layouts.makeLayoutStackRegistration
@@ -547,6 +547,29 @@ def bindFuncButtonSaveElastixTransform(
         saveElastixTransformParameters(q_widget, gui_defaults, initial_dir, transform_parameters)
         QMessageBox.information(q_widget, "Save Elastix Transform Parameters", "Elastix Transform Parameters saved successfully!")
     q_button.clicked.connect(_saveElastixTransformParameters)
+
+def bindFuncButtonApplyElastixTransform_XYCTtoXYCZT(
+    q_widget: QWidget,
+    q_button: QPushButton,
+    data_manager: DataManager,
+    app_key: AppKeys,
+    output_directory: str="./elastix"
+) -> None:
+    def _applyElastixTransform_XYCTtoXYCZT():
+        os.makedirs(output_directory, exist_ok=True)
+
+        img_stack = data_manager.getTiffStack(app_key)
+        transform_parameters_XYCT = loadElastixTransformParameters(q_widget)
+        num_z = data_manager.getSizeOfZ(app_key)
+        transform_parameters_XYCZT = duplicateTransformParameters(transform_parameters_XYCT, axis="z", num_z=num_z)
+        img_stack_reg = applyStackTransform(img_stack, transform_parameters_XYCZT, output_directory)
+        data_manager.dict_transform_parameters[app_key] = transform_parameters_XYCZT
+        data_manager.dict_tiff_reg[app_key] = img_stack_reg
+        shutil.rmtree(output_directory)
+        
+        QMessageBox.information(q_widget, "Image Registration Finish", "Image Registration Finished!")
+    q_button.clicked.connect(_applyElastixTransform_XYCTtoXYCZT)
+
 
 """
 processing_roi_layouts

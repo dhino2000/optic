@@ -1,3 +1,3 @@
 from .normalization import normalizeImageStackWithReferenceAreas
-from .elastix import convertDictToElastixFormat, makeElastixParameterObject, calculateSingleTransform, applySingleTransform, calculateStackTransform, applyStackTransform, runStackRegistration, applyPointTransform, applyDictROICoordsTransform, saveElastixTransformParameters
+from .elastix import convertDictToElastixFormat, makeElastixParameterObject, calculateSingleTransform, applySingleTransform, calculateStackTransform, applyStackTransform, runStackRegistration, applyPointTransform, applyDictROICoordsTransform, saveElastixTransformParameters, loadElastixTransformParameters, duplicateTransformParameters
 from .optimal_transport import getOneToOneMatching, calculateROIMatching
