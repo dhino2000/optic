@@ -7,11 +7,12 @@ if not dir_parent in sys.path:
     sys.path.append(dir_parent)
 
 from PyQt5.QtWidgets import QMainWindow, QWidget, QGridLayout, QVBoxLayout, QHBoxLayout, QApplication
-from ...config import *
-from ...controls import *
-from ...gui import *
-from ...io import *
-from ...manager import *
+from optic.config import *
+from optic.controls import *
+from optic.dialog import *
+from optic.gui import *
+from optic.io import *
+from optic.manager import *
 from optic.gui.bind_func import *
 
 class TIFStackExplorerGUI(QMainWindow):
@@ -106,6 +107,7 @@ class TIFStackExplorerGUI(QMainWindow):
     return -> Layout
     """
     "Upper Left"
+    # XYZCT tiff stack view, slider
     def makeLayoutComponentImageView(self):
         layout = makeLayoutViewWithZTSlider(
             self.widget_manager, 
@@ -159,6 +161,15 @@ class TIFStackExplorerGUI(QMainWindow):
             f"export_reg_tiff",
             f"show_reg_result"
         )
+        layout.addLayout(makeLayoutSaveElastixTransform(
+            self.widget_manager,
+            key_button=f"elastix_save_transform",
+        ))
+        layout.addLayout(makeLayoutApplyElastixTransform(
+            self.widget_manager,
+            key_label="elastix_apply_transform",
+            key_button_xyct_xyczt=f"elastix_apply_transform_xyct_xyczt",
+        ))
         return layout
     
     def makeLayoutComponentStackNormalization(self):
@@ -243,10 +254,9 @@ class TIFStackExplorerGUI(QMainWindow):
 
         self.widget_manager.dict_button["load_file"].clicked.connect(lambda: self.loadFilePathsandInitialize())
         bindFuncExit(q_window=self, q_button=self.widget_manager.dict_button["exit"])
+        bindFuncHelp(q_button=self.widget_manager.dict_button["help"], url=AccessURL.HELP[self.config_manager.current_app])
 
     def bindFuncAllWidget(self):
-        self.widget_manager.dict_button[f"help"].clicked.connect(lambda: self.control_manager.view_controls[self.app_key_pri].updateView())
-
         # Z,T plane slider
         bindFuncPlaneZSlider(self.widget_manager.dict_slider[f"{self.app_key_pri}_plane_z"], self.control_manager.view_controls[self.app_key_pri])
         bindFuncPlaneTSlider(self.widget_manager.dict_slider[f"{self.app_key_pri}_plane_t"], self.control_manager.view_controls[self.app_key_pri])
@@ -344,4 +354,20 @@ class TIFStackExplorerGUI(QMainWindow):
             data_manager=self.data_manager,
             app_key=self.app_key_pri,
             path_tif_src=self.widget_manager.dict_lineedit[f"{self.app_key_pri}_path_tiff"].text(),
+        )
+        # save transform parameters
+        bindFuncButtonSaveElastixTransform(
+            q_widget=self,
+            q_button=self.widget_manager.dict_button[f"elastix_save_transform"],
+            q_linnedit=self.widget_manager.dict_lineedit[f"{self.app_key_pri}_path_tiff"],
+            data_manager=self.data_manager,
+            app_key=self.app_key_pri,
+            gui_defaults=self.config_manager.gui_defaults
+        )
+        # apply transform parameters from XYCT to XYCZT
+        bindFuncButtonApplyElastixTransform_XYCTtoXYCZT(
+            q_widget=self,
+            q_button=self.widget_manager.dict_button[f"elastix_apply_transform_xyct_xyczt"],
+            data_manager=self.data_manager,
+            app_key=self.app_key_pri,
         )
