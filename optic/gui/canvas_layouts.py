@@ -2,7 +2,7 @@ from __future__ import annotations
 from ..type_definitions import *
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
-from .base_layouts import makeLayoutLineEditLabel
+from .base_layouts import makeLayoutLineEditLabel, makeLayoutComboBoxLabel
 
 # F, Fneu, spks, event plotting canvas Layout
 def makeLayoutCanvasTracePlot(
@@ -61,24 +61,66 @@ def makeLayoutLightPlotMode(
                 )
     return layout
 
-# Eventfile plot, Eventfile plot range
-def makeLayoutEventFilePlot(
-        widget_manager: WidgetManager, 
+# Eventfile plot, Eventfile plot range, F - Fneu, DF/F0
+def makeLayoutEventFilePlotProperty(
+        widget_manager: WidgetManager,
+        key_button_load_eventfile: str,
+        key_button_clear_eventfile: str,
+        key_checkbox_plot_eventfile: str,
+        key_checkbox_plot_eventfile_ffneu: str,
+        key_checkbox_plot_eventfile_dff0: str, 
+        key_label_prop_range: str,
+        key_label_prop_ffneu: str,
+        key_label_prop_dff0: str,
+        key_label_combobox_eventfile: str,
+        key_lineedit_prop_range: str,
+        key_lineedit_prop_ffneu: str,
+        key_lineedit_prop_dff0: str,
+        key_combobox_eventfile: str,
         app_key: AppKeys,
         ) -> QVBoxLayout:
     layout = QVBoxLayout()
-    layout.addWidget(widget_manager.makeWidgetCheckBox(key=f"{app_key}_plot_eventfile", 
-                                                       label="plot EventFile trace", 
-                                                       checked=True,
-                                                       ))
-    layout.addLayout(makeLayoutLineEditLabel(widget_manager,
-                                                key_label=f"{app_key}_plot_eventfile_range",
-                                                key_lineedit=f"{app_key}_plot_eventfile_range",
-                                                label="plot range from Event start (pre, post; sec)",
-                                                text_set="(10, 10)"))
+    layout_prop = QHBoxLayout()
+    layout_prop_range, layout_prop_ffneu, layout_prop_dff0 = QVBoxLayout(), QVBoxLayout(), QVBoxLayout()
+    layout_prop_range.addWidget(widget_manager.makeWidgetCheckBox(key=key_checkbox_plot_eventfile, 
+                                                                label="plot EventFile trace", 
+                                                                checked=True,
+                                                                ))
+    layout_prop_range.addLayout(makeLayoutLineEditLabel(widget_manager,
+                                                        key_label=key_label_prop_range,
+                                                        key_lineedit=key_lineedit_prop_range,
+                                                        label="plot range from Event start (pre, post; sec)",
+                                                        text_set="(10, 10)"))
+    layout_prop.addLayout(layout_prop_range)
+    layout_prop_ffneu.addWidget(widget_manager.makeWidgetCheckBox(key=key_checkbox_plot_eventfile_ffneu, 
+                                                                label="plot F - Fneu * factor", 
+                                                                checked=True,
+                                                                ))
+    layout_prop_ffneu.addLayout(makeLayoutLineEditLabel(widget_manager,
+                                                        key_label=key_label_prop_ffneu,
+                                                        key_lineedit=key_lineedit_prop_ffneu,
+                                                        label="Fneu factor",
+                                                        text_set="0.7"))
+    layout_prop.addLayout(layout_prop_ffneu)
+    layout_prop_dff0.addWidget(widget_manager.makeWidgetCheckBox(key=key_checkbox_plot_eventfile_dff0, 
+                                                                label="plot DF/F0", 
+                                                                checked=True,
+                                                                ))
+    layout_prop_dff0.addLayout(makeLayoutLineEditLabel(widget_manager,
+                                                        key_label=key_label_prop_dff0,
+                                                        key_lineedit=key_lineedit_prop_dff0,
+                                                        label="F0 percentile",
+                                                        text_set="35"))
+    layout_prop.addLayout(layout_prop_dff0)
+    layout.addLayout(layout_prop)
     layout_button = QHBoxLayout()
-    layout_button.addWidget(widget_manager.makeWidgetButton(key=f"{app_key}_load_eventfile", label="Load EventFile npy file"))
-    layout_button.addWidget(widget_manager.makeWidgetButton(key=f"{app_key}_clear_eventfile", label="Clear"))
+    layout_button.addWidget(widget_manager.makeWidgetButton(key=key_button_load_eventfile, label="Load EventFile npy file"))
+    layout_button.addWidget(widget_manager.makeWidgetButton(key=key_button_clear_eventfile, label="Clear"))
     layout.addLayout(layout_button)
+    layout.addLayout(makeLayoutComboBoxLabel(widget_manager,
+                                             key_label=key_label_combobox_eventfile,
+                                             key_combobox=key_combobox_eventfile,
+                                             label="Loaded EventFile",
+                                             ))
     return layout
 
