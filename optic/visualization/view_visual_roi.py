@@ -89,7 +89,8 @@ def drawAllROIsWithTracking(
         roi_display_sec = control_manager.getSharedAttr(app_key_sec, "roi_display")
         try:
             table_control_pri = control_manager.table_controls[app_key_pri]
-            roiId_pairs = table_control_pri.getMatchedROIPairs()
+            table_control_sec = control_manager.table_controls[app_key_sec]
+            roiId_pairs = table_control_pri.getMatchedROIPairs(table_control_sec)
             # all ROI pairs
             for roiId_pri, roiId_sec in roiId_pairs:
                 coords_pri = data_manager.getDictROICoords(app_key_pri)[roiId_pri]["med"]

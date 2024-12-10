@@ -83,30 +83,32 @@ def convertMatROICheckToDictROICheck(mat_roicheck: Dict[str, Any]) -> Dict[str, 
 
 # convert contents of QTableWidget into dict_roitracking
 def convertTableDataToDictROITracking(
-        q_table: QTableWidget, 
+        q_table_pri: QTableWidget, 
+        q_table_sec: QTableWidget, 
         table_columns: TableColumns, 
         local_var: bool=False
         ) -> Dict[str, np.ndarray]:
     # celltype, checkbox, string
-    dict_roi_tracking = convertTableDataToDictROICheck(q_table, table_columns, local_var)
-    row_count = q_table.rowCount()
+    dict_roi_tracking = convertTableDataToDictROICheck(q_table_pri, table_columns, local_var)
+    row_count_pri = q_table_pri.rowCount()
+    row_count_sec = q_table_sec.rowCount()
     for col_name, col_info in table_columns.getColumns().items():        
         # Cell ID
         if col_info['type'] == 'id':
             values = []
-            for row in range(row_count):
-                item = q_table.item(row, col_info['order'])
+            for row in range(row_count_pri):
+                item = q_table_pri.item(row, col_info['order'])
                 value = int(item.text()) if item else np.nan
                 values.append([value])
             dict_roi_tracking[col_name] = np.array(values)
         # Cell ID Match
         elif col_info['type'] == 'id_match':
             values = []
-            for row in range(row_count):
-                item = q_table.item(row, col_info['order'])
+            for row in range(row_count_pri):
+                item = q_table_pri.item(row, col_info['order'])
                 try:
                     value = int(item.text()) if item else np.nan
-                    if value >= 0 and value < row_count:
+                    if value >= 0 and value < row_count_sec: # check if the value is valid
                         values.append([value])
                     else:
                         values.append([np.nan])

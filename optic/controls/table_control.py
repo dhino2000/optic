@@ -455,7 +455,7 @@ class TableControl:
                 continue
 
     # if "Match Cell ID" is filled, get ROI pair
-    def getMatchedROIPairs(self) -> List[Tuple[int, int]]:
+    def getMatchedROIPairs(self, table_control_sec: TableControl) -> List[Tuple[int, int]]:
         matched_pairs = []
 
         col_id = self.table_columns.getColumns()['Cell_ID']['order'] # hardcoded !!!
@@ -470,8 +470,8 @@ class TableControl:
                     continue
                     
                 cell_id_match = int(cell_id_match_item.text())
-                # Skip invalid values
-                if (cell_id_match < 0 or cell_id_match >= self.len_row):
+                # Skip invalid values, below 0 or above the number of "sec" ROIs
+                if (cell_id_match < 0 or cell_id_match >= table_control_sec.len_row):
                     continue
                 
                 matched_pairs.append((cell_id, cell_id_match))

@@ -249,7 +249,7 @@ def saveROITracking(
             now = f"save_{datetime.datetime.now().strftime('%y%m%d_%H%M%S')}"
             if is_overwrite:
                 mat_roi_tracking = loadmat(path_dst, simplify_cells=True)
-                dict_roi_tracking_pri = convertTableDataToDictROITracking(q_table_pri, table_column_pri, local_var)
+                dict_roi_tracking_pri = convertTableDataToDictROITracking(q_table_pri, q_table_sec, table_column_pri, local_var)
                 dict_roi_check_sec = convertTableDataToDictROICheck(q_table_sec, table_column_sec)
                 mat_roi_tracking = convertDictROITrackingToMatROITracking(
                     dict_roi_tracking_pri,
@@ -259,7 +259,7 @@ def saveROITracking(
                     user=user
                     )
             else:
-                dict_roi_tracking_pri = convertTableDataToDictROITracking(q_table_pri, table_column_pri, local_var)
+                dict_roi_tracking_pri = convertTableDataToDictROITracking(q_table_pri, q_table_sec, table_column_pri, local_var)
                 dict_roi_check_sec = convertTableDataToDictROICheck(q_table_sec, table_column_sec)
                 mat_roi_tracking = convertDictROITrackingToMatROITracking(
                     dict_roi_tracking_pri,
