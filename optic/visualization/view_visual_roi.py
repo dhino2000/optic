@@ -154,7 +154,13 @@ def drawROIPair(
     pen = QPen(qcolor)
     pen.setWidth(width)
     painter.setPen(pen)
+    # draw line
     painter.drawLine(x_pri, y_pri, x_sec, y_sec)
+    # draw circle
+    marker_size = width * 1
+    painter.drawEllipse(x_pri - marker_size//2, y_pri - marker_size//2, marker_size, marker_size)
+    painter.drawEllipse(x_sec - marker_size//2, y_sec - marker_size//2, marker_size, marker_size)
+
 
 # highlight selected ROI with tracking
 def highlightROISelectedWithTracking(
