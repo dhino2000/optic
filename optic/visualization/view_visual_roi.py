@@ -54,6 +54,7 @@ def drawAllROIsWithTracking(
     painter = QPainter(pixmap)
     painter.setRenderHint(QPainter.Antialiasing)
     roi_display = control_manager.getSharedAttr(app_key_pri, "roi_display")
+    ROISelectedId = control_manager.getSharedAttr(app_key_pri, "roi_selected_id")
 
     if view_control.show_reg_im_roi:
         dict_roi_coords = data_manager.getDictROICoordsRegistered(app_key_pri)
@@ -61,7 +62,7 @@ def drawAllROIsWithTracking(
         dict_roi_coords = data_manager.getDictROICoords(app_key_pri)
 
     for roiId, dict_roi_coords_single in dict_roi_coords.items():
-        if roi_display[roiId]:
+        if roi_display[roiId] and roiId != ROISelectedId:
             color = view_control.getROIColor(roiId)
             opacity = view_control.getROIOpacity()
             drawROI(painter, dict_roi_coords_single, color, opacity)
@@ -99,9 +100,16 @@ def drawAllROIsWithTracking(
                 else:
                     coords_sec = data_manager.getDictROICoords(app_key_sec)[roiId_sec]["med"]
                 # show only if both ROIs are displayed
-                if roi_display_pri[roiId_pri] and roi_display_sec[roiId_sec]:
+                if roi_display_pri[roiId_pri] and roi_display_sec[roiId_sec] and roiId_pri != ROISelectedId:
                     drawROIPair(painter, coords_pri, coords_sec, view_control.getROIPairOpacity())
+                elif roiId_pri == ROISelectedId:
+                    coords_pri_selected, coords_sec_selected = coords_pri, coords_sec
         except (TypeError, KeyError):
+            pass
+        # selected ROI pair 
+        try:
+            drawROIPair(painter, coords_pri_selected, coords_sec_selected, view_control.getROIPairOpacity())
+        except (NameError, UnboundLocalError):
             pass
 
     painter.end()
