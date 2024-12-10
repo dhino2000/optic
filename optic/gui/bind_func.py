@@ -596,6 +596,7 @@ def bindFuncButtonRunROIMatching(
     app_key_sec: str,
 ):
     def _runROIMatching():
+        view_control_pri = control_manager.view_controls[app_key_pri]
         roi_display_type_pri = q_buttongroup_celltype_pri.checkedButton().text()
         roi_display_type_sec = q_buttongroup_celltype_sec.checkedButton().text()
         result = showConfirmationDialog(
@@ -603,8 +604,14 @@ def bindFuncButtonRunROIMatching(
             'Confirmation',
             f"Match only displayed ROIs? \nYes: Match {roi_display_type_pri} ROIs and {roi_display_type_sec} ROIs \nNo: Match all ROIs \nCancel: Cancel"
         )
-        array_src = np.array([data_manager.getDictROICoords(app_key_pri)[idx]["med"] for idx in range(data_manager.getNROIs(app_key_pri))])
-        array_tgt = np.array([data_manager.getDictROICoords(app_key_sec)[idx]["med"] for idx in range(data_manager.getNROIs(app_key_sec))])
+        # use registered coordinates if show_reg_im_roi is True
+        if view_control_pri.show_reg_im_roi:
+            array_src = np.array([data_manager.getDictROICoordsRegistered(app_key_pri)[idx]["med"] for idx in range(data_manager.getNROIs(app_key_pri))])
+            array_tgt = np.array([data_manager.getDictROICoordsRegistered(app_key_sec)[idx]["med"] for idx in range(data_manager.getNROIs(app_key_sec))])
+        else:
+            array_src = np.array([data_manager.getDictROICoords(app_key_pri)[idx]["med"] for idx in range(data_manager.getNROIs(app_key_pri))])
+            array_tgt = np.array([data_manager.getDictROICoords(app_key_sec)[idx]["med"] for idx in range(data_manager.getNROIs(app_key_sec))])
+        
         if result == QMessageBox.Yes:
             roi_display_pri = list(control_manager.getSharedAttr(app_key_pri, "roi_display").values())
             roi_display_sec = list(control_manager.getSharedAttr(app_key_sec, "roi_display").values())
