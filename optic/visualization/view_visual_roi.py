@@ -67,7 +67,7 @@ def drawAllROIsWithTracking(
             opacity = view_control.getROIOpacity()
             drawROI(painter, dict_roi_coords_single, color, opacity)
     
-    highlightROISelectedWithTracking(view_control, painter, data_manager, control_manager, app_key_pri)
+    highlightROISelectedWithTracking(view_control, painter, data_manager, control_manager, app_key_pri, app_key_sec)
     # draw contour of selected ROI of "sec"
     if view_control.show_roi_match:
         try:
@@ -176,14 +176,16 @@ def highlightROISelectedWithTracking(
         painter: QPainter, 
         data_manager: DataManager, 
         control_manager: ControlManager, 
-        app_key: AppKeys
+        app_key_pri: AppKeys,
+        app_key_sec: AppKeys = None
         ) -> None:
-    ROISelectedId = control_manager.getSharedAttr(app_key, "roi_selected_id")
+    # pri selected ROI
+    ROISelectedId = control_manager.getSharedAttr(app_key_pri, "roi_selected_id")
     if ROISelectedId is not None:
         if view_control.show_reg_im_roi:
-            dict_roi_coords_single = data_manager.getDictROICoordsRegistered(app_key)[ROISelectedId]
+            dict_roi_coords_single = data_manager.getDictROICoordsRegistered(app_key_pri)[ROISelectedId]
         else:
-            dict_roi_coords_single = data_manager.getDictROICoords(app_key)[ROISelectedId]
+            dict_roi_coords_single = data_manager.getDictROICoords(app_key_pri)[ROISelectedId]
         xpix, ypix = dict_roi_coords_single["xpix"], dict_roi_coords_single["ypix"]
         color = view_control.getROIColor(ROISelectedId)
         opacity = view_control.getHighlightOpacity()
@@ -193,6 +195,24 @@ def highlightROISelectedWithTracking(
         
         for x, y in zip(xpix, ypix):
             painter.drawPoint(int(x), int(y))
+
+    # sec selected ROI
+    if app_key_sec is not None:
+        ROISelectedId = control_manager.getSharedAttr(app_key_sec, "roi_selected_id")
+        if ROISelectedId is not None:
+            if view_control.show_reg_im_roi:
+                dict_roi_coords_single = data_manager.getDictROICoordsRegistered(app_key_sec)[ROISelectedId]
+            else:
+                dict_roi_coords_single = data_manager.getDictROICoords(app_key_sec)[ROISelectedId]
+            xpix, ypix = dict_roi_coords_single["xpix"], dict_roi_coords_single["ypix"]
+            color = (0, 0, 255) # hardcoded !!!
+            opacity = view_control.getHighlightOpacity()
+            
+            pen = QPen(QColor(*color, opacity))
+            painter.setPen(pen)
+            
+            for x, y in zip(xpix, ypix):
+                painter.drawPoint(int(x), int(y))
 
 # find Closest ROI to click position
 def findClosestROI(

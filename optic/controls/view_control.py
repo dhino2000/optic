@@ -275,7 +275,7 @@ class ViewControl:
                 self.getROIwithClick(int(scene_pos.x()), int(scene_pos.y()))
 
     def mousePressEventWithTracking(self, event: QMouseEvent) -> None:
-        if event.button() == Qt.LeftButton:
+        if event.button() == Qt.LeftButton or event.button() == Qt.RightButton:
             scene_pos = self.q_view.mapToScene(event.pos())
             self.getROIwithClick(int(scene_pos.x()), int(scene_pos.y()), reg=self.show_reg_im_roi)
 

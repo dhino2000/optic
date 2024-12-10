@@ -72,15 +72,25 @@ def bindFuncViewMouseEvent(
 # -> makeWidgetView, mousePressEvent
 def bindFuncViewMouseEventWithTracking(
     q_view: 'QGraphicsView', 
-    view_control: 'ViewControl', 
-    table_control: 'TableControl',
+    view_control_pri: 'ViewControl', 
+    table_control_pri: 'TableControl',
+    view_control_sec: 'ViewControl'=None,
+    table_control_sec: 'TableControl'=None
 ) -> None:
     def onViewPressed(event) -> None:
-        view_control.mousePressEventWithTracking(event)
-        roi_selected_id = view_control.control_manager.getSharedAttr(view_control.app_key, 'roi_selected_id')
-        table_control.updateSelectedROI(roi_selected_id)
-        table_control.q_table.setFocus()
-    
+        if event.button() == Qt.LeftButton: # for "pri" ROI
+            view_control_pri.mousePressEventWithTracking(event)
+            roi_selected_id = view_control_pri.control_manager.getSharedAttr(view_control_pri.app_key, 'roi_selected_id')
+            table_control_pri.updateSelectedROI(roi_selected_id)
+            table_control_pri.q_table.setFocus()
+        elif event.button() == Qt.RightButton: # for "sec" ROI
+            if view_control_sec is not None and table_control_sec is not None:
+                view_control_sec.mousePressEventWithTracking(event)
+                roi_selected_id = view_control_sec.control_manager.getSharedAttr(view_control_sec.app_key, 'roi_selected_id')
+                table_control_sec.updateSelectedROI(roi_selected_id)
+                table_control_sec.q_table.setFocus()
+                view_control_pri.updateView()
+            
     q_view.mousePressEvent = onViewPressed
 
 # -> makeWidgetView, mouseMoveEvent
@@ -566,7 +576,7 @@ def bindFuncButtonApplyElastixTransform_XYCTtoXYCZT(
         data_manager.dict_transform_parameters[app_key] = transform_parameters_XYCZT
         data_manager.dict_tiff_reg[app_key] = img_stack_reg
         shutil.rmtree(output_directory)
-        
+
         QMessageBox.information(q_widget, "Image Registration Finish", "Image Registration Finished!")
     q_button.clicked.connect(_applyElastixTransform_XYCTtoXYCZT)
 
