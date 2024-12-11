@@ -30,7 +30,7 @@ def saveTifImage(
         path_dst        : str,
         im              : np.array[Any, Any, Any]
         ) -> None:
-    path_dst, is_overwrite = saveFileDialog(q_widget=q_widget, file_type="tif", title="Save TIF image file", initial_dir=path_dst)
+    path_dst, is_overwrite = saveFileDialog(q_widget=q_widget, file_type=".tif", title="Save TIF image file", initial_dir=path_dst)
     tifffile.imsave(path_dst, im)
 
 # load tif image data (XYC)
@@ -52,7 +52,7 @@ def saveTiffStack(
         metadata        : Dict[str, Any] = None
         ) -> None:
     # To save as ImageJ format, move axes to the last
-    path_dst, is_overwrite = saveFileDialog(q_widget=q_widget, file_type="tif", title="Save TIFF image stack file", initial_dir=path_dst)
+    path_dst, is_overwrite = saveFileDialog(q_widget=q_widget, file_type=".tif", title="Save TIFF image stack file", initial_dir=path_dst)
     if path_dst:
         if imagej:
             data_ijformat = np.moveaxis(tiff_stack, [0,1,2,3,4], [4,3,2,1,0])
@@ -82,29 +82,30 @@ def loadTiffStack(
     else:
         return
 
-# EventFile npyの読み込み, 初期化
-def loadEventFileNPY(
+# load npy event files
+def loadEventFilesNPY(
         q_window        : QMainWindow, 
         data_manager    : DataManager, 
-        control_manager : ControlManager, 
         app_key         : str
         ) -> None | np.array:
-    path_eventfile = openFileDialog(q_widget=q_window, file_type="npy", title="Open Eventfile npy File").replace("\\", "/")
+    list_path_eventfile = openFileDialog(q_widget=q_window, file_type=".npy", title="Open Eventfile npy File", multiple=True)
+    list_path_eventfile = [path.replace("\\", "/") for path in list_path_eventfile]
 
-    if path_eventfile:
-        eventfile = np.load(path_eventfile)
-        len_eventfile = len(eventfile)
-        len_Fall = data_manager.getLengthOfData(app_key)
-        eventfile_name = path_eventfile.split("/")[-1].split(".")[0]
-        control_manager.setSharedAttr(app_key, "eventfile_name", eventfile_name)
-        if not len_eventfile == len_Fall:
-            QMessageBox.warning(q_window, "File load failed", f"Length of data does not match! \nFall: {len_Fall}, eventfile: {len_eventfile}")
-            return None
-        else:
-            data_manager.dict_eventfile[app_key] = eventfile
-            return data_manager.dict_eventfile[app_key]
+    if len(list_path_eventfile) > 0:
+        data_manager.clearDictEventfile(app_key) # initialize dict_eventfile
+        for path_eventfile in list_path_eventfile:
+            eventfile = np.load(path_eventfile)
+            len_eventfile = len(eventfile)
+            len_Fall = data_manager.getLengthOfData(app_key)
+            eventfile_name = path_eventfile.split("/")[-1].split(".")[0]
+            if not len_eventfile == len_Fall:
+                QMessageBox.warning(q_window, "File load failed", f"Length of data does not match! \nFall: {len_Fall}, eventfile: {len_eventfile}")
+                return False
+            else:
+                data_manager.dict_eventfile[app_key][eventfile_name] = eventfile
+        return True
     else:
-        return
+        return False
 
 # 保存用のファイルパス作成, 初期位置も指定
 def generateSavePath(
@@ -156,7 +157,7 @@ def saveROICheck(
         ) -> None:
     path_src = q_lineedit.text()
     path_dst = generateSavePath(path_src, prefix="ROIcheck_", remove_strings="Fall_")
-    path_dst, is_overwrite = saveFileDialog(q_widget=q_window, file_type="mat", title="Save ROIcheck mat File", initial_dir=path_dst)
+    path_dst, is_overwrite = saveFileDialog(q_widget=q_window, file_type=".mat", title="Save ROIcheck mat File", initial_dir=path_dst)
     
     if path_dst:
         try:
@@ -197,7 +198,7 @@ def loadROICheck(
         table_columns   : TableColumns,
         table_control   : TableControl,
         ) -> Union[Dict[str, Any], None]:
-    path_roicheck = openFileDialog(q_widget=q_window, file_type="mat", title="Open ROIcheck mat File")
+    path_roicheck = openFileDialog(q_widget=q_window, file_type=".mat", title="Open ROIcheck mat File")
     if path_roicheck:
         try:
             mat_roicheck = loadmat(path_roicheck, simplify_cells=True)
@@ -237,7 +238,7 @@ def saveROITracking(
     path_src_pri = q_lineedit_pri.text()
     path_src_sec = q_lineedit_sec.text()
     path_dst = generateSavePath(path_src_pri, prefix="ROItracking_", remove_strings="Fall_")
-    path_dst, is_overwrite = saveFileDialog(q_widget=q_window, file_type="mat", title="Save ROItracking mat File", initial_dir=path_dst)
+    path_dst, is_overwrite = saveFileDialog(q_widget=q_window, file_type=".mat", title="Save ROItracking mat File", initial_dir=path_dst)
     
     if path_dst:
         try:
@@ -289,7 +290,7 @@ def loadROITracking(
         table_control_pri  : TableControl,
         table_control_sec  : TableControl,
         ) -> Union[Dict[str, Any], None]:
-    path_roi_tracking = openFileDialog(q_widget=q_window, file_type="mat", title="Open ROItracking mat File")
+    path_roi_tracking = openFileDialog(q_widget=q_window, file_type=".mat", title="Open ROItracking mat File")
     if path_roi_tracking:
         try:
             mat_roi_tracking = loadmat(path_roi_tracking, simplify_cells=True)

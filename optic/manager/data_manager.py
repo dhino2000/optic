@@ -34,7 +34,7 @@ class DataManager:
         self.dict_im_roi:               Dict[AppKeys, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
         self.dict_im_roi_reg:           Dict[AppKeys, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
 
-        self.dict_eventfile:            Dict[AppKeys, np.ndarray[Tuple[int]]] = {}
+        self.dict_eventfile:            Dict[AppKeys, Dict[str, np.ndarray[Tuple[int]]]] = defaultdict(dict)
         self.dict_roicheck:             Dict[AppKeys, Any] = {}
 
     """
@@ -206,11 +206,13 @@ class DataManager:
     def getTransformParameters(self, app_key: AppKeys) -> elastixParameterObject:
         return self.dict_transform_parameters.get(app_key)
     
-    def getEventfile(self, app_key: AppKeys) -> np.array:
+    # eventfile
+    def getDictEventfile(self, app_key: AppKeys) -> Dict[str, np.ndarray[Tuple[int]]]:
         return self.dict_eventfile.get(app_key)
-    
-    # clear attributes
-    def clearEventfile(self, app_key: AppKeys) -> None:
+    def clearDictEventfile(self, app_key: AppKeys, eventfile_name: str=None) -> None:
         if app_key in self.dict_eventfile:
-            del self.dict_eventfile[app_key]
+            if eventfile_name and eventfile_name in self.dict_eventfile[app_key]:
+                del self.dict_eventfile[app_key][eventfile_name]
+            else:
+                del self.dict_eventfile[app_key]
     

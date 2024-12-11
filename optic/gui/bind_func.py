@@ -1,7 +1,7 @@
 from __future__ import annotations
 from ..type_definitions import *
 from ..io.file_dialog import openFileDialogAndSetLineEdit, saveFileDialog
-from ..io.data_io import saveROICheck, loadROICheck, loadEventFileNPY, generateSavePath, saveTiffStack, saveROITracking, loadROITracking
+from ..io.data_io import saveROICheck, loadROICheck, loadEventFilesNPY, generateSavePath, saveTiffStack, saveROITracking, loadROITracking
 from ..visualization.view_visual_rectangle import clipRectangleRange
 from ..visualization.info_visual import updateROICountDisplay
 from ..processing import *
@@ -159,16 +159,29 @@ def bindFuncButtonEventfileIO(
     q_button_load: 'QPushButton', 
     q_button_clear: 'QPushButton', 
     q_window: 'QWidget', 
+    q_combobox_eventfile: 'QComboBox',
     data_manager: 'DataManager', 
     control_manager: 'ControlManager', 
     canvas_control: 'CanvasControl', 
     app_key: str
 ) -> None:
-    def _loadEventFileNPY() -> None:
-        loadEventFileNPY(q_window, data_manager, control_manager, app_key)
+    def _loadEventFilesNPY() -> None:
+        success = loadEventFilesNPY(q_window, data_manager, app_key)
+        # update combobox
+        if success:
+            q_combobox_eventfile.clear()
+            q_combobox_eventfile.addItems(data_manager.getDictEventfile(app_key).keys())
+    def _clearDictEventfile() -> None:
+        data_manager.clearDictEventfile(app_key)
+        q_combobox_eventfile.clear()
+    def _updateEventfileName() -> None:
+        eventfile_name = q_combobox_eventfile.currentText()
+        control_manager.setSharedAttr(app_key, "eventfile_name", eventfile_name)
         canvas_control.updatePlotWithROISelect()
-    q_button_load.clicked.connect(_loadEventFileNPY)
-    q_button_clear.clicked.connect(lambda: data_manager.clearEventfile(app_key))
+
+    q_button_load.clicked.connect(_loadEventFilesNPY)
+    q_button_clear.clicked.connect(_clearDictEventfile)
+    q_combobox_eventfile.currentIndexChanged.connect(_updateEventfileName)
 
 # -> canvas_layouts.makeLayoutCanvasTracePlot
 def bindFuncButtonExportFigure(

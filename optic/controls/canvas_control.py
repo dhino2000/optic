@@ -73,8 +73,12 @@ class CanvasControl:
         ylim_config = self.config_manager.gui_defaults['CANVAS_SETTINGS']['YLIM']
         self.ylim = (self.y_max * ylim_config[0], self.y_max * ylim_config[1])
 
-        # eventfileの取得と処理
-        self.eventfile = self.data_manager.getEventfile(self.app_key)
+        # get and preprocess eventfile
+        eventfile_name = self.control_manager.getSharedAttr(self.app_key, 'eventfile_name')
+        try:
+            self.eventfile = self.data_manager.getDictEventfile(self.app_key).get(eventfile_name)
+        except AttributeError:
+            self.eventfile = None
         if self.eventfile is not None:
             self.full_traces['event'] = self.eventfile * self.y_max
             self.colors['event'] = PlotColors.EVENT
@@ -86,7 +90,7 @@ class CanvasControl:
 
         event_indices = extractEventOnsetIndices(self.eventfile)
         
-        range_str = self.widget_manager.dict_lineedit[f"{self.app_key}_plot_eventfile_range"].text()
+        range_str = self.widget_manager.dict_lineedit[f"{self.app_key}_eventfile_prop_range"].text() # hardcoded !!!
         pre_sec, post_sec = map(int, range_str.strip('()').split(','))
         pre_frames, post_frames = int(pre_sec * self.fs), int(post_sec * self.fs)
 
@@ -153,7 +157,7 @@ class CanvasControl:
         if event_segments is None or trace_segments is None:
             return
 
-        range_str = self.widget_manager.dict_lineedit[f"{self.app_key}_plot_eventfile_range"].text()
+        range_str = self.widget_manager.dict_lineedit[f"{self.app_key}_eventfile_prop_range"].text() # hardcoded !!!
         pre_sec, post_sec = map(float, range_str.strip('()').split(','))
         pre_frame, post_frame = pre_sec * self.fs, post_sec * self.fs
 
