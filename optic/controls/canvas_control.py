@@ -41,6 +41,8 @@ class CanvasControl:
             self.downsampled_range:          List[int, int] = [0, 0]
             self.is_dragging:                          bool = False
             self.drag_start_x:                        float = None  
+            self.plot_ffneu:                           bool = True
+            self.plot_dff0:                            bool = True
             self.initializePlot()
 
     def setupAxes(self):
@@ -55,6 +57,21 @@ class CanvasControl:
     """
     Data preparation
     """
+    def preprocessTraceData(self, full_traces: Dict[str, np.ndarray[np.float32]]) -> Dict[str, np.ndarray[np.float32]]:
+        fneu_factor = float(self.widget_manager.dict_lineedit[f"{self.app_key}_eventfile_prop_ffneu"].text()) # hardcoded !!!
+        f0_percentile = float(self.widget_manager.dict_lineedit[f"{self.app_key}_eventfile_prop_dff0"].text()) # hardcoded !!!
+        full_traces['F_event'] = full_traces['F']
+
+        if self.plot_ffneu:
+            f = full_traces['F_event'] - full_traces['Fneu'] * fneu_factor
+            full_traces['F_event'] = f
+        if self.plot_dff0 and f0_percentile > 0 and f0_percentile < 100:
+            f = full_traces['F_event']
+            f0 = np.percentile(f, f0_percentile)
+            dff0 = (f - f0) / f0
+            full_traces['F_event'] = dff0
+        return full_traces
+
     def prepareTraceData(self):
         self.updatePlotWidth()
         self.updateDownsampleThreshold()
@@ -81,6 +98,8 @@ class CanvasControl:
             self.eventfile = None
         if self.eventfile is not None:
             self.full_traces['event'] = self.eventfile * self.y_max
+            # convert F trace to (F - Fneu) or DF/F0
+            self.full_traces = self.preprocessTraceData(self.full_traces)
             self.colors['event'] = PlotColors.EVENT
             self.labels['event'] = PlotLabels.EVENT
 
@@ -95,7 +114,7 @@ class CanvasControl:
         pre_frames, post_frames = int(pre_sec * self.fs), int(post_sec * self.fs)
 
         event_segments = extractEventAlignedData(self.eventfile, event_indices, pre_frames, post_frames)
-        trace_segments = extractEventAlignedData(self.full_traces['F'], event_indices, pre_frames, post_frames)
+        trace_segments = extractEventAlignedData(self.full_traces['F_event'], event_indices, pre_frames, post_frames)
 
         self.event_segments = event_segments
         self.trace_segments = trace_segments
@@ -108,6 +127,7 @@ class CanvasControl:
     def initializePlot(self):
         self.prepareTraceData()
         self.plotTracesMean()
+        self.figure.tight_layout()
         self.canvas.draw_idle()
 
     def updatePlotWithROISelect(self):
@@ -116,12 +136,14 @@ class CanvasControl:
         self.plotTracesOverall()
         if self.widget_manager.dict_checkbox[f"{self.app_key}_plot_eventfile"].isChecked():
             self.plotEventAlignedTrace()
+        self.figure.tight_layout()
         self.canvas.draw_idle()
 
     def updatePlotWithMouseEvent(self):
         self.prepareTraceData()
         self.plotTracesZoomed()
         self.plotTracesOverall()
+        self.figure.tight_layout()
         self.canvas.draw_idle()
 
     def plotTraces(self, ax_key, traces, title_suffix, start, end, **kwargs):
@@ -223,7 +245,7 @@ class CanvasControl:
         self.plotTraces(AxisKeys.BOT, mean_traces, "Average", 0, self.plot_data_points, ylim=None, title="Average Traces")
 
     def getDownsampledTraces(self, start, end):
-        traces = {key: trace[start:end] for key, trace in self.full_traces.items()}
+        traces = {key: trace[start:end] for key, trace in self.full_traces.items() if key != 'F_event'}
         if self.widget_manager.dict_checkbox["light_plot_mode"].isChecked() and end - start > self.downsample_threshold:
             return {key: downSampleTrace(trace, self.downsample_threshold) for key, trace in traces.items()}
         return traces

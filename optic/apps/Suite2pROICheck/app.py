@@ -1,9 +1,10 @@
 from PyQt5.QtWidgets import QMainWindow, QWidget, QGridLayout, QVBoxLayout, QHBoxLayout, QApplication
-from ...config import *
-from ...controls import *
-from ...gui import *
-from ...io import *
-from ...manager import *
+from optic.config import *
+from optic.controls import *
+from optic.dialog import *
+from optic.gui import *
+from optic.io import *
+from optic.manager import *
 from optic.gui.bind_func import *
 
 class Suite2pROICheckGUI(QMainWindow):
@@ -153,9 +154,24 @@ class Suite2pROICheckGUI(QMainWindow):
         layout.addLayout(makeLayoutMinimumPlotRange(self.widget_manager, self.config_manager, self.app_key_pri))
         return layout
     
-    # EventFileの読み込み, plot用
-    def makeLayoutComponentEventFilePlot(self):
-        layout = makeLayoutEventFilePlot(self.widget_manager, self.app_key_pri)
+    # EventFile load, plot property
+    def makeLayoutComponentEventFilePlotProperty(self):
+        layout = makeLayoutEventFilePlotProperty(
+            self.widget_manager, 
+            f"{self.app_key_pri}_load_eventfile",
+            f"{self.app_key_pri}_clear_eventfile",
+            f"{self.app_key_pri}_plot_eventfile",
+            f"{self.app_key_pri}_plot_eventfile_ffneu",
+            f"{self.app_key_pri}_plot_eventfile_dff0",
+            f"{self.app_key_pri}_eventfile_prop_range",
+            f"{self.app_key_pri}_eventfile_prop_ffneu",
+            f"{self.app_key_pri}_eventfile_prop_dff0",
+            f"{self.app_key_pri}_eventfile_loaded",
+            f"{self.app_key_pri}_eventfile_prop_range",
+            f"{self.app_key_pri}_eventfile_prop_ffneu",
+            f"{self.app_key_pri}_eventfile_prop_dff0",
+            f"{self.app_key_pri}_eventfile_loaded",
+            self.app_key_pri)
         return layout
     
     "Middle Upper"
@@ -214,6 +230,11 @@ class Suite2pROICheckGUI(QMainWindow):
             key_slider=self.app_key_pri, 
             label=self.app_key_pri
         ))
+        layout.addLayout(makeLayoutDisplayROIContourNext(
+            self.widget_manager,
+            key_checkbox_contour=f"{self.app_key_pri}_display_contour",
+            key_checkbox_next=f"{self.app_key_pri}_display_next_roi",
+        ))
         return layout
 
     "Right Upper"
@@ -266,7 +287,7 @@ class Suite2pROICheckGUI(QMainWindow):
             key_button=f"export_canvas_{self.app_key_pri}"
         ), stretch=1)
         layout.addLayout(self.makeLayoutComponentPlotProperty())
-        layout.addLayout(self.makeLayoutComponentEventFilePlot())
+        layout.addLayout(self.makeLayoutComponentEventFilePlotProperty())
         return layout
 
     # 中上
@@ -303,7 +324,6 @@ class Suite2pROICheckGUI(QMainWindow):
             self.loadFilePathsandInitialize()
 
     def showSubWindowSetROICellTypeSet(self, app_key):
-        from optic.dialog.roi_celltype_set import ROICellTypeSetDialog
         celltype_window = ROICellTypeSetDialog(
             self, 
             self.app_key_pri,
@@ -331,6 +351,7 @@ class Suite2pROICheckGUI(QMainWindow):
 
         self.widget_manager.dict_button["load_file"].clicked.connect(lambda: self.loadFilePathsandInitialize())
         bindFuncExit(q_window=self, q_button=self.widget_manager.dict_button["exit"])
+        bindFuncHelp(q_button=self.widget_manager.dict_button["help"], url=AccessURL.HELP[self.config_manager.current_app])
 
     def bindFuncAllWidget(self):
         # ROICheck save load
@@ -406,6 +427,12 @@ class Suite2pROICheckGUI(QMainWindow):
                 view_control=self.control_manager.view_controls[self.app_key_pri],
                 channel=channel,
             )
+        # display Selected ROI Contour, Next ROI
+        bindFuncCheckBoxDisplayROIContourNext(
+            q_checkbox_contour=self.widget_manager.dict_checkbox[f"{self.app_key_pri}_display_contour"],
+            q_checkbox_next=self.widget_manager.dict_checkbox[f"{self.app_key_pri}_display_next_roi"],
+            view_control=self.control_manager.view_controls[self.app_key_pri],
+        )
         # View MousePressEvent
         bindFuncViewMouseEvent(
             q_view=self.widget_manager.dict_view[self.app_key_pri],
@@ -442,8 +469,15 @@ class Suite2pROICheckGUI(QMainWindow):
             q_button_load=self.widget_manager.dict_button[f"{self.app_key_pri}_load_eventfile"],
             q_button_clear=self.widget_manager.dict_button[f"{self.app_key_pri}_clear_eventfile"],
             q_window=self,
+            q_combobox_eventfile=self.widget_manager.dict_combobox[f"{self.app_key_pri}_eventfile_loaded"],
             data_manager=self.data_manager,
             control_manager=self.control_manager,
             canvas_control=self.control_manager.canvas_controls[self.app_key_pri],
             app_key=self.app_key_pri,
+        )
+        # Canvas plot EventFile property
+        bindFuncCheckboxEventfilePlotProperty(
+            q_checkbox_ffneu=self.widget_manager.dict_checkbox[f"{self.app_key_pri}_plot_eventfile_ffneu"],
+            q_checkbox_dff0=self.widget_manager.dict_checkbox[f"{self.app_key_pri}_plot_eventfile_dff0"],
+            canvas_control=self.control_manager.canvas_controls[self.app_key_pri],
         )

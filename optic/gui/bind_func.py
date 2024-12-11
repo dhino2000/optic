@@ -183,6 +183,23 @@ def bindFuncButtonEventfileIO(
     q_button_clear.clicked.connect(_clearDictEventfile)
     q_combobox_eventfile.currentIndexChanged.connect(_updateEventfileName)
 
+# -> canvas_layouts.makeLayoutEventFilePlotProperty
+def bindFuncCheckboxEventfilePlotProperty(
+    q_checkbox_ffneu: 'QCheckBox',
+    q_checkbox_dff0: 'QCheckBox',    
+    canvas_control: 'CanvasControl'    
+) -> None:
+    def _onCheckboxChangedFFneu(state: int) -> None:
+        is_checked_ffneu = (state == Qt.Checked)
+        canvas_control.plot_ffneu = is_checked_ffneu
+        canvas_control.updatePlotWithROISelect()
+    def _onCheckboxChangedDff0(state: int) -> None:
+        is_checked_dff0 = (state == Qt.Checked)
+        canvas_control.plot_dff0 = is_checked_dff0
+        canvas_control.updatePlotWithROISelect()
+    q_checkbox_ffneu.stateChanged.connect(_onCheckboxChangedFFneu)
+    q_checkbox_dff0.stateChanged.connect(_onCheckboxChangedDff0)
+
 # -> canvas_layouts.makeLayoutCanvasTracePlot
 def bindFuncButtonExportFigure(
     q_button: 'QPushButton', 
