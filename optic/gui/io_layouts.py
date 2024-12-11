@@ -57,3 +57,16 @@ def makeLayoutROIManagerIO(
     for key, label in zip(list_key, list_label):
         layout.addWidget(widget_manager.makeWidgetButton(key=key, label=label))
     return layout
+
+# Mask npy IO
+def makeLayoutMaskNpyIO(
+        widget_manager: WidgetManager, 
+        key_button_save: str,
+        key_button_load: str,
+        )-> QHBoxLayout:
+    layout = QHBoxLayout()
+    list_key = [key_button_save, key_button_load]
+    list_label = ["Save Mask", "Load Mask"]
+    for key, label in zip(list_key, list_label):
+        layout.addWidget(widget_manager.makeWidgetButton(key=key, label=label))
+    return layout

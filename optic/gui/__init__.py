@@ -2,7 +2,7 @@ from .app_setup import setupMainWindow
 from .app_style import setAppStyle, applyAppStyle
 from .base_layouts import makeLayoutLineEditLabel, makeLayoutButtonGroup, makeLayoutSliderLabel, makeLayoutComboBoxLabel
 from .info_layouts import makeLayoutROIProperty, makeLayoutROICount
-from .io_layouts import makeLayoutLoadFileWidget, makeLayoutROICheckIO, makeLayoutROITrackingIO, makeLayoutLoadFileExitHelp, makeLayoutROIManagerIO
+from .io_layouts import makeLayoutLoadFileWidget, makeLayoutROICheckIO, makeLayoutROITrackingIO, makeLayoutLoadFileExitHelp, makeLayoutROIManagerIO, makeLayoutMaskNpyIO
 from .processing_image_layouts import makeLayoutElastixConfig, makeLayoutStackRegistration, makeLayoutStackNormalization, makeLayoutFallRegistration, makeLayoutApplyElastixTransform, makeLayoutSaveElastixTransform
 from .processing_roi_layouts import makeLayoutROIMatching, makeLayoutROIMatchingTest
 from .canvas_layouts import makeLayoutCanvasTracePlot, makeLayoutMinimumPlotRange, makeLayoutLightPlotMode, makeLayoutEventFilePlotProperty
