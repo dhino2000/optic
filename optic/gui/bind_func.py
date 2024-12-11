@@ -294,6 +294,19 @@ def bindFuncROITrackingIO(
         ))
     q_button_load.clicked.connect(lambda: _loadROITracking())
 
+# -> io_layouts.makeLayoutMaskNpyIO
+def bindFuncROIMaskNpyIO(
+    q_button_save: 'QPushButton', 
+    q_button_load: 'QPushButton', 
+    q_window: 'QWidget', 
+    data_manager: 'DataManager',
+    app_key: str
+) -> None:
+    def _loadMaskNpy() -> None:
+        loadEventFilesNPY(
+
+        )
+    q_button_load.clicked.connect(lambda: _loadMaskNpy())
 """
 processing_image_layouts
 """

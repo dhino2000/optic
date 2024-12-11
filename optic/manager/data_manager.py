@@ -29,10 +29,12 @@ class DataManager:
         # Elastix
         self.dict_parameter_map:        Dict[AppKeys, mapstringvectorstring] = {}
         self.dict_transform_parameters: Dict[AppKeys, elastixParameterObject] = {}
-
         # ROI image
         self.dict_im_roi:               Dict[AppKeys, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
         self.dict_im_roi_reg:           Dict[AppKeys, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
+        # ROI mask, XYCT
+        self.dict_roi_mask:             Dict[AppKeys, np.ndarray[np.uint16, Tuple[int, int, int]]] = defaultdict(dict)
+        self.dict_roi_mask_reg:         Dict[AppKeys, np.ndarray[np.uint16, Tuple[int, int, int]]] = defaultdict(dict)
 
         self.dict_eventfile:            Dict[AppKeys, Dict[str, np.ndarray[Tuple[int]]]] = defaultdict(dict)
         self.dict_roicheck:             Dict[AppKeys, Any] = {}
@@ -199,6 +201,12 @@ class DataManager:
     
     def getDictROIImageRegistered(self, app_key: AppKeys) -> Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]:
         return self.dict_im_roi_reg.get(app_key)
+    
+    def getDictROIMask(self, app_key: AppKeys) -> np.ndarray[np.uint16, Tuple[int, int, int]]:
+        return self.dict_roi_mask.get(app_key)
+    
+    def getDictROIMaskRegistered(self, app_key: AppKeys) -> np.ndarray[np.uint16, Tuple[int, int, int]]:
+        return self.dict_roi_mask_reg.get(app_key)
     
     # Elastix
     def getParameterMap(self, app_key: AppKeys) -> mapstringvectorstring:

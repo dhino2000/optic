@@ -106,6 +106,28 @@ def loadEventFilesNPY(
         return True
     else:
         return False
+    
+# load npy cell pose mask file
+def loadCellposeMaskNPY(
+        q_window        : QMainWindow, 
+        data_manager    : DataManager, 
+        app_key         : str
+        ) -> None | np.array:
+    path_mask = openFileDialog(q_widget=q_window, file_type=".npy", title="Open Cellpose mask npy File").replace("\\", "/")
+    mask = np.load(path_mask, allow_pickle=True).tolist()
+    outlines = mask["outlines"]
+    masks = mask["masks"]
+
+    if path_mask:
+        if not masks.ndim == 3:
+            QMessageBox.warning(q_window, "Mask Load Error", "masks should be generated with XYCT tiff stack !")
+            return False
+        
+        data_manager.dict_roi_mask[app_key] = masks
+        data_manager.dict_roi_mask_reg[app_key] = masks
+        return True
+    else:
+        return False
 
 # 保存用のファイルパス作成, 初期位置も指定
 def generateSavePath(
