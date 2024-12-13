@@ -61,7 +61,7 @@ def setupWidgetROITable(
 
     return q_table, groups_celltype
 
-# for MicrogliaTracking
+# for MicrogliaTracking, empty table
 def setupWidgetDynamicTable(
         q_table: QTableWidget, 
         table_columns: TableColumns,
