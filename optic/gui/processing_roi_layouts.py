@@ -2,6 +2,7 @@ from __future__ import annotations
 from ..type_definitions import *
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout
 from ..gui.base_layouts import makeLayoutComboBoxLabel, makeLayoutLineEditLabel
+from ..gui.io_layouts import makeLayoutROIManagerIO, makeLayoutMaskNpyIO
 
 # Optimal transport ROI Matching config
 def makeLayoutROIMatching(
@@ -78,4 +79,19 @@ def makeLayoutROIMatchingTest(
 ) -> QHBoxLayout:
     layout = QHBoxLayout()
     layout.addWidget(widget_manager.makeWidgetButton(key_button_roi_matching_test, "ROI Matching Test"))
+    return layout
+
+# ROI Manager layout
+def makeLayoutROIManager(
+        widget_manager: WidgetManager,
+        key_label_roi_manager: str,
+        key_button_save_roi: str,
+        key_button_load_roi: str,
+        key_button_save_mask: str,
+        key_button_load_mask: str
+        ) -> QVBoxLayout:
+    layout = QVBoxLayout()
+    layout.addWidget(widget_manager.makeWidgetLabel(key=key_label_roi_manager, label="ROI Manager", bold=True, italic=True, use_global_style=False))
+    layout.addLayout(makeLayoutROIManagerIO(widget_manager, key_button_save_roi, key_button_load_roi))
+    layout.addLayout(makeLayoutMaskNpyIO(widget_manager, key_button_save_mask, key_button_load_mask))
     return layout

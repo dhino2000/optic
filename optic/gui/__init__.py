@@ -4,7 +4,7 @@ from .base_layouts import makeLayoutLineEditLabel, makeLayoutButtonGroup, makeLa
 from .info_layouts import makeLayoutROIProperty, makeLayoutROICount
 from .io_layouts import makeLayoutLoadFileWidget, makeLayoutROICheckIO, makeLayoutROITrackingIO, makeLayoutLoadFileExitHelp, makeLayoutROIManagerIO, makeLayoutMaskNpyIO
 from .processing_image_layouts import makeLayoutElastixConfig, makeLayoutStackRegistration, makeLayoutStackNormalization, makeLayoutFallRegistration, makeLayoutApplyElastixTransform, makeLayoutSaveElastixTransform
-from .processing_roi_layouts import makeLayoutROIMatching, makeLayoutROIMatchingTest
+from .processing_roi_layouts import makeLayoutROIMatching, makeLayoutROIMatchingTest, makeLayoutROIManager
 from .canvas_layouts import makeLayoutCanvasTracePlot, makeLayoutMinimumPlotRange, makeLayoutLightPlotMode, makeLayoutEventFilePlotProperty
 from .slider_layouts import makeLayoutContrastSlider, makeLayoutOpacitySlider
 from .info_layouts import makeLayoutROIProperty

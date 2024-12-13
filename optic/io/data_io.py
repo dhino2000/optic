@@ -111,12 +111,14 @@ def loadEventFilesNPY(
 def loadCellposeMaskNPY(
         q_window        : QMainWindow, 
         data_manager    : DataManager, 
+        view_control    : ViewControl,
         app_key         : str
         ) -> None | np.array:
     path_mask = openFileDialog(q_widget=q_window, file_type=".npy", title="Open Cellpose mask npy File").replace("\\", "/")
     mask = np.load(path_mask, allow_pickle=True).tolist()
     outlines = mask["outlines"]
     masks = mask["masks"]
+    colors = mask["colors"]
 
     if path_mask:
         if not masks.ndim == 3:
@@ -125,6 +127,7 @@ def loadCellposeMaskNPY(
         
         data_manager.dict_roi_mask[app_key] = masks
         data_manager.dict_roi_mask_reg[app_key] = masks
+        view_control.roi_colors = {roi_id: tuple(v) for roi_id, v in enumerate(colors)}
         return True
     else:
         return False

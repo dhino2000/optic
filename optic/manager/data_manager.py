@@ -17,8 +17,8 @@ class DataManager:
         self.dict_tiff_reg:             Dict[AppKeys, np.ndarray[Tuple[int, int, int, int, int]]] = {}
 
         # ROI coordinates
-        self.dict_roi_coords:           Dict[AppKeys, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32], Tuple[int]]]] = {}
-        self.dict_roi_coords_reg:       Dict[AppKeys, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32], Tuple[int]]]] = {}
+        self.dict_roi_coords:           Dict[AppKeys, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]] = {}
+        self.dict_roi_coords_reg:       Dict[AppKeys, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]] = {}
         # background image
         self.dict_im_bg:                Dict[AppKeys, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
         self.dict_im_bg_chan2:          Dict[AppKeys, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
@@ -32,9 +32,11 @@ class DataManager:
         # ROI image
         self.dict_im_roi:               Dict[AppKeys, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
         self.dict_im_roi_reg:           Dict[AppKeys, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
-        # ROI mask, XYCT
+        # ROI mask, coordinates, XYCT
         self.dict_roi_mask:             Dict[AppKeys, np.ndarray[np.uint16, Tuple[int, int, int]]] = defaultdict(dict)
         self.dict_roi_mask_reg:         Dict[AppKeys, np.ndarray[np.uint16, Tuple[int, int, int]]] = defaultdict(dict)
+        self.dict_roi_coords_xyct:      Dict[AppKeys, Dict[int, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]]] = {}
+        self.dict_roi_coords_xyct_reg:  Dict[AppKeys, Dict[int, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]]] = {}
 
         self.dict_eventfile:            Dict[AppKeys, Dict[str, np.ndarray[Tuple[int]]]] = defaultdict(dict)
         self.dict_roicheck:             Dict[AppKeys, Any] = {}

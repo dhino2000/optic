@@ -1,7 +1,7 @@
 from __future__ import annotations
 from ..type_definitions import *
 from ..io.file_dialog import openFileDialogAndSetLineEdit, saveFileDialog
-from ..io.data_io import saveROICheck, loadROICheck, loadEventFilesNPY, generateSavePath, saveTiffStack, saveROITracking, loadROITracking
+from ..io.data_io import saveROICheck, loadROICheck, loadEventFilesNPY, generateSavePath, saveTiffStack, saveROITracking, loadROITracking, loadCellposeMaskNPY
 from ..visualization.view_visual_rectangle import clipRectangleRange
 from ..visualization.info_visual import updateROICountDisplay
 from ..processing import *
@@ -303,8 +303,10 @@ def bindFuncROIMaskNpyIO(
     app_key: str
 ) -> None:
     def _loadMaskNpy() -> None:
-        loadEventFilesNPY(
-
+        loadCellposeMaskNPY(
+            q_window, 
+            data_manager, 
+            app_key, 
         )
     q_button_load.clicked.connect(lambda: _loadMaskNpy())
 """
