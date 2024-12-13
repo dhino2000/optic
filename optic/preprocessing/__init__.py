@@ -3,3 +3,4 @@ from .preprocessing_fall import convertMatToDictFall, convertMatToDictROICheck, 
 from .preprocessing_roi import getROIContour, updateROIImage
 from .preprocessing_table import convertTableDataToDictROICheck, convertDictROICheckToMatROICheck, convertMatROICheckToDictROICheck
 from .preprocessing_tiff import standardizeTIFFStack, extractTIFFStack, getTiffStackShape
+from .preprocessing_cellpose import convertCellposeMaskToDictROICoordsXYCT, convertCellposeMaskToDictROIMatching

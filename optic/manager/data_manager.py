@@ -37,6 +37,8 @@ class DataManager:
         self.dict_roi_mask_reg:         Dict[AppKeys, np.ndarray[np.uint16, Tuple[int, int, int]]] = defaultdict(dict)
         self.dict_roi_coords_xyct:      Dict[AppKeys, Dict[int, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]]] = {}
         self.dict_roi_coords_xyct_reg:  Dict[AppKeys, Dict[int, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]]] = {}
+        # ROI matching, XYCT
+        self.dict_roi_macthing:         Dict[AppKeys, Dict[str, Dict[int, Optional[int]]]] = {}
 
         self.dict_eventfile:            Dict[AppKeys, Dict[str, np.ndarray[Tuple[int]]]] = defaultdict(dict)
         self.dict_roicheck:             Dict[AppKeys, Any] = {}
@@ -204,11 +206,20 @@ class DataManager:
     def getDictROIImageRegistered(self, app_key: AppKeys) -> Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]:
         return self.dict_im_roi_reg.get(app_key)
     
-    def getDictROIMask(self, app_key: AppKeys) -> np.ndarray[np.uint16, Tuple[int, int, int]]:
+    def getROIMask(self, app_key: AppKeys) -> np.ndarray[np.uint16, Tuple[int, int, int]]:
         return self.dict_roi_mask.get(app_key)
     
-    def getDictROIMaskRegistered(self, app_key: AppKeys) -> np.ndarray[np.uint16, Tuple[int, int, int]]:
+    def getROIMaskRegistered(self, app_key: AppKeys) -> np.ndarray[np.uint16, Tuple[int, int, int]]:
         return self.dict_roi_mask_reg.get(app_key)
+    
+    def getDictROICoordsXYCT(self, app_key: AppKeys) -> Dict[int, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]]:
+        return self.dict_roi_coords_xyct.get(app_key)
+    
+    def getDictROICoordsXYCTRegistered(self, app_key: AppKeys) -> Dict[int, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]]:
+        return self.dict_roi_coords_xyct_reg.get(app_key)
+    
+    def getDictROIMatching(self, app_key: AppKeys) -> Dict[str, Dict[int, Optional[int]]]:
+        return self.dict_roi_macthing.get(app_key)
     
     # Elastix
     def getParameterMap(self, app_key: AppKeys) -> mapstringvectorstring:

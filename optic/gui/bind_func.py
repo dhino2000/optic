@@ -5,6 +5,7 @@ from ..io.data_io import saveROICheck, loadROICheck, loadEventFilesNPY, generate
 from ..visualization.view_visual_rectangle import clipRectangleRange
 from ..visualization.info_visual import updateROICountDisplay
 from ..processing import *
+from ..preprocessing import *
 from ..utils import *
 from PyQt5.QtCore import Qt, QUrl
 from PyQt5.QtGui import QDesktopServices
@@ -308,6 +309,8 @@ def bindFuncROIMaskNpyIO(
             data_manager, 
             app_key, 
         )
+        data_manager.dict_roi_coords_xyct[app_key] = convertCellposeMaskToDictROICoordsXYCT(data_manager.getROIMask(app_key), app_key)
+        data_manager.dict_roi_macthing[app_key] = convertCellposeMaskToDictROIMatching(data_manager.getROIMask(app_key), app_key)
     q_button_load.clicked.connect(lambda: _loadMaskNpy())
 """
 processing_image_layouts
