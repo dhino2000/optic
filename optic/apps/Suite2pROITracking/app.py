@@ -372,12 +372,6 @@ class Suite2pROITrackingGUI(QMainWindow):
                 app_key=app_key,
                 local_var=False
             )
-            # View MousePressEvent
-            bindFuncViewMouseEventWithTracking(
-                q_view=self.widget_manager.dict_view[app_key],
-                view_control=self.control_manager.view_controls[app_key],
-                table_control=self.control_manager.table_controls[app_key],
-            )
             # Table Column Config
             self.widget_manager.dict_button[f"{app_key}_config_table"].clicked.connect(
                 partial(self.showSubWindowTableColumnConfig, app_key)
@@ -420,6 +414,20 @@ class Suite2pROITrackingGUI(QMainWindow):
                     view_control=self.control_manager.view_controls[app_key],
                     channel=channel,
                 )
+        # View MousePressEvent
+        bindFuncViewMouseEventWithTracking(
+            q_view=self.widget_manager.dict_view[self.app_keys[0]],
+            view_control_pri=self.control_manager.view_controls[self.app_keys[0]],
+            table_control_pri=self.control_manager.table_controls[self.app_keys[0]],
+            view_control_sec=self.control_manager.view_controls[self.app_keys[1]],
+            table_control_sec=self.control_manager.table_controls[self.app_keys[1]],
+        )
+        bindFuncViewMouseEventWithTracking(
+            q_view=self.widget_manager.dict_view[self.app_keys[1]],
+            view_control_pri=self.control_manager.view_controls[self.app_keys[1]],
+            table_control_pri=self.control_manager.table_controls[self.app_keys[1]],
+        )
+
         # ROICheck Table onSelectionChanged
         bindFuncTableSelectionChangedWithTracking(
             q_table_pri=self.widget_manager.dict_table[self.app_keys[0]],
