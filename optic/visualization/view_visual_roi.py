@@ -114,6 +114,31 @@ def drawAllROIsWithTracking(
 
     painter.end()
 
+# draw all ROIs for microglia tracking
+def drawAllROIsForMicrogliaTracking(
+        view_control: ViewControl, 
+        pixmap: QPixmap, 
+        data_manager: DataManager, 
+        control_manager: ControlManager, 
+        app_key: AppKeys,
+        plane_t: int
+        ) -> None:
+    painter = QPainter(pixmap)
+    painter.setRenderHint(QPainter.Antialiasing)
+    # roi_display = control_manager.getSharedAttr(app_key, "roi_display")
+    # ROISelectedId = control_manager.getSharedAttr(app_key, "roi_selected_id")
+
+    # get dict of ROI coordinates of single t plane
+    dict_roi_coords_xyct = data_manager.getDictROICoordsXYCT(app_key).get(plane_t)
+    for roiId, dict_roi_coords_single in dict_roi_coords_xyct.items():
+        # color = view_control.getROIColor(roiId)
+        color = (0, 0, 255) # hardcoded !!! temporary !!!
+        opacity = view_control.getROIOpacity()
+        drawROI(painter, dict_roi_coords_single, color, opacity)
+    
+    painter.end()
+
+
 # draw single ROI
 def drawROI(
         painter: QPainter, 

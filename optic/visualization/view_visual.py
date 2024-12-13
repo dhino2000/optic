@@ -4,7 +4,7 @@ from PyQt5.QtGui import QPainter, QPen, QColor, QImage, QPixmap
 from PyQt5.QtCore import Qt
 import numpy as np
 from ..config.constants import ChannelKeys, PenColors, PenWidth
-from .view_visual_roi import drawAllROIs, drawAllROIsWithTracking, drawROI, findClosestROI, shouldSkipROI
+from .view_visual_roi import drawAllROIs, drawAllROIsWithTracking, drawROI, findClosestROI, shouldSkipROI, drawAllROIsForMicrogliaTracking
 from .view_visual_rectangle import drawRectangle, drawRectangleIfInRange
 from ..preprocessing.preprocessing_roi import updateROIImage
 
@@ -282,6 +282,11 @@ def updateViewTiffWithTracking(
     # Caution !!! width and height are swapped between TIFF and QImage
     qimage = QImage(bg_image.data, height, width, height * 3, QImage.Format_RGB888)
     pixmap = QPixmap.fromImage(qimage)
+
+    try:
+        drawAllROIsForMicrogliaTracking(view_control, pixmap, data_manager, control_manager, app_key, plane_t)
+    except AttributeError:
+        pass
 
     q_scene.clear()
     q_scene.addPixmap(pixmap)
