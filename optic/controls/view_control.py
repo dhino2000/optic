@@ -307,9 +307,9 @@ class ViewControl:
         scene_pos = self.q_view.mapFromScene(view_pos)
         delta = event.pos() - scene_pos
         self.q_view.horizontalScrollBar().setValue(
-            self.q_view.horizontalScrollBar().value() + delta.x())
+            self.q_view.horizontalScrollBar().value() - delta.x())
         self.q_view.verticalScrollBar().setValue(
-            self.q_view.verticalScrollBar().value() + delta.y())
+            self.q_view.verticalScrollBar().value() - delta.y())
         
         self.q_view.viewport().update()
 

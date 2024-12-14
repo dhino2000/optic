@@ -63,7 +63,7 @@ def updateViewFall(
     q_scene.clear()
     q_scene.addPixmap(pixmap)
     q_view.setScene(q_scene)
-    q_view.fitInView(q_scene.sceneRect(), Qt.KeepAspectRatio)
+    # q_view.fitInView(q_scene.sceneRect(), Qt.KeepAspectRatio)
 
 # update view for Fall data for ROI Tracking
 def updateViewFallWithTracking(
@@ -227,7 +227,6 @@ def updateViewTiff(
         view_control.setRect(new_rect)
 
     q_view.setScene(q_scene)
-    # q_view.fitInView(q_scene.sceneRect(), Qt.KeepAspectRatio)
 
 # update view for Tiff data, microglia tracking
 def updateViewTiffWithTracking(

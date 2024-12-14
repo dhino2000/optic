@@ -70,6 +70,33 @@ def bindFuncViewMouseEvent(
     
     q_view.mousePressEvent = onViewPressed
 
+# -> makeWidgetView, keyPressEvent
+def bindFuncViewKeyEvent(
+    q_view: 'QGraphicsView',
+    view_control: 'ViewControl'
+) -> None:
+    # key event
+    def onKeyPressed(event: QKeyEvent) -> None:
+        view_control.keyPressEvent(event)
+
+    def onKeyReleased(event: QKeyEvent) -> None:
+        view_control.keyReleaseEvent(event)
+
+    q_view.keyPressEvent = onKeyPressed
+    q_view.keyReleaseEvent = onKeyReleased
+
+# -> makeWidgetView, wheelEvent
+def bindFuncViewWheelEvent(
+    q_view: 'QGraphicsView',
+    view_control: 'ViewControl'
+) -> None:    
+    # scroll event
+    def onWheelEvent(event: QWheelEvent) -> None:
+        view_control.wheelEvent(event)
+        event.accept()
+
+    q_view.wheelEvent = onWheelEvent
+
 # -> makeWidgetView, mousePressEvent
 def bindFuncViewMouseEventWithTracking(
     q_view: 'QGraphicsView', 
@@ -94,7 +121,7 @@ def bindFuncViewMouseEventWithTracking(
             
     q_view.mousePressEvent = onViewPressed
 
-# -> makeWidgetView, mouseMoveEvent
+# -> makeWidgetView, mouseEvent
 def bindFuncViewMouseEventForTIFF(
     q_view: 'QGraphicsView',
     q_lineedit: 'QLineEdit',
@@ -130,6 +157,11 @@ def bindFuncViewMouseEventForTIFF(
     q_view.mouseMoveEvent = onViewMoved
     q_view.mouseReleaseEvent = onViewReleased
 
+# -> makeWidgetView, keyEvent
+def bindFuncViewKeyEventForTIFF(
+    q_view: 'QGraphicsView',
+    view_control: 'ViewControl'
+) -> None:
     # key event
     def onKeyPressed(event: QKeyEvent) -> None:
         view_control.keyPressEvent(event)
@@ -139,7 +171,12 @@ def bindFuncViewMouseEventForTIFF(
 
     q_view.keyPressEvent = onKeyPressed
     q_view.keyReleaseEvent = onKeyReleased
-    
+
+# -> makeWidgetView, wheelEvent
+def bindFuncViewWheelEventForTIFF(
+    q_view: 'QGraphicsView',
+    view_control: 'ViewControl'
+) -> None:
     # scroll event
     def onWheelEvent(event: QWheelEvent) -> None:
         view_control.wheelEvent(event)
