@@ -133,6 +133,8 @@ def bindFuncViewMouseEventForTIFF(
         if event.button() == Qt.LeftButton:
             if view_control.dict_key_pushed[Qt.Key_Control]: # + control key
                 view_control.startDraggingWithCtrlKey(event)
+            elif view_control.dict_key_pushed[Qt.Key_Shift]: # + shift key
+                view_control.startDraggingWithShiftKey(event)
             elif table_control:
                 scene_pos = q_view.mapToScene(event.pos())
                 view_control.getROIwithClick(int(scene_pos.x()), int(scene_pos.y()))
@@ -142,6 +144,8 @@ def bindFuncViewMouseEventForTIFF(
     def onViewMoved(event: QMouseEvent) -> None:
         if view_control.is_dragging and view_control.dict_key_pushed[Qt.Key_Control]:
             view_control.updateDraggingWithCtrlKey(event)
+        elif view_control.is_dragging and view_control.dict_key_pushed[Qt.Key_Shift]:
+            view_control.updateDraggingWithShiftKey(event)
 
     def onViewReleased(event: QMouseEvent) -> None:
         if event.button() == Qt.LeftButton and view_control.is_dragging:
@@ -150,8 +154,11 @@ def bindFuncViewMouseEventForTIFF(
                 rect = view_control.rect.rect()
                 rect_range = view_control.getRectRangeFromQRectF(rect)
                 q_lineedit.setText(','.join(map(str, rect_range)))
+            elif view_control.dict_key_pushed[Qt.Key_Shift]: # + shift key
+                view_control.finishDraggingWithShiftKey(event)
             else:
                 view_control.cancelDraggingWithCtrlKey()
+                view_control.cancelDraggingWithShiftKey()
 
     q_view.mousePressEvent = onViewPressed
     q_view.mouseMoveEvent = onViewMoved

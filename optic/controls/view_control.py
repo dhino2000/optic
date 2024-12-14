@@ -8,6 +8,7 @@ from ..preprocessing.preprocessing_roi import updateROIImage
 from ..gui.view_setup import setViewSize
 from ..config.constants import BGImageTypeList, Extension
 from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QGraphicsView, QGraphicsScene, QGraphicsRectItem
 import random
 import numpy as np
 
@@ -275,6 +276,8 @@ class ViewControl:
         if event.button() == Qt.LeftButton:
             if self.dict_key_pushed[Qt.Key_Control]:
                 self.startDraggingWithCtrlKey(event)
+            elif self.dict_key_pushed[Qt.Key_Shift]:
+                self.startDraggingWithShiftKey(event)
             else:
                 scene_pos = self.q_view.mapToScene(event.pos())
                 self.getROIwithClick(int(scene_pos.x()), int(scene_pos.y()))
@@ -287,11 +290,15 @@ class ViewControl:
     def mouseMoveEvent(self, event: QMouseEvent) -> None:
         if self.is_dragging and self.dict_key_pushed[Qt.Key_Control]:
             self.updateDraggingWithCtrlKey(event)
+        elif self.is_dragging and self.dict_key_pushed[Qt.Key_Shift]:
+            self.updateDraggingWithShiftKey(event)
 
     def mouseReleaseEvent(self, event: QMouseEvent) -> None:
         if event.button() == Qt.LeftButton and self.is_dragging:
             if self.dict_key_pushed[Qt.Key_Control]:
                 self.finishDraggingWithCtrlKey(event)
+            elif self.dict_key_pushed[Qt.Key_Shift]:
+                self.finishDraggingWithShiftKey(event)
             else:
                 self.cancelDraggingWithCtrlKey()
 
@@ -313,7 +320,27 @@ class ViewControl:
         
         self.q_view.viewport().update()
 
-    
+    # with shift key
+    def startDraggingWithShiftKey(self, event: QMouseEvent) -> None:
+        self.drag_pos_start = self.q_view.mapToScene(event.pos())
+        self.is_dragging = True
+
+    def updateDraggingWithShiftKey(self, event: QMouseEvent) -> None:
+        current_pos = self.q_view.mapToScene(event.pos())
+        delta = current_pos - self.drag_pos_start
+        self.q_view.setTransformationAnchor(QGraphicsView.NoAnchor)
+        self.q_view.translate(delta.x(), delta.y())
+        self.drag_pos_start = current_pos
+
+    def finishDraggingWithShiftKey(self, event: QMouseEvent) -> None:
+        self.is_dragging = False
+        self.drag_pos_start = None
+
+    def cancelDraggingWithShiftKey(self) -> None:
+        self.is_dragging = False
+        self.drag_pos_start = None
+
+    # with ctrl key
     def startDraggingWithCtrlKey(self, event: QMouseEvent) -> None:
         self.drag_start_pos = self.q_view.mapToScene(event.pos())
         self.is_dragging = True
