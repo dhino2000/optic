@@ -1,7 +1,8 @@
 from __future__ import annotations
 from ..type_definitions import *
-from PyQt5.QtGui import QPainter, QPen, QColor, QImage, QPixmap
+from PyQt5.QtGui import QPainter, QPen, QColor, QImage, QPixmap, QTransform
 from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QGraphicsScene, QGraphicsView
 import numpy as np
 from ..config.constants import ChannelKeys, PenColors, PenWidth
 from .view_visual_roi import drawAllROIs, drawAllROIsWithTracking, drawROI, findClosestROI, shouldSkipROI, drawAllROIsForMicrogliaTracking
@@ -226,7 +227,7 @@ def updateViewTiff(
         view_control.setRect(new_rect)
 
     q_view.setScene(q_scene)
-    q_view.fitInView(q_scene.sceneRect(), Qt.KeepAspectRatio)
+    # q_view.fitInView(q_scene.sceneRect(), Qt.KeepAspectRatio)
 
 # update view for Tiff data, microglia tracking
 def updateViewTiffWithTracking(
@@ -380,3 +381,35 @@ def adjustChannelContrast(
         print(f"Error in adjustChannelContrast: {str(e)}")
         raise e
         return None
+    
+# scroll zoom event
+def zoomView(
+    view: QGraphicsView,
+    delta_y: float,
+    zoom_factor: float = 1.2,
+    max_scale: float = 10.0,
+) -> None:
+    """
+    view zoom event with scroll
+    
+    Args:
+        view (QGraphicsView): QGraphicsView object
+        delta_y (float): scroll event value
+        zoom_factor (float): zoom factor
+        max_scale (float): max scale value
+    """
+    current_scale = view.transform().m11()
+
+    if delta_y > 0:  # zoom in
+        if current_scale < max_scale:
+            view.scale(zoom_factor, zoom_factor)
+    else:  # zoom out
+        view.scale(1.0/zoom_factor, 1.0/zoom_factor)
+
+# reset zoom
+def resetZoomView(
+    view: QGraphicsView,
+    scene_rect: QRectF
+) -> None:
+    view.setTransform(QTransform())
+    view.fitInView(scene_rect, Qt.KeepAspectRatio)

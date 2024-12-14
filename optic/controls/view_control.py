@@ -1,6 +1,6 @@
 from __future__ import annotations
 from ..type_definitions import *
-from ..visualization.view_visual import updateViewFall, updateViewTiff, updateViewFallWithTracking, updateViewTiffWithTracking
+from ..visualization.view_visual import updateViewFall, updateViewTiff, updateViewFallWithTracking, updateViewTiffWithTracking, zoomView, resetZoomView
 from ..visualization.view_visual_roi import findClosestROI, shouldSkipROI
 from ..visualization.view_visual_rectangle import initializeDragRectangle, updateDragRectangle, clipRectangleRange
 from ..visualization.info_visual import updateZPlaneDisplay, updateTPlaneDisplay
@@ -256,9 +256,13 @@ class ViewControl:
     """
     event Functions
     """
+    # catch key press/release event
     def keyPressEvent(self, event: QKeyEvent) -> None:
         if event.key() in self.dict_key_pushed:
             self.dict_key_pushed[event.key()] = True
+        if event.key() == Qt.Key_R:
+            resetZoomView(self.q_view, self.q_scene.sceneRect())
+            self.updateView()
 
     def keyReleaseEvent(self, event: QKeyEvent) -> None:
         if event.key() in self.dict_key_pushed:
@@ -266,6 +270,7 @@ class ViewControl:
             if self.is_dragging:
                 self.cancelDraggingWithCtrlKey()
 
+    # catch mouse press/move/release event
     def mousePressEvent(self, event: QMouseEvent) -> None:
         if event.button() == Qt.LeftButton:
             if self.dict_key_pushed[Qt.Key_Control]:
@@ -289,6 +294,25 @@ class ViewControl:
                 self.finishDraggingWithCtrlKey(event)
             else:
                 self.cancelDraggingWithCtrlKey()
+
+    # catch scroll event
+    def wheelEvent(self, event: QWheelEvent) -> None:
+        # ズーム前の位置を保存
+        view_pos = self.q_view.mapToScene(event.pos())
+        
+        # ズーム実行
+        zoomView(self.q_view, event.angleDelta().y())
+        
+        # ズーム後の位置を計算して調整
+        scene_pos = self.q_view.mapFromScene(view_pos)
+        delta = event.pos() - scene_pos
+        self.q_view.horizontalScrollBar().setValue(
+            self.q_view.horizontalScrollBar().value() + delta.x())
+        self.q_view.verticalScrollBar().setValue(
+            self.q_view.verticalScrollBar().value() + delta.y())
+        
+        self.q_view.viewport().update()
+
     
     def startDraggingWithCtrlKey(self, event: QMouseEvent) -> None:
         self.drag_start_pos = self.q_view.mapToScene(event.pos())

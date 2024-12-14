@@ -101,9 +101,10 @@ def bindFuncViewMouseEventForTIFF(
     view_control: 'ViewControl',
     table_control: 'TableControl'
 ) -> None:
+    # mouse event
     def onViewPressed(event: QMouseEvent) -> None:
         if event.button() == Qt.LeftButton:
-            if view_control.dict_key_pushed[Qt.Key_Control]:
+            if view_control.dict_key_pushed[Qt.Key_Control]: # + control key
                 view_control.startDraggingWithCtrlKey(event)
             elif table_control:
                 scene_pos = q_view.mapToScene(event.pos())
@@ -117,7 +118,7 @@ def bindFuncViewMouseEventForTIFF(
 
     def onViewReleased(event: QMouseEvent) -> None:
         if event.button() == Qt.LeftButton and view_control.is_dragging:
-            if view_control.dict_key_pushed[Qt.Key_Control]:
+            if view_control.dict_key_pushed[Qt.Key_Control]: # + control key
                 view_control.finishDraggingWithCtrlKey(event)
                 rect = view_control.rect.rect()
                 rect_range = view_control.getRectRangeFromQRectF(rect)
@@ -129,6 +130,7 @@ def bindFuncViewMouseEventForTIFF(
     q_view.mouseMoveEvent = onViewMoved
     q_view.mouseReleaseEvent = onViewReleased
 
+    # key event
     def onKeyPressed(event: QKeyEvent) -> None:
         view_control.keyPressEvent(event)
 
@@ -137,6 +139,14 @@ def bindFuncViewMouseEventForTIFF(
 
     q_view.keyPressEvent = onKeyPressed
     q_view.keyReleaseEvent = onKeyReleased
+    
+    # scroll event
+    def onWheelEvent(event: QWheelEvent) -> None:
+        view_control.wheelEvent(event)
+        event.accept()
+
+    q_view.wheelEvent = onWheelEvent
+
 
 """
 canvas_layouts
