@@ -62,13 +62,30 @@ def bindFuncViewMouseEvent(
     view_control: 'ViewControl', 
     table_control: 'TableControl'
 ) -> None:
-    def onViewPressed(event) -> None:
-        view_control.mousePressEvent(event)
-        roi_selected_id = view_control.control_manager.getSharedAttr(view_control.app_key, 'roi_selected_id')
-        table_control.updateSelectedROI(roi_selected_id)
-        table_control.q_table.setFocus()
-    
+    def onViewPressed(event: QMouseEvent) -> None:
+        if event.button() == Qt.LeftButton:
+            if view_control.dict_key_pushed[Qt.Key_Shift]: # + shift key
+                view_control.startDraggingWithShiftKey(event)
+            else:
+                view_control.mousePressEvent(event)
+                roi_selected_id = view_control.control_manager.getSharedAttr(view_control.app_key, 'roi_selected_id')
+                table_control.updateSelectedROI(roi_selected_id)
+                table_control.q_table.setFocus()
+
+    def onViewMoved(event: QMouseEvent) -> None:
+        if view_control.is_dragging and view_control.dict_key_pushed[Qt.Key_Shift]:
+            view_control.updateDraggingWithShiftKey(event)
+
+    def onViewReleased(event: QMouseEvent) -> None:
+        if event.button() == Qt.LeftButton and view_control.is_dragging:
+            if view_control.dict_key_pushed[Qt.Key_Shift]: # + shift key
+                view_control.finishDraggingWithShiftKey(event)
+            else:
+                view_control.cancelDraggingWithShiftKey()
+
     q_view.mousePressEvent = onViewPressed
+    q_view.mouseMoveEvent = onViewMoved
+    q_view.mouseReleaseEvent = onViewReleased
 
 # -> makeWidgetView, keyPressEvent
 def bindFuncViewKeyEvent(
@@ -77,6 +94,7 @@ def bindFuncViewKeyEvent(
 ) -> None:
     # key event
     def onKeyPressed(event: QKeyEvent) -> None:
+        print(event.key())
         view_control.keyPressEvent(event)
 
     def onKeyReleased(event: QKeyEvent) -> None:
