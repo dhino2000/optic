@@ -57,6 +57,7 @@ class TableControl:
         from ..gui.table_setup import applyDictROIMatchingToTable
         self.q_table.setRowCount(0) # initialize table
         applyDictROIMatchingToTable(self.q_table, self.table_columns, dict_roi_matching, row_count, has_roi_id_match)
+        self.setLenRow(row_count)
 
     # change table cell selection
     def onSelectionChanged(self, selected: QItemSelection, deselected: QItemSelection) -> None:
@@ -138,7 +139,8 @@ class TableControl:
             return
         else:
             self.control_manager.setSharedAttr(self.app_key, 'roi_selected_id', roi_id)
-            updateROIPropertyDisplay(self.control_manager, self.data_manager, self.widget_manager, self.app_key)
+            if self.config_manager.current_app == "SUITE2P_ROI_CHECK" or self.config_manager.current_app == "SUITE2P_ROI_TRACKING":
+                updateROIPropertyDisplay(self.control_manager, self.data_manager, self.widget_manager, self.app_key)
 
     def getSharedAttr_ROISelected(self) -> int:
         return self.control_manager.getSharedAttr(self.app_key, 'roi_selected_id')

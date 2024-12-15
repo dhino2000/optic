@@ -373,6 +373,7 @@ def bindFuncROIMaskNpyIO(
     q_button_load: 'QPushButton', 
     q_window: 'QWidget', 
     data_manager: 'DataManager',
+    control_manager: 'ControlManager',
     app_key: str
 ) -> None:
     def _loadMaskNpy() -> None:
@@ -385,7 +386,23 @@ def bindFuncROIMaskNpyIO(
         data_manager.dict_roi_coords_xyct["pri"] = convertCellposeMaskToDictROICoordsXYCT(data_manager.getROIMask(app_key))
         data_manager.dict_roi_macthing["pri"] = convertCellposeMaskToDictROIMatching(data_manager.getROIMask(app_key))
         data_manager.dict_roi_coords_xyct["sec"] = data_manager.dict_roi_coords_xyct["pri"].copy()
+
+        control_manager.view_controls["pri"].updateView()
+        control_manager.view_controls["sec"].updateView()
+
+        dict_roi_matching = data_manager.getDictROIMatching("pri") # hardcoded !!!
+        t_pri, t_sec = control_manager.table_controls["pri"].getPlaneT(), control_manager.table_controls["sec"].getPlaneT()
+        key_roi_matching = f"t{t_pri}_t{t_sec}"
+        roi_matching = dict_roi_matching.get(key_roi_matching)
+
+        row_count_pri = len(data_manager.getDictROICoordsXYCT("pri").get(t_pri)) # hardcoded !!!
+        row_count_sec = len(data_manager.getDictROICoordsXYCT("sec").get(t_sec)) # hardcoded !!!
+        
+        control_manager.table_controls["pri"].updateWidgetDynamicTableWithT(roi_matching, row_count_pri, True)
+        control_manager.table_controls["sec"].updateWidgetDynamicTableWithT(roi_matching, row_count_sec, False)
+
     q_button_load.clicked.connect(lambda: _loadMaskNpy())
+
 """
 processing_image_layouts
 """
@@ -765,6 +782,27 @@ def bindFuncButtonRunROIMatching(
         QMessageBox.information(q_widget, "ROI Matching Finish", "ROI Matching Finished!")
     q_button.clicked.connect(_runROIMatching)
 
+# -> processing_roi_layouts.makeLayoutROIManagerForTable
+def bindFuncButtonsROIManagerForTable(
+    q_button_add: 'QPushButton',
+    q_button_remove: 'QPushButton',
+    q_button_edit: 'QPushButton',
+    q_table: 'QTableWidget',
+    table_control: 'TableControl',
+    view_control: 'ViewControl',
+    app_key: str,
+) -> None:
+    def _addROItoTable() -> None:
+        pass
+    def _removeSelectedROIfromTable() -> None:
+        pass
+    def _editSelectedROI() -> None:
+        pass
+
+    q_button_add.clicked.connect(_addROItoTable)
+    q_button_remove.clicked.connect(_removeSelectedROIfromTable)
+    q_button_edit.clicked.connect(_editSelectedROI)
+
 """
 slider_layouts
 """
@@ -932,7 +970,7 @@ def bindFuncTableSelectionChangedWithTracking(
     canvas_control_pri: 'CanvasControl',
     canvas_control_sec: 'CanvasControl'
 ) -> None:
-    def _onSelectionChangedWithTracking(selected, deselected) -> None:
+    def _onSelectionChangedWithTracking(selected, deselected) -> None: # for "pri" table
         if selected.indexes():
             table_control_pri.onSelectionChangedWithTracking(selected, deselected)
             row = table_control_pri.getSharedAttr_ROIMatch()
@@ -941,7 +979,7 @@ def bindFuncTableSelectionChangedWithTracking(
             view_control_sec.updateView()
             if canvas_control_pri: # for canvas_control
                 canvas_control_pri.updatePlotWithROISelect()
-    def _onSelectionChanged(selected, deselected) -> None:
+    def _onSelectionChanged(selected, deselected) -> None: # for "sec" table
         if selected.indexes():
             table_control_sec.onSelectionChanged(selected, deselected)
             view_control_sec.updateView()

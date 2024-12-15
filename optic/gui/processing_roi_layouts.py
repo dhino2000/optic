@@ -100,11 +100,11 @@ def makeLayoutROIManager(
 def makeLayoutROIManagerForTable(
     widget_manager: WidgetManager,
     key_button_roi_add: str,
-    key_button_roi_delete: str,
+    key_button_roi_remove: str,
     key_button_roi_edit: str,
 ) -> QVBoxLayout:
     layout = QVBoxLayout()
     layout.addWidget(widget_manager.makeWidgetButton(key_button_roi_add, "Add ROI"))
-    layout.addWidget(widget_manager.makeWidgetButton(key_button_roi_delete, "Delete ROI"))
+    layout.addWidget(widget_manager.makeWidgetButton(key_button_roi_remove, "Remove ROI"))
     layout.addWidget(widget_manager.makeWidgetButton(key_button_roi_edit, "Edit ROI"))
     return layout

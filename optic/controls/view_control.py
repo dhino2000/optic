@@ -54,6 +54,9 @@ class ViewControl:
         self.show_roi_match:        bool                        = True
         self.show_roi_pair:         bool                        = True
 
+        # ROI edit mode
+        self.roi_edit_mode:         bool                        = False
+
         # for tiff view
         self.tiff_shape:            Tuple[int, int, int, int, int]  = ()
         self.plane_z:               int                             = 0
