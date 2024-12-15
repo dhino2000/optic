@@ -831,22 +831,32 @@ def bindFuncPlaneTSlider(
 
 # -> view_layouts.makeLayoutViewWithZTSlider for Microglia Tracking
 def bindFuncPlaneTSliderWithXYCTTracking(
-    q_slider: 'QSlider',
+    q_slider_pri: 'QSlider',
+    q_slider_sec: 'QSlider',
     data_manager: 'DataManager',
     control_manager: 'ControlManager',
-    view_control: 'ViewControl',
     table_control_pri: 'TableControl',
     table_control_sec: 'TableControl',
-    app_key: AppKeys,
 ) -> None:
-    def onTChanged(value: int) -> None:
-        view_control.setPlaneT(value)
-        view_control.updateView()
+    def onTChanged(value: int, app_key: AppKeys) -> None:
+        # "pri" value should be less than "sec" value
+        if app_key == "pri": # pri slider changed
+            if value >= q_slider_pri.maximum():
+                return
+            elif value >= q_slider_sec.value():
+                q_slider_sec.setValue(value + 1)
+        else: # sec slider changed
+            if value <= q_slider_sec.minimum():
+                return
+            elif value <= q_slider_pri.value():
+                q_slider_pri.setValue(value - 1)
+
+        control_manager.view_controls[app_key].setPlaneT(value)
+        control_manager.view_controls[app_key].updateView()
         control_manager.table_controls[app_key].setPlaneT(value)
 
         try:
             dict_roi_matching = data_manager.getDictROIMatching("pri") # hardcoded !!!
-            dict_roi_coords_xyct = data_manager.getDictROICoordsXYCT(app_key)
             t_pri, t_sec = table_control_pri.getPlaneT(), table_control_sec.getPlaneT()
             key_roi_matching = f"t{t_pri}_t{t_sec}"
             roi_matching = dict_roi_matching.get(key_roi_matching)
@@ -857,8 +867,11 @@ def bindFuncPlaneTSliderWithXYCTTracking(
             table_control_pri.updateWidgetDynamicTableWithT(roi_matching, row_count_pri, has_roi_id_match=True)
             table_control_sec.updateWidgetDynamicTableWithT(roi_matching, row_count_sec, has_roi_id_match=False)
         except Exception as e:
-            raise e
-    q_slider.valueChanged.connect(onTChanged)
+            # raise e
+            pass
+        
+    q_slider_pri.valueChanged.connect(lambda value: onTChanged(value, "pri")) # hardcoded !!!
+    q_slider_sec.valueChanged.connect(lambda value: onTChanged(value, "sec")) # hardcoded !!!
 
 # -> slider_layouts.makeLayoutContrastSlider
 def bindFuncBackgroundVisibilityCheckbox(
