@@ -276,11 +276,11 @@ class ViewControl:
         if event.button() == Qt.LeftButton:
             if self.dict_key_pushed[Qt.Key_Control]:
                 self.startDraggingWithCtrlKey(event)
-            elif self.dict_key_pushed[Qt.Key_Shift]:
-                self.startDraggingWithShiftKey(event)
             else:
                 scene_pos = self.q_view.mapToScene(event.pos())
                 self.getROIwithClick(int(scene_pos.x()), int(scene_pos.y()))
+        elif event.button() == Qt.MiddleButton:
+            self.startDraggingWithMiddleClick(event)
 
     def mousePressEventWithTracking(self, event: QMouseEvent) -> None:
         if event.button() == Qt.LeftButton or event.button() == Qt.RightButton:
@@ -290,53 +290,54 @@ class ViewControl:
     def mouseMoveEvent(self, event: QMouseEvent) -> None:
         if self.is_dragging and self.dict_key_pushed[Qt.Key_Control]:
             self.updateDraggingWithCtrlKey(event)
-        elif self.is_dragging and self.dict_key_pushed[Qt.Key_Shift]:
-            self.updateDraggingWithShiftKey(event)
 
     def mouseReleaseEvent(self, event: QMouseEvent) -> None:
         if event.button() == Qt.LeftButton and self.is_dragging:
             if self.dict_key_pushed[Qt.Key_Control]:
                 self.finishDraggingWithCtrlKey(event)
-            elif self.dict_key_pushed[Qt.Key_Shift]:
-                self.finishDraggingWithShiftKey(event)
             else:
                 self.cancelDraggingWithCtrlKey()
 
     # catch scroll event
     def wheelEvent(self, event: QWheelEvent) -> None:
-        # ズーム前の位置を保存
-        view_pos = self.q_view.mapToScene(event.pos())
-        
-        # ズーム実行
-        zoomView(self.q_view, event.angleDelta().y())
-        
-        # ズーム後の位置を計算して調整
-        scene_pos = self.q_view.mapFromScene(view_pos)
-        delta = event.pos() - scene_pos
-        self.q_view.horizontalScrollBar().setValue(
-            self.q_view.horizontalScrollBar().value() - delta.x())
-        self.q_view.verticalScrollBar().setValue(
-            self.q_view.verticalScrollBar().value() - delta.y())
-        
-        self.q_view.viewport().update()
+        # Ctrlキーが押されているときのみズーム操作を許可
+        if self.dict_key_pushed[Qt.Key_Control]:
+            # ズーム前の位置を保存
+            view_pos = self.q_view.mapToScene(event.pos())
+            
+            # ズーム実行
+            zoomView(self.q_view, event.angleDelta().y())
+            
+            # ズーム後の位置を計算して調整
+            scene_pos = self.q_view.mapFromScene(view_pos)
+            delta = event.pos() - scene_pos
+            self.q_view.horizontalScrollBar().setValue(
+                self.q_view.horizontalScrollBar().value() - delta.x())
+            self.q_view.verticalScrollBar().setValue(
+                self.q_view.verticalScrollBar().value() - delta.y())
+            
+            self.q_view.viewport().update()
+        else:
+            # Ctrlキーが押されていない場合は何もしない（スクロールを無効化）
+            event.accept()
 
-    # with shift key
-    def startDraggingWithShiftKey(self, event: QMouseEvent) -> None:
+    # middle click dragging
+    def startDraggingWithMiddleClick(self, event: QMouseEvent) -> None:
         self.drag_pos_start = self.q_view.mapToScene(event.pos())
         self.is_dragging = True
 
-    def updateDraggingWithShiftKey(self, event: QMouseEvent) -> None:
+    def updateDraggingWithMiddleClick(self, event: QMouseEvent) -> None:
         current_pos = self.q_view.mapToScene(event.pos())
         delta = current_pos - self.drag_pos_start
         self.q_view.setTransformationAnchor(QGraphicsView.NoAnchor)
         self.q_view.translate(delta.x(), delta.y())
         self.drag_pos_start = current_pos
 
-    def finishDraggingWithShiftKey(self, event: QMouseEvent) -> None:
+    def finishDraggingWithMiddleClick(self, event: QMouseEvent) -> None:
         self.is_dragging = False
         self.drag_pos_start = None
 
-    def cancelDraggingWithShiftKey(self) -> None:
+    def cancelDraggingWithMiddleClick(self) -> None:
         self.is_dragging = False
         self.drag_pos_start = None
 

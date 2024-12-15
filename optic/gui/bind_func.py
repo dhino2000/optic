@@ -64,24 +64,23 @@ def bindFuncViewMouseEvent(
 ) -> None:
     def onViewPressed(event: QMouseEvent) -> None:
         if event.button() == Qt.LeftButton:
-            if view_control.dict_key_pushed[Qt.Key_Shift]: # + shift key
-                view_control.startDraggingWithShiftKey(event)
-            else:
-                view_control.mousePressEvent(event)
-                roi_selected_id = view_control.control_manager.getSharedAttr(view_control.app_key, 'roi_selected_id')
-                table_control.updateSelectedROI(roi_selected_id)
-                table_control.q_table.setFocus()
+            view_control.mousePressEvent(event)
+            roi_selected_id = view_control.control_manager.getSharedAttr(view_control.app_key, 'roi_selected_id')
+            table_control.updateSelectedROI(roi_selected_id)
+            table_control.q_table.setFocus()
+        elif event.button() == Qt.MiddleButton:
+            view_control.startDraggingWithMiddleClick(event)
 
     def onViewMoved(event: QMouseEvent) -> None:
-        if view_control.is_dragging and view_control.dict_key_pushed[Qt.Key_Shift]:
-            view_control.updateDraggingWithShiftKey(event)
+        if view_control.is_dragging:
+            view_control.updateDraggingWithMiddleClick(event)
 
     def onViewReleased(event: QMouseEvent) -> None:
-        if event.button() == Qt.LeftButton and view_control.is_dragging:
-            if view_control.dict_key_pushed[Qt.Key_Shift]: # + shift key
-                view_control.finishDraggingWithShiftKey(event)
-            else:
-                view_control.cancelDraggingWithShiftKey()
+        if event.button() == Qt.MiddleButton and view_control.is_dragging:
+            view_control.finishDraggingWithMiddleClick(event)
+        else:
+            view_control.cancelDraggingWithMiddleClick()
+
 
     q_view.mousePressEvent = onViewPressed
     q_view.mouseMoveEvent = onViewMoved
@@ -111,7 +110,6 @@ def bindFuncViewWheelEvent(
     # scroll event
     def onWheelEvent(event: QWheelEvent) -> None:
         view_control.wheelEvent(event)
-        event.accept()
 
     q_view.wheelEvent = onWheelEvent
 
@@ -151,19 +149,20 @@ def bindFuncViewMouseEventForTIFF(
         if event.button() == Qt.LeftButton:
             if view_control.dict_key_pushed[Qt.Key_Control]: # + control key
                 view_control.startDraggingWithCtrlKey(event)
-            elif view_control.dict_key_pushed[Qt.Key_Shift]: # + shift key
-                view_control.startDraggingWithShiftKey(event)
             elif table_control:
                 scene_pos = q_view.mapToScene(event.pos())
                 view_control.getROIwithClick(int(scene_pos.x()), int(scene_pos.y()))
                 roi_selected_id = view_control.control_manager.getSharedAttr(view_control.app_key, 'roi_selected_id')
                 table_control.updateSelectedROI(roi_selected_id)
+        elif event.button() == Qt.MiddleButton:
+            view_control.startDraggingWithMiddleClick(event)
 
     def onViewMoved(event: QMouseEvent) -> None:
-        if view_control.is_dragging and view_control.dict_key_pushed[Qt.Key_Control]:
-            view_control.updateDraggingWithCtrlKey(event)
-        elif view_control.is_dragging and view_control.dict_key_pushed[Qt.Key_Shift]:
-            view_control.updateDraggingWithShiftKey(event)
+        if view_control.is_dragging:
+            if view_control.dict_key_pushed[Qt.Key_Control]:
+                view_control.updateDraggingWithCtrlKey(event)
+            else:
+                view_control.updateDraggingWithMiddleClick(event)
 
     def onViewReleased(event: QMouseEvent) -> None:
         if event.button() == Qt.LeftButton and view_control.is_dragging:
@@ -172,11 +171,12 @@ def bindFuncViewMouseEventForTIFF(
                 rect = view_control.rect.rect()
                 rect_range = view_control.getRectRangeFromQRectF(rect)
                 q_lineedit.setText(','.join(map(str, rect_range)))
-            elif view_control.dict_key_pushed[Qt.Key_Shift]: # + shift key
-                view_control.finishDraggingWithShiftKey(event)
             else:
                 view_control.cancelDraggingWithCtrlKey()
-                view_control.cancelDraggingWithShiftKey()
+        elif event.button() == Qt.MiddleButton and view_control.is_dragging:
+            view_control.finishDraggingWithMiddleClick(event)
+        else:
+            view_control.cancelDraggingWithMiddleClick()
 
     q_view.mousePressEvent = onViewPressed
     q_view.mouseMoveEvent = onViewMoved
