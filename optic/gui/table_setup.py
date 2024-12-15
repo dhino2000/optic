@@ -150,3 +150,37 @@ def applyDictROITrackingToTable(
                         value = data[row]
                         if not np.isnan(value):
                             item.setText(str(int(value)))
+
+# apply dict_roi_matching to table
+def applyDictROIMatchingToTable(
+        q_table: QTableWidget, 
+        table_columns: TableColumns,
+        dict_roi_matching: Dict[int, Optional[int]],
+        row_count: int,
+        has_roi_id_match: bool = False
+        ) -> None:
+    if q_table.rowCount() < row_count:
+        q_table.setRowCount(row_count)
+
+    if has_roi_id_match:
+        for col_name, col_info in table_columns.getColumns().items():
+            if col_info['type'] == 'id':
+                col_index = col_info['order']
+                for row in range(row_count):
+                    item = QTableWidgetItem(str(row))
+                    q_table.setItem(row, col_index, item)
+            if col_info['type'] == 'id_match':
+                col_index = col_info['order']
+                for row in range(row_count):
+                    matched_id = dict_roi_matching.get(row)
+                    item = QTableWidgetItem()
+                    if matched_id is not None:
+                        item.setText(str(matched_id))
+                    q_table.setItem(row, col_index, item)
+    else:
+        for col_name, col_info in table_columns.getColumns().items():
+            if col_info['type'] == 'id':
+                col_index = col_info['order']
+                for row in range(row_count):
+                    item = QTableWidgetItem(str(row))
+                    q_table.setItem(row, col_index, item)

@@ -381,8 +381,10 @@ def bindFuncROIMaskNpyIO(
             data_manager, 
             app_key, 
         )
-        data_manager.dict_roi_coords_xyct[app_key] = convertCellposeMaskToDictROICoordsXYCT(data_manager.getROIMask(app_key))
-        data_manager.dict_roi_macthing[app_key] = convertCellposeMaskToDictROIMatching(data_manager.getROIMask(app_key))
+        # hardcoded !!!
+        data_manager.dict_roi_coords_xyct["pri"] = convertCellposeMaskToDictROICoordsXYCT(data_manager.getROIMask(app_key))
+        data_manager.dict_roi_macthing["pri"] = convertCellposeMaskToDictROIMatching(data_manager.getROIMask(app_key))
+        data_manager.dict_roi_coords_xyct["sec"] = data_manager.dict_roi_coords_xyct["pri"].copy()
     q_button_load.clicked.connect(lambda: _loadMaskNpy())
 """
 processing_image_layouts
@@ -820,11 +822,42 @@ def bindFuncPlaneZSlider(
     q_slider.valueChanged.connect(onZChanged)
 def bindFuncPlaneTSlider(
     q_slider: 'QSlider',
-    view_control: 'ViewControl'
+    view_control: 'ViewControl',
 ) -> None:
     def onTChanged(value: int) -> None:
         view_control.setPlaneT(value)
         view_control.updateView()
+    q_slider.valueChanged.connect(onTChanged)
+
+# -> view_layouts.makeLayoutViewWithZTSlider for Microglia Tracking
+def bindFuncPlaneTSliderWithXYCTTracking(
+    q_slider: 'QSlider',
+    data_manager: 'DataManager',
+    control_manager: 'ControlManager',
+    view_control: 'ViewControl',
+    table_control_pri: 'TableControl',
+    table_control_sec: 'TableControl',
+    app_key: AppKeys,
+) -> None:
+    def onTChanged(value: int) -> None:
+        view_control.setPlaneT(value)
+        view_control.updateView()
+        control_manager.table_controls[app_key].setPlaneT(value)
+
+        try:
+            dict_roi_matching = data_manager.getDictROIMatching("pri") # hardcoded !!!
+            dict_roi_coords_xyct = data_manager.getDictROICoordsXYCT(app_key)
+            t_pri, t_sec = table_control_pri.getPlaneT(), table_control_sec.getPlaneT()
+            key_roi_matching = f"t{t_pri}_t{t_sec}"
+            roi_matching = dict_roi_matching.get(key_roi_matching)
+
+            row_count_pri = len(data_manager.getDictROICoordsXYCT("pri").get(t_pri)) # hardcoded !!!
+            row_count_sec = len(data_manager.getDictROICoordsXYCT("sec").get(t_sec)) # hardcoded !!!
+
+            table_control_pri.updateWidgetDynamicTableWithT(roi_matching, row_count_pri, has_roi_id_match=True)
+            table_control_sec.updateWidgetDynamicTableWithT(roi_matching, row_count_sec, has_roi_id_match=False)
+        except Exception as e:
+            raise e
     q_slider.valueChanged.connect(onTChanged)
 
 # -> slider_layouts.makeLayoutContrastSlider

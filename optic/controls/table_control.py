@@ -32,6 +32,8 @@ class TableControl:
         self.selected_row:                          int = 0
         self.selected_column:                       int = 0
         self.len_row:                               int = 0
+        # for Microglia Tracking
+        self.plane_t:                               int = 0
 
     def setupWidgetROITable(self, app_key: str) -> None:
         from ..gui.table_setup import setupWidgetROITable
@@ -50,6 +52,11 @@ class TableControl:
         from ..gui.table_setup import setupWidgetROITable
         self.q_table.clear()
         self.q_table = setupWidgetROITable(self.q_table, self.len_row, self.table_columns, key_event_ignore=True)
+
+    def updateWidgetDynamicTableWithT(self, dict_roi_matching: Dict[int, Optional[int]], row_count:int, has_roi_id_match: bool) -> None:
+        from ..gui.table_setup import applyDictROIMatchingToTable
+        self.q_table.setRowCount(0) # initialize table
+        applyDictROIMatchingToTable(self.q_table, self.table_columns, dict_roi_matching, row_count, has_roi_id_match)
 
     # change table cell selection
     def onSelectionChanged(self, selected: QItemSelection, deselected: QItemSelection) -> None:
@@ -93,7 +100,9 @@ class TableControl:
             return id
         except (KeyError, AttributeError, ValueError):
             return None
-
+        
+    def getPlaneT(self) -> int:
+        return self.plane_t
     """
     set Functions
     """
@@ -114,6 +123,9 @@ class TableControl:
 
     def setTableColumns(self, table_columns: TableColumns) -> None:
         self.table_columns = table_columns
+
+    def setPlaneT(self, plane_t: int) -> None:
+        self.plane_t = plane_t
     """
     shared_attr Functions
     roi_selected_id: Current selected ROI ID

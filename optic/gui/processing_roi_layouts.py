@@ -95,3 +95,16 @@ def makeLayoutROIManager(
     layout.addLayout(makeLayoutROIManagerIO(widget_manager, key_button_save_roi, key_button_load_roi))
     layout.addLayout(makeLayoutMaskNpyIO(widget_manager, key_button_save_mask, key_button_load_mask))
     return layout
+
+# ROI Manager layout for Table
+def makeLayoutROIManagerForTable(
+    widget_manager: WidgetManager,
+    key_button_roi_add: str,
+    key_button_roi_delete: str,
+    key_button_roi_edit: str,
+) -> QVBoxLayout:
+    layout = QVBoxLayout()
+    layout.addWidget(widget_manager.makeWidgetButton(key_button_roi_add, "Add ROI"))
+    layout.addWidget(widget_manager.makeWidgetButton(key_button_roi_delete, "Delete ROI"))
+    layout.addWidget(widget_manager.makeWidgetButton(key_button_roi_edit, "Edit ROI"))
+    return layout
