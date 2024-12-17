@@ -292,12 +292,22 @@ class TIFStackExplorerGUI(QMainWindow):
             q_lineedit=self.widget_manager.dict_lineedit[f"{self.app_key_pri}_normalization_area"],
             view_control=self.control_manager.view_controls[self.app_key_pri]
         )
-        # drag and draw rectangle
+        # View mouse event, drag and draw rectangle
         bindFuncViewMouseEvent_TIFFStackExplorer(
             q_view=self.widget_manager.dict_view[self.app_key_pri],
             q_lineedit=self.widget_manager.dict_lineedit[f"{self.app_key_pri}_normalization_area"],
             view_control=self.control_manager.view_controls[self.app_key_pri],
             table_control=None
+        )
+        # View key event
+        bindFuncViewKeyEvent_TIFFStackExplorer(
+            q_view=self.widget_manager.dict_view[self.app_key_pri],
+            view_control=self.control_manager.view_controls[self.app_key_pri],
+        )
+        # View wheel event
+        bindFuncViewWheelEvent_TIFFStackExplorer(
+            q_view=self.widget_manager.dict_view[self.app_key_pri],
+            view_control=self.control_manager.view_controls[self.app_key_pri],
         )
         # highlight rectangle with selected listwidget item
         bindFuncListWidgetSelectionChanged(
