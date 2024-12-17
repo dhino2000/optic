@@ -56,8 +56,12 @@ def bindFuncHelp(
 ) -> None:
     q_button.clicked.connect(lambda: QDesktopServices.openUrl(QUrl(url)))
 
+
+"""
+View Functions, Suite2pROICheck
+"""
 # -> makeWidgetView, mousePressEvent
-def bindFuncViewMouseEvent(
+def bindFuncViewMouseEvent_Suite2pROICheck(
     q_view: 'QGraphicsView', 
     view_control: 'ViewControl', 
     table_control: 'TableControl'
@@ -87,7 +91,7 @@ def bindFuncViewMouseEvent(
     q_view.mouseReleaseEvent = onViewReleased
 
 # -> makeWidgetView, keyPressEvent
-def bindFuncViewKeyEvent(
+def bindFuncViewKeyEvent_Suite2pROICheck(
     q_view: 'QGraphicsView',
     view_control: 'ViewControl'
 ) -> None:
@@ -103,7 +107,7 @@ def bindFuncViewKeyEvent(
     q_view.keyReleaseEvent = onKeyReleased
 
 # -> makeWidgetView, wheelEvent
-def bindFuncViewWheelEvent(
+def bindFuncViewWheelEvent_Suite2pROICheck(
     q_view: 'QGraphicsView',
     view_control: 'ViewControl'
 ) -> None:    
@@ -113,8 +117,11 @@ def bindFuncViewWheelEvent(
 
     q_view.wheelEvent = onWheelEvent
 
+"""
+View Functions, Suite2pROITracking
+"""
 # -> makeWidgetView, mousePressEvent
-def bindFuncViewMouseEventWithTracking(
+def bindFuncViewMouseEvent_Suite2pROITracking(
     q_view: 'QGraphicsView', 
     view_control_pri: 'ViewControl', 
     table_control_pri: 'TableControl',
@@ -137,8 +144,11 @@ def bindFuncViewMouseEventWithTracking(
             
     q_view.mousePressEvent = onViewPressed
 
+"""
+View Functions, TIFFStackExplorer
+"""
 # -> makeWidgetView, mouseEvent
-def bindFuncViewMouseEventForTIFF(
+def bindFuncViewMouseEvent_TIFFStackExplorer(
     q_view: 'QGraphicsView',
     q_lineedit: 'QLineEdit',
     view_control: 'ViewControl',
@@ -183,7 +193,7 @@ def bindFuncViewMouseEventForTIFF(
     q_view.mouseReleaseEvent = onViewReleased
 
 # -> makeWidgetView, keyEvent
-def bindFuncViewKeyEventForTIFF(
+def bindFuncViewKeyEvent_TIFFStackExplorer(
     q_view: 'QGraphicsView',
     view_control: 'ViewControl'
 ) -> None:
@@ -198,7 +208,7 @@ def bindFuncViewKeyEventForTIFF(
     q_view.keyReleaseEvent = onKeyReleased
 
 # -> makeWidgetView, wheelEvent
-def bindFuncViewWheelEventForTIFF(
+def bindFuncViewWheelEvent_TIFFStackExplorer(
     q_view: 'QGraphicsView',
     view_control: 'ViewControl'
 ) -> None:
@@ -209,6 +219,37 @@ def bindFuncViewWheelEventForTIFF(
 
     q_view.wheelEvent = onWheelEvent
 
+"""
+View Functions, MicrogliaTracking
+"""
+# -> makeWidgetView, mouseEvent
+def bindFuncViewKeyEvent_MicrogliaTracking(
+    q_view: 'QGraphicsView',
+    view_control: 'ViewControl'
+) -> None:
+    pass
+
+# -> makeWidgetView, keyEvent
+def bindFuncViewKeyEvent_MicrogliaTracking(
+    q_view: 'QGraphicsView',
+    view_control: 'ViewControl'
+) -> None:
+    # key event
+    def onKeyPressed(event: QKeyEvent) -> None:
+        view_control.keyPressEvent(event)
+
+    def onKeyReleased(event: QKeyEvent) -> None:
+        view_control.keyReleaseEvent(event)
+
+    q_view.keyPressEvent = onKeyPressed
+    q_view.keyReleaseEvent = onKeyReleased
+
+# -> makeWidgetView, wheelEvent
+def bindFuncViewKeyEvent_MicrogliaTracking(
+    q_view: 'QGraphicsView',
+    view_control: 'ViewControl'
+) -> None:
+    pass
 
 """
 canvas_layouts
@@ -788,16 +829,29 @@ def bindFuncButtonsROIManagerForTable(
     q_button_remove: 'QPushButton',
     q_button_edit: 'QPushButton',
     q_table: 'QTableWidget',
+    data_manager: 'DataManager',
     table_control: 'TableControl',
     view_control: 'ViewControl',
     app_key: str,
 ) -> None:
     def _addROItoTable() -> None:
-        pass
+        if not view_control.roi_edit_mode:
+            view_control.roi_edit_mode = True
+            print("roi_edit_mode:", view_control.roi_edit_mode)
+
     def _removeSelectedROIfromTable() -> None:
-        pass
+        roi_selected_id = table_control.getSharedAttr_ROISelected()
+        plane_t = view_control.getPlaneT()
+        # remove selected roi from dict_roi_coords_xyct
+        if roi_selected_id:
+            del data_manager.dict_roi_coords_xyct[app_key][plane_t][roi_selected_id]
+            deleteIndexedRow(q_table, roi_selected_id)
+        print("ROI", roi_selected_id, "is removed.")
+
     def _editSelectedROI() -> None:
-        pass
+        if not view_control.roi_edit_mode:
+            view_control.roi_edit_mode = True
+            print("roi_edit_mode:", view_control.roi_edit_mode)
 
     q_button_add.clicked.connect(_addROItoTable)
     q_button_remove.clicked.connect(_removeSelectedROIfromTable)

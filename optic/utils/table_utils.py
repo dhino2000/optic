@@ -1,6 +1,10 @@
 from __future__ import annotations
 from ..type_definitions import *
 
+def deleteIndexedRow(q_table: QTableWidget, idx_row: int) -> None:
+    if 0 <= idx_row < q_table.rowCount():
+        q_table.removeRow(idx_row)
+
 def deleteSelectedRows(q_table: QTableWidget) -> None:
     selected_rows = sorted(set(index.row() for index in q_table.selectedIndexes()), reverse=True)
     for row in selected_rows:

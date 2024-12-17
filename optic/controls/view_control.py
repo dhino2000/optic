@@ -262,11 +262,17 @@ class ViewControl:
     """
     # catch key press/release event
     def keyPressEvent(self, event: QKeyEvent) -> None:
-        if event.key() in self.dict_key_pushed:
-            self.dict_key_pushed[event.key()] = True
-        if event.key() == Qt.Key_R:
-            resetZoomView(self.q_view, self.q_scene.sceneRect())
-            self.updateView()
+        if self.roi_edit_mode:
+            if event.key() == Qt.Key_Space:
+                self.roi_edit_mode = False
+                print("roi_edit_mode:", self.roi_edit_mode)
+                self.updateView()
+        else:
+            if event.key() in self.dict_key_pushed:
+                self.dict_key_pushed[event.key()] = True
+            if event.key() == Qt.Key_R:
+                resetZoomView(self.q_view, self.q_scene.sceneRect())
+                self.updateView()
 
     def keyReleaseEvent(self, event: QKeyEvent) -> None:
         if event.key() in self.dict_key_pushed:

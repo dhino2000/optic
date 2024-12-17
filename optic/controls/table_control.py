@@ -67,7 +67,9 @@ class TableControl:
             
             self.setSelectedRow(row)
             self.setSelectedColumn(column)
-            self.setSharedAttr_ROISelected(row)
+
+            cell_id = self.getCellIdFromRow(row)
+            self.setSharedAttr_ROISelected(cell_id)
 
     def onSelectionChangedWithTracking(self, selected: QItemSelection, deselected: QItemSelection) -> None:
         if selected.indexes():
@@ -76,9 +78,11 @@ class TableControl:
             
             self.setSelectedRow(row)
             self.setSelectedColumn(column)
-            self.setSharedAttr_ROISelected(row)
+            
+            cell_id = self.getCellIdFromRow(row)
+            self.setSharedAttr_ROISelected(cell_id)
             # for ROI tracking
-            id_roi_match = self.getMatchId(row)
+            id_roi_match = self.getCellIdMatchFromRow(row)
             self.setSharedAttr_ROIMatch(id_roi_match)
 
     """
@@ -94,16 +98,39 @@ class TableControl:
         return self.len_row
     
     # if "Cell ID Match" column is empty, return None
-    def getMatchId(self, roi_id: int) -> Optional[int]:
+    def getCellIdMatchFromRow(self, row: int) -> Optional[int]:
         try:
-            col_id_match = self.table_columns.getColumns()['Cell_ID_Match']['order'] # hardcoded !!!
-            id = int(self.q_table.item(roi_id, col_id_match).text())
-            return id
-        except (KeyError, AttributeError, ValueError):
+            # Get first column with type 'id_match'
+            id_match_columns = [(col_name, col_info) for col_name, col_info in self.table_columns.getColumns().items() 
+                            if col_info['type'] == 'id_match']
+            if not id_match_columns:
+                return None
+                
+            col_name, col_info = id_match_columns[0]
+            item = self.q_table.item(row, col_info['order'])
+            if not item or not item.text().strip():
+                return None
+                
+            return int(item.text())
+        except (ValueError, AttributeError):
             return None
         
     def getPlaneT(self) -> int:
         return self.plane_t
+    
+    # get "Cell ID" from table row
+    def getCellIdFromRow(self, row: int) -> Optional[int]:
+        try:
+            # Get first column with type 'id'
+            id_columns = [(col_name, col_info) for col_name, col_info in self.table_columns.getColumns().items() 
+                        if col_info['type'] == 'id']
+            if not id_columns:
+                return None
+                
+            col_name, col_info = id_columns[0]
+            return int(self.q_table.item(row, col_info['order']).text())
+        except (ValueError, AttributeError):
+            return None
     """
     set Functions
     """

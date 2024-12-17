@@ -434,7 +434,7 @@ class Suite2pROICheckGUI(QMainWindow):
             view_control=self.control_manager.view_controls[self.app_key_pri],
         )
         # View MousePressEvent
-        bindFuncViewMouseEvent(
+        bindFuncViewMouseEvent_Suite2pROICheck(
             q_view=self.widget_manager.dict_view[self.app_key_pri],
             view_control=self.control_manager.view_controls[self.app_key_pri],
             table_control=self.control_manager.table_controls[self.app_key_pri],

@@ -293,7 +293,7 @@ class TIFStackExplorerGUI(QMainWindow):
             view_control=self.control_manager.view_controls[self.app_key_pri]
         )
         # drag and draw rectangle
-        bindFuncViewMouseEventForTIFF(
+        bindFuncViewMouseEvent_TIFFStackExplorer(
             q_view=self.widget_manager.dict_view[self.app_key_pri],
             q_lineedit=self.widget_manager.dict_lineedit[f"{self.app_key_pri}_normalization_area"],
             view_control=self.control_manager.view_controls[self.app_key_pri],

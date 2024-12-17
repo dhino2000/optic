@@ -415,14 +415,14 @@ class Suite2pROITrackingGUI(QMainWindow):
                     channel=channel,
                 )
         # View MousePressEvent
-        bindFuncViewMouseEventWithTracking(
+        bindFuncViewMouseEvent_Suite2pROITracking(
             q_view=self.widget_manager.dict_view[self.app_keys[0]],
             view_control_pri=self.control_manager.view_controls[self.app_keys[0]],
             table_control_pri=self.control_manager.table_controls[self.app_keys[0]],
             view_control_sec=self.control_manager.view_controls[self.app_keys[1]],
             table_control_sec=self.control_manager.table_controls[self.app_keys[1]],
         )
-        bindFuncViewMouseEventWithTracking(
+        bindFuncViewMouseEvent_Suite2pROITracking(
             q_view=self.widget_manager.dict_view[self.app_keys[1]],
             view_control_pri=self.control_manager.view_controls[self.app_keys[1]],
             table_control_pri=self.control_manager.table_controls[self.app_keys[1]],

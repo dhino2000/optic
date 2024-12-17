@@ -71,7 +71,7 @@ class TableColumnConfigDialog(QDialog):
             self.widget_manager.makeWidgetLineEdit(key=f"width_{i}", text_set=str(col_info['width']))
             self.widget_manager.dict_table["table_columns"].setCellWidget(i, 2, self.widget_manager.dict_lineedit[f"width_{i}"])
 
-    def deleteSelectedColumns(self):
+    def deleteSelectedTableColumns(self):
         deleteSelectedRows(self.widget_manager.dict_table["table_columns"])
 
     def addNewColumn(self):
@@ -125,5 +125,5 @@ class TableColumnConfigDialog(QDialog):
     def bindFuncAllWidget(self):
         self.widget_manager.dict_button["update"].clicked.connect(self.updateTableColumns)
         self.widget_manager.dict_button["exit"].clicked.connect(self.reject)
-        self.widget_manager.dict_button["del_col"].clicked.connect(self.deleteSelectedColumns)
+        self.widget_manager.dict_button["del_col"].clicked.connect(self.deleteSelectedTableColumns)
         self.widget_manager.dict_button["add_col"].clicked.connect(self.addNewColumn)
