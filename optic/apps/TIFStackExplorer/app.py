@@ -99,8 +99,6 @@ class TIFStackExplorerGUI(QMainWindow):
             config_manager=self.config_manager,
             control_manager=self.control_manager,
         )
-        self.control_manager.view_controls[self.app_key_pri].setViewSize()
-        pass
 
     """
     makeLayout Function; Component
@@ -142,7 +140,7 @@ class TIFStackExplorerGUI(QMainWindow):
         return layout
 
     "Upper Right"
-    def makeLayoutComponenStackRegistration(self):
+    def makeLayoutComponentStackRegistration(self):
         layout = makeLayoutStackRegistration(
             self.widget_manager,
             self.data_manager,
@@ -218,7 +216,7 @@ class TIFStackExplorerGUI(QMainWindow):
     
     def makeLayoutSectionRightUpper(self):
         layout = QVBoxLayout()
-        layout.addLayout(self.makeLayoutComponenStackRegistration())
+        layout.addLayout(self.makeLayoutComponentStackRegistration())
         layout.addLayout(self.makeLayoutComponentStackNormalization())
         return layout
 

@@ -61,60 +61,82 @@ def bindFuncHelp(
 View Functions, Suite2pROICheck
 """
 # -> makeWidgetView, mousePressEvent
-def bindFuncViewMouseEvent_Suite2pROICheck(
-    q_view: 'QGraphicsView', 
-    view_control: 'ViewControl', 
-    table_control: 'TableControl'
-) -> None:
-    def onViewPressed(event: QMouseEvent) -> None:
-        if event.button() == Qt.LeftButton:
-            view_control.mousePressEvent(event)
-            roi_selected_id = view_control.control_manager.getSharedAttr(view_control.app_key, 'roi_selected_id')
-            table_control.updateSelectedROI(roi_selected_id)
-            table_control.q_table.setFocus()
-        elif event.button() == Qt.MiddleButton:
-            view_control.startDraggingWithMiddleClick(event)
+# def bindFuncViewMouseEvent_Suite2pROICheck(
+#     q_view: 'QGraphicsView', 
+#     view_control: 'ViewControl', 
+#     table_control: 'TableControl'
+# ) -> None:
+#     def onViewPressed(event: QMouseEvent) -> None:
+#         if event.button() == Qt.LeftButton:
+#             view_control.mousePressEvent(event)
+#             roi_selected_id = view_control.control_manager.getSharedAttr(view_control.app_key, 'roi_selected_id')
+#             table_control.updateSelectedROI(roi_selected_id)
+#             table_control.q_table.setFocus()
+#         elif event.button() == Qt.MiddleButton:
+#             view_control.startDraggingWithMiddleClick(event)
 
-    def onViewMoved(event: QMouseEvent) -> None:
-        if view_control.is_dragging:
-            view_control.updateDraggingWithMiddleClick(event)
+#     def onViewMoved(event: QMouseEvent) -> None:
+#         if view_control.is_dragging:
+#             view_control.updateDraggingWithMiddleClick(event)
 
-    def onViewReleased(event: QMouseEvent) -> None:
-        if event.button() == Qt.MiddleButton and view_control.is_dragging:
-            view_control.finishDraggingWithMiddleClick(event)
-        else:
-            view_control.cancelDraggingWithMiddleClick()
+#     def onViewReleased(event: QMouseEvent) -> None:
+#         if event.button() == Qt.MiddleButton and view_control.is_dragging:
+#             view_control.finishDraggingWithMiddleClick(event)
+#         else:
+#             view_control.cancelDraggingWithMiddleClick()
 
 
-    q_view.mousePressEvent = onViewPressed
-    q_view.mouseMoveEvent = onViewMoved
-    q_view.mouseReleaseEvent = onViewReleased
+#     q_view.mousePressEvent = onViewPressed
+#     q_view.mouseMoveEvent = onViewMoved
+#     q_view.mouseReleaseEvent = onViewReleased
 
-# -> makeWidgetView, keyPressEvent
-def bindFuncViewKeyEvent_Suite2pROICheck(
-    q_view: 'QGraphicsView',
-    view_control: 'ViewControl'
-) -> None:
-    # key event
-    def onKeyPressed(event: QKeyEvent) -> None:
-        print(event.key())
-        view_control.keyPressEvent(event)
+# # -> makeWidgetView, keyPressEvent
+# def bindFuncViewKeyEvent_Suite2pROICheck(
+#     q_view: 'QGraphicsView',
+#     view_control: 'ViewControl'
+# ) -> None:
+#     # key event
+#     def onKeyPressed(event: QKeyEvent) -> None:
+#         print(event.key())
+#         view_control.keyPressEvent(event)
 
-    def onKeyReleased(event: QKeyEvent) -> None:
-        view_control.keyReleaseEvent(event)
+#     def onKeyReleased(event: QKeyEvent) -> None:
+#         view_control.keyReleaseEvent(event)
 
-    q_view.keyPressEvent = onKeyPressed
-    q_view.keyReleaseEvent = onKeyReleased
+#     q_view.keyPressEvent = onKeyPressed
+#     q_view.keyReleaseEvent = onKeyReleased
 
-# -> makeWidgetView, wheelEvent
-def bindFuncViewWheelEvent_Suite2pROICheck(
-    q_view: 'QGraphicsView',
-    view_control: 'ViewControl'
-) -> None:    
-    # scroll event
-    def onWheelEvent(event: QWheelEvent) -> None:
-        view_control.wheelEvent(event)
+# # -> makeWidgetView, wheelEvent
+# def bindFuncViewWheelEvent_Suite2pROICheck(
+#     q_view: 'QGraphicsView',
+#     view_control: 'ViewControl'
+# ) -> None:    
+#     # scroll event
+#     def onWheelEvent(event: QWheelEvent) -> None:
+#         view_control.wheelEvent(event)
 
+#     q_view.wheelEvent = onWheelEvent
+
+def bindFuncViewEvents(q_view: QGraphicsView, view_control: ViewControl):
+    def onKeyPress(event: QKeyEvent):
+        view_control.view_handler.handleKeyPress(event)
+
+    def onMousePress(event: QMouseEvent):
+        view_control.view_handler.handleMousePress(event)
+
+    def onMouseMove(event: QMouseEvent):
+        view_control.view_handler.handleMouseMove(event)
+
+    def onMouseRelease(event: QMouseEvent):
+        view_control.view_handler.handleMouseRelease(event)
+
+    def onWheelEvent(event: QWheelEvent):
+        view_control.view_handler.handleWheelEvent(event)
+
+    q_view.keyPressEvent = onKeyPress
+    q_view.mousePressEvent = onMousePress
+    q_view.mouseMoveEvent = onMouseMove
+    q_view.mouseReleaseEvent = onMouseRelease
     q_view.wheelEvent = onWheelEvent
 
 """
@@ -227,7 +249,24 @@ def bindFuncViewKeyEvent_MicrogliaTracking(
     q_view: 'QGraphicsView',
     view_control: 'ViewControl'
 ) -> None:
-    pass
+    # mouse event
+    def onViewPressed(event: QMouseEvent) -> None:
+        if event.button() == Qt.MiddleButton:
+            view_control.startDraggingWithMiddleClick(event)
+
+    def onViewMoved(event: QMouseEvent) -> None:
+        if view_control.is_dragging:
+            view_control.updateDraggingWithMiddleClick(event)
+
+    def onViewReleased(event: QMouseEvent) -> None:
+        if event.button() == Qt.MiddleButton and view_control.is_dragging:
+            view_control.finishDraggingWithMiddleClick(event)
+        else:
+            view_control.cancelDraggingWithMiddleClick()
+
+    q_view.mousePressEvent = onViewPressed
+    q_view.mouseMoveEvent = onViewMoved
+    q_view.mouseReleaseEvent = onViewReleased
 
 # -> makeWidgetView, keyEvent
 def bindFuncViewKeyEvent_MicrogliaTracking(
@@ -245,11 +284,16 @@ def bindFuncViewKeyEvent_MicrogliaTracking(
     q_view.keyReleaseEvent = onKeyReleased
 
 # -> makeWidgetView, wheelEvent
-def bindFuncViewKeyEvent_MicrogliaTracking(
+def bindFuncViewWheelEvent_MicrogliaTracking(
     q_view: 'QGraphicsView',
     view_control: 'ViewControl'
 ) -> None:
-    pass
+    # scroll event
+    def onWheelEvent(event: QWheelEvent) -> None:
+        view_control.wheelEvent(event)
+        event.accept()
+
+    q_view.wheelEvent = onWheelEvent
 
 """
 canvas_layouts
@@ -840,12 +884,13 @@ def bindFuncButtonsROIManagerForTable(
             print("roi_edit_mode:", view_control.roi_edit_mode)
 
     def _removeSelectedROIfromTable() -> None:
-        roi_selected_id = table_control.getSharedAttr_ROISelected()
+        row = q_table.currentRow()
+        roi_selected_id = table_control.getCellIdFromRow(row)
         plane_t = view_control.getPlaneT()
         # remove selected roi from dict_roi_coords_xyct
         if roi_selected_id:
             del data_manager.dict_roi_coords_xyct[app_key][plane_t][roi_selected_id]
-            deleteIndexedRow(q_table, roi_selected_id)
+            deleteIndexedRow(q_table, row)
         print("ROI", roi_selected_id, "is removed.")
 
     def _editSelectedROI() -> None:

@@ -292,7 +292,6 @@ def updateViewTiffWithTracking(
     q_scene.addPixmap(pixmap)
 
     q_view.setScene(q_scene)
-    q_view.fitInView(q_scene.sceneRect(), Qt.KeepAspectRatio)
 
 # create RGB image from Mono images
 def convertMonoImageToRGBImage(
