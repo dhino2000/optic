@@ -3,10 +3,8 @@ from ..type_definitions import *
 from PyQt5.QtCore import Qt, QRectF
 from PyQt5.QtGui import QKeyEvent, QMouseEvent, QWheelEvent
 from PyQt5.QtWidgets import QGraphicsView, QGraphicsScene, QGraphicsRectItem
-from ..visualization.view_visual_rectangle import initializeDragRectangle, updateDragRectangle, clipRectangleRange
 from ..visualization.view_visual import zoomView, resetZoomView
-from ..visualization.view_visual_roi import findClosestROI, shouldSkipROI
-from ..preprocessing.preprocessing_roi import updateROIImage
+from ..config.constants import AppKeys
 
 
 class ViewHandler:
@@ -105,14 +103,35 @@ class ViewHandler:
     class Suite2pROITrackingHandler:
         def __init__(self, view_control: ViewControl):
             self.view_control = view_control
+            self.app_key = view_control.app_key
+
+            self.control_manager: ControlManager = view_control.control_manager
+            self.table_control: TableControl = self.control_manager.table_controls[self.app_key]
 
         def keyPressEvent(self, event: QKeyEvent):
-            if event.key() == Qt.Key_R:
-                resetZoomView(self.view_control.q_view, self.view_control.q_scene.sceneRect())
-                self.view_control.updateView()
+            pass
+
+        def keyReleaseEvent(self, event: QKeyEvent):
+            pass
 
         def mousePressEvent(self, event: QMouseEvent):
-            print("Suite2pROITracking: Mouse pressed")
+            if event.button() == Qt.LeftButton: # for "pri", "sec" views
+                scene_pos = self.view_control.q_view.mapToScene(event.pos())
+                self.view_control.getROIwithClick(int(scene_pos.x()), int(scene_pos.y()))
+                roi_selected_id = self.view_control.control_manager.getSharedAttr(self.view_control.app_key, 'roi_selected_id')
+                self.table_control.updateSelectedROI(roi_selected_id)
+                self.table_control.q_table.setFocus()
+            elif event.button() == Qt.RightButton: # for "pri" view
+                if self.app_key == AppKeys.PRI:
+                    self.view_control_sec: ViewControl = self.control_manager.view_controls[AppKeys.SEC]
+                    self.table_control_sec: TableControl = self.control_manager.table_controls[AppKeys.SEC]
+                    
+                    scene_pos = self.view_control.q_view.mapToScene(event.pos())
+                    self.view_control_sec.getROIwithClick(int(scene_pos.x()), int(scene_pos.y()))
+                    roi_selected_id = self.view_control_sec.control_manager.getSharedAttr(self.view_control_sec.app_key, 'roi_selected_id')
+                    self.table_control_sec.updateSelectedROI(roi_selected_id)
+                    self.table_control_sec.q_table.setFocus()
+                    self.view_control.updateView()
 
         def mouseMoveEvent(self, event: QMouseEvent):
             pass
@@ -133,6 +152,9 @@ class ViewHandler:
             self.drag_start_pos = None
 
         def keyPressEvent(self, event: QKeyEvent):
+            pass
+
+        def keyReleaseEvent(self, event: QKeyEvent):
             pass
 
         def mousePressEvent(self, event: QMouseEvent):
@@ -167,6 +189,9 @@ class ViewHandler:
                 resetZoomView(self.view_control.q_view, self.view_control.q_scene.sceneRect())
                 self.view_control.updateView()
 
+        def keyReleaseEvent(self, event: QKeyEvent):
+            pass
+
         def mousePressEvent(self, event: QMouseEvent):
             pass
 
@@ -190,6 +215,9 @@ class ViewHandler:
 
         def keyPressEvent(self, event: QKeyEvent):
             print("Default: Key Pressed")
+
+        def keyReleaseEvent(self, event: QKeyEvent):
+            pass
 
         def mousePressEvent(self, event: QMouseEvent):
             print("Default: Mouse Pressed")
