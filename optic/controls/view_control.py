@@ -9,7 +9,7 @@ from ..preprocessing.preprocessing_roi import updateROIImage
 from ..gui.view_setup import setViewSize
 from ..config.constants import BGImageTypeList, Extension
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QGraphicsView, QGraphicsScene, QGraphicsRectItem
+from PyQt5.QtWidgets import QGraphicsView, QGraphicsScene, QGraphicsRectItem, QGraphicsPathItem, QGraphicsPixmapItem
 import random
 import numpy as np
 
@@ -80,13 +80,13 @@ class ViewControl:
 
         self.setDataType()
         self.setImageSize()
+        self.initializeImageLayers()
         if self.data_dtype == Extension.MAT:
             self.initializeROIColors()
             self.setSharedAttr_ROISelected(roi_id=0)
         elif self.data_dtype == Extension.TIFF:
             self.setImageDataType()
             self.setTIFFShape()
-
 
     def updateView(self) -> None:
         if self.config_manager.current_app == "SUITE2P_ROI_CHECK":
@@ -121,6 +121,19 @@ class ViewControl:
             self.data_manager.getSizeOfZ(self.app_key),
             self.data_manager.getSizeOfT(self.app_key)
         )
+
+    def initializeImageLayers(self) -> None:
+        self.layer_bg = QGraphicsPixmapItem()  # for background image
+        self.layer_roi = QGraphicsPathItem()  # for ROI 
+        self.layer_roi_edit = QGraphicsPathItem()  # for ROI edit
+
+        self.q_scene.addItem(self.layer_bg)
+        self.q_scene.addItem(self.layer_roi)
+        self.q_scene.addItem(self.layer_roi_edit)
+        # bg -> roi -> roi_edit
+        self.layer_bg.setZValue(0)
+        self.layer_roi.setZValue(1)
+        self.layer_roi_edit.setZValue(2)
 
     def initializeROIColors(self):
         for roi_id in self.data_manager.getStat(self.app_key).keys():

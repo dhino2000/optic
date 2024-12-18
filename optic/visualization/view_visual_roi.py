@@ -1,10 +1,45 @@
 from __future__ import annotations
 from ..type_definitions import *
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QPen, QColor, QPainter
+from PyQt5.QtGui import QPen, QColor, QPainter, QPainterPath
 from ..preprocessing.preprocessing_roi import getROIContour
 from ..config.constants import PenColors, PenWidth
 import numpy as np
+
+def drawROIPath(
+        path: QPainterPath, 
+        dict_roi_coords_single: Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32], Tuple[int]]
+        ) -> None:
+    xpix, ypix = dict_roi_coords_single["xpix"], dict_roi_coords_single["ypix"]
+    for x, y in zip(xpix, ypix):
+        path.lineTo(float(x), float(y)) 
+
+def updateLayerROI(
+        view_control: ViewControl, 
+        layer_roi: QGraphicsPathItem, 
+        data_manager: DataManager, 
+        control_manager: ControlManager, 
+        app_key: AppKeys
+        ) -> None:
+    path = QPainterPath()  # 新しいパスを作成
+    roi_display = control_manager.getSharedAttr(app_key, "roi_display")
+    ROISelectedId = control_manager.getSharedAttr(app_key, "roi_selected_id")
+    
+    dict_roi_coords = data_manager.getDictROICoords(app_key)
+    for roiId, dict_roi_coords_single in dict_roi_coords.items():
+        if roi_display[roiId] and roiId != ROISelectedId:
+            drawROIPath(path, dict_roi_coords_single)
+    
+    # 選択中のROI
+    dict_roi_coords_selected = dict_roi_coords[ROISelectedId]
+    drawROIPath(path, dict_roi_coords_selected)
+    
+    # パスを layer_roi に設定
+    layer_roi.setPath(path)
+
+    # ペンとブラシを設定（必要に応じて変更）
+    layer_roi.setPen(QPen(Qt.red, 2))
+    layer_roi.setBrush(Qt.NoBrush)
 
 # draw all ROIs
 def drawAllROIs(
