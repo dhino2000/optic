@@ -13,14 +13,16 @@ class ViewHandler:
     def __init__(
             self,
             view_control: ViewControl,
+            app_key: AppKeys,
         ):
         self.view_control = view_control
+        self.app_key = app_key
         self.current_app = view_control.config_manager.current_app
         self.handler = self._initializeHandler(self.current_app)
 
     def _initializeHandler(self, current_app):
         if current_app == "SUITE2P_ROI_CHECK":
-            return self.Suite2pROICheckHandler(self.view_control)
+            return self.Suite2pROICheckHandler(self.view_control, self.view_control.control_manager.table_controls[self.app_key])
         elif current_app == "SUITE2P_ROI_TRACKING":
             return self.Suite2pROITrackingHandler(self.view_control)
         elif current_app == "MICROGLIA_TRACKING":
@@ -32,6 +34,9 @@ class ViewHandler:
 
     def handleKeyPress(self, event: QKeyEvent):
         self.handler.keyPressEvent(event)
+
+    def handleKeyRelease(self, event: QKeyEvent):
+        self.handler.keyReleaseEvent(event)
 
     def handleMousePress(self, event: QMouseEvent):
         self.handler.mousePressEvent(event)
@@ -49,19 +54,29 @@ class ViewHandler:
     Suite2pROICheck Handler
     """
     class Suite2pROICheckHandler:
-        def __init__(self, view_control: ViewControl):
+        def __init__(self, view_control: ViewControl, table_control: TableControl):
             self.view_control = view_control
+            self.table_control = table_control
             self.is_dragging = False
 
         def keyPressEvent(self, event: QKeyEvent):
+            if event.key() in self.view_control.dict_key_pushed:
+                self.view_control.dict_key_pushed[event.key()] = True
             if event.key() == Qt.Key_R:
                 resetZoomView(self.view_control.q_view, self.view_control.q_scene.sceneRect())
                 self.view_control.updateView()
+
+        def keyReleaseEvent(self, event: QKeyEvent) -> None:
+            if event.key() in self.view_control.dict_key_pushed:
+                self.view_control.dict_key_pushed[event.key()] = False
 
         def mousePressEvent(self, event: QMouseEvent):
             if event.button() == Qt.LeftButton:
                 scene_pos = self.view_control.q_view.mapToScene(event.pos())
                 self.view_control.getROIwithClick(int(scene_pos.x()), int(scene_pos.y()))
+                roi_selected_id = self.view_control.control_manager.getSharedAttr(self.view_control.app_key, 'roi_selected_id')
+                self.table_control.updateSelectedROI(roi_selected_id)
+                self.table_control.q_table.setFocus()
             elif event.button() == Qt.MiddleButton:
                 self.is_dragging = True
                 self.drag_start_pos = self.view_control.q_view.mapToScene(event.pos())

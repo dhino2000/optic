@@ -121,6 +121,9 @@ def bindFuncViewEvents(q_view: QGraphicsView, view_control: ViewControl):
     def onKeyPress(event: QKeyEvent):
         view_control.view_handler.handleKeyPress(event)
 
+    def onKeyRelease(event: QKeyEvent):
+        view_control.view_handler.handleKeyRelease(event)
+
     def onMousePress(event: QMouseEvent):
         view_control.view_handler.handleMousePress(event)
 
@@ -134,6 +137,7 @@ def bindFuncViewEvents(q_view: QGraphicsView, view_control: ViewControl):
         view_control.view_handler.handleWheelEvent(event)
 
     q_view.keyPressEvent = onKeyPress
+    q_view.keyReleaseEvent = onKeyRelease
     q_view.mousePressEvent = onMousePress
     q_view.mouseMoveEvent = onMouseMove
     q_view.mouseReleaseEvent = onMouseRelease
