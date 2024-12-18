@@ -56,7 +56,6 @@ class ViewHandler:
         def __init__(self, view_control: ViewControl, table_control: TableControl):
             self.view_control = view_control
             self.table_control = table_control
-            self.is_dragging = False
 
         def keyPressEvent(self, event: QKeyEvent):
             if event.key() in self.view_control.dict_key_pushed:
@@ -77,21 +76,21 @@ class ViewHandler:
                 self.table_control.updateSelectedROI(roi_selected_id)
                 self.table_control.q_table.setFocus()
             elif event.button() == Qt.MiddleButton:
-                self.is_dragging = True
-                self.drag_start_pos = self.view_control.q_view.mapToScene(event.pos())
+                self.view_control.is_dragging = True
+                self.view_control.drag_start_pos = self.view_control.q_view.mapToScene(event.pos())
 
         def mouseMoveEvent(self, event: QMouseEvent):
-            if self.is_dragging:
+            if self.view_control.is_dragging:
                 current_pos = self.view_control.q_view.mapToScene(event.pos())
-                delta = current_pos - self.drag_start_pos
+                delta = current_pos - self.view_control.drag_start_pos
                 self.view_control.q_view.setTransformationAnchor(QGraphicsView.NoAnchor)
                 self.view_control.q_view.translate(delta.x(), delta.y())
-                self.drag_start_pos = current_pos
+                self.view_control.drag_start_pos = current_pos
 
         def mouseReleaseEvent(self, event: QMouseEvent):
-            if self.is_dragging:
-                self.is_dragging = False
-                self.drag_start_pos = None
+            if self.view_control.is_dragging:
+                self.view_control.is_dragging = False
+                self.view_control.drag_start_pos = None
 
         def wheelEvent(self, event: QWheelEvent):
             if self.view_control.dict_key_pushed[Qt.Key_Control]:
@@ -145,38 +144,72 @@ class ViewHandler:
 
     """
     MicrogliaTracking Handler
+    --- default mode ---
+    click : select roi
+    middle click + drag : pan
+    ctrl + scroll : zoom in/out
+    R : reset zoom
+    --- roi edit mode ---
+    space : quit roi edit mode
+
     """
     class MicrogliaTrackingHandler:
         def __init__(self, view_control: ViewControl):
             self.view_control = view_control
-            self.is_dragging = False
-            self.drag_start_pos = None
+            self.app_key = view_control.app_key
+
+            self.control_manager: ControlManager = view_control.control_manager
+            self.table_control: TableControl = self.control_manager.table_controls[self.app_key]
 
         def keyPressEvent(self, event: QKeyEvent):
-            pass
+            if event.key() in self.view_control.dict_key_pushed:
+                self.view_control.dict_key_pushed[event.key()] = True
+            if event.key() == Qt.Key_R:
+                resetZoomView(self.view_control.q_view, self.view_control.q_scene.sceneRect())
+                self.view_control.updateView()
+            if event.key() == Qt.Key_Space:
+                if self.view_control.roi_edit_mode:
+                    self.view_control.roi_edit_mode = False
+                    print("ROI edit mode off")
 
-        def keyReleaseEvent(self, event: QKeyEvent):
-            pass
+        def keyReleaseEvent(self, event: QKeyEvent) -> None:
+            if event.key() in self.view_control.dict_key_pushed:
+                self.view_control.dict_key_pushed[event.key()] = False
 
         def mousePressEvent(self, event: QMouseEvent):
-            if event.button() == Qt.MiddleButton:
-                self.is_dragging = True
-                self.drag_start_pos = self.view_control.q_view.mapToScene(event.pos())
+            if event.button() == Qt.LeftButton:
+                if self.view_control.roi_edit_mode:
+                    self.view_control.is_dragging = True
+                    pass
+                else:
+                    scene_pos = self.view_control.q_view.mapToScene(event.pos())
+                    self.view_control.getROIwithClick(int(scene_pos.x()), int(scene_pos.y()))
+                    roi_selected_id = self.view_control.control_manager.getSharedAttr(self.view_control.app_key, 'roi_selected_id')
+                    print(f"ROI selected: {roi_selected_id}")
+                    # self.table_control.updateSelectedROI(roi_selected_id)
+                    # self.table_control.q_table.setFocus()
+            elif event.button() == Qt.MiddleButton:
+                self.view_control.is_dragging = True
+                self.view_control.drag_start_pos = self.view_control.q_view.mapToScene(event.pos())
 
         def mouseMoveEvent(self, event: QMouseEvent):
-            if self.is_dragging:
-                current_pos = self.view_control.q_view.mapToScene(event.pos())
-                delta = current_pos - self.drag_start_pos
-                self.view_control.q_view.setTransformationAnchor(QGraphicsView.NoAnchor)
-                self.view_control.q_view.translate(delta.x(), delta.y())
-                self.drag_start_pos = current_pos
+            if self.view_control.is_dragging:
+                if event.button() == Qt.MiddleButton:
+                    current_pos = self.view_control.q_view.mapToScene(event.pos())
+                    delta = current_pos - self.view_control.drag_start_pos
+                    self.view_control.q_view.setTransformationAnchor(QGraphicsView.NoAnchor)
+                    self.view_control.q_view.translate(delta.x(), delta.y())
+                    self.view_control.drag_start_pos = current_pos
 
         def mouseReleaseEvent(self, event: QMouseEvent):
-            if event.button() == Qt.MiddleButton:
-                self.is_dragging = False
+            if self.view_control.is_dragging:
+                self.view_control.is_dragging = False
+                self.view_control.drag_start_pos = None
 
         def wheelEvent(self, event: QWheelEvent):
-            pass
+            if self.view_control.dict_key_pushed[Qt.Key_Control]:
+                zoomView(self.view_control.q_view, event.angleDelta().y(), event.pos())
+                self.view_control.updateView()
 
     """
     TifStackExplorer Handler
@@ -184,9 +217,6 @@ class ViewHandler:
     class TifStackExplorerHandler:
         def __init__(self, view_control: ViewControl):
             self.view_control = view_control
-            self.is_dragging = False
-            self.drag_pos_start = None
-            self.rect = None
 
         def keyPressEvent(self, event: QKeyEvent):
             if event.key() in self.view_control.dict_key_pushed:
@@ -201,31 +231,31 @@ class ViewHandler:
 
         def mousePressEvent(self, event: QMouseEvent):
             if event.button() == Qt.LeftButton and self.view_control.dict_key_pushed[Qt.Key_Control]:
-                self.drag_start_pos = self.view_control.q_view.mapToScene(event.pos())
-                self.is_dragging = True
-                self.rect = initializeDragRectangle(self.view_control.q_scene, self.drag_start_pos, self.drag_start_pos)
+                self.view_control.drag_start_pos = self.view_control.q_view.mapToScene(event.pos())
+                self.view_control.is_dragging = True
+                self.rect = initializeDragRectangle(self.view_control.q_scene, self.view_control.drag_start_pos, self.view_control.drag_start_pos)
             elif event.button() == Qt.MiddleButton:
-                self.is_dragging = True
-                self.drag_start_pos = self.view_control.q_view.mapToScene(event.pos())
+                self.view_control.is_dragging = True
+                self.view_control.drag_start_pos = self.view_control.q_view.mapToScene(event.pos())
 
         def mouseMoveEvent(self, event: QMouseEvent):
-            if self.is_dragging:
-                if self.view_control.dict_key_pushed[Qt.Key_Control]: # draw rectangle
-                    current_pos = self.view_control.q_view.mapToScene(event.pos())
-                    updateDragRectangle(self.rect, self.drag_start_pos, current_pos)
-                else:
-                    current_pos = self.view_control.q_view.mapToScene(event.pos())
-                    delta = current_pos - self.drag_start_pos
-                    self.view_control.q_view.setTransformationAnchor(QGraphicsView.NoAnchor)
-                    self.view_control.q_view.translate(delta.x(), delta.y())
-                    self.drag_start_pos = current_pos
+            if event.buttons() & Qt.LeftButton and self.view_control.is_dragging:  # left drag
+                current_pos = self.view_control.q_view.mapToScene(event.pos())
+                if self.view_control.dict_key_pushed[Qt.Key_Control]:  # + control key
+                    updateDragRectangle(self.rect, self.view_control.drag_start_pos, current_pos)
+            elif event.buttons() & Qt.MiddleButton and self.view_control.is_dragging:  # middle drag
+                current_pos = self.view_control.q_view.mapToScene(event.pos())
+                delta = current_pos - self.view_control.drag_start_pos
+                self.view_control.q_view.setTransformationAnchor(QGraphicsView.NoAnchor)
+                self.view_control.q_view.translate(delta.x(), delta.y())
+                self.view_control.drag_start_pos = current_pos
 
         def mouseReleaseEvent(self, event: QMouseEvent):
-            if event.button() == Qt.LeftButton and self.is_dragging:
+            if event.button() == Qt.LeftButton and self.view_control.is_dragging:
                 if self.view_control.dict_key_pushed[Qt.Key_Control]: # + control key
-                    self.is_dragging = False
+                    self.view_control.is_dragging = False
                     end_pos = self.view_control.q_view.mapToScene(event.pos())
-                    updateDragRectangle(self.rect, self.drag_start_pos, end_pos)
+                    updateDragRectangle(self.rect, self.view_control.drag_start_pos, end_pos)
                     final_rect = self.rect.rect()
                     rect_range = self.view_control.getRectRangeFromQRectF(final_rect)
                     self.view_control.setRectRange(clipRectangleRange(self.view_control.tiff_shape, rect_range))
@@ -233,14 +263,14 @@ class ViewHandler:
                 else:
                     if self.rect:
                         self.view_control.q_scene.removeItem(self.rect)
-                    self.is_dragging = False
+                    self.view_control.is_dragging = False
                     self.rect = None
             elif event.button() == Qt.MiddleButton and self.view_control.is_dragging:
-                self.is_dragging = False
+                self.view_control.is_dragging = False
                 self.drag_pos_start = None
             else:
-                self.is_dragging = False
-                self.drag_start_pos = None
+                self.view_control.is_dragging = False
+                self.view_control.drag_start_pos = None
 
 
 

@@ -58,7 +58,7 @@ def bindFuncHelp(
 
 
 """
-View Functions
+View Functions -> ViewHandler
 """
 def bindFuncViewEvents(q_view: QGraphicsView, view_control: ViewControl):
     def onKeyPress(event: QKeyEvent):
@@ -85,82 +85,6 @@ def bindFuncViewEvents(q_view: QGraphicsView, view_control: ViewControl):
     q_view.mouseMoveEvent = onMouseMove
     q_view.mouseReleaseEvent = onMouseRelease
     q_view.wheelEvent = onWheelEvent
-
-"""
-View Functions, TIFFStackExplorer
-"""
-# -> makeWidgetView, mouseEvent
-def bindFuncViewMouseEvent_TIFFStackExplorer(
-    q_view: 'QGraphicsView',
-    q_lineedit: 'QLineEdit',
-    view_control: 'ViewControl',
-    table_control: 'TableControl'
-) -> None:
-    # mouse event
-    def onViewPressed(event: QMouseEvent) -> None:
-        if event.button() == Qt.LeftButton:
-            if view_control.dict_key_pushed[Qt.Key_Control]: # + control key
-                view_control.startDraggingWithCtrlKey(event)
-            elif table_control:
-                scene_pos = q_view.mapToScene(event.pos())
-                view_control.getROIwithClick(int(scene_pos.x()), int(scene_pos.y()))
-                roi_selected_id = view_control.control_manager.getSharedAttr(view_control.app_key, 'roi_selected_id')
-                table_control.updateSelectedROI(roi_selected_id)
-        elif event.button() == Qt.MiddleButton:
-            view_control.startDraggingWithMiddleClick(event)
-
-    def onViewMoved(event: QMouseEvent) -> None:
-        if view_control.is_dragging:
-            if view_control.dict_key_pushed[Qt.Key_Control]:
-                view_control.updateDraggingWithCtrlKey(event)
-            else:
-                view_control.updateDraggingWithMiddleClick(event)
-
-    def onViewReleased(event: QMouseEvent) -> None:
-        if event.button() == Qt.LeftButton and view_control.is_dragging:
-            if view_control.dict_key_pushed[Qt.Key_Control]: # + control key
-                view_control.finishDraggingWithCtrlKey(event)
-                rect = view_control.rect.rect()
-                rect_range = view_control.getRectRangeFromQRectF(rect)
-                q_lineedit.setText(','.join(map(str, rect_range)))
-            else:
-                view_control.cancelDraggingWithCtrlKey()
-        elif event.button() == Qt.MiddleButton and view_control.is_dragging:
-            view_control.finishDraggingWithMiddleClick(event)
-        else:
-            view_control.cancelDraggingWithMiddleClick()
-
-    q_view.mousePressEvent = onViewPressed
-    q_view.mouseMoveEvent = onViewMoved
-    q_view.mouseReleaseEvent = onViewReleased
-
-# -> makeWidgetView, keyEvent
-def bindFuncViewKeyEvent_TIFFStackExplorer(
-    q_view: 'QGraphicsView',
-    view_control: 'ViewControl'
-) -> None:
-    # key event
-    def onKeyPressed(event: QKeyEvent) -> None:
-        view_control.keyPressEvent(event)
-
-    def onKeyReleased(event: QKeyEvent) -> None:
-        view_control.keyReleaseEvent(event)
-
-    q_view.keyPressEvent = onKeyPressed
-    q_view.keyReleaseEvent = onKeyReleased
-
-# -> makeWidgetView, wheelEvent
-def bindFuncViewWheelEvent_TIFFStackExplorer(
-    q_view: 'QGraphicsView',
-    view_control: 'ViewControl'
-) -> None:
-    # scroll event
-    def onWheelEvent(event: QWheelEvent) -> None:
-        view_control.wheelEvent(event)
-        event.accept()
-
-    q_view.wheelEvent = onWheelEvent
-
 
 """
 canvas_layouts
@@ -748,6 +672,7 @@ def bindFuncButtonsROIManagerForTable(
     def _addROItoTable() -> None:
         if not view_control.roi_edit_mode:
             view_control.roi_edit_mode = True
+            view_control.q_view.setFocus()
             print("roi_edit_mode:", view_control.roi_edit_mode)
 
     def _removeSelectedROIfromTable() -> None:
@@ -759,6 +684,7 @@ def bindFuncButtonsROIManagerForTable(
             del data_manager.dict_roi_coords_xyct[app_key][plane_t][roi_selected_id]
             deleteIndexedRow(q_table, row)
         print("ROI", roi_selected_id, "is removed.")
+        view_control.updateView()
 
     def _editSelectedROI() -> None:
         if not view_control.roi_edit_mode:

@@ -56,6 +56,10 @@ class ViewControl:
         self.show_roi_match:        bool                        = True
         self.show_roi_pair:         bool                        = True
 
+        # event attributes
+        self.is_dragging = False
+        self.drag_start_pos = None
+
         # ROI edit mode
         self.roi_edit_mode:         bool                        = False
 
@@ -286,17 +290,19 @@ class ViewControl:
             dict_roi_coords = self.data_manager.getDictROICoordsRegistered(self.app_key)
         else:
             dict_roi_coords = self.data_manager.getDictROICoords(self.app_key)
-        dict_roi_med = {roi_id: dict_roi_coords[roi_id]["med"] for roi_id in dict_roi_coords.keys()}
-        skip_checkboxes = [checkbox for key, checkbox in self.widget_manager.dict_checkbox.items() if key.startswith(f"{self.app_key}_skip_choose_")]
-        dict_roi_skip = {roi_id: shouldSkipROI(roi_id, 
-                                               self.config_manager.getTableColumns(self.app_key).getColumns(),
-                                               self.widget_manager.dict_table[self.app_key],
-                                               skip_checkboxes) 
-                        for roi_id in dict_roi_med.keys()}
-        closest_roi_id = findClosestROI(x, y, dict_roi_med, dict_roi_skip)
-        if closest_roi_id is not None:
-            self.control_manager.setSharedAttr(self.app_key, 'roi_selected_id', closest_roi_id)
-            self.updateView()
+            
+        if dict_roi_coords is not None:
+            dict_roi_med = {roi_id: dict_roi_coords[roi_id]["med"] for roi_id in dict_roi_coords.keys()}
+            skip_checkboxes = [checkbox for key, checkbox in self.widget_manager.dict_checkbox.items() if key.startswith(f"{self.app_key}_skip_choose_")]
+            dict_roi_skip = {roi_id: shouldSkipROI(roi_id, 
+                                                self.config_manager.getTableColumns(self.app_key).getColumns(),
+                                                self.widget_manager.dict_table[self.app_key],
+                                                skip_checkboxes) 
+                            for roi_id in dict_roi_med.keys()}
+            closest_roi_id = findClosestROI(x, y, dict_roi_med, dict_roi_skip)
+            if closest_roi_id is not None:
+                self.control_manager.setSharedAttr(self.app_key, 'roi_selected_id', closest_roi_id)
+                self.updateView()
 
     def getRectRangeFromQRectF(self, rect: QRectF) -> List[int, int, int, int, int, int, int, int]:
         x_start = int(rect.left())
