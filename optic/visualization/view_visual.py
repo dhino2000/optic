@@ -11,7 +11,7 @@ from ..preprocessing.preprocessing_roi import updateROIImage
 
 # q_view widget visualization
 # update view for Fall data
-def updateViewFall(
+def updateView_Suite2pROICheck(
         q_scene: QGraphicsScene, 
         q_view: QGraphicsView, 
         view_control: ViewControl, 
@@ -66,7 +66,7 @@ def updateViewFall(
     # q_view.fitInView(q_scene.sceneRect(), Qt.KeepAspectRatio)
 
 # update view for Fall data for ROI Tracking
-def updateViewFallWithTracking(
+def updateView_Suite2pROITracking(
         q_scene: QGraphicsScene, 
         q_view: QGraphicsView, 
         view_control: ViewControl, 
@@ -138,7 +138,7 @@ def updateViewFallWithTracking(
     q_view.fitInView(q_scene.sceneRect(), Qt.KeepAspectRatio)
 
 # update view for Tiff data
-def updateViewTiff(
+def updateView_TIFStackExplorer(
         q_scene: QGraphicsScene, 
         q_view: QGraphicsView, 
         view_control: ViewControl, 
@@ -229,7 +229,7 @@ def updateViewTiff(
     q_view.setScene(q_scene)
 
 # update view for Tiff data, microglia tracking
-def updateViewTiffWithTracking(
+def updateView_MicrogliaTracking(
         q_scene: QGraphicsScene, 
         q_view: QGraphicsView, 
         view_control: ViewControl, 

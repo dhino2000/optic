@@ -1,7 +1,7 @@
 from __future__ import annotations
 from ..type_definitions import *
 from ..handlers.view_handler import ViewHandler
-from ..visualization.view_visual import updateViewFall, updateViewTiff, updateViewFallWithTracking, updateViewTiffWithTracking, zoomView, resetZoomView
+from ..visualization.view_visual import updateView_Suite2pROICheck, updateView_TIFStackExplorer, updateView_Suite2pROITracking, updateView_MicrogliaTracking, zoomView, resetZoomView
 from ..visualization.view_visual_roi import findClosestROI, shouldSkipROI
 from ..visualization.view_visual_rectangle import initializeDragRectangle, updateDragRectangle, clipRectangleRange
 from ..visualization.info_visual import updateZPlaneDisplay, updateTPlaneDisplay
@@ -90,13 +90,13 @@ class ViewControl:
 
     def updateView(self) -> None:
         if self.config_manager.current_app == "SUITE2P_ROI_CHECK":
-            updateViewFall(self.q_scene, self.q_view, self, self.data_manager, self.control_manager, self.app_key)
+            updateView_Suite2pROICheck(self.q_scene, self.q_view, self, self.data_manager, self.control_manager, self.app_key)
         elif self.config_manager.current_app == "SUITE2P_ROI_TRACKING":
-            updateViewFallWithTracking(self.q_scene, self.q_view, self, self.data_manager, self.control_manager, self.app_key, self.app_key_sec)
+            updateView_Suite2pROITracking(self.q_scene, self.q_view, self, self.data_manager, self.control_manager, self.app_key, self.app_key_sec)
         elif self.config_manager.current_app == "MICROGLIA_TRACKING":
-            updateViewTiffWithTracking(self.q_scene, self.q_view, self, self.data_manager, self.control_manager, self.app_key)  
+            updateView_MicrogliaTracking(self.q_scene, self.q_view, self, self.data_manager, self.control_manager, self.app_key)  
         elif self.config_manager.current_app == "TIFSTACK_EXPLORER":
-            updateViewTiff(self.q_scene, self.q_view, self, self.data_manager, self.control_manager, self.app_key)
+            updateView_TIFStackExplorer(self.q_scene, self.q_view, self, self.data_manager, self.control_manager, self.app_key)
         
 
     """
@@ -314,157 +314,3 @@ class ViewControl:
         dict_im_roi, dict_im_roi_reg = updateROIImage(self.data_manager, self.control_manager, self.app_key, dtype="uint8", value=50, reg=True)
         self.data_manager.dict_im_roi[self.app_key] = dict_im_roi
         self.data_manager.dict_im_roi_reg[self.app_key] = dict_im_roi_reg
-
-
-#     """
-#     event Functions
-#     """
-#     # catch key press/release event
-#     def keyPressEvent(self, event: QKeyEvent) -> None:
-#         print(event.key())
-
-#         if self.roi_edit_mode:
-#             if event.key() == Qt.Key_Space:
-#                 self.roi_edit_mode = False
-#                 print("roi_edit_mode:", self.roi_edit_mode)
-#                 self.updateView()
-#         else:
-#             if event.key() in self.dict_key_pushed:
-#                 self.dict_key_pushed[event.key()] = True
-#             if event.key() == Qt.Key_R:
-#                 resetZoomView(self.q_view, self.q_scene.sceneRect())
-#                 self.updateView()
-
-#     def keyReleaseEvent(self, event: QKeyEvent) -> None:
-#         if event.key() in self.dict_key_pushed:
-#             self.dict_key_pushed[event.key()] = False
-#             if self.is_dragging:
-#                 self.cancelDraggingWithCtrlKey()
-
-#     # catch mouse press/move/release event
-#     def mousePressEvent(self, event: QMouseEvent) -> None:
-#         if event.button() == Qt.LeftButton:
-#             if self.dict_key_pushed[Qt.Key_Control]:
-#                 self.startDraggingWithCtrlKey(event)
-#             else:
-#                 scene_pos = self.q_view.mapToScene(event.pos())
-#                 self.getROIwithClick(int(scene_pos.x()), int(scene_pos.y()))
-#         elif event.button() == Qt.MiddleButton:
-#             self.startDraggingWithMiddleClick(event)
-
-#     def mousePressEventWithTracking(self, event: QMouseEvent) -> None:
-#         if event.button() == Qt.LeftButton or event.button() == Qt.RightButton:
-#             scene_pos = self.q_view.mapToScene(event.pos())
-#             self.getROIwithClick(int(scene_pos.x()), int(scene_pos.y()), reg=self.show_reg_im_roi)
-
-#     def mouseMoveEvent(self, event: QMouseEvent) -> None:
-#         if self.is_dragging and self.dict_key_pushed[Qt.Key_Control]:
-#             self.updateDraggingWithCtrlKey(event)
-
-#     def mouseReleaseEvent(self, event: QMouseEvent) -> None:
-#         if event.button() == Qt.LeftButton and self.is_dragging:
-#             if self.dict_key_pushed[Qt.Key_Control]:
-#                 self.finishDraggingWithCtrlKey(event)
-#             else:
-#                 self.cancelDraggingWithCtrlKey()
-
-#     # catch scroll event
-#     def wheelEvent(self, event: QWheelEvent) -> None:
-#         # Ctrlキーが押されているときのみズーム操作を許可
-#         if self.dict_key_pushed[Qt.Key_Control]:
-#             # ズーム前の位置を保存
-#             view_pos = self.q_view.mapToScene(event.pos())
-            
-#             # ズーム実行
-#             zoomView(self.q_view, event.angleDelta().y())
-            
-#             # ズーム後の位置を計算して調整
-#             scene_pos = self.q_view.mapFromScene(view_pos)
-#             delta = event.pos() - scene_pos
-#             self.q_view.horizontalScrollBar().setValue(
-#                 self.q_view.horizontalScrollBar().value() - delta.x())
-#             self.q_view.verticalScrollBar().setValue(
-#                 self.q_view.verticalScrollBar().value() - delta.y())
-            
-#             self.q_view.viewport().update()
-#         else:
-#             # Ctrlキーが押されていない場合は何もしない（スクロールを無効化）
-#             event.accept()
-
-#     # middle click dragging
-#     def startDraggingWithMiddleClick(self, event: QMouseEvent) -> None:
-#         self.drag_pos_start = self.q_view.mapToScene(event.pos())
-#         self.is_dragging = True
-
-#     def updateDraggingWithMiddleClick(self, event: QMouseEvent) -> None:
-#         current_pos = self.q_view.mapToScene(event.pos())
-#         delta = current_pos - self.drag_pos_start
-#         self.q_view.setTransformationAnchor(QGraphicsView.NoAnchor)
-#         self.q_view.translate(delta.x(), delta.y())
-#         self.drag_pos_start = current_pos
-
-#     def finishDraggingWithMiddleClick(self, event: QMouseEvent) -> None:
-#         self.is_dragging = False
-#         self.drag_pos_start = None
-
-#     def cancelDraggingWithMiddleClick(self) -> None:
-#         self.is_dragging = False
-#         self.drag_pos_start = None
-
-#     # with ctrl key
-#     def startDraggingWithCtrlKey(self, event: QMouseEvent) -> None:
-#         self.drag_start_pos = self.q_view.mapToScene(event.pos())
-#         self.is_dragging = True
-#         self.rect = initializeDragRectangle(self.q_scene, self.drag_start_pos, self.drag_start_pos)
-
-#     def updateDraggingWithCtrlKey(self, event: QMouseEvent) -> None:
-#         current_pos = self.q_view.mapToScene(event.pos())
-#         updateDragRectangle(self.rect, self.drag_start_pos, current_pos)
-
-#     def finishDraggingWithCtrlKey(self, event: QMouseEvent) -> None:
-#         self.is_dragging = False
-#         end_pos = self.q_view.mapToScene(event.pos())
-#         updateDragRectangle(self.rect, self.drag_start_pos, end_pos)
-#         final_rect = self.rect.rect()
-#         rect_range = self.getRectRangeFromQRectF(final_rect)
-#         self.setRectRange(clipRectangleRange(self.tiff_shape, rect_range))
-
-#     def cancelDraggingWithCtrlKey(self) -> None:
-#         if self.rect:
-#             self.q_scene.removeItem(self.rect)
-#         self.is_dragging = False
-#         self.rect = None
-
-#     def getROIwithClick(self, x:int, y:int, reg=False) -> None:
-#         if reg:
-#             dict_roi_coords = self.data_manager.getDictROICoordsRegistered(self.app_key)
-#         else:
-#             dict_roi_coords = self.data_manager.getDictROICoords(self.app_key)
-#         dict_roi_med = {roi_id: dict_roi_coords[roi_id]["med"] for roi_id in dict_roi_coords.keys()}
-#         skip_checkboxes = [checkbox for key, checkbox in self.widget_manager.dict_checkbox.items() if key.startswith(f"{self.app_key}_skip_choose_")]
-#         dict_roi_skip = {roi_id: shouldSkipROI(roi_id, 
-#                                                self.config_manager.getTableColumns(self.app_key).getColumns(),
-#                                                self.widget_manager.dict_table[self.app_key],
-#                                                skip_checkboxes) 
-#                         for roi_id in dict_roi_med.keys()}
-#         closest_roi_id = findClosestROI(x, y, dict_roi_med, dict_roi_skip)
-#         if closest_roi_id is not None:
-#             self.control_manager.setSharedAttr(self.app_key, 'roi_selected_id', closest_roi_id)
-#             self.updateView()
-
-#     def getRectRangeFromQRectF(self, rect: QRectF) -> List[int, int, int, int, int, int, int, int]:
-#         x_start = int(rect.left())
-#         x_end = int(rect.right())
-#         y_start = int(rect.top())
-#         y_end = int(rect.bottom())
-#         z_start = self.getPlaneZ()
-#         z_end = z_start
-#         t_start = self.getPlaneT()
-#         t_end = t_start
-#         return [x_start, x_end, y_start, y_end, z_start, z_end, t_start, t_end]
-    
-#     # update ROI image, show only choosed celltype, show registered ROI image or not
-#     def updateROIImage(self) -> None:
-#         dict_im_roi, dict_im_roi_reg = updateROIImage(self.data_manager, self.control_manager, self.app_key, dtype="uint8", value=50, reg=True)
-#         self.data_manager.dict_im_roi[self.app_key] = dict_im_roi
-#         self.data_manager.dict_im_roi_reg[self.app_key] = dict_im_roi_reg
