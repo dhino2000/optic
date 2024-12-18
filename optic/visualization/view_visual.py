@@ -382,27 +382,38 @@ def adjustChannelContrast(
     
 # scroll zoom event
 def zoomView(
-    view: QGraphicsView,
-    delta_y: float,
+    q_view: QGraphicsView,
+    delta: float,
+    center_pos: QPoint,
     zoom_factor: float = 1.2,
-    max_scale: float = 10.0,
+    max_scale: float = 10.0
 ) -> None:
     """
-    view zoom event with scroll
+    Zoom view with specified position as center
     
     Args:
-        view (QGraphicsView): QGraphicsView object
-        delta_y (float): scroll event value
-        zoom_factor (float): zoom factor
-        max_scale (float): max scale value
+        q_view: Target view
+        delta: Zoom delta value (positive for zoom in, negative for zoom out)
+        center_pos: Center position for zooming
+        zoom_factor: Zoom scale factor
+        max_scale: Maximum zoom scale
     """
-    current_scale = view.transform().m11()
+    scene_pos = q_view.mapToScene(center_pos)
+    current_scale = q_view.transform().m11()
+    
+    if delta > 0 and current_scale < max_scale:
+        factor = zoom_factor
+    elif delta < 0:
+        factor = 1.0/zoom_factor
+    else:
+        return
 
-    if delta_y > 0:  # zoom in
-        if current_scale < max_scale:
-            view.scale(zoom_factor, zoom_factor)
-    else:  # zoom out
-        view.scale(1.0/zoom_factor, 1.0/zoom_factor)
+    q_view.scale(factor, factor)
+    new_pos = q_view.mapFromScene(scene_pos)
+    delta = center_pos - new_pos
+    q_view.horizontalScrollBar().setValue(q_view.horizontalScrollBar().value() - delta.x())
+    q_view.verticalScrollBar().setValue(q_view.verticalScrollBar().value() - delta.y())
+    q_view.viewport().update()
 
 # reset zoom
 def resetZoomView(

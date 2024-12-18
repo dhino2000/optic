@@ -87,33 +87,6 @@ def bindFuncViewEvents(q_view: QGraphicsView, view_control: ViewControl):
     q_view.wheelEvent = onWheelEvent
 
 """
-View Functions, Suite2pROITracking
-"""
-# -> makeWidgetView, mousePressEvent
-def bindFuncViewMouseEvent_Suite2pROITracking(
-    q_view: 'QGraphicsView', 
-    view_control_pri: 'ViewControl', 
-    table_control_pri: 'TableControl',
-    view_control_sec: 'ViewControl'=None,
-    table_control_sec: 'TableControl'=None
-) -> None:
-    def onViewPressed(event) -> None:
-        if event.button() == Qt.LeftButton: # for "pri" ROI
-            view_control_pri.mousePressEventWithTracking(event)
-            roi_selected_id = view_control_pri.control_manager.getSharedAttr(view_control_pri.app_key, 'roi_selected_id')
-            table_control_pri.updateSelectedROI(roi_selected_id)
-            table_control_pri.q_table.setFocus()
-        elif event.button() == Qt.RightButton: # for "sec" ROI
-            if view_control_sec is not None and table_control_sec is not None:
-                view_control_sec.mousePressEventWithTracking(event)
-                roi_selected_id = view_control_sec.control_manager.getSharedAttr(view_control_sec.app_key, 'roi_selected_id')
-                table_control_sec.updateSelectedROI(roi_selected_id)
-                table_control_sec.q_table.setFocus()
-                view_control_pri.updateView()
-            
-    q_view.mousePressEvent = onViewPressed
-
-"""
 View Functions, TIFFStackExplorer
 """
 # -> makeWidgetView, mouseEvent
@@ -188,59 +161,6 @@ def bindFuncViewWheelEvent_TIFFStackExplorer(
 
     q_view.wheelEvent = onWheelEvent
 
-"""
-View Functions, MicrogliaTracking
-"""
-# -> makeWidgetView, mouseEvent
-def bindFuncViewKeyEvent_MicrogliaTracking(
-    q_view: 'QGraphicsView',
-    view_control: 'ViewControl'
-) -> None:
-    # mouse event
-    def onViewPressed(event: QMouseEvent) -> None:
-        if event.button() == Qt.MiddleButton:
-            view_control.startDraggingWithMiddleClick(event)
-
-    def onViewMoved(event: QMouseEvent) -> None:
-        if view_control.is_dragging:
-            view_control.updateDraggingWithMiddleClick(event)
-
-    def onViewReleased(event: QMouseEvent) -> None:
-        if event.button() == Qt.MiddleButton and view_control.is_dragging:
-            view_control.finishDraggingWithMiddleClick(event)
-        else:
-            view_control.cancelDraggingWithMiddleClick()
-
-    q_view.mousePressEvent = onViewPressed
-    q_view.mouseMoveEvent = onViewMoved
-    q_view.mouseReleaseEvent = onViewReleased
-
-# -> makeWidgetView, keyEvent
-def bindFuncViewKeyEvent_MicrogliaTracking(
-    q_view: 'QGraphicsView',
-    view_control: 'ViewControl'
-) -> None:
-    # key event
-    def onKeyPressed(event: QKeyEvent) -> None:
-        view_control.keyPressEvent(event)
-
-    def onKeyReleased(event: QKeyEvent) -> None:
-        view_control.keyReleaseEvent(event)
-
-    q_view.keyPressEvent = onKeyPressed
-    q_view.keyReleaseEvent = onKeyReleased
-
-# -> makeWidgetView, wheelEvent
-def bindFuncViewWheelEvent_MicrogliaTracking(
-    q_view: 'QGraphicsView',
-    view_control: 'ViewControl'
-) -> None:
-    # scroll event
-    def onWheelEvent(event: QWheelEvent) -> None:
-        view_control.wheelEvent(event)
-        event.accept()
-
-    q_view.wheelEvent = onWheelEvent
 
 """
 canvas_layouts
