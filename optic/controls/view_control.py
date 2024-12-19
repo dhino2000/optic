@@ -94,7 +94,7 @@ class ViewControl:
         elif self.config_manager.current_app == "SUITE2P_ROI_TRACKING":
             updateView_Suite2pROITracking(self.q_scene, self.q_view, self, self.data_manager, self.control_manager, self.app_key, self.app_key_sec)
         elif self.config_manager.current_app == "MICROGLIA_TRACKING":
-            updateView_MicrogliaTracking(self.q_scene, self.q_view, self, self.data_manager, self.control_manager, self.app_key)  
+            updateView_MicrogliaTracking(self.q_scene, self.q_view, self, self.data_manager, self.control_manager, self.app_key, self.app_key_sec)  
         elif self.config_manager.current_app == "TIFSTACK_EXPLORER":
             updateView_TIFStackExplorer(self.q_scene, self.q_view, self, self.data_manager, self.control_manager, self.app_key)
         

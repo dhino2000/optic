@@ -8,6 +8,9 @@ from ..config.constants import ChannelKeys, PenColors, PenWidth
 from .view_visual_roi import updateLayerROI_Suite2pROICheck, updateLayerROI_Suite2pROITracking, updateLayerROI_MicrogliaTracking, updateLayerROI_TIFStackExplorer
 from ..preprocessing.preprocessing_roi import updateROIImage
 
+"""
+update View
+"""
 # q_view widget visualization
 # update view for Fall data
 def updateView_Suite2pROICheck(
@@ -62,7 +65,7 @@ def updateView_Suite2pROICheck(
     view_control.layer_bg.setPixmap(pixmap)
 
     # update ROI layer
-    updateLayerROI_Suite2pROICheck(view_control, view_control.layer_roi, data_manager, control_manager, app_key)
+    updateLayerROI_Suite2pROICheck(view_control, data_manager, control_manager, app_key)
 
 # update view for Fall data for ROI Tracking
 def updateView_Suite2pROITracking(
@@ -132,7 +135,80 @@ def updateView_Suite2pROITracking(
     view_control.layer_bg.setPixmap(pixmap)
 
     # update ROI layer
-    updateLayerROI_Suite2pROITracking(view_control, view_control.layer_roi, data_manager, control_manager, app_key, app_key_sec)
+    updateLayerROI_Suite2pROITracking(view_control, data_manager, control_manager, app_key, app_key_sec)
+
+# update view for Tiff data, microglia tracking
+def updateView_MicrogliaTracking(
+        q_scene: QGraphicsScene, 
+        q_view: QGraphicsView, 
+        view_control: ViewControl, 
+        data_manager: DataManager, 
+        control_manager: ControlManager, 
+        app_key: AppKeys,
+        app_key_sec: AppKeys = None,
+        ) -> None:
+    bg_image_chan1 = None
+    bg_image_chan2 = None
+    bg_image_chan3 = None 
+    plane_z = view_control.getPlaneZ()
+    plane_t = view_control.getPlaneT()
+    min_val_image = np.min(data_manager.getTiffStack(app_key))
+    max_val_image = np.max(data_manager.getTiffStack(app_key))
+
+    if view_control.getBackgroundVisibility(ChannelKeys.CHAN1):
+        bg_image_chan1 = adjustChannelContrast(
+            image=data_manager.getImageFromXYCZTTiffStack(app_key, plane_z, plane_t, 0, view_control.show_reg_stack),
+            min_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN1, 'min'),
+            max_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN1, 'max'),
+            min_val_image=min_val_image,
+            max_val_image=max_val_image
+            )
+    if view_control.getBackgroundVisibility(ChannelKeys.CHAN2):
+        bg_image_chan2 = adjustChannelContrast(
+            image=data_manager.getImageFromXYCZTTiffStack(app_key, plane_z, plane_t, 1, view_control.show_reg_stack),
+            min_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN2, 'min'),
+            max_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN2, 'max'),
+            min_val_image=min_val_image,
+            max_val_image=max_val_image
+            )
+    if view_control.getBackgroundVisibility(ChannelKeys.CHAN3):
+        bg_image_chan3 = adjustChannelContrast(
+            image=data_manager.getImageFromXYCZTTiffStack(app_key, plane_z, plane_t, 2, view_control.show_reg_stack),
+            min_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN3, 'min'),
+            max_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN3, 'max'),
+            min_val_image=min_val_image,
+            max_val_image=max_val_image
+            )
+
+    (width, height) = view_control.getImageSize()
+    bg_image = convertMonoImageToRGBImage(
+        image_g=bg_image_chan1, 
+        image_r=bg_image_chan2, 
+        image_b=bg_image_chan3, 
+        height=height,
+        width=width,
+        )
+
+    # Caution !!! width and height are swapped between TIFF and QImage
+    # Caution !!! width and height are swapped between TIFF and QImage
+    bg_image_corrected = np.ascontiguousarray(bg_image.transpose(1, 0, 2))
+
+    # Create QImage
+    qimage = QImage(
+        bg_image_corrected.data,
+        width,
+        height,
+        width * 3,
+        QImage.Format_RGB888
+    )
+    pixmap = QPixmap.fromImage(qimage)
+    view_control.layer_bg.setPixmap(pixmap)
+
+    # try:
+    #     updateLayerROI_MicrogliaTracking(view_control, data_manager, control_manager, app_key, app_key_sec)
+    # except AttributeError:
+    #     pass
+
 
 # update view for Tiff data
 def updateView_TIFStackExplorer(
@@ -187,125 +263,23 @@ def updateView_TIFStackExplorer(
 
     # update background layer
     # Caution !!! width and height are swapped between TIFF and QImage
-    qimage = QImage(bg_image.data, height, width, height * 3, QImage.Format_RGB888)
+    bg_image_corrected = np.ascontiguousarray(bg_image.transpose(1, 0, 2))
+
+    # Create QImage
+    qimage = QImage(
+        bg_image_corrected.data,
+        width,
+        height,
+        width * 3,
+        QImage.Format_RGB888
+    )
     pixmap = QPixmap.fromImage(qimage)
     view_control.layer_bg.setPixmap(pixmap)
 
-    # Draw rectangle
-    rect_range = view_control.getRectRange()
-    if rect_range:
-        x_min, x_max, y_min, y_max, z_min, z_max, t_min, t_max = rect_range
-        # Clear and initialize the pixmap
-        pixmap = QPixmap(*view_control.getImageSize())
-        pixmap.fill(Qt.transparent)
-        # Draw rectangle if in range
-        drawRectangleIfInRange(
-            pixmap,
-            view_control.getPlaneZ(),
-            view_control.getPlaneT(),
-            x_min,
-            x_max,
-            y_min,
-            y_max,
-            z_min,
-            z_max,
-            t_min,
-            t_max,
-            color=PenColors.RECTANGLE_DRAG,
-            width=PenWidth.RECTANGLE
-        )
-        # Update layer_roi_edit with the new pixmap
-        view_control.layer_roi_edit.setPixmap(pixmap)
 
-    # Draw highlight rectangle
-    highlight_rect_range = view_control.getRectHighlightRange()
-    if highlight_rect_range:
-        x_min, x_max, y_min, y_max, z_min, z_max, t_min, t_max = highlight_rect_range
-        # Load the existing pixmap and draw highlight
-        pixmap = view_control.layer_roi_edit.pixmap()
-        drawRectangleIfInRange(
-            pixmap,
-            view_control.getPlaneZ(),
-            view_control.getPlaneT(),
-            x_min,
-            x_max,
-            y_min,
-            y_max,
-            z_min,
-            z_max,
-            t_min,
-            t_max,
-            color=PenColors.RECTANGLE_HIGHLIGHT,
-            width=PenWidth.RECTANGLE
-        )
-        # Update layer_roi_edit with the updated pixmap
-        view_control.layer_roi_edit.setPixmap(pixmap)
-
-# update view for Tiff data, microglia tracking
-def updateView_MicrogliaTracking(
-        q_scene: QGraphicsScene, 
-        q_view: QGraphicsView, 
-        view_control: ViewControl, 
-        data_manager: DataManager, 
-        control_manager: ControlManager, 
-        app_key: AppKeys,
-        ) -> None:
-    bg_image_chan1 = None
-    bg_image_chan2 = None
-    bg_image_chan3 = None 
-    plane_z = view_control.getPlaneZ()
-    plane_t = view_control.getPlaneT()
-    min_val_image = np.min(data_manager.getTiffStack(app_key))
-    max_val_image = np.max(data_manager.getTiffStack(app_key))
-
-    if view_control.getBackgroundVisibility(ChannelKeys.CHAN1):
-        bg_image_chan1 = adjustChannelContrast(
-            image=data_manager.getImageFromXYCZTTiffStack(app_key, plane_z, plane_t, 0, view_control.show_reg_stack),
-            min_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN1, 'min'),
-            max_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN1, 'max'),
-            min_val_image=min_val_image,
-            max_val_image=max_val_image
-            )
-    if view_control.getBackgroundVisibility(ChannelKeys.CHAN2):
-        bg_image_chan2 = adjustChannelContrast(
-            image=data_manager.getImageFromXYCZTTiffStack(app_key, plane_z, plane_t, 1, view_control.show_reg_stack),
-            min_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN2, 'min'),
-            max_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN2, 'max'),
-            min_val_image=min_val_image,
-            max_val_image=max_val_image
-            )
-    if view_control.getBackgroundVisibility(ChannelKeys.CHAN3):
-        bg_image_chan3 = adjustChannelContrast(
-            image=data_manager.getImageFromXYCZTTiffStack(app_key, plane_z, plane_t, 2, view_control.show_reg_stack),
-            min_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN3, 'min'),
-            max_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN3, 'max'),
-            min_val_image=min_val_image,
-            max_val_image=max_val_image
-            )
-
-    (width, height) = view_control.getImageSize()
-    bg_image = convertMonoImageToRGBImage(
-        image_g=bg_image_chan1, 
-        image_r=bg_image_chan2, 
-        image_b=bg_image_chan3, 
-        height=height,
-        width=width,
-        )
-
-    # Caution !!! width and height are swapped between TIFF and QImage
-    qimage = QImage(bg_image.data, height, width, height * 3, QImage.Format_RGB888)
-    pixmap = QPixmap.fromImage(qimage)
-
-    try:
-        drawAllROIsForMicrogliaTracking(view_control, pixmap, data_manager, control_manager, app_key, plane_t)
-    except AttributeError:
-        pass
-
-    q_scene.clear()
-    q_scene.addPixmap(pixmap)
-
-    q_view.setScene(q_scene)
-
+"""
+Sub functions for updateView
+"""
 # create RGB image from Mono images
 def convertMonoImageToRGBImage(
         image_r: Optional[np.ndarray] = None, 
