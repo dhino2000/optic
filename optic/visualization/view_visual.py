@@ -5,7 +5,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QGraphicsScene, QGraphicsView
 import numpy as np
 from ..config.constants import ChannelKeys, PenColors, PenWidth
-from .view_visual_roi import drawAllROIs, drawAllROIsWithTracking, drawROI, findClosestROI, shouldSkipROI, drawAllROIsForMicrogliaTracking, updateLayerROI
+from .view_visual_roi import drawAllROIsForMicrogliaTracking, updateLayerROI_Suite2pROICheck, updateLayerROI_Suite2pROITracking, updateLayerROI_MicrogliaTracking, updateLayerROI_TIFStackExplorer
 from .view_visual_rectangle import drawRectangle, drawRectangleIfInRange
 from ..preprocessing.preprocessing_roi import updateROIImage
 
@@ -63,7 +63,7 @@ def updateView_Suite2pROICheck(
     view_control.layer_bg.setPixmap(pixmap)
 
     # update ROI layer
-    updateLayerROI(view_control, view_control.layer_roi, data_manager, control_manager, app_key)
+    updateLayerROI_Suite2pROICheck(view_control, view_control.layer_roi, data_manager, control_manager, app_key)
 
 # update view for Fall data for ROI Tracking
 def updateView_Suite2pROITracking(
@@ -127,15 +127,13 @@ def updateView_Suite2pROITracking(
         width=width,
         dtype=np.uint8)
 
+    # update background layer
     qimage = QImage(bg_image.data, width, height, width * 3, QImage.Format_RGB888)
     pixmap = QPixmap.fromImage(qimage)
+    view_control.layer_bg.setPixmap(pixmap)
 
-    drawAllROIsWithTracking(view_control, pixmap, data_manager, control_manager, app_key, app_key_sec)
-
-    q_scene.clear()
-    q_scene.addPixmap(pixmap)
-    q_view.setScene(q_scene)
-    q_view.fitInView(q_scene.sceneRect(), Qt.KeepAspectRatio)
+    # update ROI layer
+    updateLayerROI_Suite2pROITracking(view_control, view_control.layer_roi, data_manager, control_manager, app_key, app_key_sec)
 
 # update view for Tiff data
 def updateView_TIFStackExplorer(

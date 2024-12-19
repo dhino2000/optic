@@ -7,7 +7,8 @@ from ..preprocessing.preprocessing_roi import getROIContour
 from ..config.constants import PenColors, PenWidth
 import numpy as np
 
-def updateLayerROI(
+# update layer_roi for Suite2pROICheck
+def updateLayerROI_Suite2pROICheck(
         view_control: ViewControl, 
         layer_roi: QGraphicsPixmapItem, 
         data_manager: DataManager, 
@@ -51,51 +52,20 @@ def updateLayerROI(
     painter.end()
     layer_roi.setPixmap(pixmap)
 
-# draw all ROIs
-def drawAllROIs(
+# update layer_roi for Suite2pROITracking
+def updateLayerROI_Suite2pROITracking(
         view_control: ViewControl, 
-        pixmap: QPixmap, 
-        data_manager: DataManager, 
-        control_manager: ControlManager, 
-        app_key: AppKeys
-        ) -> None:
-    painter = QPainter(pixmap)
-    painter.setRenderHint(QPainter.Antialiasing)
-    roi_display = control_manager.getSharedAttr(app_key, "roi_display")
-    ROISelectedId = control_manager.getSharedAttr(app_key, "roi_selected_id")
-    
-    dict_roi_coords = data_manager.getDictROICoords(app_key)
-    for roiId, dict_roi_coords_single in dict_roi_coords.items():
-        if roi_display[roiId] and roiId != ROISelectedId:
-            color = view_control.getROIColor(roiId)
-            opacity = view_control.getROIOpacity()
-            drawROI(painter, dict_roi_coords_single, color, opacity)
-    
-    dict_roi_coords_selected = dict_roi_coords[ROISelectedId]
-    color_selected = view_control.getROIColor(ROISelectedId)
-    opacity_selected = view_control.getHighlightOpacity()
-    # draw contour of selected ROI
-    if view_control.getROIDisplayProp("contour"):
-        drawROIContour(painter, dict_roi_coords_selected, color_selected, opacity_selected)
-    else:
-        drawROI(painter, dict_roi_coords_selected, color_selected, opacity_selected)
-
-    # draw next ROI of selected ROI, with White color
-    if view_control.getROIDisplayProp("next"):
-        dict_roi_coords_selected_next = dict_roi_coords.get(ROISelectedId+1)
-        if dict_roi_coords_selected_next:
-            drawROIContour(painter, dict_roi_coords_selected_next, (255, 255, 255), opacity_selected)
-    painter.end()
-
-# draw all ROIs and contour of selected ROI
-def drawAllROIsWithTracking(
-        view_control: ViewControl, 
-        pixmap: QPixmap, 
+        layer_roi: QGraphicsPixmapItem, 
         data_manager: DataManager, 
         control_manager: ControlManager, 
         app_key_pri: AppKeys,
         app_key_sec: AppKeys,
+        draw_selected_roi: bool = True
         ) -> None:
+    width, height = view_control.getImageSize()
+    pixmap = QPixmap(width, height)
+    pixmap.fill(Qt.transparent) 
+
     painter = QPainter(pixmap)
     painter.setRenderHint(QPainter.Antialiasing)
     roi_display = control_manager.getSharedAttr(app_key_pri, "roi_display")
@@ -105,29 +75,21 @@ def drawAllROIsWithTracking(
         dict_roi_coords = data_manager.getDictROICoordsRegistered(app_key_pri)
     else:
         dict_roi_coords = data_manager.getDictROICoords(app_key_pri)
-
+    
     for roiId, dict_roi_coords_single in dict_roi_coords.items():
         if roi_display[roiId] and roiId != ROISelectedId:
             color = view_control.getROIColor(roiId)
             opacity = view_control.getROIOpacity()
             drawROI(painter, dict_roi_coords_single, color, opacity)
-    
+
+    # draw selected ROI
+    if draw_selected_roi:
+        dict_roi_coords_selected = dict_roi_coords[ROISelectedId]
+        color_selected = view_control.getROIColor(ROISelectedId)
+        opacity_selected = view_control.getHighlightOpacity()
+        drawROI(painter, dict_roi_coords_selected, color_selected, opacity_selected)
+
     highlightROISelectedWithTracking(view_control, painter, data_manager, control_manager, app_key_pri, app_key_sec)
-    # draw contour of selected ROI of "sec"
-    if view_control.show_roi_match:
-        try:
-            roiId_match = control_manager.getSharedAttr(app_key_pri, "roi_match_id")
-            view_control_sec = control_manager.view_controls[app_key_sec]
-            if view_control_sec.show_reg_im_roi:
-                dict_roi_coords_sec = data_manager.getDictROICoordsRegistered(app_key_sec)
-            else:
-                dict_roi_coords_sec = data_manager.getDictROICoords(app_key_sec)
-            dict_roi_coords_sec_single = dict_roi_coords_sec[roiId_match]
-            color = view_control_sec.getROIColor(roiId_match)
-            opacity = view_control_sec.getROIOpacity()
-            drawROIContour(painter, dict_roi_coords_sec_single, color, opacity)
-        except KeyError:
-            pass
 
     # draw ROI pairs
     if view_control.show_roi_pair and app_key_sec is not None:
@@ -158,6 +120,100 @@ def drawAllROIsWithTracking(
             pass
 
     painter.end()
+    from ..visualization.view_visual import resetZoomView
+    resetZoomView(view_control.q_view, view_control.q_scene.sceneRect())
+    layer_roi.setPixmap(pixmap)
+
+# update layer_roi for MicrogliaTracking
+def updateLayerROI_MicrogliaTracking(
+        view_control: ViewControl, 
+        layer_roi: QGraphicsPixmapItem, 
+        data_manager: DataManager, 
+        control_manager: ControlManager, 
+        app_key: AppKeys,
+        draw_selected_roi: bool = True
+        ) -> None:
+    width, height = view_control.getImageSize()
+    pixmap = QPixmap(width, height)
+    pixmap.fill(Qt.transparent) 
+
+    painter = QPainter(pixmap)
+    painter.setRenderHint(QPainter.Antialiasing)
+    roi_display = control_manager.getSharedAttr(app_key, "roi_display")
+    ROISelectedId = control_manager.getSharedAttr(app_key, "roi_selected_id")
+    
+    dict_roi_coords = data_manager.getDictROICoords(app_key)
+    for roiId, dict_roi_coords_single in dict_roi_coords.items():
+        if roi_display[roiId] and roiId != ROISelectedId:
+            color = view_control.getROIColor(roiId)
+            opacity = view_control.getROIOpacity()
+            drawROI(painter, dict_roi_coords_single, color, opacity)
+
+    # draw selected ROI
+    if draw_selected_roi:
+        dict_roi_coords_selected = dict_roi_coords[ROISelectedId]
+        color_selected = view_control.getROIColor(ROISelectedId)
+        opacity_selected = view_control.getHighlightOpacity()
+        # draw contour of selected ROI
+        if view_control.getROIDisplayProp("contour"):
+            drawROIContour(painter, dict_roi_coords_selected, color_selected, opacity_selected)
+        else:
+            drawROI(painter, dict_roi_coords_selected, color_selected, opacity_selected)
+
+    # draw next ROI of selected ROI, with White color
+    if view_control.getROIDisplayProp("next"):
+        dict_roi_coords_selected_next = dict_roi_coords.get(ROISelectedId+1)
+        if dict_roi_coords_selected_next:
+            drawROIContour(painter, dict_roi_coords_selected_next, (255, 255, 255), opacity_selected)
+
+    painter.end()
+    layer_roi.setPixmap(pixmap)
+
+# update layer_roi for TIFStackExplorer
+def updateLayerROI_TIFStackExplorer(
+        view_control: ViewControl, 
+        layer_roi: QGraphicsPixmapItem, 
+        data_manager: DataManager, 
+        control_manager: ControlManager, 
+        app_key: AppKeys,
+        draw_selected_roi: bool = True
+        ) -> None:
+    width, height = view_control.getImageSize()
+    pixmap = QPixmap(width, height)
+    pixmap.fill(Qt.transparent) 
+
+    painter = QPainter(pixmap)
+    painter.setRenderHint(QPainter.Antialiasing)
+    roi_display = control_manager.getSharedAttr(app_key, "roi_display")
+    ROISelectedId = control_manager.getSharedAttr(app_key, "roi_selected_id")
+    
+    dict_roi_coords = data_manager.getDictROICoords(app_key)
+    for roiId, dict_roi_coords_single in dict_roi_coords.items():
+        if roi_display[roiId] and roiId != ROISelectedId:
+            color = view_control.getROIColor(roiId)
+            opacity = view_control.getROIOpacity()
+            drawROI(painter, dict_roi_coords_single, color, opacity)
+
+    # draw selected ROI
+    if draw_selected_roi:
+        dict_roi_coords_selected = dict_roi_coords[ROISelectedId]
+        color_selected = view_control.getROIColor(ROISelectedId)
+        opacity_selected = view_control.getHighlightOpacity()
+        # draw contour of selected ROI
+        if view_control.getROIDisplayProp("contour"):
+            drawROIContour(painter, dict_roi_coords_selected, color_selected, opacity_selected)
+        else:
+            drawROI(painter, dict_roi_coords_selected, color_selected, opacity_selected)
+
+    # draw next ROI of selected ROI, with White color
+    if view_control.getROIDisplayProp("next"):
+        dict_roi_coords_selected_next = dict_roi_coords.get(ROISelectedId+1)
+        if dict_roi_coords_selected_next:
+            drawROIContour(painter, dict_roi_coords_selected_next, (255, 255, 255), opacity_selected)
+
+    painter.end()
+    layer_roi.setPixmap(pixmap)
+
 
 # draw all ROIs for microglia tracking
 def drawAllROIsForMicrogliaTracking(
@@ -239,51 +295,6 @@ def drawROIPair(
     painter.drawEllipse(x_pri - marker_size//2, y_pri - marker_size//2, marker_size, marker_size)
     painter.drawEllipse(x_sec - marker_size//2, y_sec - marker_size//2, marker_size, marker_size)
 
-
-# highlight selected ROI with tracking
-def highlightROISelectedWithTracking(
-        view_control: ViewControl, 
-        painter: QPainter, 
-        data_manager: DataManager, 
-        control_manager: ControlManager, 
-        app_key_pri: AppKeys,
-        app_key_sec: AppKeys = None
-        ) -> None:
-    # pri selected ROI
-    ROISelectedId = control_manager.getSharedAttr(app_key_pri, "roi_selected_id")
-    if ROISelectedId is not None:
-        if view_control.show_reg_im_roi:
-            dict_roi_coords_single = data_manager.getDictROICoordsRegistered(app_key_pri)[ROISelectedId]
-        else:
-            dict_roi_coords_single = data_manager.getDictROICoords(app_key_pri)[ROISelectedId]
-        xpix, ypix = dict_roi_coords_single["xpix"], dict_roi_coords_single["ypix"]
-        color = view_control.getROIColor(ROISelectedId)
-        opacity = view_control.getHighlightOpacity()
-        
-        pen = QPen(QColor(*color, opacity))
-        painter.setPen(pen)
-        
-        for x, y in zip(xpix, ypix):
-            painter.drawPoint(int(x), int(y))
-
-    # sec selected ROI
-    if app_key_sec is not None:
-        ROISelectedId = control_manager.getSharedAttr(app_key_sec, "roi_selected_id")
-        if ROISelectedId is not None:
-            if view_control.show_reg_im_roi:
-                dict_roi_coords_single = data_manager.getDictROICoordsRegistered(app_key_sec)[ROISelectedId]
-            else:
-                dict_roi_coords_single = data_manager.getDictROICoords(app_key_sec)[ROISelectedId]
-            xpix, ypix = dict_roi_coords_single["xpix"], dict_roi_coords_single["ypix"]
-            color = (0, 0, 255) # hardcoded !!!
-            opacity = view_control.getHighlightOpacity()
-            
-            pen = QPen(QColor(*color, opacity))
-            painter.setPen(pen)
-            
-            for x, y in zip(xpix, ypix):
-                painter.drawPoint(int(x), int(y))
-
 # find Closest ROI to click position
 def findClosestROI(
         x: int, 
@@ -328,3 +339,47 @@ def shouldSkipROI(
                         if checkbox_item and checkbox_item.checkState() == Qt.Checked:
                             return True
     return False
+
+# highlight selected ROI with tracking
+def highlightROISelectedWithTracking(
+        view_control: ViewControl, 
+        painter: QPainter, 
+        data_manager: DataManager, 
+        control_manager: ControlManager, 
+        app_key_pri: AppKeys,
+        app_key_sec: AppKeys = None
+        ) -> None:
+    # pri selected ROI
+    ROISelectedId = control_manager.getSharedAttr(app_key_pri, "roi_selected_id")
+    if ROISelectedId is not None:
+        if view_control.show_reg_im_roi:
+            dict_roi_coords_single = data_manager.getDictROICoordsRegistered(app_key_pri)[ROISelectedId]
+        else:
+            dict_roi_coords_single = data_manager.getDictROICoords(app_key_pri)[ROISelectedId]
+        xpix, ypix = dict_roi_coords_single["xpix"], dict_roi_coords_single["ypix"]
+        color = view_control.getROIColor(ROISelectedId)
+        opacity = view_control.getHighlightOpacity()
+        
+        pen = QPen(QColor(*color, opacity))
+        painter.setPen(pen)
+        
+        for x, y in zip(xpix, ypix):
+            painter.drawPoint(int(x), int(y))
+
+    # sec selected ROI
+    if app_key_sec is not None:
+        ROISelectedId = control_manager.getSharedAttr(app_key_sec, "roi_selected_id")
+        if ROISelectedId is not None:
+            if view_control.show_reg_im_roi:
+                dict_roi_coords_single = data_manager.getDictROICoordsRegistered(app_key_sec)[ROISelectedId]
+            else:
+                dict_roi_coords_single = data_manager.getDictROICoords(app_key_sec)[ROISelectedId]
+            xpix, ypix = dict_roi_coords_single["xpix"], dict_roi_coords_single["ypix"]
+            color = (0, 0, 255) # hardcoded !!!
+            opacity = view_control.getHighlightOpacity()
+            
+            pen = QPen(QColor(*color, opacity))
+            painter.setPen(pen)
+            
+            for x, y in zip(xpix, ypix):
+                painter.drawPoint(int(x), int(y))
