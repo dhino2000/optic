@@ -2,7 +2,6 @@ from __future__ import annotations
 from ..type_definitions import *
 from ..io.file_dialog import openFileDialogAndSetLineEdit, saveFileDialog
 from ..io.data_io import saveROICheck, loadROICheck, loadEventFilesNPY, generateSavePath, saveTiffStack, saveROITracking, loadROITracking, loadCellposeMaskNPY
-from ..visualization.view_visual_rectangle import clipRectangleRange
 from ..visualization.info_visual import updateROICountDisplay
 from ..processing import *
 from ..preprocessing import *

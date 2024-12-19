@@ -5,8 +5,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QGraphicsScene, QGraphicsView
 import numpy as np
 from ..config.constants import ChannelKeys, PenColors, PenWidth
-from .view_visual_roi import drawAllROIsForMicrogliaTracking, updateLayerROI_Suite2pROICheck, updateLayerROI_Suite2pROITracking, updateLayerROI_MicrogliaTracking, updateLayerROI_TIFStackExplorer
-from .view_visual_rectangle import drawRectangle, drawRectangleIfInRange
+from .view_visual_roi import updateLayerROI_Suite2pROICheck, updateLayerROI_Suite2pROITracking, updateLayerROI_MicrogliaTracking, updateLayerROI_TIFStackExplorer
 from ..preprocessing.preprocessing_roi import updateROIImage
 
 # q_view widget visualization
@@ -186,45 +185,61 @@ def updateView_TIFStackExplorer(
         width=width,
         )
 
+    # update background layer
     # Caution !!! width and height are swapped between TIFF and QImage
     qimage = QImage(bg_image.data, height, width, height * 3, QImage.Format_RGB888)
     pixmap = QPixmap.fromImage(qimage)
+    view_control.layer_bg.setPixmap(pixmap)
 
-    q_scene.clear()
-    q_scene.addPixmap(pixmap)
-    # draw rectangle
+    # Draw rectangle
     rect_range = view_control.getRectRange()
-    existing_rect = view_control.getRect()
     if rect_range:
         x_min, x_max, y_min, y_max, z_min, z_max, t_min, t_max = rect_range
-        current_z = view_control.getPlaneZ()
-        current_t = view_control.getPlaneT()
-        new_rect = drawRectangleIfInRange(
-            q_scene, current_z, current_t,
-            x_min, x_max, y_min, y_max, z_min, z_max, t_min, t_max,
+        # Clear and initialize the pixmap
+        pixmap = QPixmap(*view_control.getImageSize())
+        pixmap.fill(Qt.transparent)
+        # Draw rectangle if in range
+        drawRectangleIfInRange(
+            pixmap,
+            view_control.getPlaneZ(),
+            view_control.getPlaneT(),
+            x_min,
+            x_max,
+            y_min,
+            y_max,
+            z_min,
+            z_max,
+            t_min,
+            t_max,
             color=PenColors.RECTANGLE_DRAG,
-            width=PenWidth.RECTANGLE,
-            existing_rect=existing_rect,
+            width=PenWidth.RECTANGLE
         )
-        view_control.setRect(new_rect)
+        # Update layer_roi_edit with the new pixmap
+        view_control.layer_roi_edit.setPixmap(pixmap)
 
-    # draw highlight rectangle
-    rect_range = view_control.getRectHighlightRange()
-    existing_rect = view_control.getRectHighlight()
-    if rect_range:
-        x_min, x_max, y_min, y_max, z_min, z_max, t_min, t_max = rect_range
-        current_z = view_control.getPlaneZ()
-        current_t = view_control.getPlaneT()
-        new_rect = drawRectangleIfInRange(
-            q_scene, current_z, current_t,
-            x_min, x_max, y_min, y_max, z_min, z_max, t_min, t_max,
+    # Draw highlight rectangle
+    highlight_rect_range = view_control.getRectHighlightRange()
+    if highlight_rect_range:
+        x_min, x_max, y_min, y_max, z_min, z_max, t_min, t_max = highlight_rect_range
+        # Load the existing pixmap and draw highlight
+        pixmap = view_control.layer_roi_edit.pixmap()
+        drawRectangleIfInRange(
+            pixmap,
+            view_control.getPlaneZ(),
+            view_control.getPlaneT(),
+            x_min,
+            x_max,
+            y_min,
+            y_max,
+            z_min,
+            z_max,
+            t_min,
+            t_max,
             color=PenColors.RECTANGLE_HIGHLIGHT,
-            width=PenWidth.RECTANGLE,
-            existing_rect=existing_rect,
+            width=PenWidth.RECTANGLE
         )
-        view_control.setRect(new_rect)
-
-    q_view.setScene(q_scene)
+        # Update layer_roi_edit with the updated pixmap
+        view_control.layer_roi_edit.setPixmap(pixmap)
 
 # update view for Tiff data, microglia tracking
 def updateView_MicrogliaTracking(

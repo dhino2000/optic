@@ -5,7 +5,7 @@ from PyQt5.QtGui import QKeyEvent, QMouseEvent, QWheelEvent
 from PyQt5.QtWidgets import QGraphicsView, QGraphicsScene, QGraphicsRectItem
 from ..visualization.view_visual import zoomView, resetZoomView
 from ..visualization.view_visual_rectangle import initializeDragRectangle, updateDragRectangle, clipRectangleRange
-from ..config.constants import AppKeys
+from ..config.constants import AppKeys, PenColors, PenWidth
 
 
 class ViewHandler:
@@ -185,8 +185,7 @@ class ViewHandler:
         def __init__(self, view_control: ViewControl):
             self.view_control = view_control
             self.is_dragging = False
-            self.drag_pos_start = None
-            self.rect = None
+            self.drag_start_pos = None
 
         def keyPressEvent(self, event: QKeyEvent):
             if event.key() in self.view_control.dict_key_pushed:
@@ -200,49 +199,25 @@ class ViewHandler:
                 self.view_control.dict_key_pushed[event.key()] = False
 
         def mousePressEvent(self, event: QMouseEvent):
-            if event.button() == Qt.LeftButton and self.view_control.dict_key_pushed[Qt.Key_Control]:
-                self.drag_start_pos = self.view_control.q_view.mapToScene(event.pos())
-                self.is_dragging = True
-                self.rect = initializeDragRectangle(self.view_control.q_scene, self.drag_start_pos, self.drag_start_pos)
-            elif event.button() == Qt.MiddleButton:
+            if event.button() == Qt.MiddleButton:
                 self.is_dragging = True
                 self.drag_start_pos = self.view_control.q_view.mapToScene(event.pos())
 
         def mouseMoveEvent(self, event: QMouseEvent):
             if self.is_dragging:
-                if self.view_control.dict_key_pushed[Qt.Key_Control]: # draw rectangle
-                    current_pos = self.view_control.q_view.mapToScene(event.pos())
-                    updateDragRectangle(self.rect, self.drag_start_pos, current_pos)
-                else:
-                    current_pos = self.view_control.q_view.mapToScene(event.pos())
-                    delta = current_pos - self.drag_start_pos
-                    self.view_control.q_view.setTransformationAnchor(QGraphicsView.NoAnchor)
-                    self.view_control.q_view.translate(delta.x(), delta.y())
-                    self.drag_start_pos = current_pos
+                current_pos = self.view_control.q_view.mapToScene(event.pos())
+                delta = current_pos - self.drag_start_pos
+                self.view_control.q_view.setTransformationAnchor(QGraphicsView.NoAnchor)
+                self.view_control.q_view.translate(delta.x(), delta.y())
+                self.drag_start_pos = current_pos
 
         def mouseReleaseEvent(self, event: QMouseEvent):
-            if event.button() == Qt.LeftButton and self.is_dragging:
-                if self.view_control.dict_key_pushed[Qt.Key_Control]: # + control key
-                    self.is_dragging = False
-                    end_pos = self.view_control.q_view.mapToScene(event.pos())
-                    updateDragRectangle(self.rect, self.drag_start_pos, end_pos)
-                    final_rect = self.rect.rect()
-                    rect_range = self.view_control.getRectRangeFromQRectF(final_rect)
-                    self.view_control.setRectRange(clipRectangleRange(self.view_control.tiff_shape, rect_range))
-                    self.view_control.widget_manager.dict_lineedit[f"{self.view_control.app_key}_normalization_area"].setText(','.join(map(str, rect_range))) # hardcoded !!!
-                else:
-                    if self.rect:
-                        self.view_control.q_scene.removeItem(self.rect)
-                    self.is_dragging = False
-                    self.rect = None
-            elif event.button() == Qt.MiddleButton and self.view_control.is_dragging:
+            if event.button() == Qt.MiddleButton:
                 self.is_dragging = False
                 self.drag_pos_start = None
             else:
                 self.is_dragging = False
                 self.drag_start_pos = None
-
-
 
         def wheelEvent(self, event: QWheelEvent):
             if self.view_control.dict_key_pushed[Qt.Key_Control]:

@@ -3,7 +3,7 @@ from ..type_definitions import *
 from ..handlers.view_handler import ViewHandler
 from ..visualization.view_visual import updateView_Suite2pROICheck, updateView_TIFStackExplorer, updateView_Suite2pROITracking, updateView_MicrogliaTracking, zoomView, resetZoomView
 from ..visualization.view_visual_roi import findClosestROI, shouldSkipROI
-from ..visualization.view_visual_rectangle import initializeDragRectangle, updateDragRectangle, clipRectangleRange
+from ..visualization.view_visual_rectangle import initializeDragRectangle, updateDragRectangle
 from ..visualization.info_visual import updateZPlaneDisplay, updateTPlaneDisplay
 from ..preprocessing.preprocessing_roi import updateROIImage
 from ..gui.view_setup import setViewSize

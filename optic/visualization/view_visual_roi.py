@@ -154,91 +154,20 @@ def updateLayerROI_MicrogliaTracking(
         dict_roi_coords_selected = dict_roi_coords[ROISelectedId]
         color_selected = view_control.getROIColor(ROISelectedId)
         opacity_selected = view_control.getHighlightOpacity()
-        # draw contour of selected ROI
-        if view_control.getROIDisplayProp("contour"):
-            drawROIContour(painter, dict_roi_coords_selected, color_selected, opacity_selected)
-        else:
-            drawROI(painter, dict_roi_coords_selected, color_selected, opacity_selected)
-
-    # draw next ROI of selected ROI, with White color
-    if view_control.getROIDisplayProp("next"):
-        dict_roi_coords_selected_next = dict_roi_coords.get(ROISelectedId+1)
-        if dict_roi_coords_selected_next:
-            drawROIContour(painter, dict_roi_coords_selected_next, (255, 255, 255), opacity_selected)
+        drawROI(painter, dict_roi_coords_selected, color_selected, opacity_selected)
 
     painter.end()
     layer_roi.setPixmap(pixmap)
 
 # update layer_roi for TIFStackExplorer
 def updateLayerROI_TIFStackExplorer(
-        view_control: ViewControl, 
-        layer_roi: QGraphicsPixmapItem, 
-        data_manager: DataManager, 
-        control_manager: ControlManager, 
-        app_key: AppKeys,
-        draw_selected_roi: bool = True
-        ) -> None:
-    width, height = view_control.getImageSize()
-    pixmap = QPixmap(width, height)
-    pixmap.fill(Qt.transparent) 
-
-    painter = QPainter(pixmap)
-    painter.setRenderHint(QPainter.Antialiasing)
-    roi_display = control_manager.getSharedAttr(app_key, "roi_display")
-    ROISelectedId = control_manager.getSharedAttr(app_key, "roi_selected_id")
-    
-    dict_roi_coords = data_manager.getDictROICoords(app_key)
-    for roiId, dict_roi_coords_single in dict_roi_coords.items():
-        if roi_display[roiId] and roiId != ROISelectedId:
-            color = view_control.getROIColor(roiId)
-            opacity = view_control.getROIOpacity()
-            drawROI(painter, dict_roi_coords_single, color, opacity)
-
-    # draw selected ROI
-    if draw_selected_roi:
-        dict_roi_coords_selected = dict_roi_coords[ROISelectedId]
-        color_selected = view_control.getROIColor(ROISelectedId)
-        opacity_selected = view_control.getHighlightOpacity()
-        # draw contour of selected ROI
-        if view_control.getROIDisplayProp("contour"):
-            drawROIContour(painter, dict_roi_coords_selected, color_selected, opacity_selected)
-        else:
-            drawROI(painter, dict_roi_coords_selected, color_selected, opacity_selected)
-
-    # draw next ROI of selected ROI, with White color
-    if view_control.getROIDisplayProp("next"):
-        dict_roi_coords_selected_next = dict_roi_coords.get(ROISelectedId+1)
-        if dict_roi_coords_selected_next:
-            drawROIContour(painter, dict_roi_coords_selected_next, (255, 255, 255), opacity_selected)
-
-    painter.end()
-    layer_roi.setPixmap(pixmap)
-
-
-# draw all ROIs for microglia tracking
-def drawAllROIsForMicrogliaTracking(
-        view_control: ViewControl, 
-        pixmap: QPixmap, 
-        data_manager: DataManager, 
-        control_manager: ControlManager, 
-        app_key: AppKeys,
-        plane_t: int
-        ) -> None:
-    painter = QPainter(pixmap)
-    painter.setRenderHint(QPainter.Antialiasing)
-    # roi_display = control_manager.getSharedAttr(app_key, "roi_display")
-    # ROISelectedId = control_manager.getSharedAttr(app_key, "roi_selected_id")
-
-    # get dict of ROI coordinates of single t plane
-    dict_roi_coords_xyct = data_manager.getDictROICoordsXYCT(app_key).get(plane_t)
-    for roiId, dict_roi_coords_single in dict_roi_coords_xyct.items():
-        # color = view_control.getROIColor(roiId)
-        color = (0, 0, 255) # hardcoded !!! temporary !!!
-        opacity = view_control.getROIOpacity()
-        drawROI(painter, dict_roi_coords_single, color, opacity)
-    
-    painter.end()
-
+        view_control: ViewControl,
+        layer_roi: QGraphicsScene,
+        rect_coords: List[Tuple[float, float, float, float]],
+        color: Tuple[int, int, int],
+        opacity: float
+    ) -> None:
+    pass
 
 # draw single ROI
 def drawROI(
