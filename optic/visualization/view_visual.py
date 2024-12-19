@@ -5,7 +5,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QGraphicsScene, QGraphicsView
 import numpy as np
 from ..config.constants import ChannelKeys, PenColors, PenWidth
-from .view_visual_roi import drawAllROIs, drawAllROIsWithTracking, drawROI, findClosestROI, shouldSkipROI, drawAllROIsForMicrogliaTracking, updateLayerROI, drawROIPath
+from .view_visual_roi import drawAllROIs, drawAllROIsWithTracking, drawROI, findClosestROI, shouldSkipROI, drawAllROIsForMicrogliaTracking, updateLayerROI
 from .view_visual_rectangle import drawRectangle, drawRectangleIfInRange
 from ..preprocessing.preprocessing_roi import updateROIImage
 
@@ -19,7 +19,7 @@ def updateView_Suite2pROICheck(
         control_manager: ControlManager, 
         app_key: AppKeys,
         ) -> None:
-    # 背景画像の準備
+    # background image
     bg_image_chan1 = None
     bg_image_chan2 = None
     bg_image_chan3 = None  # optional
@@ -47,7 +47,7 @@ def updateView_Suite2pROICheck(
             max_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN3, 'max'),
             )
 
-    # 背景画像をRGB形式に変換
+    # convert mono images to RGB image
     (width, height) = view_control.getImageSize()
     bg_image = convertMonoImageToRGBImage(
         image_g=bg_image_chan1, 
@@ -57,16 +57,13 @@ def updateView_Suite2pROICheck(
         width=width,
         dtype=np.uint8)
 
-    # 背景画像を QGraphicsPixmapItem にセット
+    # update background layer
     qimage = QImage(bg_image.data, width, height, width * 3, QImage.Format_RGB888)
     pixmap = QPixmap.fromImage(qimage)
     view_control.layer_bg.setPixmap(pixmap)
 
-    # ROI レイヤーを更新
+    # update ROI layer
     updateLayerROI(view_control, view_control.layer_roi, data_manager, control_manager, app_key)
-
-    # シーンのセットアップ（重ねたレイヤーが反映される）
-    q_view.setScene(q_scene)
 
 # update view for Fall data for ROI Tracking
 def updateView_Suite2pROITracking(

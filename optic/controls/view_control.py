@@ -124,8 +124,8 @@ class ViewControl:
 
     def initializeImageLayers(self) -> None:
         self.layer_bg = QGraphicsPixmapItem()  # for background image
-        self.layer_roi = QGraphicsPathItem()  # for ROI 
-        self.layer_roi_edit = QGraphicsPathItem()  # for ROI edit
+        self.layer_roi = QGraphicsPixmapItem()  # for ROI 
+        self.layer_roi_edit = QGraphicsPixmapItem()  # for ROI edit
 
         self.q_scene.addItem(self.layer_bg)
         self.q_scene.addItem(self.layer_roi)
@@ -134,6 +134,9 @@ class ViewControl:
         self.layer_bg.setZValue(0)
         self.layer_roi.setZValue(1)
         self.layer_roi_edit.setZValue(2)
+
+        # set scene to view
+        self.q_view.setScene(self.q_scene)
 
     def initializeROIColors(self):
         for roi_id in self.data_manager.getStat(self.app_key).keys():
