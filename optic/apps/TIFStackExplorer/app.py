@@ -99,6 +99,7 @@ class TIFStackExplorerGUI(QMainWindow):
             config_manager=self.config_manager,
             control_manager=self.control_manager,
         )
+        # self.control_manager.view_controls[self.app_key_pri].setViewSize()
 
     """
     makeLayout Function; Component
@@ -170,18 +171,27 @@ class TIFStackExplorerGUI(QMainWindow):
         ))
         return layout
     
-    def makeLayoutComponentStackNormalization(self):
-        layout = makeLayoutStackNormalization(
+    # def makeLayoutComponentStackNormalization(self):
+    #     layout = makeLayoutStackNormalization(
+    #         self.widget_manager,
+    #         key_label=f"{self.app_key_pri}_normalization",
+    #         key_label_area=f"{self.app_key_pri}_normalization_area",
+    #         key_lineedit_area=f"{self.app_key_pri}_normalization_area",
+    #         key_button_area=f"{self.app_key_pri}_normalization_area_set",
+    #         key_button_add=f"{self.app_key_pri}_normalization_area_add",
+    #         key_button_remove=f"{self.app_key_pri}_normalization_area_remove",
+    #         key_button_clear=f"{self.app_key_pri}_normalization_area_clear",
+    #         key_button_run=f"{self.app_key_pri}_normalization_run",
+    #         key_listwidget=f"{self.app_key_pri}_normalization_area",
+    #     )
+    #     return layout
+
+    def makeLayoutComponentExportFallLike(self):
+        layout = makeLayoutExportFallLike(
             self.widget_manager,
-            key_label=f"{self.app_key_pri}_normalization",
-            key_label_area=f"{self.app_key_pri}_normalization_area",
-            key_lineedit_area=f"{self.app_key_pri}_normalization_area",
-            key_button_area=f"{self.app_key_pri}_normalization_area_set",
-            key_button_add=f"{self.app_key_pri}_normalization_area_add",
-            key_button_remove=f"{self.app_key_pri}_normalization_area_remove",
-            key_button_clear=f"{self.app_key_pri}_normalization_area_clear",
-            key_button_run=f"{self.app_key_pri}_normalization_run",
-            key_listwidget=f"{self.app_key_pri}_normalization_area",
+            key_label="export_fall_like",
+            key_button_load_mask="load_cellpose_mask",
+            key_button_export="export_fall_like",
         )
         return layout
 
@@ -217,7 +227,8 @@ class TIFStackExplorerGUI(QMainWindow):
     def makeLayoutSectionRightUpper(self):
         layout = QVBoxLayout()
         layout.addLayout(self.makeLayoutComponentStackRegistration())
-        layout.addLayout(self.makeLayoutComponentStackNormalization())
+        # layout.addLayout(self.makeLayoutComponentStackNormalization())
+        layout.addLayout(self.makeLayoutComponentExportFallLike())
         return layout
 
     def makeLayoutSectionBottom(self):
@@ -272,60 +283,47 @@ class TIFStackExplorerGUI(QMainWindow):
                 view_control=self.control_manager.view_controls[self.app_key_pri],
                 channel=channel,
             )
+        # View Events
+        bindFuncViewEvents(
+            q_view=self.widget_manager.dict_view[self.app_key_pri],
+            view_control=self.control_manager.view_controls[self.app_key_pri],
+        )
 
-        # set rectangle range and draw rectangle
-        bindFuncButtonSetRectangeRange(
-            q_widget=self,
-            q_button=self.widget_manager.dict_button[f"{self.app_key_pri}_normalization_area_set"],
-            q_lineedit=self.widget_manager.dict_lineedit[f"{self.app_key_pri}_normalization_area"],
-            view_control=self.control_manager.view_controls[self.app_key_pri]
-        ) 
-        # add, remove, clear rectangle range
-        bindFuncButtonManageRectangleRangeForListWidget(
-            q_widget=self,
-            q_button_add=self.widget_manager.dict_button[f"{self.app_key_pri}_normalization_area_add"],
-            q_button_remove=self.widget_manager.dict_button[f"{self.app_key_pri}_normalization_area_remove"],
-            q_button_clear=self.widget_manager.dict_button[f"{self.app_key_pri}_normalization_area_clear"],
-            q_listwidget=self.widget_manager.dict_listwidget[f"{self.app_key_pri}_normalization_area"],
-            q_lineedit=self.widget_manager.dict_lineedit[f"{self.app_key_pri}_normalization_area"],
-            view_control=self.control_manager.view_controls[self.app_key_pri]
-        )
-        # View mouse event, drag and draw rectangle
-        bindFuncViewMouseEvent_TIFFStackExplorer(
-            q_view=self.widget_manager.dict_view[self.app_key_pri],
-            q_lineedit=self.widget_manager.dict_lineedit[f"{self.app_key_pri}_normalization_area"],
-            view_control=self.control_manager.view_controls[self.app_key_pri],
-            table_control=None
-        )
-        # View key event
-        bindFuncViewKeyEvent_TIFFStackExplorer(
-            q_view=self.widget_manager.dict_view[self.app_key_pri],
-            view_control=self.control_manager.view_controls[self.app_key_pri],
-        )
-        # View wheel event
-        bindFuncViewWheelEvent_TIFFStackExplorer(
-            q_view=self.widget_manager.dict_view[self.app_key_pri],
-            view_control=self.control_manager.view_controls[self.app_key_pri],
-        )
-        # highlight rectangle with selected listwidget item
-        bindFuncListWidgetSelectionChanged(
-            q_listwidget=self.widget_manager.dict_listwidget[f"{self.app_key_pri}_normalization_area"],
-            view_control=self.control_manager.view_controls[self.app_key_pri]
-        )
-        # run normalization
-        bindFuncButtonRunImageNormalization(
-            q_widget=self,
-            q_button=self.widget_manager.dict_button[f"{self.app_key_pri}_normalization_run"],
-            q_lineedit=self.widget_manager.dict_lineedit[f"{self.app_key_pri}_path_tiff"],
-            q_listwidget=self.widget_manager.dict_listwidget[f"{self.app_key_pri}_normalization_area"],
-            tiff_stack=self.data_manager.getTiffStack(self.app_key_pri),
-            metadata=self.data_manager.getTiffMetadata(self.app_key_pri),
-        )
+        # # set rectangle range and draw rectangle
+        # bindFuncButtonSetRectangeRange(
+        #     q_widget=self,
+        #     q_button=self.widget_manager.dict_button[f"{self.app_key_pri}_normalization_area_set"],
+        #     q_lineedit=self.widget_manager.dict_lineedit[f"{self.app_key_pri}_normalization_area"],
+        #     view_control=self.control_manager.view_controls[self.app_key_pri]
+        # ) 
+        # # add, remove, clear rectangle range
+        # bindFuncButtonManageRectangleRangeForListWidget(
+        #     q_widget=self,
+        #     q_button_add=self.widget_manager.dict_button[f"{self.app_key_pri}_normalization_area_add"],
+        #     q_button_remove=self.widget_manager.dict_button[f"{self.app_key_pri}_normalization_area_remove"],
+        #     q_button_clear=self.widget_manager.dict_button[f"{self.app_key_pri}_normalization_area_clear"],
+        #     q_listwidget=self.widget_manager.dict_listwidget[f"{self.app_key_pri}_normalization_area"],
+        #     q_lineedit=self.widget_manager.dict_lineedit[f"{self.app_key_pri}_normalization_area"],
+        #     view_control=self.control_manager.view_controls[self.app_key_pri]
+        # )
+        # # highlight rectangle with selected listwidget item
+        # bindFuncListWidgetSelectionChanged(
+        #     q_listwidget=self.widget_manager.dict_listwidget[f"{self.app_key_pri}_normalization_area"],
+        #     view_control=self.control_manager.view_controls[self.app_key_pri]
+        # )
+        # # run normalization
+        # bindFuncButtonRunImageNormalization(
+        #     q_widget=self,
+        #     q_button=self.widget_manager.dict_button[f"{self.app_key_pri}_normalization_run"],
+        #     q_lineedit=self.widget_manager.dict_lineedit[f"{self.app_key_pri}_path_tiff"],
+        #     q_listwidget=self.widget_manager.dict_listwidget[f"{self.app_key_pri}_normalization_area"],
+        #     tiff_stack=self.data_manager.getTiffStack(self.app_key_pri),
+        #     metadata=self.data_manager.getTiffMetadata(self.app_key_pri),
+        # )
         # Elastix config
         self.widget_manager.dict_button[f"elastix_config"].clicked.connect(
             lambda: self.showSubWindowElastixParamsConfig()
         )
-
         # show registration result
         bindFuncCheckboxShowRegisteredStack(
             q_checkbox=self.widget_manager.dict_checkbox[f"show_reg_result"],
@@ -378,4 +376,19 @@ class TIFStackExplorerGUI(QMainWindow):
             q_button=self.widget_manager.dict_button[f"elastix_apply_transform_xyct_xyczt"],
             data_manager=self.data_manager,
             app_key=self.app_key_pri,
+        )
+        # load cellpose mask (XY)
+        bindFuncButtonLoadCellposeMask(
+            q_window=self,
+            q_button=self.widget_manager.dict_button[f"load_cellpose_mask"],
+            view_control=self.control_manager.view_controls[self.app_key_pri],
+            data_manager=self.data_manager,
+            app_key=self.app_key_pri,
+        )
+        # export fall-like mat
+        bindFuncButtonExportFallLike(
+            q_window=self,
+            q_button=self.widget_manager.dict_button[f"export_fall_like"],
+            q_lineedit=self.widget_manager.dict_lineedit[f"{self.app_key_pri}_path_tiff"],
+            data_manager=self.data_manager,
         )
