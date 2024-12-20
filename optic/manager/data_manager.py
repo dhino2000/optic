@@ -67,6 +67,7 @@ class DataManager:
                         self.dict_im_bg_chan2_reg[app_key] = getBGImageChannel2FromFall(self, app_key)
             return True
         except Exception as e:
+            raise e
             return False
         
     # load tiff image data (for optional)
@@ -123,7 +124,7 @@ class DataManager:
         return self.dict_Fall[app_key]["stat"]
     # get fs
     def getFs(self, app_key: AppKeys) -> float:
-        return self.dict_Fall[app_key]["ops"]["fs"].flatten()[0]
+        return self.dict_Fall[app_key]["ops"]["fs"]
     # get data length
     def getLengthOfData(self, app_key: AppKeys) -> int:
         if self.dict_data_dtype[app_key] == Extension.MAT:
@@ -133,7 +134,7 @@ class DataManager:
         return len(self.dict_Fall[app_key]["stat"])
     # get nchannels
     def getNChannels(self, app_key: AppKeys) -> int:
-        return self.dict_Fall[app_key]["ops"]["nchannels"].flatten()[0]
+        return self.dict_Fall[app_key]["ops"]["nchannels"]
     # get ROI coordinates
     def getDictROICoords(self, app_key: AppKeys) -> Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32], Tuple[int]]]:
         return self.dict_roi_coords.get(app_key)
@@ -169,7 +170,7 @@ class DataManager:
     # get image size, change return with dtype
     def getImageSize(self, app_key: AppKeys) -> Tuple[int, int]:
         if self.dict_data_dtype[app_key] == Extension.MAT:
-            return (self.dict_Fall[app_key]["ops"]["Lx"].item(), self.dict_Fall[app_key]["ops"]["Ly"].item())
+            return (self.dict_Fall[app_key]["ops"]["Lx"], self.dict_Fall[app_key]["ops"]["Ly"])
         elif self.dict_data_dtype[app_key] == Extension.TIFF:
             return (self.dict_tiff[app_key].shape[0], self.dict_tiff[app_key].shape[1])
         

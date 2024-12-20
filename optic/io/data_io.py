@@ -18,7 +18,7 @@ def loadFallMat(
         path_fall       : str, 
         preprocessing   : bool=True
         ) -> Dict[str, Any]:
-    Fall = loadmat(path_fall)
+    Fall = loadmat(path_fall, simplify_cells=True)
     if preprocessing:
         dict_Fall = convertMatToDictFall(Fall)
     else:
@@ -303,8 +303,8 @@ def saveROITracking(
             savemat(path_dst, mat_roi_tracking)
             QMessageBox.information(q_window, "File save", f"ROI Tracking file saved!\nuser: {user}, date: {now}")
         except Exception as e:
-            raise e
-            # QMessageBox.warning(q_window, "File save failed", f"Error saving ROI Tracking file: {e}")
+            # raise e
+            QMessageBox.warning(q_window, "File save failed", f"Error saving ROI Tracking file: {e}")
 
 # load ROITracking.mat
 def loadROITracking(
