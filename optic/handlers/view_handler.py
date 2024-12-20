@@ -56,7 +56,6 @@ class ViewHandler:
         def __init__(self, view_control: ViewControl, table_control: TableControl):
             self.view_control = view_control
             self.table_control = table_control
-            self.is_dragging = False
 
         def keyPressEvent(self, event: QKeyEvent):
             if event.key() in self.view_control.dict_key_pushed:
@@ -77,21 +76,21 @@ class ViewHandler:
                 self.table_control.updateSelectedROI(roi_selected_id)
                 self.table_control.q_table.setFocus()
             elif event.button() == Qt.MiddleButton:
-                self.is_dragging = True
-                self.drag_start_pos = self.view_control.q_view.mapToScene(event.pos())
+                self.view_control.is_dragging = True
+                self.view_control.drag_start_pos = self.view_control.q_view.mapToScene(event.pos())
 
         def mouseMoveEvent(self, event: QMouseEvent):
-            if self.is_dragging:
+            if self.view_control.is_dragging:
                 current_pos = self.view_control.q_view.mapToScene(event.pos())
-                delta = current_pos - self.drag_start_pos
+                delta = current_pos - self.view_control.drag_start_pos
                 self.view_control.q_view.setTransformationAnchor(QGraphicsView.NoAnchor)
                 self.view_control.q_view.translate(delta.x(), delta.y())
-                self.drag_start_pos = current_pos
+                self.view_control.drag_start_pos = current_pos
 
         def mouseReleaseEvent(self, event: QMouseEvent):
-            if self.is_dragging:
-                self.is_dragging = False
-                self.drag_start_pos = None
+            if self.view_control.is_dragging:
+                self.view_control.is_dragging = False
+                self.view_control.drag_start_pos = None
 
         def wheelEvent(self, event: QWheelEvent):
             if self.view_control.dict_key_pushed[Qt.Key_Control]:
@@ -147,6 +146,14 @@ class ViewHandler:
 
     """
     MicrogliaTracking Handler
+    --- default mode ---
+    click : select roi
+    middle click + drag : pan
+    ctrl + scroll : zoom in/out
+    R : reset zoom
+    --- roi edit mode ---
+    space : quit roi edit mode
+
     """
     class MicrogliaTrackingHandler:
         def __init__(self, view_control: ViewControl):
@@ -218,8 +225,8 @@ class ViewHandler:
 
         def mousePressEvent(self, event: QMouseEvent):
             if event.button() == Qt.MiddleButton:
-                self.is_dragging = True
-                self.drag_start_pos = self.view_control.q_view.mapToScene(event.pos())
+                self.view_control.is_dragging = True
+                self.view_control.drag_start_pos = self.view_control.q_view.mapToScene(event.pos())
 
         def mouseMoveEvent(self, event: QMouseEvent):
             if self.is_dragging:
@@ -234,8 +241,8 @@ class ViewHandler:
                 self.is_dragging = False
                 self.drag_pos_start = None
             else:
-                self.is_dragging = False
-                self.drag_start_pos = None
+                self.view_control.is_dragging = False
+                self.view_control.drag_start_pos = None
 
         def wheelEvent(self, event: QWheelEvent):
             if self.view_control.dict_key_pushed[Qt.Key_Control]:

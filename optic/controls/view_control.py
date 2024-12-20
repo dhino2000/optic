@@ -56,6 +56,10 @@ class ViewControl:
         self.show_roi_match:        bool                        = True
         self.show_roi_pair:         bool                        = True
 
+        # event attributes
+        self.is_dragging = False
+        self.drag_start_pos = None
+
         # ROI edit mode
         self.roi_edit_mode:         bool                        = False
 
