@@ -414,19 +414,11 @@ class Suite2pROITrackingGUI(QMainWindow):
                     view_control=self.control_manager.view_controls[app_key],
                     channel=channel,
                 )
-        # View MousePressEvent
-        bindFuncViewMouseEvent_Suite2pROITracking(
-            q_view=self.widget_manager.dict_view[self.app_keys[0]],
-            view_control_pri=self.control_manager.view_controls[self.app_keys[0]],
-            table_control_pri=self.control_manager.table_controls[self.app_keys[0]],
-            view_control_sec=self.control_manager.view_controls[self.app_keys[1]],
-            table_control_sec=self.control_manager.table_controls[self.app_keys[1]],
-        )
-        bindFuncViewMouseEvent_Suite2pROITracking(
-            q_view=self.widget_manager.dict_view[self.app_keys[1]],
-            view_control_pri=self.control_manager.view_controls[self.app_keys[1]],
-            table_control_pri=self.control_manager.table_controls[self.app_keys[1]],
-        )
+            # View Event
+            bindFuncViewEvents(
+                q_view=self.widget_manager.dict_view[app_key],
+                view_control=self.control_manager.view_controls[app_key],
+            )
 
         # ROICheck Table onSelectionChanged
         bindFuncTableSelectionChangedWithTracking(

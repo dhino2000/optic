@@ -433,11 +433,10 @@ class Suite2pROICheckGUI(QMainWindow):
             q_checkbox_next=self.widget_manager.dict_checkbox[f"{self.app_key_pri}_display_next_roi"],
             view_control=self.control_manager.view_controls[self.app_key_pri],
         )
-        # View MousePressEvent
-        bindFuncViewMouseEvent_Suite2pROICheck(
+        # View Events
+        bindFuncViewEvents(
             q_view=self.widget_manager.dict_view[self.app_key_pri],
             view_control=self.control_manager.view_controls[self.app_key_pri],
-            table_control=self.control_manager.table_controls[self.app_key_pri],
         )
         # Canvas MouseEvent
         # Top axis events
