@@ -119,7 +119,6 @@ class ViewHandler:
             if event.button() == Qt.LeftButton: # for "pri", "sec" views
                 scene_pos = self.view_control.q_view.mapToScene(event.pos())
                 reg = self.view_control.getShowRegImROI() # registered ROI
-                print(reg)
                 self.view_control.getROIwithClick(int(scene_pos.x()), int(scene_pos.y()), reg)
                 roi_selected_id = self.view_control.control_manager.getSharedAttr(self.view_control.app_key, 'roi_selected_id')
                 self.table_control.updateSelectedROI(roi_selected_id)
@@ -131,7 +130,6 @@ class ViewHandler:
                     
                     scene_pos = self.view_control.q_view.mapToScene(event.pos())
                     reg = self.view_control.getShowRegImROI() # registered ROI
-                    print(reg)
                     self.view_control_sec.getROIwithClick(int(scene_pos.x()), int(scene_pos.y()), reg)
                     roi_selected_id = self.view_control_sec.control_manager.getSharedAttr(self.view_control_sec.app_key, 'roi_selected_id')
                     self.table_control_sec.updateSelectedROI(roi_selected_id)
@@ -171,7 +169,8 @@ class ViewHandler:
         def mousePressEvent(self, event: QMouseEvent):
             if event.button() == Qt.LeftButton:
                 scene_pos = self.view_control.q_view.mapToScene(event.pos())
-                self.view_control.getROIwithClick(int(scene_pos.x()), int(scene_pos.y()))
+                reg = self.view_control.getShowRegImROI() # registered ROI
+                self.view_control.getROIwithClick(int(scene_pos.x()), int(scene_pos.y()), reg, xyct=True)
                 roi_selected_id = self.view_control.control_manager.getSharedAttr(self.view_control.app_key, 'roi_selected_id')
                 self.table_control.updateSelectedROI(roi_selected_id)
                 self.table_control.q_table.setFocus()
