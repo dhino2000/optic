@@ -111,7 +111,8 @@ def loadEventFilesNPY(
 def loadCellposeMaskNPY(
         q_window        : QMainWindow, 
         data_manager    : DataManager, 
-        app_key         : str
+        app_key         : str,
+        ndim            : Literal[2, 3]
         ) -> None | np.array:
     path_mask = openFileDialog(q_widget=q_window, file_type=".npy", title="Open Cellpose mask npy File").replace("\\", "/")
     mask = np.load(path_mask, allow_pickle=True).tolist()
@@ -120,8 +121,11 @@ def loadCellposeMaskNPY(
     colors = mask["colors"]
 
     if path_mask:
-        if not masks.ndim == 3:
-            QMessageBox.warning(q_window, "Mask Load Error", "masks should be generated with XYCT tiff stack !")
+        if not masks.ndim == ndim:
+            if ndim == 2:
+                QMessageBox.warning(q_window, "Mask Load Error", "masks should be generated with XYC tiff stack !")
+            elif ndim == 3:
+                QMessageBox.warning(q_window, "Mask Load Error", "masks should be generated with XYCT tiff stack !")
             return False
         
         data_manager.dict_roi_mask[app_key] = masks

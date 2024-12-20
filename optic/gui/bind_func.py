@@ -332,6 +332,7 @@ def bindFuncROIMaskNpyIO(
             q_window, 
             data_manager, 
             app_key, 
+            ndim=3,
         )
         # hardcoded !!!
         data_manager.dict_roi_coords_xyct["pri"] = convertCellposeMaskToDictROICoordsXYCT(data_manager.getROIMask(app_key))
@@ -509,6 +510,23 @@ def bindFuncCheckboxShowRegisteredStack(
         view_control.setShowRegStack(is_visible)
         view_control.updateView()
     q_checkbox.stateChanged.connect(onVisibilityChanged)
+
+# -> processing_image_layouts.makeLayoutExportFallLike
+def bindFuncButtonLoadCellposeMask(
+    q_window: 'QWidget',
+    q_button: 'QPushButton',
+    data_manager: 'DataManager',
+    app_key: AppKeys,
+) -> None:
+    def _loadMaskNpy() -> None:
+        loadCellposeMaskNPY(
+            q_window, 
+            data_manager, 
+            app_key, 
+            ndim=2
+        )
+        data_manager.dict_roi_coords[app_key] = convertCellposeMaskToDictROICoords(data_manager.getROIMask(app_key))
+    q_button.clicked.connect(_loadMaskNpy)
 
 """
 Elastix

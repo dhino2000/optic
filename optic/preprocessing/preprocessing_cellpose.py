@@ -11,6 +11,20 @@ In cellpose, the ROI IDs of the identical ROI in different time points are same,
 but in optic, each timepoint has its own ROI IDs.
 the matching relationship is managed by the "cell_id_match" column.
 """
+def convertCellposeMaskToDictROICoords(
+    masks       : np.ndarray[np.uint16, Tuple[int, int]], 
+    ) -> Dict[int, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]]:
+    dict_roi_coords = {}
+
+    list_roi_id_cellpose = np.delete(np.unique(masks), 0)
+    for roi_id, roi_id_cellpose in enumerate(list_roi_id_cellpose):
+        xpix, ypix = np.where(masks == roi_id_cellpose)
+        xpix, ypix = xpix.astype("uint16"), ypix.astype("uint16")
+
+        med = (int(np.median(xpix)), int(np.median(ypix)))
+        dict_roi_coords[roi_id] = {"xpix": xpix, "ypix": ypix, "med": med}
+    return dict_roi_coords
+
 def convertCellposeMaskToDictROICoordsXYCT(
     masks       : np.ndarray[np.uint16, Tuple[int, int, int]], 
     ) -> Dict[int, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]]:

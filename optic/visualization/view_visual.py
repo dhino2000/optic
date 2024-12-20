@@ -276,6 +276,9 @@ def updateView_TIFStackExplorer(
     pixmap = QPixmap.fromImage(qimage)
     view_control.layer_bg.setPixmap(pixmap)
 
+    # update ROI layer
+    updateLayerROI_TIFStackExplorer(view_control, data_manager, control_manager, app_key)
+
 
 """
 Sub functions for updateView

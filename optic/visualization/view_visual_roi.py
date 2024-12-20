@@ -7,6 +7,9 @@ from ..preprocessing.preprocessing_roi import getROIContour
 from ..config.constants import PenColors, PenWidth
 import numpy as np
 
+"""
+update layer_roi
+"""
 # update layer_roi for Suite2pROICheck
 def updateLayerROI_Suite2pROICheck(
         view_control: ViewControl, 
@@ -111,25 +114,47 @@ def updateLayerROI_MicrogliaTracking(
     plane_t = view_control.getPlaneT()
     
     dict_roi_coords_xyct = data_manager.getDictROICoordsXYCT(app_key).get(plane_t)
-    for roiId, dict_roi_coords_single in dict_roi_coords_xyct.items():
-        # color = view_control.getROIColor(roiId)
-        color = (0, 0, 255) # hardcoded !!! temporary !!!
-        opacity = view_control.getROIOpacity()
-        drawROI(painter, dict_roi_coords_single, color, opacity)
+    if dict_roi_coords_xyct is not None:
+        for roiId, dict_roi_coords_single in dict_roi_coords_xyct.items():
+            # color = view_control.getROIColor(roiId)
+            color = (0, 0, 255) # hardcoded !!! temporary !!!
+            opacity = view_control.getROIOpacity()
+            drawROI(painter, dict_roi_coords_single, color, opacity)
 
     painter.end()
     view_control.layer_roi.setPixmap(pixmap)
 
 # update layer_roi for TIFStackExplorer
 def updateLayerROI_TIFStackExplorer(
-        view_control: ViewControl,
-        layer_roi: QGraphicsScene,
-        rect_coords: List[Tuple[float, float, float, float]],
-        color: Tuple[int, int, int],
-        opacity: float
+        view_control: ViewControl, 
+        data_manager: DataManager, 
+        control_manager: ControlManager, 
+        app_key: AppKeys,
+        draw_selected_roi: bool = True
     ) -> None:
-    pass
+    width, height = view_control.getImageSize()
+    pixmap = QPixmap(width, height)
+    pixmap.fill(Qt.transparent) 
 
+    painter = QPainter(pixmap)
+    painter.setRenderHint(QPainter.Antialiasing)
+    # roi_display = control_manager.getSharedAttr(app_key, "roi_display")
+    # ROISelectedId = control_manager.getSharedAttr(app_key, "roi_selected_id")
+    
+    # draw all ROIs except selected ROI
+    dict_roi_coords = data_manager.getDictROICoords(app_key)
+    if dict_roi_coords is not None:
+        for roiId, dict_roi_coords_single in dict_roi_coords.items():
+            color = (0, 0, 255) # hardcoded !!!
+            opacity = 255 # hardcoded !!!
+            drawROI(painter, dict_roi_coords_single, color, opacity)
+
+    painter.end()
+    view_control.layer_roi.setPixmap(pixmap)
+
+"""
+ROI drawing functions
+"""
 # draw single ROI
 def drawROI(
         painter: QPainter, 

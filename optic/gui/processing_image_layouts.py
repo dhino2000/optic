@@ -178,3 +178,18 @@ def makeLayoutStackNormalization(
     layout.addWidget(widget_manager.makeWidgetListWidget(key=key_listwidget))
     layout.addWidget(widget_manager.makeWidgetButton(key=key_button_run, label="Run Image Normalization"))
     return layout
+
+# Concatenate tif image and cellpose npy mask, export FallLike.mat
+def makeLayoutExportFallLike(
+        widget_manager: WidgetManager,
+        key_label: str,
+        key_button_load_mask: str,
+        key_button_export: str
+        ) -> QVBoxLayout:
+    layout = QVBoxLayout()
+    layout.addWidget(widget_manager.makeWidgetLabel(key=key_label, label="Make FallLike.mat", font_size=12, bold=True, italic=True, use_global_style=False))
+    layout_button = QHBoxLayout()
+    layout_button.addWidget(widget_manager.makeWidgetButton(key=key_button_load_mask, label="Load cellpose seg.npy (XY image)"))
+    layout_button.addWidget(widget_manager.makeWidgetButton(key=key_button_export, label="Export FallLike.mat"))
+    layout.addLayout(layout_button)
+    return layout 
