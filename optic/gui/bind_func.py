@@ -515,6 +515,7 @@ def bindFuncCheckboxShowRegisteredStack(
 def bindFuncButtonLoadCellposeMask(
     q_window: 'QWidget',
     q_button: 'QPushButton',
+    view_control: 'ViewControl',
     data_manager: 'DataManager',
     app_key: AppKeys,
 ) -> None:
@@ -526,7 +527,25 @@ def bindFuncButtonLoadCellposeMask(
             ndim=2
         )
         data_manager.dict_roi_coords[app_key] = convertCellposeMaskToDictROICoords(data_manager.getROIMask(app_key))
+        view_control.updateView()
     q_button.clicked.connect(_loadMaskNpy)
+
+# -> processing_image_layouts.makeLayoutExportFallLike
+def bindFuncButtonExportFallLike(
+    q_window: 'QWidget',
+    q_button: 'QPushButton',
+    q_lineedit: 'QLineEdit',
+    data_manager: 'DataManager',
+) -> None:
+    def _exportFallLike() -> None:
+        from ..preprocessing.preprocessing_fall import makeFallLikeFromBgImageAndDictROICoords
+        from scipy.io import savemat
+        Falllike = makeFallLikeFromBgImageAndDictROICoords(data_manager)
+        path_dst = q_lineedit.text().replace(".tif", "_Fall_like.mat")
+        path_dst, _ = saveFileDialog(q_window, file_type=".mat", initial_dir=path_dst)
+        savemat(path_dst, Falllike)
+        QMessageBox.information(q_window, "Export Finish", "Exported Fall-like.mat!")
+    q_button.clicked.connect(_exportFallLike)
 
 """
 Elastix
