@@ -33,7 +33,7 @@ def convertCellposeMaskToDictROICoordsXYCT(
         dict_roi_coords_xyct[t_plane] = {}
         list_roi_id_cellpose = np.delete(np.unique(mask), 0)
         for roi_id, roi_id_cellpose in enumerate(list_roi_id_cellpose):
-            xpix, ypix = np.where(mask == roi_id_cellpose)
+            ypix, xpix = np.where(mask == roi_id_cellpose) # XY reversed
             xpix, ypix = xpix.astype("uint16"), ypix.astype("uint16")
 
             med = (int(np.median(xpix)), int(np.median(ypix)))

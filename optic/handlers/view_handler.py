@@ -118,7 +118,9 @@ class ViewHandler:
         def mousePressEvent(self, event: QMouseEvent):
             if event.button() == Qt.LeftButton: # for "pri", "sec" views
                 scene_pos = self.view_control.q_view.mapToScene(event.pos())
-                self.view_control.getROIwithClick(int(scene_pos.x()), int(scene_pos.y()))
+                reg = self.view_control.getShowRegImROI() # registered ROI
+                print(reg)
+                self.view_control.getROIwithClick(int(scene_pos.x()), int(scene_pos.y()), reg)
                 roi_selected_id = self.view_control.control_manager.getSharedAttr(self.view_control.app_key, 'roi_selected_id')
                 self.table_control.updateSelectedROI(roi_selected_id)
                 self.table_control.q_table.setFocus()
@@ -128,7 +130,9 @@ class ViewHandler:
                     self.table_control_sec: TableControl = self.control_manager.table_controls[AppKeys.SEC]
                     
                     scene_pos = self.view_control.q_view.mapToScene(event.pos())
-                    self.view_control_sec.getROIwithClick(int(scene_pos.x()), int(scene_pos.y()))
+                    reg = self.view_control.getShowRegImROI() # registered ROI
+                    print(reg)
+                    self.view_control_sec.getROIwithClick(int(scene_pos.x()), int(scene_pos.y()), reg)
                     roi_selected_id = self.view_control_sec.control_manager.getSharedAttr(self.view_control_sec.app_key, 'roi_selected_id')
                     self.table_control_sec.updateSelectedROI(roi_selected_id)
                     self.table_control_sec.q_table.setFocus()
@@ -149,17 +153,29 @@ class ViewHandler:
     class MicrogliaTrackingHandler:
         def __init__(self, view_control: ViewControl):
             self.view_control = view_control
+            self.table_control = view_control.control_manager.table_controls[view_control.app_key]
             self.is_dragging = False
             self.drag_start_pos = None
 
         def keyPressEvent(self, event: QKeyEvent):
-            pass
+            if event.key() in self.view_control.dict_key_pushed:
+                self.view_control.dict_key_pushed[event.key()] = True
+            if event.key() == Qt.Key_R:
+                resetZoomView(self.view_control.q_view, self.view_control.q_scene.sceneRect())
+                self.view_control.updateView()
 
         def keyReleaseEvent(self, event: QKeyEvent):
-            pass
+            if event.key() in self.view_control.dict_key_pushed:
+                self.view_control.dict_key_pushed[event.key()] = False
 
         def mousePressEvent(self, event: QMouseEvent):
-            if event.button() == Qt.MiddleButton:
+            if event.button() == Qt.LeftButton:
+                scene_pos = self.view_control.q_view.mapToScene(event.pos())
+                self.view_control.getROIwithClick(int(scene_pos.x()), int(scene_pos.y()))
+                roi_selected_id = self.view_control.control_manager.getSharedAttr(self.view_control.app_key, 'roi_selected_id')
+                self.table_control.updateSelectedROI(roi_selected_id)
+                self.table_control.q_table.setFocus()
+            elif event.button() == Qt.MiddleButton:
                 self.is_dragging = True
                 self.drag_start_pos = self.view_control.q_view.mapToScene(event.pos())
 
@@ -172,11 +188,14 @@ class ViewHandler:
                 self.drag_start_pos = current_pos
 
         def mouseReleaseEvent(self, event: QMouseEvent):
-            if event.button() == Qt.MiddleButton:
+            if self.is_dragging:
                 self.is_dragging = False
+                self.drag_start_pos = None
 
         def wheelEvent(self, event: QWheelEvent):
-            pass
+            if self.view_control.dict_key_pushed[Qt.Key_Control]:
+                zoomView(self.view_control.q_view, event.angleDelta().y(), event.pos())
+                self.view_control.updateView()
 
     """
     TifStackExplorer Handler

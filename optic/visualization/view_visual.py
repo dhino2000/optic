@@ -204,10 +204,10 @@ def updateView_MicrogliaTracking(
     pixmap = QPixmap.fromImage(qimage)
     view_control.layer_bg.setPixmap(pixmap)
 
-    # try:
-    #     updateLayerROI_MicrogliaTracking(view_control, data_manager, control_manager, app_key, app_key_sec)
-    # except AttributeError:
-    #     pass
+    try:
+        updateLayerROI_MicrogliaTracking(view_control, data_manager, control_manager, app_key, app_key_sec)
+    except AttributeError:
+        pass
 
 
 # update view for Tiff data

@@ -297,11 +297,22 @@ class ViewControl:
         self.view_handler.handleWheelEvent(event)
 
     # With click, get the closest ROI id and update view
-    def getROIwithClick(self, x:int, y:int, reg=False) -> None:
-        if reg:
-            dict_roi_coords = self.data_manager.getDictROICoordsRegistered(self.app_key)
-        else:
-            dict_roi_coords = self.data_manager.getDictROICoords(self.app_key)
+    def getROIwithClick(self, x:int, y:int, reg:bool=False, xyct:bool=False) -> None:
+        if xyct: # for Microglia Tracking
+            if reg:
+                dict_roi_coords_xyct = self.data_manager.getDictROICoordsXYCTRegistered(self.app_key)
+            else:
+                dict_roi_coords_xyct = self.data_manager.getDictROICoordsXYCT(self.app_key)
+            if dict_roi_coords_xyct is not None:
+                dict_roi_coords_xyct = dict_roi_coords_xyct.get(self.getPlaneT())
+        else: # for Suite2pROICheck, Suite2pROITracking
+            if reg:
+                dict_roi_coords = self.data_manager.getDictROICoordsRegistered(self.app_key)
+            else:
+                dict_roi_coords = self.data_manager.getDictROICoords(self.app_key)
+        if dict_roi_coords is None:
+            return # No ROI data
+
         dict_roi_med = {roi_id: dict_roi_coords[roi_id]["med"] for roi_id in dict_roi_coords.keys()}
         skip_checkboxes = [checkbox for key, checkbox in self.widget_manager.dict_checkbox.items() if key.startswith(f"{self.app_key}_skip_choose_")]
         dict_roi_skip = {roi_id: shouldSkipROI(roi_id, 

@@ -110,12 +110,14 @@ def updateLayerROI_MicrogliaTracking(
 
     painter = QPainter(pixmap)
     painter.setRenderHint(QPainter.Antialiasing)
-    ROISelectedId = control_manager.getSharedAttr(app_key, "roi_selected_id")
+    # ROISelectedId = control_manager.getSharedAttr(app_key, "roi_selected_id")
     plane_t = view_control.getPlaneT()
     
-    dict_roi_coords_xyct = data_manager.getDictROICoordsXYCT(app_key).get(plane_t)
+    # WARNING: this code often causes crash, be careful when data_manager.dict_roi_coords_xyct is None
+    dict_roi_coords_xyct = data_manager.getDictROICoordsXYCT(app_key)
     if dict_roi_coords_xyct is not None:
-        for roiId, dict_roi_coords_single in dict_roi_coords_xyct.items():
+        dict_roi_coords_xyct_tplane = dict_roi_coords_xyct.get(plane_t)
+        for roiId, dict_roi_coords_single in dict_roi_coords_xyct_tplane.items():
             # color = view_control.getROIColor(roiId)
             color = (0, 0, 255) # hardcoded !!! temporary !!!
             opacity = view_control.getROIOpacity()
@@ -226,7 +228,11 @@ def findClosestROI(
     for roi_id, med in dict_roi_med.items():
         if skip_roi and skip_roi.get(roi_id, False):
             continue
-        distance = np.sqrt((x - med[0])**2 + (y - med[1])**2)
+        """
+        WARNING !!!
+        Suite2p Fall's ROI center (med) is in the format of (y, x),
+        """
+        distance = np.sqrt((x - med[1])**2 + (y - med[0])**2)
         if distance < min_distance:
             min_distance = distance
             closest_roi_id = roi_id
