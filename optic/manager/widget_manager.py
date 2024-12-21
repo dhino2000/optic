@@ -86,6 +86,22 @@ def makeWidgetSlider(
         widget.setObjectName('use-global')
     return widget
 
+# QSpinBox Widget
+def makeWidgetSpinBox(
+    value_min: int,
+    value_max: int,
+    value_set: int,
+    step: int,
+    use_global_style: bool
+) -> QSpinBox:
+    widget = QSpinBox()
+    widget.setRange(value_min, value_max)
+    widget.setValue(value_set)
+    widget.setSingleStep(step)
+    if use_global_style:
+        widget.setObjectName('use-global')
+    return widget
+
 # QPushButton Widget
 def makeWidgetButton(
     label: str, 
@@ -230,6 +246,7 @@ class WidgetManager:
         self.dict_ax          :Dict[str, Axes] = {} 
         self.dict_checkbox    :Dict[str, QCheckBox] = {} 
         self.dict_slider      :Dict[str, QSlider] = {}
+        self.dict_spinbox     :Dict[str, QSpinBox] = {}
         self.dict_combobox    :Dict[str, QComboBox] = {} 
         self.dict_listwidget  :Dict[str, QListWidget] = {} 
         self.dict_buttongroup :Dict[str, QButtonGroup] = {}
@@ -288,6 +305,18 @@ class WidgetManager:
     ) -> QSlider:
         self.dict_slider[key] = makeWidgetSlider(func_, value_min, value_max, value_set, height, axis, use_global_style)
         return self.dict_slider[key]
+    
+    def makeWidgetSpinBox(
+        self,
+        key: str,
+        value_min: int = 0,
+        value_max: int = 100,
+        value_set: int = 0,
+        step: int = 1,
+        use_global_style: bool=True
+    ) -> QSpinBox:
+        self.dict_spinbox[key] = makeWidgetSpinBox(value_min, value_max, value_set, step, use_global_style)
+        return self.dict_spinbox[key]
     
     def makeWidgetButton(
         self, 

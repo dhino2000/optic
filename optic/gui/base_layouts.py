@@ -84,22 +84,54 @@ def makeLayoutButtonGroup(
     widget_manager.dict_buttongroup[key_buttongroup] = button_group
     return layout
 
-# QSlider Layout label付き
+# QSlider + QLabel Layout
 def makeLayoutSliderLabel(
         widget_manager: WidgetManager, 
         key_label: str, 
         key_slider: str, 
         label: str, 
+        axis :Literal["vertical", "horizontal"] = "vertical", 
         align: Qt.AlignmentFlag=Qt.AlignLeft, 
         func_: Any=None, 
         value_min: int=0, 
         value_max: int=255, 
         value_set: int=10, 
         height: int=10, 
-        axis: Qt.Orientation=Qt.Horizontal) -> QVBoxLayout:
-    layout = QVBoxLayout()
+        axis_slider: Qt.Orientation=Qt.Horizontal
+    ) -> QVBoxLayout:
+    if axis == "vertical":
+        layout = QVBoxLayout()
+    elif axis == "horizontal":
+        layout = QHBoxLayout()
+    else:
+        raise ValueError(f"Invalid axis value: {axis}. Expected 'vertical' or 'horizontal'.")
     label_widget = widget_manager.makeWidgetLabel(key_label, label, align)
-    slider_widget = widget_manager.makeWidgetSlider(key_slider, func_, value_min, value_max, value_set, height, axis)
+    slider_widget = widget_manager.makeWidgetSlider(key_slider, func_, value_min, value_max, value_set, height, axis_slider)
     layout.addWidget(label_widget)
     layout.addWidget(slider_widget)
+    return layout
+
+# QSpinBox + QLabel Layout
+def makeLayoutSpinBoxLabel(
+        widget_manager: WidgetManager, 
+        key_label: str, 
+        key_spinbox: str, 
+        label: str, 
+        axis: Literal["vertical", "horizontal"]="vertical",
+        align: Qt.AlignmentFlag=Qt.AlignLeft, 
+        value_min: int=1, 
+        value_max: int=100, 
+        value_set: int=5,
+        step: int=1,
+        ) -> QVBoxLayout:
+    if axis == "vertical":
+        layout = QVBoxLayout()
+    elif axis == "horizontal":
+        layout = QHBoxLayout()
+    else:
+        raise ValueError(f"Invalid axis value: {axis}. Expected 'vertical' or 'horizontal'.")
+    label_widget = widget_manager.makeWidgetLabel(key_label, label, align)
+    spinner_widget = widget_manager.makeWidgetSpinBox(key_spinbox, value_min, value_max, value_set, step)
+    layout.addWidget(label_widget)
+    layout.addWidget(spinner_widget)
     return layout

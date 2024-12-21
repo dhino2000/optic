@@ -1,10 +1,10 @@
 from .app_setup import setupMainWindow
 from .app_style import setAppStyle, applyAppStyle
-from .base_layouts import makeLayoutLineEditLabel, makeLayoutButtonGroup, makeLayoutSliderLabel, makeLayoutComboBoxLabel
+from .base_layouts import makeLayoutLineEditLabel, makeLayoutButtonGroup, makeLayoutSliderLabel, makeLayoutComboBoxLabel, makeLayoutSpinBoxLabel
 from .info_layouts import makeLayoutROIProperty, makeLayoutROICount
 from .io_layouts import makeLayoutLoadFileWidget, makeLayoutROICheckIO, makeLayoutROITrackingIO, makeLayoutLoadFileExitHelp, makeLayoutROIManagerIO, makeLayoutMaskNpyIO
 from .processing_image_layouts import makeLayoutElastixConfig, makeLayoutStackRegistration, makeLayoutStackNormalization, makeLayoutFallRegistration, makeLayoutApplyElastixTransform, makeLayoutSaveElastixTransform, makeLayoutExportFallLike
-from .processing_roi_layouts import makeLayoutROIMatching, makeLayoutROIMatchingTest, makeLayoutROIManager, makeLayoutROIManagerForTable
+from .processing_roi_layouts import makeLayoutROIMatching, makeLayoutROIMatchingTest, makeLayoutROIManager, makeLayoutROIManagerForTable, makeLayoutROIEditConfig
 from .canvas_layouts import makeLayoutCanvasTracePlot, makeLayoutMinimumPlotRange, makeLayoutLightPlotMode, makeLayoutEventFilePlotProperty
 from .slider_layouts import makeLayoutContrastSlider, makeLayoutOpacitySlider
 from .info_layouts import makeLayoutROIProperty

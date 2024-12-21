@@ -1,7 +1,7 @@
 from __future__ import annotations
 from ..type_definitions import *
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout
-from ..gui.base_layouts import makeLayoutComboBoxLabel, makeLayoutLineEditLabel
+from ..gui.base_layouts import makeLayoutComboBoxLabel, makeLayoutLineEditLabel, makeLayoutSliderLabel, makeLayoutSpinBoxLabel
 from ..gui.io_layouts import makeLayoutROIManagerIO, makeLayoutMaskNpyIO
 
 # Optimal transport ROI Matching config
@@ -107,4 +107,34 @@ def makeLayoutROIManagerForTable(
     layout.addWidget(widget_manager.makeWidgetButton(key_button_roi_add, "Add ROI"))
     layout.addWidget(widget_manager.makeWidgetButton(key_button_roi_remove, "Remove ROI"))
     layout.addWidget(widget_manager.makeWidgetButton(key_button_roi_edit, "Edit ROI"))
+    return layout
+
+# ROI Edit Config layout
+def makeLayoutROIEditConfig(
+        widget_manager: WidgetManager,
+        key_label_roi_opacity: str,
+        key_label_pen_radius: str,
+        key_slider_roi_opacity: str,
+        key_spinbox_pen_radius: str,
+        ) -> QVBoxLayout:
+    layout = QVBoxLayout()
+    layout.addLayout(makeLayoutSpinBoxLabel(
+        widget_manager, 
+        key_label_pen_radius, 
+        key_spinbox_pen_radius, 
+        "Pen Radius:", 
+        axis="horizontal", 
+        value_min=1, 
+        value_max=100, 
+        value_set=5, 
+        step=1))
+    layout.addLayout(makeLayoutSliderLabel(
+        widget_manager, 
+        key_label_roi_opacity, 
+        key_slider_roi_opacity, 
+        "ROI Opacity:", 
+        axis="horizontal", 
+        value_min=0, 
+        value_max=255, 
+        value_set=150,))
     return layout
