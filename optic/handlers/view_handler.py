@@ -5,6 +5,7 @@ from PyQt5.QtGui import QKeyEvent, QMouseEvent, QWheelEvent
 from PyQt5.QtWidgets import QGraphicsView, QGraphicsScene, QGraphicsRectItem
 from ..visualization.view_visual import zoomView, resetZoomView
 from ..visualization.view_visual_rectangle import initializeDragRectangle, updateDragRectangle, clipRectangleRange
+from ..visualization.roi_edit import editROIdraw, editROIerase, updateROIEditLayer
 from ..config.constants import AppKeys, PenColors, PenWidth
 
 
@@ -160,11 +161,14 @@ class ViewHandler:
             self.view_control = view_control
             self.table_control = view_control.control_manager.table_controls[view_control.app_key]
             self.is_dragging = False
+            self.is_dragging_edit = False
             self.drag_start_pos = None
+            self.roi_points_edit = set()
 
         def keyPressEvent(self, event: QKeyEvent):
             if event.key() in self.view_control.dict_key_pushed:
                 self.view_control.dict_key_pushed[event.key()] = True
+            # Reset zoom
             if event.key() == Qt.Key_R:
                 resetZoomView(self.view_control.q_view, self.view_control.q_scene.sceneRect())
                 self.view_control.updateView()
@@ -174,31 +178,64 @@ class ViewHandler:
                 self.view_control.dict_key_pushed[event.key()] = False
 
         def mousePressEvent(self, event: QMouseEvent):
-            if event.button() == Qt.LeftButton:
+            if self.view_control.roi_edit_mode:
                 scene_pos = self.view_control.q_view.mapToScene(event.pos())
-                reg = self.view_control.getShowRegImROI() # registered ROI
-                self.view_control.getROIwithClick(int(scene_pos.x()), int(scene_pos.y()), reg, xyct=True)
-                roi_selected_id = self.view_control.control_manager.getSharedAttr(self.view_control.app_key, 'roi_selected_id')
-                self.table_control.updateSelectedROI(roi_selected_id)
-                self.table_control.q_table.setFocus()
-            elif event.button() == Qt.MiddleButton:
-                self.is_dragging = True
-                self.drag_start_pos = self.view_control.q_view.mapToScene(event.pos())
+                x, y = int(scene_pos.x()), int(scene_pos.y())
+                if event.button() == Qt.LeftButton: 
+                    self.is_dragging_edit = True
+                    editROIdraw(self.roi_points_edit, x, y, radius=3)
+                elif event.button() == Qt.RightButton:
+                    self.is_dragging_edit = True
+                    editROIerase(self.roi_points_edit, x, y, radius=5) 
+            else:
+                # Select ROI
+                if event.button() == Qt.LeftButton:
+                    scene_pos = self.view_control.q_view.mapToScene(event.pos())
+                    reg = self.view_control.getShowRegImROI() # registered ROI
+                    self.view_control.getROIwithClick(int(scene_pos.x()), int(scene_pos.y()), reg, xyct=True)
+                    roi_selected_id = self.view_control.control_manager.getSharedAttr(self.view_control.app_key, 'roi_selected_id')
+                    self.table_control.updateSelectedROI(roi_selected_id)
+                    self.table_control.q_table.setFocus()
+                # Pan
+                elif event.button() == Qt.MiddleButton:
+                    self.is_dragging = True
+                    self.drag_start_pos = self.view_control.q_view.mapToScene(event.pos())
 
         def mouseMoveEvent(self, event: QMouseEvent):
+            # Pan
             if self.is_dragging:
                 current_pos = self.view_control.q_view.mapToScene(event.pos())
                 delta = current_pos - self.drag_start_pos
                 self.view_control.q_view.setTransformationAnchor(QGraphicsView.NoAnchor)
                 self.view_control.q_view.translate(delta.x(), delta.y())
                 self.drag_start_pos = current_pos
+            # ROI Edit
+            if self.view_control.roi_edit_mode and self.is_dragging_edit:
+                scene_pos = self.view_control.q_view.mapToScene(event.pos())
+                x, y = int(scene_pos.x()), int(scene_pos.y())
+
+                if event.buttons() & Qt.LeftButton:
+                    editROIdraw(self.roi_points_edit, x, y, radius=3) 
+                elif event.buttons() & Qt.RightButton: 
+                    editROIerase(self.roi_points_edit, x, y, radius=5) 
+
+                updateROIEditLayer(
+                    self.view_control,
+                    self.view_control.layer_roi_edit, 
+                    self.roi_points_edit, 
+                    color=(255, 255, 255), 
+                    opacity=150
+                )
 
         def mouseReleaseEvent(self, event: QMouseEvent):
             if self.is_dragging:
                 self.is_dragging = False
                 self.drag_start_pos = None
+            if self.is_dragging_edit:
+                self.is_dragging_edit = False
 
         def wheelEvent(self, event: QWheelEvent):
+            # Zoom
             if self.view_control.dict_key_pushed[Qt.Key_Control]:
                 zoomView(self.view_control.q_view, event.angleDelta().y(), event.pos())
                 self.view_control.updateView()
