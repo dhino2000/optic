@@ -7,7 +7,15 @@ from PyQt5.QtCore import Qt
 # ROI editing functions
 
 # Draw ROI
-def editROIdraw(points: set[Tuple[int, int]], x: int, y: int, radius: int = 5) -> None:
+def editROIdraw(
+        points: set[Tuple[int, int]], 
+        x: int, 
+        y: int, 
+        radius: int = 5, 
+        x_min: int = 0,
+        x_max: int = 511,
+        y_min: int = 0,
+        y_max: int = 511) -> None:
     """
     Adds a point to the ROI points list with a specified radius.
 
@@ -20,6 +28,14 @@ def editROIdraw(points: set[Tuple[int, int]], x: int, y: int, radius: int = 5) -
     for dx in range(-radius, radius + 1):
         for dy in range(-radius, radius + 1):
             if dx**2 + dy**2 <= radius**2:  # 円形にする
+                if x + dx < x_min:
+                    dx = x_min - x
+                if x + dx > x_max:
+                    dx = x_max - x
+                if y + dy < y_min:
+                    dy = y_min - y
+                if y + dy > y_max:
+                    dy = y_max - y
                 points.add((x + dx, y + dy))
 
 # Erase ROI

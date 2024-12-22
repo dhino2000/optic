@@ -7,6 +7,7 @@ from ..preprocessing.preprocessing_image import getBGImageFromFall, getBGImageCh
 from ..preprocessing.preprocessing_fall import getROICoordsFromDictFall
 from ..config.constants import Extension
 from ..io.data_io import loadFallMat, loadTiffStack, loadTifImage
+from ..utils.custom_dict import CustomDict
 
 class DataManager:
     def __init__(self):
@@ -35,10 +36,10 @@ class DataManager:
         # ROI mask, coordinates, XYCT
         self.dict_roi_mask:             Dict[AppKeys, np.ndarray[np.uint16, Tuple[int, int, int]]] = {}
         self.dict_roi_mask_reg:         Dict[AppKeys, np.ndarray[np.uint16, Tuple[int, int, int]]] = {}
-        self.dict_roi_coords_xyct:      Dict[AppKeys, Dict[int, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]]] = {}
-        self.dict_roi_coords_xyct_reg:  Dict[AppKeys, Dict[int, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]]] = {}
+        self.dict_roi_coords_xyct:      Dict[AppKeys, Dict[int, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]]] = CustomDict()
+        self.dict_roi_coords_xyct_reg:  Dict[AppKeys, Dict[int, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]]] = CustomDict()
         # ROI matching, XYCT
-        self.dict_roi_macthing:         Dict[AppKeys, Dict[str, Dict[int, Optional[int]]]] = {}
+        self.dict_roi_macthing:         Dict[AppKeys, Dict[str, Dict[int, Optional[int]]]] = CustomDict()
 
         self.dict_eventfile:            Dict[AppKeys, Dict[str, np.ndarray[Tuple[int]]]] = defaultdict(dict)
         self.dict_roicheck:             Dict[AppKeys, Any] = {}

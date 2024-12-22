@@ -2,11 +2,13 @@ from __future__ import annotations
 from ..type_definitions import *
 from PyQt5.QtCore import Qt, QRectF
 from PyQt5.QtGui import QKeyEvent, QMouseEvent, QWheelEvent
-from PyQt5.QtWidgets import QGraphicsView, QGraphicsScene, QGraphicsRectItem
+from PyQt5.QtWidgets import QGraphicsView, QGraphicsScene, QGraphicsRectItem, QTableWidgetItem
 from ..visualization.view_visual import zoomView, resetZoomView
 from ..visualization.view_visual_rectangle import initializeDragRectangle, updateDragRectangle, clipRectangleRange
 from ..visualization.roi_edit import editROIdraw, editROIerase, updateROIEditLayer
+from ..utils.view_utils import generateRandomColor
 from ..config.constants import AppKeys, PenColors, PenWidth
+import numpy as np
 
 
 class ViewHandler:
@@ -158,12 +160,15 @@ class ViewHandler:
     """
     class MicrogliaTrackingHandler:
         def __init__(self, view_control: ViewControl):
-            self.view_control = view_control
-            self.table_control = view_control.control_manager.table_controls[view_control.app_key]
-            self.is_dragging = False
-            self.is_dragging_edit = False
-            self.drag_start_pos = None
-            self.roi_points_edit = set()
+            self.view_control:               ViewControl = view_control
+            self.table_control:             TableControl = view_control.control_manager.table_controls[view_control.app_key]
+            self.is_dragging:                       bool = False
+            self.is_dragging_edit:                  bool = False
+            self.drag_start_pos:         Tuple[int, int] = None
+            self.roi_points_edit:   Set[Tuple[int, int]] = set()
+            self.roi_id_edit:                        int = None
+            self.plane_t_pri:                        int = None
+            self.plane_t_sec:                        int = None
 
         def keyPressEvent(self, event: QKeyEvent):
             if event.key() in self.view_control.dict_key_pushed:
@@ -172,6 +177,48 @@ class ViewHandler:
             if event.key() == Qt.Key_R:
                 resetZoomView(self.view_control.q_view, self.view_control.q_scene.sceneRect())
                 self.view_control.updateView()
+            # Quit ROI edit mode
+            if event.key() == Qt.Key_Space:
+                self.view_control.roi_edit_mode = False
+                print("Quit ROI edit mode")
+
+                print(f"add ROI {self.roi_id_edit}")
+                xpix = np.array(list(self.roi_points_edit)).astype("uint16")[:, 0]
+                ypix = np.array(list(self.roi_points_edit)).astype("uint16")[:, 1]
+                med = (np.median(xpix).astype("uint16"), np.median(ypix).astype("uint16"))
+                dict_roi_coords_xyct_edit = {"xpix": xpix, "ypix": ypix, "med": med}
+
+                key_roi_matching = f"t{self.plane_t_pri}_t{self.plane_t_sec}"
+                print(key_roi_matching, self.roi_id_edit)
+
+                # Need to modify !!!
+                if self.view_control.app_key == AppKeys.PRI:
+                    self.view_control.data_manager.dict_roi_coords_xyct["pri"][self.plane_t_pri][self.roi_id_edit] = dict_roi_coords_xyct_edit
+                elif self.view_control.app_key == AppKeys.SEC:
+                    self.view_control.data_manager.dict_roi_coords_xyct["sec"][self.plane_t_sec][self.roi_id_edit] = dict_roi_coords_xyct_edit
+                self.view_control.data_manager.dict_roi_macthing["pri"][key_roi_matching][self.roi_id_edit] = None
+
+                if self.view_control.app_key == AppKeys.PRI:
+                    self.view_control.roi_colors_xyct[self.plane_t_pri][self.roi_id_edit] = generateRandomColor()
+                elif self.view_control.app_key == AppKeys.SEC:
+                    self.view_control.roi_colors_xyct[self.plane_t_sec][self.roi_id_edit] = generateRandomColor()
+
+                self.roi_points_edit = set()
+                updateROIEditLayer(
+                    self.view_control,
+                    self.view_control.layer_roi_edit, 
+                    self.roi_points_edit, 
+                    color=(255, 255, 255), 
+                    opacity=150
+                )
+
+                self.table_control.updateWidgetDynamicTableWithT(
+                    self.view_control.data_manager.dict_roi_macthing["pri"], 
+                    self.roi_id_edit+1,
+                    self.view_control.app_key == AppKeys.PRI,
+                    )
+                self.view_control.updateView()
+                
 
         def keyReleaseEvent(self, event: QKeyEvent):
             if event.key() in self.view_control.dict_key_pushed:
@@ -183,7 +230,8 @@ class ViewHandler:
                 x, y = int(scene_pos.x()), int(scene_pos.y())
                 if event.button() == Qt.LeftButton: 
                     self.is_dragging_edit = True
-                    editROIdraw(self.roi_points_edit, x, y, radius=3)
+                    xmin, xmax, ymin, ymax = 0, self.view_control.image_sizes[0], 0, self.view_control.image_sizes[1]
+                    editROIdraw(self.roi_points_edit, x, y, radius=3, x_min=xmin, x_max=xmax, y_min=ymin, y_max=ymax)
                 elif event.button() == Qt.RightButton:
                     self.is_dragging_edit = True
                     editROIerase(self.roi_points_edit, x, y, radius=5) 
@@ -215,7 +263,8 @@ class ViewHandler:
                 x, y = int(scene_pos.x()), int(scene_pos.y())
 
                 if event.buttons() & Qt.LeftButton:
-                    editROIdraw(self.roi_points_edit, x, y, radius=3) 
+                    xmin, xmax, ymin, ymax = 0, self.view_control.image_sizes[0], 0, self.view_control.image_sizes[1]
+                    editROIdraw(self.roi_points_edit, x, y, radius=3, x_min=xmin, x_max=xmax, y_min=ymin, y_max=ymax)
                 elif event.buttons() & Qt.RightButton: 
                     editROIerase(self.roi_points_edit, x, y, radius=5) 
 

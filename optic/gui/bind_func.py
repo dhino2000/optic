@@ -11,7 +11,7 @@ from PyQt5.QtGui import QDesktopServices
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 from matplotlib.backend_bases import Event
-from PyQt5.QtWidgets import QPushButton, QWidget, QLineEdit, QTableWidget, QButtonGroup, QCheckBox, QGraphicsView, QSlider, QMessageBox
+from PyQt5.QtWidgets import QPushButton, QWidget, QLineEdit, QTableWidget, QButtonGroup, QCheckBox, QGraphicsView, QSlider, QMessageBox, QComboBox, QTableWidgetItem
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from copy import deepcopy
 from itk.elxParameterObjectPython import elastixParameterObject
@@ -707,6 +707,7 @@ def bindFuncButtonsROIManagerForTable(
     q_button_edit: 'QPushButton',
     q_table: 'QTableWidget',
     data_manager: 'DataManager',
+    control_manager: 'ControlManager',
     table_control: 'TableControl',
     view_control: 'ViewControl',
     app_key: str,
@@ -717,6 +718,12 @@ def bindFuncButtonsROIManagerForTable(
             view_control.q_view.setFocus()
             print("roi_edit_mode:", view_control.roi_edit_mode)
 
+            roi_id_edit = table_control.len_row
+            view_control.view_handler.handler.roi_id_edit = roi_id_edit # for adding new roi
+            # Hardcoded !!!
+            view_control.view_handler.handler.plane_t_pri = control_manager.view_controls["pri"].getPlaneT()
+            view_control.view_handler.handler.plane_t_sec = control_manager.view_controls["sec"].getPlaneT()
+
     def _removeSelectedROIfromTable() -> None:
         row = q_table.currentRow()
         roi_selected_id = table_control.getCellIdFromRow(row)
@@ -725,6 +732,7 @@ def bindFuncButtonsROIManagerForTable(
         if roi_selected_id:
             del data_manager.dict_roi_coords_xyct[app_key][plane_t][roi_selected_id]
             deleteIndexedRow(q_table, row)
+        table_control.setLenRow(q_table.rowCount())
         print("ROI", roi_selected_id, "is removed.")
         view_control.updateView()
 

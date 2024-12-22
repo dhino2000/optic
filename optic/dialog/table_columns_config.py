@@ -74,7 +74,7 @@ class TableColumnConfigDialog(QDialog):
     def deleteSelectedTableColumns(self):
         deleteSelectedRows(self.widget_manager.dict_table["table_columns"])
 
-    def addNewColumn(self):
+    def addNewTableColumn(self):
         row = addRow(self.widget_manager.dict_table["table_columns"])
         
         # 新しい行にウィジェットを追加
@@ -126,4 +126,4 @@ class TableColumnConfigDialog(QDialog):
         self.widget_manager.dict_button["update"].clicked.connect(self.updateTableColumns)
         self.widget_manager.dict_button["exit"].clicked.connect(self.reject)
         self.widget_manager.dict_button["del_col"].clicked.connect(self.deleteSelectedTableColumns)
-        self.widget_manager.dict_button["add_col"].clicked.connect(self.addNewColumn)
+        self.widget_manager.dict_button["add_col"].clicked.connect(self.addNewTableColumn)
