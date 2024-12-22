@@ -118,8 +118,7 @@ def updateLayerROI_MicrogliaTracking(
     if dict_roi_coords_xyct is not None:
         dict_roi_coords_xyct_tplane = dict_roi_coords_xyct.get(plane_t)
         for roiId, dict_roi_coords_single in dict_roi_coords_xyct_tplane.items():
-            # color = view_control.getROIColor(roiId)
-            color = (0, 0, 255) # hardcoded !!! temporary !!!
+            color = view_control.getROIColorXYCT(plane_t, roiId)
             opacity = view_control.getROIOpacity()
             drawROI(painter, dict_roi_coords_single, color, opacity)
 

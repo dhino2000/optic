@@ -263,6 +263,12 @@ def bindFuncROIMaskNpyIO(
         data_manager.dict_roi_macthing["pri"] = convertCellposeMaskToDictROIMatching(data_manager.getROIMask(app_key))
         data_manager.dict_roi_coords_xyct["sec"] = data_manager.dict_roi_coords_xyct["pri"].copy()
 
+        # initialize ROI XYCT Colors
+        for plane_t in data_manager.dict_roi_coords_xyct["pri"].keys():
+            for roi_id in data_manager.dict_roi_coords_xyct["pri"][plane_t].keys():
+                control_manager.view_controls["pri"].roi_colors_xyct[plane_t][roi_id]= generateRandomColor()
+                control_manager.view_controls["sec"].roi_colors_xyct[plane_t][roi_id]= generateRandomColor()
+
         control_manager.view_controls["pri"].updateView()
         control_manager.view_controls["sec"].updateView()
 

@@ -7,3 +7,4 @@ from .listwidget_utils import clearListWidget, getAllItemsFromListWidget, getInd
 from .dialog_utils import showConfirmationDialog, showProgressDialog
 from .table_utils import deleteSelectedRows, addRow, clearColumnCells, deleteIndexedRow
 from .canvas_utils import exportAxes, exportFigure
+from .view_utils import generateRandomColor

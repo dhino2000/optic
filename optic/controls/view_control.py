@@ -8,6 +8,8 @@ from ..visualization.info_visual import updateZPlaneDisplay, updateTPlaneDisplay
 from ..preprocessing.preprocessing_roi import updateROIImage
 from ..gui.view_setup import setViewSize
 from ..config.constants import BGImageTypeList, Extension
+from ..utils.view_utils import generateRandomColor
+from collections import defaultdict
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QGraphicsView, QGraphicsScene, QGraphicsRectItem, QGraphicsPathItem, QGraphicsPixmapItem
 import random
@@ -72,10 +74,11 @@ class ViewControl:
         self.rect_highlight:        QGraphicsRectItem               = None
         self.rect_highlight_range:  List[int, int, int, int, int, int, int, int] = None
 
-        self.roi_colors:        Dict[int, Tuple[int, int, int]] = {}
-        self.roi_opacity:       int                             = int(config_manager.gui_defaults["ROI_VISUAL_SETTINGS"]["DEFAULT_ROI_OPACITY"])
-        self.highlight_opacity: int                             = int(config_manager.gui_defaults["ROI_VISUAL_SETTINGS"]["DEFAULT_HIGHLIGHT_OPACITY"])
-        self.roi_pair_opacity:  int                             = 255
+        self.roi_colors:        Dict[int, Tuple[int, int, int]]            = {}
+        self.roi_colors_xyct:   Dict[int, Dict[int, Tuple[int, int, int]]] = defaultdict(dict)
+        self.roi_opacity:       int                                        = int(config_manager.gui_defaults["ROI_VISUAL_SETTINGS"]["DEFAULT_ROI_OPACITY"])
+        self.highlight_opacity: int                                        = int(config_manager.gui_defaults["ROI_VISUAL_SETTINGS"]["DEFAULT_HIGHLIGHT_OPACITY"])
+        self.roi_pair_opacity:  int                                        = 255
 
         # Key pushing state, Mouse dragging state
         self.dict_key_pushed:   Dict[str, bool]                 = {Qt.Key_Control: False, Qt.Key_Shift: False}
@@ -144,10 +147,7 @@ class ViewControl:
 
     def initializeROIColors(self):
         for roi_id in self.data_manager.getStat(self.app_key).keys():
-            self.roi_colors[roi_id] = self.generateRandomColor()
-
-    def generateRandomColor(self) -> Tuple[int, int, int]:
-        return (random.randint(100, 255), random.randint(100, 255), random.randint(100, 255))
+            self.roi_colors[roi_id] = generateRandomColor()
     
     """
     get Functions
@@ -172,6 +172,9 @@ class ViewControl:
     
     def getROIColor(self, roi_id: int) -> Tuple[int, int, int]:
         return self.roi_colors[roi_id]
+    
+    def getROIColorXYCT(self, plane_t: int, roi_id: int) -> Dict[int, Tuple[int, int, int]]:
+        return self.roi_colors_xyct[plane_t][roi_id]
 
     def getROIOpacity(self) -> int:
         return self.roi_opacity
