@@ -182,26 +182,29 @@ class ViewHandler:
                 self.view_control.roi_edit_mode = False
                 print("Quit ROI edit mode")
 
-                print(f"add ROI {self.roi_id_edit}")
-                xpix = np.array(list(self.roi_points_edit)).astype("uint16")[:, 0]
-                ypix = np.array(list(self.roi_points_edit)).astype("uint16")[:, 1]
-                med = (np.median(xpix).astype("uint16"), np.median(ypix).astype("uint16"))
-                dict_roi_coords_xyct_edit = {"xpix": xpix, "ypix": ypix, "med": med}
+                try:
+                    print(f"add ROI {self.roi_id_edit}")
+                    xpix = np.array(list(self.roi_points_edit)).astype("uint16")[:, 0]
+                    ypix = np.array(list(self.roi_points_edit)).astype("uint16")[:, 1]
+                    med = (np.median(xpix).astype("uint16"), np.median(ypix).astype("uint16"))
+                    dict_roi_coords_xyct_edit = {"xpix": xpix, "ypix": ypix, "med": med}
 
-                key_roi_matching = f"t{self.plane_t_pri}_t{self.plane_t_sec}"
-                print(key_roi_matching, self.roi_id_edit)
+                    key_roi_matching = f"t{self.plane_t_pri}_t{self.plane_t_sec}"
+                    print(key_roi_matching, self.roi_id_edit)
 
-                # Need to modify !!!
-                if self.view_control.app_key == AppKeys.PRI:
-                    self.view_control.data_manager.dict_roi_coords_xyct["pri"][self.plane_t_pri][self.roi_id_edit] = dict_roi_coords_xyct_edit
-                elif self.view_control.app_key == AppKeys.SEC:
-                    self.view_control.data_manager.dict_roi_coords_xyct["sec"][self.plane_t_sec][self.roi_id_edit] = dict_roi_coords_xyct_edit
-                self.view_control.data_manager.dict_roi_macthing["pri"][key_roi_matching][self.roi_id_edit] = None
+                    # Need to modify !!!
+                    if self.view_control.app_key == AppKeys.PRI:
+                        self.view_control.data_manager.dict_roi_coords_xyct["pri"][self.plane_t_pri][self.roi_id_edit] = dict_roi_coords_xyct_edit
+                    elif self.view_control.app_key == AppKeys.SEC:
+                        self.view_control.data_manager.dict_roi_coords_xyct["sec"][self.plane_t_sec][self.roi_id_edit] = dict_roi_coords_xyct_edit
+                    self.view_control.data_manager.dict_roi_macthing["pri"][key_roi_matching][self.roi_id_edit] = None
 
-                if self.view_control.app_key == AppKeys.PRI:
-                    self.view_control.roi_colors_xyct[self.plane_t_pri][self.roi_id_edit] = generateRandomColor()
-                elif self.view_control.app_key == AppKeys.SEC:
-                    self.view_control.roi_colors_xyct[self.plane_t_sec][self.roi_id_edit] = generateRandomColor()
+                    if self.view_control.app_key == AppKeys.PRI:
+                        self.view_control.roi_colors_xyct[self.plane_t_pri][self.roi_id_edit] = generateRandomColor()
+                    elif self.view_control.app_key == AppKeys.SEC:
+                        self.view_control.roi_colors_xyct[self.plane_t_sec][self.roi_id_edit] = generateRandomColor()
+                except IndexError as e: # no roi_points_edit
+                    pass
 
                 self.roi_points_edit = set()
                 updateROIEditLayer(
