@@ -309,9 +309,9 @@ class ViewControl:
     def getROIwithClick(self, x:int, y:int, reg:bool=False, xyct:bool=False) -> None:
         if xyct: # for Microglia Tracking XYCT
             if reg:
-                dict_roi_coords = self.data_manager.getDictROICoordsXYCTRegistered(self.app_key)
+                dict_roi_coords = self.data_manager.getDictROICoordsXYCTRegistered()
             else:
-                dict_roi_coords = self.data_manager.getDictROICoordsXYCT(self.app_key)
+                dict_roi_coords = self.data_manager.getDictROICoordsXYCT()
             if dict_roi_coords is not None:
                 dict_roi_coords = dict_roi_coords.get(self.getPlaneT())
         else: # for Suite2pROICheck, Suite2pROITracking

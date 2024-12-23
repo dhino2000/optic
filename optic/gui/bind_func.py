@@ -721,9 +721,11 @@ def bindFuncButtonsROIManagerForTable(
         row = q_table.currentRow()
         roi_selected_id = table_control.getCellIdFromRow(row)
         plane_t = view_control.getPlaneT()
-        # remove selected roi from dict_roi_coords_xyct
+        # remove selected roi from dict_roi_coords_xyct, dict_roi_matching
         if roi_selected_id:
-            del data_manager.dict_roi_coords_xyct[app_key][plane_t][roi_selected_id]
+            data_manager.dict_roi_matching["id"][plane_t].remove(roi_selected_id)
+            del data_manager.dict_roi_matching["match"][plane_t][roi_selected_id]
+            del data_manager.dict_roi_coords_xyct[plane_t][roi_selected_id]
             deleteIndexedRow(q_table, row)
         table_control.setLenRow(q_table.rowCount())
         print("ROI", roi_selected_id, "is removed.")
