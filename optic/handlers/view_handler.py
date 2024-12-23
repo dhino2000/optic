@@ -170,6 +170,15 @@ class ViewHandler:
             self.plane_t_pri:                        int = None
             self.plane_t_sec:                        int = None
 
+        def updateROIEditLayer(self):
+            updateROIEditLayer(
+                self.view_control,
+                self.view_control.layer_roi_edit, 
+                self.roi_points_edit, 
+                color=(255, 255, 255), 
+                opacity=self.view_control.roi_edit_radius
+            )
+
         def keyPressEvent(self, event: QKeyEvent):
             if event.key() in self.view_control.dict_key_pushed:
                 self.view_control.dict_key_pushed[event.key()] = True
@@ -207,13 +216,7 @@ class ViewHandler:
                     pass
 
                 self.roi_points_edit = set()
-                updateROIEditLayer(
-                    self.view_control,
-                    self.view_control.layer_roi_edit, 
-                    self.roi_points_edit, 
-                    color=(255, 255, 255), 
-                    opacity=150
-                )
+                self.updateROIEditLayer()
 
                 self.table_control.updateWidgetDynamicTableWithT(
                     self.view_control.data_manager.dict_roi_macthing["pri"], 
@@ -234,10 +237,10 @@ class ViewHandler:
                 if event.button() == Qt.LeftButton: 
                     self.is_dragging_edit = True
                     xmin, xmax, ymin, ymax = 0, self.view_control.image_sizes[0], 0, self.view_control.image_sizes[1]
-                    editROIdraw(self.roi_points_edit, x, y, radius=3, x_min=xmin, x_max=xmax, y_min=ymin, y_max=ymax)
+                    editROIdraw(self.roi_points_edit, x, y, radius=self.view_control.roi_edit_radius, x_min=xmin, x_max=xmax, y_min=ymin, y_max=ymax)
                 elif event.button() == Qt.RightButton:
                     self.is_dragging_edit = True
-                    editROIerase(self.roi_points_edit, x, y, radius=5) 
+                    editROIerase(self.roi_points_edit, x, y, radius=self.view_control.roi_edit_radius) 
             else:
                 # Select ROI
                 if event.button() == Qt.LeftButton:
@@ -267,17 +270,11 @@ class ViewHandler:
 
                 if event.buttons() & Qt.LeftButton:
                     xmin, xmax, ymin, ymax = 0, self.view_control.image_sizes[0], 0, self.view_control.image_sizes[1]
-                    editROIdraw(self.roi_points_edit, x, y, radius=3, x_min=xmin, x_max=xmax, y_min=ymin, y_max=ymax)
+                    editROIdraw(self.roi_points_edit, x, y, radius=self.view_control.roi_edit_radius, x_min=xmin, x_max=xmax, y_min=ymin, y_max=ymax)
                 elif event.buttons() & Qt.RightButton: 
-                    editROIerase(self.roi_points_edit, x, y, radius=5) 
+                    editROIerase(self.roi_points_edit, x, y, radius=self.view_control.roi_edit_radius)
 
-                updateROIEditLayer(
-                    self.view_control,
-                    self.view_control.layer_roi_edit, 
-                    self.roi_points_edit, 
-                    color=(255, 255, 255), 
-                    opacity=150
-                )
+                self.updateROIEditLayer()
 
         def mouseReleaseEvent(self, event: QMouseEvent):
             if self.is_dragging:

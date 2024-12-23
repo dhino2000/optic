@@ -745,6 +745,22 @@ def bindFuncButtonsROIManagerForTable(
     q_button_remove.clicked.connect(_removeSelectedROIfromTable)
     q_button_edit.clicked.connect(_editSelectedROI)
 
+# -> processing_roi_layouts.makeLayoutROIEditConfig
+def bindFuncSliderSpinBoxROIEditConfig(
+    q_slider_opacity: QSlider,
+    q_spinbox_radius: QSpinBox, 
+    view_control: ViewControl,      
+) -> None:
+    def onOpacityChanged(value: int) -> None:
+        view_control.roi_edit_opacity = value
+        view_control.view_handler.handler.updateROIEditLayer()
+    def onRadiusChanged(value: int) -> None:
+        view_control.roi_edit_radius = value
+        view_control.view_handler.handler.updateROIEditLayer()
+
+    q_slider_opacity.valueChanged.connect(onOpacityChanged)
+    q_spinbox_radius.valueChanged.connect(onRadiusChanged)
+
 """
 slider_layouts
 """

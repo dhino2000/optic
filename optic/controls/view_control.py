@@ -78,7 +78,9 @@ class ViewControl:
         self.roi_colors_xyct:   Dict[int, Dict[int, Tuple[int, int, int]]] = defaultdict(dict)
         self.roi_opacity:       int                                        = int(config_manager.gui_defaults["ROI_VISUAL_SETTINGS"]["DEFAULT_ROI_OPACITY"])
         self.highlight_opacity: int                                        = int(config_manager.gui_defaults["ROI_VISUAL_SETTINGS"]["DEFAULT_HIGHLIGHT_OPACITY"])
+        self.roi_edit_opacity:  int                                        = 150
         self.roi_pair_opacity:  int                                        = 255
+        self.roi_edit_radius:   int                                        = 5
 
         # Key pushing state, Mouse dragging state
         self.dict_key_pushed:   Dict[str, bool]                 = {Qt.Key_Control: False, Qt.Key_Shift: False}
