@@ -176,7 +176,7 @@ class ViewHandler:
                 self.view_control.layer_roi_edit, 
                 self.roi_points_edit, 
                 color=(255, 255, 255), 
-                opacity=self.view_control.roi_edit_radius
+                opacity=self.view_control.roi_edit_opacity
             )
 
         def keyPressEvent(self, event: QKeyEvent):

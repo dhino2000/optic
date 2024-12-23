@@ -124,7 +124,7 @@ def makeLayoutROIEditConfig(
         key_spinbox_pen_radius, 
         "Pen Radius:", 
         axis="horizontal", 
-        value_min=1, 
+        value_min=0, 
         value_max=100, 
         value_set=5, 
         step=1))
