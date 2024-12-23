@@ -110,11 +110,11 @@ def updateLayerROI_MicrogliaTracking(
 
     painter = QPainter(pixmap)
     painter.setRenderHint(QPainter.Antialiasing)
-    # ROISelectedId = control_manager.getSharedAttr(app_key, "roi_selected_id")
+    ROISelectedId = control_manager.getSharedAttr(app_key, "roi_selected_id")
     plane_t = view_control.getPlaneT()
     
     # WARNING: this code often causes crash, be careful when data_manager.dict_roi_coords_xyct is None
-    dict_roi_coords_xyct = data_manager.getDictROICoordsXYCT(app_key)
+    dict_roi_coords_xyct = data_manager.getDictROICoordsXYCT()
     if dict_roi_coords_xyct is not None:
         dict_roi_coords_xyct_tplane = dict_roi_coords_xyct.get(plane_t)
         for roiId, dict_roi_coords_single in dict_roi_coords_xyct_tplane.items():

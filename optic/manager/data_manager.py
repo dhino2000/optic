@@ -33,13 +33,14 @@ class DataManager:
         # ROI image
         self.dict_im_roi:               Dict[AppKeys, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
         self.dict_im_roi_reg:           Dict[AppKeys, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
-        # ROI mask, coordinates, XYCT
+        # ROI mask, coordinates
         self.dict_roi_mask:             Dict[AppKeys, np.ndarray[np.uint16, Tuple[int, int, int]]] = {}
         self.dict_roi_mask_reg:         Dict[AppKeys, np.ndarray[np.uint16, Tuple[int, int, int]]] = {}
-        self.dict_roi_coords_xyct:      Dict[AppKeys, Dict[int, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]]] = CustomDict()
-        self.dict_roi_coords_xyct_reg:  Dict[AppKeys, Dict[int, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]]] = CustomDict()
+        # for MicrogliaTracking
         # ROI matching, XYCT
-        self.dict_roi_macthing:         Dict[AppKeys, Dict[str, Dict[int, Optional[int]]]] = CustomDict()
+        self.dict_roi_matching:         Dict[str, Dict[int, List[int] | Dict[int, Dict[int, Optional[int]]]]] = {"id": {}, "match": {}}
+        self.dict_roi_coords_xyct:      Dict[int, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]] = CustomDict()
+        self.dict_roi_coords_xyct_reg:  Dict[int, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]] = CustomDict()
 
         self.dict_eventfile:            Dict[AppKeys, Dict[str, np.ndarray[Tuple[int]]]] = defaultdict(dict)
         self.dict_roicheck:             Dict[AppKeys, Any] = {}
@@ -214,14 +215,14 @@ class DataManager:
     def getROIMaskRegistered(self, app_key: AppKeys) -> np.ndarray[np.uint16, Tuple[int, int, int]]:
         return self.dict_roi_mask_reg.get(app_key)
     
-    def getDictROICoordsXYCT(self, app_key: AppKeys) -> Dict[int, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]]:
-        return self.dict_roi_coords_xyct.get(app_key)
+    def getDictROICoordsXYCT(self) -> Dict[int, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]]:
+        return self.dict_roi_coords_xyct
     
-    def getDictROICoordsXYCTRegistered(self, app_key: AppKeys) -> Dict[int, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]]:
-        return self.dict_roi_coords_xyct_reg.get(app_key)
+    def getDictROICoordsXYCTRegistered(self) -> Dict[int, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]]:
+        return self.dict_roi_coords_xyct_reg
     
-    def getDictROIMatching(self, app_key: AppKeys) -> Dict[str, Dict[int, Optional[int]]]:
-        return self.dict_roi_macthing.get(app_key)
+    def getDictROIMatching(self) -> Dict[int, Dict[int, Dict[int, Optional[int]]]]:
+        return self.dict_roi_matching
     
     # Elastix
     def getParameterMap(self, app_key: AppKeys) -> mapstringvectorstring:

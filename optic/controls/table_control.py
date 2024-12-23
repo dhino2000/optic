@@ -53,11 +53,23 @@ class TableControl:
         self.q_table.clear()
         self.q_table = setupWidgetROITable(self.q_table, self.len_row, self.table_columns, key_event_ignore=True)
 
-    def updateWidgetDynamicTableWithT(self, dict_roi_matching: Dict[int, Optional[int]], row_count:int, has_roi_id_match: bool) -> None:
+    def updateWidgetDynamicTableWithT(
+        self, 
+        dict_roi_matching: Dict[str, Dict[int, List[int] | Dict[int, Dict[int, Optional[int]]]]],
+        t_plane_pri: int, 
+        t_plane_sec: int, 
+        use_match: bool = True
+    ) -> None:
         from ..gui.table_setup import applyDictROIMatchingToTable
-        self.q_table.setRowCount(0) # initialize table
-        applyDictROIMatchingToTable(self.q_table, self.table_columns, dict_roi_matching, row_count, has_roi_id_match)
-        self.setLenRow(row_count)
+        self.q_table.setRowCount(0)  # Initialize the table
+        applyDictROIMatchingToTable(
+            self.q_table,
+            self.table_columns,
+            dict_roi_matching,
+            t_plane_pri,
+            t_plane_sec,
+            use_match
+        )
 
     # change table cell selection
     def onSelectionChanged(self, selected: QItemSelection, deselected: QItemSelection) -> None:

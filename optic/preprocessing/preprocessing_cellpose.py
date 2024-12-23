@@ -43,22 +43,42 @@ def convertCellposeMaskToDictROICoordsXYCT(
 # convert Cellpose's mask into dict of ROI matching
 def convertCellposeMaskToDictROIMatching(
     masks       : np.ndarray[np.uint16, Tuple[int, int, int]], 
-    ) -> Dict[str, Dict[int, Optional[int]]]:
-    dict_roi_matching = {}
+) -> Dict[str, Dict[int, List[int] | Dict[int, Dict[int, Optional[int]]]]]:
+    """
+    Convert a Cellpose mask array into a dict_roi_matching structure.
+    Dict["id", Dict[plane_t, List[roi_id]]], "match", Dict[plane_t_pri, Dict[plane_t_sec, Dict[roi_id, Optional[roi_id]]]]
+    """
+    dict_roi_matching = {"id": {}, "match": {}}
     list_plane_combi = list(combinations(range(len(masks)), 2))
-    for plane_combi in list_plane_combi:
-        plane_pri, plane_sec = plane_combi
-        key_plane_combi = f"t{plane_pri}_t{plane_sec}"
-        dict_roi_matching[key_plane_combi] = {}
 
+    # ROI ID
+    for plane_t, mask in enumerate(masks):
+        dict_roi_matching["id"][plane_t] = np.arange(len(np.delete(np.unique(mask), 0)))
+
+    # ROI Matching
+    for plane_pri, plane_sec in list_plane_combi:
+        # Initialize the nested dictionaries if not already present
+        if plane_pri not in dict_roi_matching["match"]:
+            dict_roi_matching["match"][plane_pri] = {}
+        if plane_sec not in dict_roi_matching["match"][plane_pri]:
+            dict_roi_matching["match"][plane_pri][plane_sec] = {}
+
+        # Extract the masks for the primary and secondary planes
         mask_pri, mask_sec = masks[plane_pri], masks[plane_sec]
+
+        # Get unique ROI IDs, excluding 0 (background)
         list_roi_id_cellpose_pri = np.delete(np.unique(mask_pri), 0)
         list_roi_id_cellpose_sec = np.delete(np.unique(mask_sec), 0)
-        for (roi_id_pri, roi_id_cellpose_pri) in enumerate(list_roi_id_cellpose_pri):
-            for (roi_id_sec, roi_id_cellpose_sec) in enumerate(list_roi_id_cellpose_sec):
+
+        # Perform ROI matching
+        for roi_id_pri, roi_id_cellpose_pri in enumerate(list_roi_id_cellpose_pri):
+            matched = False
+            for roi_id_sec, roi_id_cellpose_sec in enumerate(list_roi_id_cellpose_sec):
                 if roi_id_cellpose_sec == roi_id_cellpose_pri:
-                    dict_roi_matching[key_plane_combi][roi_id_pri] = roi_id_sec
+                    dict_roi_matching["match"][plane_pri][plane_sec][roi_id_pri] = roi_id_sec
+                    matched = True
                     break
-                else:
-                    dict_roi_matching[key_plane_combi][roi_id_pri] = None
+            if not matched:
+                dict_roi_matching["match"][plane_pri][plane_sec][roi_id_pri] = None
+
     return dict_roi_matching

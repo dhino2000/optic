@@ -153,34 +153,43 @@ def applyDictROITrackingToTable(
 
 # apply dict_roi_matching to table
 def applyDictROIMatchingToTable(
-        q_table: QTableWidget, 
-        table_columns: TableColumns,
-        dict_roi_matching: Dict[int, Optional[int]],
-        row_count: int,
-        has_roi_id_match: bool = False
-        ) -> None:
-    if q_table.rowCount() < row_count:
-        q_table.setRowCount(row_count)
+    q_table: QTableWidget,
+    table_columns: TableColumns,
+    dict_roi_matching: Dict[str, Dict[int, List[int] | Dict[int, Dict[int, Optional[int]]]]],
+    t_plane_pri: int,
+    t_plane_sec: int,
+    use_match: bool = True
+) -> None:
+    """
+    Apply ROI matching data to the widget table.
 
-    if has_roi_id_match:
-        for col_name, col_info in table_columns.getColumns().items():
-            if col_info['type'] == 'id':
-                col_index = col_info['order']
-                for row in range(row_count):
-                    item = QTableWidgetItem(str(row))
-                    q_table.setItem(row, col_index, item)
-            if col_info['type'] == 'id_match':
-                col_index = col_info['order']
-                for row in range(row_count):
-                    matched_id = dict_roi_matching.get(row)
-                    item = QTableWidgetItem()
-                    if matched_id is not None:
-                        item.setText(str(matched_id))
-                    q_table.setItem(row, col_index, item)
+    Parameters:
+        q_table (QTableWidget): The widget table to update.
+        table_columns (TableColumns): Column definitions.
+        dict_roi_matching (Dict): ROI matching data structure.
+        t_plane_pri (int): Primary T plane.
+        t_plane_sec (int): Secondary T plane.
+        use_match (bool): Whether to use "match" (True) or "id" (False) data.
+    """
+    # Retrieve the relevant data based on the use_match flag
+    if use_match:
+        matching_data = dict_roi_matching["match"].get(t_plane_pri, {}).get(t_plane_sec, {})
     else:
-        for col_name, col_info in table_columns.getColumns().items():
-            if col_info['type'] == 'id':
-                col_index = col_info['order']
-                for row in range(row_count):
-                    item = QTableWidgetItem(str(row))
-                    q_table.setItem(row, col_index, item)
+        matching_data = {roi_id: roi_id for roi_id in dict_roi_matching["id"].get(t_plane_sec, [])}
+
+    # Adjust the table row count
+    q_table.setRowCount(len(matching_data))
+
+    # Update the table based on column definitions
+    for col_name, col_info in table_columns.getColumns().items():
+        col_index = col_info['order']
+        if col_info['type'] == 'id':  # Primary ROI IDs
+            for row, (roi_id, _) in enumerate(matching_data.items()):
+                item = QTableWidgetItem(str(roi_id))
+                q_table.setItem(row, col_index, item)
+        elif col_info['type'] == 'id_match':  # Matched Secondary ROI IDs
+            for row, (_, matched_id) in enumerate(matching_data.items()):
+                item = QTableWidgetItem()
+                if matched_id is not None:
+                    item.setText(str(matched_id))
+                q_table.setItem(row, col_index, item)

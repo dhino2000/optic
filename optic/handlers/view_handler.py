@@ -206,7 +206,7 @@ class ViewHandler:
                         self.view_control.data_manager.dict_roi_coords_xyct["pri"][self.plane_t_pri][self.roi_id_edit] = dict_roi_coords_xyct_edit
                     elif self.view_control.app_key == AppKeys.SEC:
                         self.view_control.data_manager.dict_roi_coords_xyct["sec"][self.plane_t_sec][self.roi_id_edit] = dict_roi_coords_xyct_edit
-                    self.view_control.data_manager.dict_roi_macthing["pri"][key_roi_matching][self.roi_id_edit] = None
+                    self.view_control.data_manager.dict_roi_matching["pri"][key_roi_matching][self.roi_id_edit] = None
 
                     if self.view_control.app_key == AppKeys.PRI:
                         self.view_control.roi_colors_xyct[self.plane_t_pri][self.roi_id_edit] = generateRandomColor()
@@ -219,7 +219,7 @@ class ViewHandler:
                 self.updateROIEditLayer()
 
                 self.table_control.updateWidgetDynamicTableWithT(
-                    self.view_control.data_manager.dict_roi_macthing["pri"], 
+                    self.view_control.data_manager.dict_roi_matching["pri"], 
                     self.roi_id_edit+1,
                     self.view_control.app_key == AppKeys.PRI,
                     )

@@ -190,7 +190,6 @@ def updateView_MicrogliaTracking(
         )
 
     # Caution !!! width and height are swapped between TIFF and QImage
-    # Caution !!! width and height are swapped between TIFF and QImage
     bg_image_corrected = np.ascontiguousarray(bg_image.transpose(1, 0, 2))
 
     # Create QImage

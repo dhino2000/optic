@@ -258,30 +258,23 @@ def bindFuncROIMaskNpyIO(
             app_key, 
             ndim=3,
         )
-        # hardcoded !!!
-        data_manager.dict_roi_coords_xyct["pri"] = convertCellposeMaskToDictROICoordsXYCT(data_manager.getROIMask(app_key))
-        data_manager.dict_roi_macthing["pri"] = convertCellposeMaskToDictROIMatching(data_manager.getROIMask(app_key))
-        data_manager.dict_roi_coords_xyct["sec"] = data_manager.dict_roi_coords_xyct["pri"].copy()
+        data_manager.dict_roi_coords_xyct = convertCellposeMaskToDictROICoordsXYCT(data_manager.getROIMask(app_key))
+        data_manager.dict_roi_matching = convertCellposeMaskToDictROIMatching(data_manager.getROIMask(app_key))
 
         # initialize ROI XYCT Colors
-        for plane_t in data_manager.dict_roi_coords_xyct["pri"].keys():
-            for roi_id in data_manager.dict_roi_coords_xyct["pri"][plane_t].keys():
-                control_manager.view_controls["pri"].roi_colors_xyct[plane_t][roi_id]= generateRandomColor()
-                control_manager.view_controls["sec"].roi_colors_xyct[plane_t][roi_id]= generateRandomColor()
+        for plane_t in data_manager.dict_roi_coords_xyct.keys():
+            for roi_id in data_manager.dict_roi_coords_xyct[plane_t].keys():
+                control_manager.view_controls["pri"].roi_colors_xyct[plane_t][roi_id] = generateRandomColor()
+                control_manager.view_controls["sec"].roi_colors_xyct[plane_t][roi_id] = control_manager.view_controls["pri"].roi_colors_xyct[plane_t][roi_id]
 
         control_manager.view_controls["pri"].updateView()
         control_manager.view_controls["sec"].updateView()
 
-        dict_roi_matching = data_manager.getDictROIMatching("pri") # hardcoded !!!
-        t_pri, t_sec = control_manager.table_controls["pri"].getPlaneT(), control_manager.table_controls["sec"].getPlaneT()
-        key_roi_matching = f"t{t_pri}_t{t_sec}"
-        roi_matching = dict_roi_matching.get(key_roi_matching)
-
-        row_count_pri = len(data_manager.getDictROICoordsXYCT("pri").get(t_pri)) # hardcoded !!!
-        row_count_sec = len(data_manager.getDictROICoordsXYCT("sec").get(t_sec)) # hardcoded !!!
+        t_plane_pri = control_manager.view_controls["pri"].getPlaneT()
+        t_plane_sec = control_manager.view_controls["sec"].getPlaneT()
         
-        control_manager.table_controls["pri"].updateWidgetDynamicTableWithT(roi_matching, row_count_pri, True)
-        control_manager.table_controls["sec"].updateWidgetDynamicTableWithT(roi_matching, row_count_sec, False)
+        control_manager.table_controls["pri"].updateWidgetDynamicTableWithT(data_manager.dict_roi_matching, t_plane_pri, t_plane_sec, True)
+        control_manager.table_controls["sec"].updateWidgetDynamicTableWithT(data_manager.dict_roi_matching, t_plane_pri, t_plane_sec, False)
 
     q_button_load.clicked.connect(lambda: _loadMaskNpy())
 
@@ -852,16 +845,12 @@ def bindFuncPlaneTSliderWithXYCTTracking(
         control_manager.table_controls[app_key].setPlaneT(value)
 
         try:
-            dict_roi_matching = data_manager.getDictROIMatching("pri") # hardcoded !!!
-            t_pri, t_sec = table_control_pri.getPlaneT(), table_control_sec.getPlaneT()
-            key_roi_matching = f"t{t_pri}_t{t_sec}"
-            roi_matching = dict_roi_matching.get(key_roi_matching)
-
-            row_count_pri = len(data_manager.getDictROICoordsXYCT("pri").get(t_pri)) # hardcoded !!!
-            row_count_sec = len(data_manager.getDictROICoordsXYCT("sec").get(t_sec)) # hardcoded !!!
-
-            table_control_pri.updateWidgetDynamicTableWithT(roi_matching, row_count_pri, has_roi_id_match=True)
-            table_control_sec.updateWidgetDynamicTableWithT(roi_matching, row_count_sec, has_roi_id_match=False)
+            # hardcoded !!!
+            t_plane_pri = control_manager.view_controls["pri"].getPlaneT()
+            t_plane_sec = control_manager.view_controls["sec"].getPlaneT()
+            
+            control_manager.table_controls["pri"].updateWidgetDynamicTableWithT(data_manager.dict_roi_matching, t_plane_pri, t_plane_sec, True)
+            control_manager.table_controls["sec"].updateWidgetDynamicTableWithT(data_manager.dict_roi_matching, t_plane_pri, t_plane_sec, False)
         except Exception as e:
             # raise e
             pass
