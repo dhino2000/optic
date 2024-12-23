@@ -18,7 +18,7 @@ def convertCellposeMaskToDictROICoords(
 
     list_roi_id_cellpose = np.delete(np.unique(masks), 0)
     for roi_id, roi_id_cellpose in enumerate(list_roi_id_cellpose):
-        xpix, ypix = np.where(masks == roi_id_cellpose)
+        ypix, xpix = np.where(masks == roi_id_cellpose) # XY reversed
         xpix, ypix = xpix.astype("uint16"), ypix.astype("uint16")
 
         med = (int(np.median(xpix)), int(np.median(ypix)))
