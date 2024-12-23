@@ -188,14 +188,15 @@ def drawROIContour(
         painter.drawPoint(int(x), int(y))
 
 # draw single ROI pair
+# WARNING !!! Suite2p Fall's ROI center (med) is in the format of (y, x),
 def drawROIPair(
         painter: QPainter,
         coords_pri: Tuple[int, int],
         coords_sec: Tuple[int, int],
         opacity: int,
 ) -> None:
-    x_pri, y_pri = coords_pri
-    x_sec, y_sec = coords_sec
+    y_pri, x_pri = coords_pri
+    y_sec, x_sec = coords_sec
     color = PenColors.ROI_PAIR
     width = PenWidth.ROI_PAIR
     
