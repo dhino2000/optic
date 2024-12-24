@@ -53,7 +53,7 @@ def convertCellposeMaskToDictROIMatching(
 
     # ROI ID
     for plane_t, mask in enumerate(masks):
-        dict_roi_matching["id"][plane_t] = np.arange(len(np.delete(np.unique(mask), 0)))
+        dict_roi_matching["id"][plane_t] = list(np.arange(len(np.delete(np.unique(mask), 0))))
 
     # ROI Matching
     for plane_pri, plane_sec in list_plane_combi:

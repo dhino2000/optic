@@ -162,11 +162,13 @@ class ViewHandler:
         def __init__(self, view_control: ViewControl):
             self.view_control:               ViewControl = view_control
             self.table_control:             TableControl = view_control.control_manager.table_controls[view_control.app_key]
+            self.control_manager:         ControlManager = view_control.control_manager
             self.is_dragging:                       bool = False
             self.is_dragging_edit:                  bool = False
             self.drag_start_pos:         Tuple[int, int] = None
             self.roi_points_edit:   Set[Tuple[int, int]] = set()
             self.roi_id_edit:                        int = None
+            self.plane_t:                            int = None
             self.plane_t_pri:                        int = None
             self.plane_t_sec:                        int = None
 
@@ -198,33 +200,24 @@ class ViewHandler:
                     med = (np.median(xpix).astype("uint16"), np.median(ypix).astype("uint16"))
                     dict_roi_coords_xyct_edit = {"xpix": xpix, "ypix": ypix, "med": med}
 
-                    key_roi_matching = f"t{self.plane_t_pri}_t{self.plane_t_sec}"
-                    print(key_roi_matching, self.roi_id_edit)
+                    self.view_control.data_manager.dict_roi_coords_xyct[self.plane_t][self.roi_id_edit] = dict_roi_coords_xyct_edit
+                    self.view_control.data_manager.dict_roi_matching["id"][self.plane_t] += [self.roi_id_edit]
+                    self.view_control.data_manager.dict_roi_matching["match"][self.plane_t_pri][self.plane_t_sec][self.roi_id_edit] = None
+                    # hardcoded !!!
+                    self.control_manager.view_controls["pri"].roi_colors_xyct[self.plane_t][self.roi_id_edit] = generateRandomColor()
+                    self.control_manager.view_controls["sec"].roi_colors_xyct[self.plane_t][self.roi_id_edit] = self.control_manager.view_controls["pri"].roi_colors_xyct[self.plane_t][self.roi_id_edit]
 
-                    # Need to modify !!!
-                    if self.view_control.app_key == AppKeys.PRI:
-                        self.view_control.data_manager.dict_roi_coords_xyct["pri"][self.plane_t_pri][self.roi_id_edit] = dict_roi_coords_xyct_edit
-                    elif self.view_control.app_key == AppKeys.SEC:
-                        self.view_control.data_manager.dict_roi_coords_xyct["sec"][self.plane_t_sec][self.roi_id_edit] = dict_roi_coords_xyct_edit
-                    self.view_control.data_manager.dict_roi_matching["pri"][key_roi_matching][self.roi_id_edit] = None
-
-                    if self.view_control.app_key == AppKeys.PRI:
-                        self.view_control.roi_colors_xyct[self.plane_t_pri][self.roi_id_edit] = generateRandomColor()
-                    elif self.view_control.app_key == AppKeys.SEC:
-                        self.view_control.roi_colors_xyct[self.plane_t_sec][self.roi_id_edit] = generateRandomColor()
                 except IndexError as e: # no roi_points_edit
                     pass
 
                 self.roi_points_edit = set()
                 self.updateROIEditLayer()
 
-                self.table_control.updateWidgetDynamicTableWithT(
-                    self.view_control.data_manager.dict_roi_matching["pri"], 
-                    self.roi_id_edit+1,
-                    self.view_control.app_key == AppKeys.PRI,
-                    )
-                self.view_control.updateView()
-                
+                # hardcoded !!!
+                for app_key in ["pri", "sec"]:
+                    self.control_manager.table_controls[app_key].updateWidgetDynamicTableWithT(
+                    self.view_control.data_manager.dict_roi_matching, self.plane_t_pri, self.plane_t_sec, True if app_key == "pri" else False)
+                    self.control_manager.view_controls[app_key].updateView()
 
         def keyReleaseEvent(self, event: QKeyEvent):
             if event.key() in self.view_control.dict_key_pushed:

@@ -703,7 +703,8 @@ def bindFuncButtonsROIManagerForTable(
     control_manager: 'ControlManager',
     table_control: 'TableControl',
     view_control: 'ViewControl',
-    app_key: str,
+    app_key_pri: AppKeys,
+    app_key_sec: AppKeys,
 ) -> None:
     def _addROItoTable() -> None:
         if not view_control.roi_edit_mode:
@@ -711,25 +712,38 @@ def bindFuncButtonsROIManagerForTable(
             view_control.q_view.setFocus()
             print("roi_edit_mode:", view_control.roi_edit_mode)
 
-            roi_id_edit = table_control.len_row
+            if not data_manager.dict_roi_matching["id"][view_control.getPlaneT()]:
+                roi_id_edit = 0
+            else:
+                roi_id_edit = max(data_manager.dict_roi_matching["id"][view_control.getPlaneT()]) + 1 # new roi id, last ID+1
             view_control.view_handler.handler.roi_id_edit = roi_id_edit # for adding new roi
-            # Hardcoded !!!
-            view_control.view_handler.handler.plane_t_pri = control_manager.view_controls["pri"].getPlaneT()
-            view_control.view_handler.handler.plane_t_sec = control_manager.view_controls["sec"].getPlaneT()
+
+            view_control.view_handler.handler.plane_t_pri = control_manager.view_controls[app_key_pri].getPlaneT()
+            view_control.view_handler.handler.plane_t_sec = control_manager.view_controls[app_key_sec].getPlaneT()
+            if view_control.app_key == app_key_pri:
+                view_control.view_handler.handler.plane_t = view_control.view_handler.handler.plane_t_pri
+            elif view_control.app_key == app_key_sec:
+                view_control.view_handler.handler.plane_t = view_control.view_handler.handler.plane_t_sec
 
     def _removeSelectedROIfromTable() -> None:
         row = q_table.currentRow()
         roi_selected_id = table_control.getCellIdFromRow(row)
-        plane_t = view_control.getPlaneT()
+        plane_t_pri = control_manager.view_controls[app_key_pri].getPlaneT()
+        plane_t_sec = control_manager.view_controls[app_key_sec].getPlaneT()
+        plane_t = plane_t_pri if view_control.app_key == app_key_pri else plane_t_sec # pri or sec
         # remove selected roi from dict_roi_coords_xyct, dict_roi_matching
         if roi_selected_id:
             data_manager.dict_roi_matching["id"][plane_t].remove(roi_selected_id)
-            del data_manager.dict_roi_matching["match"][plane_t][roi_selected_id]
+            if view_control.app_key == app_key_pri: # pri
+                del data_manager.dict_roi_matching["match"][plane_t_pri][plane_t_sec][roi_selected_id]
+            elif view_control.app_key == app_key_sec: # sec
+                data_manager.dict_roi_matching["match"][plane_t_pri][plane_t_sec][roi_selected_id] = None
             del data_manager.dict_roi_coords_xyct[plane_t][roi_selected_id]
             deleteIndexedRow(q_table, row)
-        table_control.setLenRow(q_table.rowCount())
         print("ROI", roi_selected_id, "is removed.")
         view_control.updateView()
+        control_manager.table_controls[app_key_pri].updateWidgetDynamicTableWithT(data_manager.dict_roi_matching, plane_t_pri, plane_t_sec, True)
+        control_manager.table_controls[app_key_sec].updateWidgetDynamicTableWithT(data_manager.dict_roi_matching, plane_t_pri, plane_t_sec, False)
 
     def _editSelectedROI() -> None:
         if not view_control.roi_edit_mode:
