@@ -115,12 +115,20 @@ def updateLayerROI_MicrogliaTracking(
     
     # WARNING: this code often causes crash, be careful when data_manager.dict_roi_coords_xyct is None
     dict_roi_coords_xyct = data_manager.getDictROICoordsXYCT()
-    if dict_roi_coords_xyct is not None:
-        dict_roi_coords_xyct_tplane = dict_roi_coords_xyct.get(plane_t)
+    dict_roi_coords_xyct_tplane = dict_roi_coords_xyct.get(plane_t)
+    if not len(dict_roi_coords_xyct_tplane) == 0:
         for roiId, dict_roi_coords_single in dict_roi_coords_xyct_tplane.items():
-            color = view_control.getROIColorXYCT(plane_t, roiId)
-            opacity = view_control.getROIOpacity()
-            drawROI(painter, dict_roi_coords_single, color, opacity)
+            if roiId != ROISelectedId:
+                color = view_control.getROIColorXYCT(plane_t, roiId)
+                opacity = view_control.getROIOpacity()
+                drawROI(painter, dict_roi_coords_single, color, opacity)
+
+        # draw selected ROI
+        if draw_selected_roi and ROISelectedId is not None:
+            dict_roi_coords_selected = dict_roi_coords_xyct_tplane[ROISelectedId]
+            color_selected = view_control.getROIColorXYCT(plane_t, ROISelectedId)
+            opacity_selected = view_control.getHighlightOpacity()
+            drawROI(painter, dict_roi_coords_selected, color_selected, opacity_selected)
 
     painter.end()
     view_control.layer_roi.setPixmap(pixmap)

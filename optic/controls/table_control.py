@@ -70,6 +70,7 @@ class TableControl:
             t_plane_sec,
             use_match
         )
+        self.setLenRow(self.q_table.rowCount())
 
     # change table cell selection
     def onSelectionChanged(self, selected: QItemSelection, deselected: QItemSelection) -> None:
