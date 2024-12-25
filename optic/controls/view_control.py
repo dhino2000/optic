@@ -312,7 +312,6 @@ class ViewControl:
                 dict_roi_coords = self.data_manager.getDictROICoordsXYCTRegistered()
             else:
                 dict_roi_coords = self.data_manager.getDictROICoordsXYCT()
-                print(dict_roi_coords)
             if dict_roi_coords is not None:
                 dict_roi_coords = dict_roi_coords.get(self.getPlaneT())
         else: # for Suite2pROICheck, Suite2pROITracking

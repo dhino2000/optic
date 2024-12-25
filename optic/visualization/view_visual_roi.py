@@ -101,7 +101,7 @@ def updateLayerROI_MicrogliaTracking(
         data_manager: DataManager, 
         control_manager: ControlManager, 
         app_key: AppKeys,
-        app_key_sec: AppKeys,
+        app_key_sec: AppKeys = None,
         draw_selected_roi: bool = True
         ) -> None:
     width, height = view_control.getImageSize()
@@ -132,6 +132,22 @@ def updateLayerROI_MicrogliaTracking(
             color_selected = view_control.getROIColorXYCT(plane_t, ROISelectedId)
             opacity_selected = view_control.getHighlightOpacity()
             drawROI(painter, dict_roi_coords_selected, color_selected, opacity_selected)
+
+    # "pri" view, draw also "sec" ROI
+    if app_key_sec:
+        view_control_sec = control_manager.view_controls[app_key_sec]
+        plane_t_sec = view_control_sec.getPlaneT()
+        if view_control.getShowRegImROI(): # show registered ROIs
+            dict_roi_coords_xyct = data_manager.getDictROICoordsXYCTRegistered()
+        else:
+            dict_roi_coords_xyct = data_manager.getDictROICoordsXYCT()
+        dict_roi_coords_xyct_tplane = dict_roi_coords_xyct.get(plane_t_sec)
+        if not len(dict_roi_coords_xyct_tplane) == 0:
+            for roiId, dict_roi_coords_single in dict_roi_coords_xyct_tplane.items():
+                if roiId != ROISelectedId:
+                    color = (0, 0, 255) # blue
+                    opacity = view_control_sec.getROIOpacity()
+                    drawROI(painter, dict_roi_coords_single, color, opacity)
 
     painter.end()
     view_control.layer_roi.setPixmap(pixmap)

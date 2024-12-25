@@ -877,7 +877,9 @@ def bindFuncPlaneTSliderWithXYCTTracking(
                 q_slider_pri.setValue(value - 1)
 
         control_manager.view_controls[app_key].setPlaneT(value)
-        control_manager.view_controls[app_key].updateView()
+        # hardcoded !!!
+        control_manager.view_controls["pri"].updateView()
+        control_manager.view_controls["sec"].updateView()
         control_manager.table_controls[app_key].setPlaneT(value)
 
         try:

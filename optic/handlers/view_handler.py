@@ -232,9 +232,9 @@ class ViewHandler:
                 self.updateROIEditLayer()
 
                 # hardcoded !!!
-                for app_key in ["pri", "sec"]:
+                for app_key in [AppKeys.PRI, AppKeys.SEC]:
                     self.control_manager.table_controls[app_key].updateWidgetDynamicTableWithT(
-                    self.view_control.data_manager.dict_roi_matching, self.plane_t_pri, self.plane_t_sec, True if app_key == "pri" else False)
+                    self.view_control.data_manager.dict_roi_matching, self.plane_t_pri, self.plane_t_sec, True if app_key == AppKeys.PRI else False)
                     self.control_manager.view_controls[app_key].updateView()
 
         def keyReleaseEvent(self, event: QKeyEvent):
