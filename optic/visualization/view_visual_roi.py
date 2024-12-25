@@ -128,26 +128,7 @@ def updateLayerROI_MicrogliaTracking(
 
         # draw selected ROI
         if draw_selected_roi and ROISelectedId is not None:
-            dict_roi_coords_selected = dict_roi_coords_xyct_tplane[ROISelectedId]
-            color_selected = view_control.getROIColorXYCT(plane_t, ROISelectedId)
-            opacity_selected = view_control.getHighlightOpacity()
-            drawROI(painter, dict_roi_coords_selected, color_selected, opacity_selected)
-
-    # "pri" view, draw also "sec" ROI
-    if app_key_sec:
-        view_control_sec = control_manager.view_controls[app_key_sec]
-        plane_t_sec = view_control_sec.getPlaneT()
-        if view_control.getShowRegImROI(): # show registered ROIs
-            dict_roi_coords_xyct = data_manager.getDictROICoordsXYCTRegistered()
-        else:
-            dict_roi_coords_xyct = data_manager.getDictROICoordsXYCT()
-        dict_roi_coords_xyct_tplane = dict_roi_coords_xyct.get(plane_t_sec)
-        if not len(dict_roi_coords_xyct_tplane) == 0:
-            for roiId, dict_roi_coords_single in dict_roi_coords_xyct_tplane.items():
-                if roiId != ROISelectedId:
-                    color = (0, 0, 255) # blue
-                    opacity = view_control_sec.getROIOpacity()
-                    drawROI(painter, dict_roi_coords_single, color, opacity)
+            highlightROISelectedWithTrackingXYCT(view_control, painter, data_manager, control_manager, app_key, app_key_sec, plane_t)
 
     painter.end()
     view_control.layer_roi.setPixmap(pixmap)
@@ -294,7 +275,7 @@ def highlightROISelectedWithTracking(
         data_manager: DataManager, 
         control_manager: ControlManager, 
         app_key_pri: AppKeys,
-        app_key_sec: AppKeys = None
+        app_key_sec: AppKeys = None,
         ) -> None:
     # pri selected ROI
     ROISelectedId = control_manager.getSharedAttr(app_key_pri, "roi_selected_id")
@@ -318,6 +299,45 @@ def highlightROISelectedWithTracking(
             color = (0, 0, 255) # hardcoded !!!
             opacity = view_control.getHighlightOpacity()
             drawROI(painter, dict_roi_coords_single, color, opacity)
+
+# highlight selected ROI with tracking for XYCT stack
+def highlightROISelectedWithTrackingXYCT(
+    view_control: ViewControl, 
+    painter: QPainter, 
+    data_manager: DataManager, 
+    control_manager: ControlManager, 
+    app_key: AppKeys,
+    app_key_sec: AppKeys = None,
+    plane_t: int = 0,
+   ) -> None:
+    ROISelectedId = control_manager.getSharedAttr(app_key, "roi_selected_id")
+    # draw selected ROI
+    if ROISelectedId is not None:
+        if view_control.getShowRegImROI(): # show registered ROIs
+            dict_roi_coords_xyct = data_manager.getDictROICoordsXYCTRegistered()
+        else:
+            dict_roi_coords_xyct = data_manager.getDictROICoordsXYCT()
+        dict_roi_coords_xyct_tplane = dict_roi_coords_xyct.get(plane_t)
+        dict_roi_coords_selected = dict_roi_coords_xyct_tplane[ROISelectedId]
+        color_selected = view_control.getROIColorXYCT(plane_t, ROISelectedId)
+        opacity_selected = view_control.getHighlightOpacity()
+        drawROI(painter, dict_roi_coords_selected, color_selected, opacity_selected)
+
+    if app_key_sec:
+        view_control_sec = control_manager.view_controls[app_key_sec]
+        plane_t_sec = view_control_sec.getPlaneT()
+        if view_control.getShowRegImROI(): # show registered ROIs
+            dict_roi_coords_xyct = data_manager.getDictROICoordsXYCTRegistered()
+        else:
+            dict_roi_coords_xyct = data_manager.getDictROICoordsXYCT()
+        dict_roi_coords_xyct_tplane = dict_roi_coords_xyct.get(plane_t_sec)
+        if not len(dict_roi_coords_xyct_tplane) == 0:
+            for roiId, dict_roi_coords_single in dict_roi_coords_xyct_tplane.items():
+                if roiId != ROISelectedId:
+                    color = (0, 0, 255) # blue
+                    opacity = view_control_sec.getHighlightOpacity()
+                    drawROI(painter, dict_roi_coords_single, color, opacity)
+
 
 # draw ROI pairs
 def drawROIPairsOnlyDisplay(
