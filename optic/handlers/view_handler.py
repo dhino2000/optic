@@ -54,6 +54,10 @@ class ViewHandler:
 
     """
     Suite2pROICheck Handler
+    left click : select roi
+    middle click + drag : pan
+    ctrl + scroll : zoom in/out
+    R : reset zoom
     """
     class Suite2pROICheckHandler:
         def __init__(self, view_control: ViewControl, table_control: TableControl):
@@ -102,6 +106,17 @@ class ViewHandler:
 
     """
     Suite2pROITracking Handler
+    --- pri view ---
+    left click : select roi
+    right click : select roi in sec view
+    middle click + drag : pan
+    ctrl + scroll : zoom in/out
+    R : reset zoom
+    --- sec view ---
+    left click : select roi
+    middle click + drag : pan
+    ctrl + scroll : zoom in/out
+    R : reset zoom
     """
     class Suite2pROITrackingHandler:
         def __init__(self, view_control: ViewControl):
@@ -171,6 +186,7 @@ class ViewHandler:
             self.plane_t:                            int = None
             self.plane_t_pri:                        int = None
             self.plane_t_sec:                        int = None
+            self.roi_add_mode:                     bool = False
 
         def updateROIEditLayer(self):
             updateROIEditLayer(
@@ -201,11 +217,13 @@ class ViewHandler:
                     dict_roi_coords_xyct_edit = {"xpix": xpix, "ypix": ypix, "med": med}
 
                     self.view_control.data_manager.dict_roi_coords_xyct[self.plane_t][self.roi_id_edit] = dict_roi_coords_xyct_edit
-                    self.view_control.data_manager.dict_roi_matching["id"][self.plane_t] += [self.roi_id_edit]
-                    self.view_control.data_manager.dict_roi_matching["match"][self.plane_t_pri][self.plane_t_sec][self.roi_id_edit] = None
-                    # hardcoded !!!
-                    self.control_manager.view_controls["pri"].roi_colors_xyct[self.plane_t][self.roi_id_edit] = generateRandomColor()
-                    self.control_manager.view_controls["sec"].roi_colors_xyct[self.plane_t][self.roi_id_edit] = self.control_manager.view_controls["pri"].roi_colors_xyct[self.plane_t][self.roi_id_edit]
+                    # With "Add ROI" mode
+                    if self.roi_add_mode:
+                        self.view_control.data_manager.dict_roi_matching["id"][self.plane_t] += [self.roi_id_edit]
+                        self.view_control.data_manager.dict_roi_matching["match"][self.plane_t_pri][self.plane_t_sec][self.roi_id_edit] = None
+                        # hardcoded !!!
+                        self.control_manager.view_controls["pri"].roi_colors_xyct[self.plane_t][self.roi_id_edit] = generateRandomColor()
+                        self.control_manager.view_controls["sec"].roi_colors_xyct[self.plane_t][self.roi_id_edit] = self.control_manager.view_controls["pri"].roi_colors_xyct[self.plane_t][self.roi_id_edit]
 
                 except IndexError as e: # no roi_points_edit
                     pass

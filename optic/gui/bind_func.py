@@ -718,12 +718,14 @@ def bindFuncButtonsROIManagerForTable(
                 roi_id_edit = max(data_manager.dict_roi_matching["id"][view_control.getPlaneT()]) + 1 # new roi id, last ID+1
             view_control.view_handler.handler.roi_id_edit = roi_id_edit # for adding new roi
 
-            view_control.view_handler.handler.plane_t_pri = control_manager.view_controls[app_key_pri].getPlaneT()
-            view_control.view_handler.handler.plane_t_sec = control_manager.view_controls[app_key_sec].getPlaneT()
-            if view_control.app_key == app_key_pri:
-                view_control.view_handler.handler.plane_t = view_control.view_handler.handler.plane_t_pri
-            elif view_control.app_key == app_key_sec:
-                view_control.view_handler.handler.plane_t = view_control.view_handler.handler.plane_t_sec
+            plane_t_pri = control_manager.view_controls[app_key_pri].getPlaneT()
+            plane_t_sec = control_manager.view_controls[app_key_sec].getPlaneT()
+            plane_t = plane_t_pri if view_control.app_key == app_key_pri else plane_t_sec # pri or sec
+            view_control.view_handler.handler.plane_t_pri = plane_t_pri
+            view_control.view_handler.handler.plane_t_sec = plane_t_sec
+            view_control.view_handler.handler.plane_t = plane_t
+
+            view_control.view_handler.handler.roi_add_mode = True
 
     def _removeSelectedROIfromTable() -> None:
         row = q_table.currentRow()
@@ -747,8 +749,26 @@ def bindFuncButtonsROIManagerForTable(
 
     def _editSelectedROI() -> None:
         if not view_control.roi_edit_mode:
+            roi_id_edit = control_manager.getSharedAttr(view_control.app_key, "roi_selected_id")
+            if roi_id_edit is None:
+                QMessageBox.warning(q_table, "No ROI Selected", "Please select a ROI to edit.")
+                return
+            view_control.view_handler.handler.roi_id_edit = roi_id_edit
+
             view_control.roi_edit_mode = True
+            view_control.q_view.setFocus()
             print("roi_edit_mode:", view_control.roi_edit_mode)
+
+            plane_t_pri = control_manager.view_controls[app_key_pri].getPlaneT()
+            plane_t_sec = control_manager.view_controls[app_key_sec].getPlaneT()
+            plane_t = plane_t_pri if view_control.app_key == app_key_pri else plane_t_sec # pri or sec
+            view_control.view_handler.handler.plane_t_pri = plane_t_pri
+            view_control.view_handler.handler.plane_t_sec = plane_t_sec
+            view_control.view_handler.handler.plane_t = plane_t
+
+            dict_roi_coords_xyct_selected = data_manager.dict_roi_coords_xyct[plane_t][roi_id_edit]
+            view_control.view_handler.handler.roi_points_edit = set([(x, y) for x, y in zip(dict_roi_coords_xyct_selected["xpix"], dict_roi_coords_xyct_selected["ypix"])])
+            view_control.view_handler.handler.roi_add_mode = False
 
     q_button_add.clicked.connect(_addROItoTable)
     q_button_remove.clicked.connect(_removeSelectedROIfromTable)
