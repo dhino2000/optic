@@ -323,11 +323,11 @@ class ViewControl:
             return # No ROI data
 
         dict_roi_med = {roi_id: dict_roi_coords[roi_id]["med"] for roi_id in dict_roi_coords.keys()}
-        skip_checkboxes = [checkbox for key, checkbox in self.widget_manager.dict_checkbox.items() if key.startswith(f"{self.app_key}_skip_choose_")]
+        skip_roi_types = self.control_manager.getSharedAttr(self.app_key, "skip_roi_types") # skip celltype, checkbox
         dict_roi_skip = {roi_id: shouldSkipROI(roi_id, 
                                                self.config_manager.getTableColumns(self.app_key).getColumns(),
                                                self.widget_manager.dict_table[self.app_key],
-                                               skip_checkboxes) 
+                                               skip_roi_types) 
                         for roi_id in dict_roi_med.keys()}
         closest_roi_id = findClosestROI(x, y, dict_roi_med, dict_roi_skip)
         if closest_roi_id is not None:

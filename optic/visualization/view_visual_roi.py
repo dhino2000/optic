@@ -252,11 +252,10 @@ def shouldSkipROI(
         roi_id: int, 
         table_columns: dict, 
         q_table: QTableWidget, 
-        skip_checkboxes: List[QCheckBox]
+        skip_roi_types: Dict[str, bool],
         ) -> bool:
-    for checkbox in skip_checkboxes:
-        if checkbox.isChecked():
-            celltype = checkbox.text().replace("Skip ", "").replace(" ROI", "")
+    for celltype, skip in skip_roi_types.items():
+        if skip:
             for col_name, col_info in table_columns.items():
                 if col_name == celltype:
                     if col_info['type'] == 'celltype':

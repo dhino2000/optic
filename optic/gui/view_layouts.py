@@ -77,7 +77,7 @@ def makeLayoutDislplayCelltype(
         ) -> QHBoxLayout:
     # change ROI display, All, Cell, Not Cell
     roidisp_options = ["All ROI", "None"]
-    roidisp_options.extend([key for key, value in table_columns.items() if value['type'] == 'celltype'])
+    roidisp_options.extend([key for key, value in table_columns.getColumns().items() if value['type'] == 'celltype'])
     layout = makeLayoutButtonGroup(q_widget, widget_manager, key_buttongroup=key_buttongroup, list_label_buttongroup=roidisp_options)
     return layout
 
@@ -99,7 +99,7 @@ def makeLayoutROIChooseSkip(
         table_columns: TableColumns
         ) -> QHBoxLayout:
     layout = QHBoxLayout()
-    skip_items = [key for key, value in table_columns.items() if value['type'] in ['celltype', 'checkbox']]
+    skip_items = [key for key, value in table_columns.getColumns().items() if value['type'] in ['celltype', 'checkbox']]
     for item in skip_items:
         key_checkbox_item = f"skip_choose_{item}"
         label_checkbox_item = f"Skip {item} ROI"

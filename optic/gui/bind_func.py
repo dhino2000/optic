@@ -1008,6 +1008,19 @@ def bindFuncRadiobuttonBGImageTypeChanged(
     checked_button = q_buttongroup.checkedButton()
     _onBGImageTypeChanged(q_buttongroup.id(checked_button))
 
+# -> view_layouts.makeLayoutROIChooseSkip, Neuron, Not Cell, Check, ...
+def bindFuncCheckBoxROIChooseSkip(
+    list_q_checkbox: List['QCheckBox'],
+    control_manager: 'ControlManager',
+    app_key: AppKeys,
+) -> None:
+    def _onCheckBoxChanged(state: int, q_checkbox_text: str) -> None:
+        is_checked = (state == Qt.Checked)
+        celltype = q_checkbox_text.split(" ")[1]
+        control_manager.setSharedAttrDictValue(app_key, "skip_roi_types", celltype, is_checked)
+    for q_checkbox in list_q_checkbox:
+        q_checkbox.stateChanged.connect(lambda state, q_checkbox_text=q_checkbox.text(): _onCheckBoxChanged(state, q_checkbox_text))
+
 # -> view_layouts.makeLayoutDisplayROIContourNext
 def bindFuncCheckBoxDisplayROIContourNext(
     q_checkbox_contour: 'QCheckBox', 

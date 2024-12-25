@@ -18,8 +18,16 @@ class ControlManager:
     def setSharedAttr(self, app_key: Union[AppKeys, str], key_attr: str, value: Any) -> None:
         self.shared_attr[app_key][key_attr] = value
 
+    def setSharedAttrDictValue(self, app_key: Union[AppKeys, str], key_attr: str, key_dict: str, value: Any) -> None:
+        self.shared_attr[app_key][key_attr][key_dict] = value
+
     def getSharedAttr(self, app_key: Union[AppKeys, str], key_attr: str) -> Any:
         return self.shared_attr[app_key].get(key_attr)
 
     def getAllSharedAttrs(self, app_key: Union[AppKeys, str]) -> Dict[str, Any]:
         return self.shared_attr[app_key]
+    
+    # intialize controls
+    def initializeSkipROITypes(self, app_key: Union[AppKeys, str], table_columns: TableColumns) -> None:
+        skip_items = [key for key, value in table_columns.getColumns().items() if value['type'] in ['celltype', 'checkbox']]
+        self.setSharedAttr(app_key, "skip_roi_types", {skip_item: False for skip_item in skip_items})
