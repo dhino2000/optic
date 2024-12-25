@@ -111,6 +111,8 @@ class Suite2pROITrackingGUI(QMainWindow):
                 app_key_sec=self.app_keys[1] if app_key == self.app_keys[0] else None # only "pri" app_key has sec app_key
             )
             self.control_manager.view_controls[app_key].setViewSize()
+            
+            self.control_manager.initializeSkipROITypes(app_key, self.control_manager.table_controls[app_key].table_columns)
 
     """
     makeLayout Function; Component
@@ -136,7 +138,7 @@ class Suite2pROITrackingGUI(QMainWindow):
             self, 
             self.widget_manager, 
             key_buttongroup=f'{app_key}_display_celltype', 
-            table_columns=self.config_manager.table_columns[app_key].getColumns()
+            table_columns=self.config_manager.table_columns[app_key]
         ))
         layout.addLayout(makeLayoutBGImageTypeDisplay(
             self, 
@@ -146,7 +148,7 @@ class Suite2pROITrackingGUI(QMainWindow):
         layout.addLayout(makeLayoutROIChooseSkip(
             self.widget_manager, 
             key_checkbox=f'{app_key}', 
-            table_columns=self.config_manager.table_columns[app_key].getColumns()
+            table_columns=self.config_manager.table_columns[app_key]
         ))
         return layout
     
@@ -182,7 +184,7 @@ class Suite2pROITrackingGUI(QMainWindow):
             self.widget_manager, 
             key_label=app_key, 
             key_table=app_key, 
-            table_columns=self.config_manager.table_columns[app_key].getColumns()
+            table_columns=self.config_manager.table_columns[app_key]
         ))
         layout.addWidget(self.widget_manager.makeWidgetButton(key=f"{app_key}_config_table", label="Table Columns Config"))
         layout.addLayout(makeLayoutROICheckIO(
@@ -386,6 +388,12 @@ class Suite2pROITrackingGUI(QMainWindow):
                 q_buttongroup=self.widget_manager.dict_buttongroup[f"{app_key}_display_celltype"], 
                 view_control=self.control_manager.view_controls[app_key],
                 table_control=self.control_manager.table_controls[app_key],
+            )
+            # Checkbox ROISkip stateChanged
+            bindFuncCheckBoxROIChooseSkip(
+                list_q_checkbox=[q_checkbox for key, q_checkbox in self.widget_manager.dict_checkbox.items() if (f"skip_choose_" in key) and (f"{app_key}" in key)],
+                control_manager=self.control_manager,
+                app_key=app_key,
             )
             # ROICheck Table TableColumn CellType Changed
             bindFuncRadiobuttonOfTableChanged(

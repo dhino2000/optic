@@ -18,7 +18,7 @@ def makeLayoutROICount(widget_manager: WidgetManager, key_label: str, table_colu
     layout = QHBoxLayout()
     # ROI number label
     list_celltype = ["All"]
-    list_celltype += [key for key, value in table_columns.items() if value['type'] == 'celltype']
+    list_celltype += [key for key, value in table_columns.getColumns().items() if value['type'] == 'celltype']
     for celltype in list_celltype:
         text = f"{celltype}: 0"
         layout.addWidget(widget_manager.makeWidgetLabel(key=f"{key_label}_roicount_{celltype}", label=text))  # レイアウトにラベルを追加

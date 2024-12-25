@@ -120,6 +120,7 @@ class Suite2pROICheckGUI(QMainWindow):
             control_manager=self.control_manager,
             ax_layout="triple"
         )
+        self.control_manager.initializeSkipROITypes(self.app_key_pri, self.control_manager.table_controls[self.app_key_pri].table_columns)
 
     """
     makeLayout Function; Component
@@ -193,7 +194,7 @@ class Suite2pROICheckGUI(QMainWindow):
             self, 
             self.widget_manager, 
             key_buttongroup=f'{self.app_key_pri}_display_celltype', 
-            table_columns=self.config_manager.table_columns[self.app_key_pri].getColumns()
+            table_columns=self.config_manager.table_columns[self.app_key_pri]
         ))
         layout.addLayout(makeLayoutBGImageTypeDisplay(
             self, 
@@ -203,7 +204,7 @@ class Suite2pROICheckGUI(QMainWindow):
         layout.addLayout(makeLayoutROIChooseSkip(
             self.widget_manager, 
             key_checkbox=f'{self.app_key_pri}', 
-            table_columns=self.config_manager.table_columns[self.app_key_pri].getColumns()
+            table_columns=self.config_manager.table_columns[self.app_key_pri]
         ))
         return layout
 
@@ -245,7 +246,7 @@ class Suite2pROICheckGUI(QMainWindow):
             self.widget_manager, 
             key_label=self.app_key_pri, 
             key_table=self.app_key_pri, 
-            table_columns=self.config_manager.table_columns[self.app_key_pri].getColumns()
+            table_columns=self.config_manager.table_columns[self.app_key_pri]
         ))
         layout.addWidget(self.widget_manager.makeWidgetButton(key=f"{self.app_key_pri}_config_table", label="Table Columns Config"))
         layout.addWidget(self.widget_manager.makeWidgetButton(key=f"{self.app_key_pri}_roi_celltype_set", label="Set ROI Celltype"))
@@ -385,6 +386,12 @@ class Suite2pROICheckGUI(QMainWindow):
             q_buttongroup=self.widget_manager.dict_buttongroup[f"{self.app_key_pri}_display_celltype"], 
             view_control=self.control_manager.view_controls[self.app_key_pri],
             table_control=self.control_manager.table_controls[self.app_key_pri],
+        )
+        # Checkbox ROISkip stateChanged
+        bindFuncCheckBoxROIChooseSkip(
+            list_q_checkbox=[q_checkbox for key, q_checkbox in self.widget_manager.dict_checkbox.items() if f"skip_choose_" in key],
+            control_manager=self.control_manager,
+            app_key=self.app_key_pri,
         )
         # Filter ROIs
         bindFuncButtonFilterROI(

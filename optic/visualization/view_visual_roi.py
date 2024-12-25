@@ -250,13 +250,13 @@ def findClosestROI(
 # Skip ROIs with "Skip" checkbox checked
 def shouldSkipROI(
         roi_id: int, 
-        table_columns: dict, 
+        table_columns: TableColumns, 
         q_table: QTableWidget, 
         skip_roi_types: Dict[str, bool],
         ) -> bool:
     for celltype, skip in skip_roi_types.items():
         if skip:
-            for col_name, col_info in table_columns.items():
+            for col_name, col_info in table_columns.getColumns().items():
                 if col_name == celltype:
                     if col_info['type'] == 'celltype':
                         radio_button = q_table.cellWidget(roi_id, col_info['order'])

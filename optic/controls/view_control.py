@@ -325,7 +325,7 @@ class ViewControl:
         dict_roi_med = {roi_id: dict_roi_coords[roi_id]["med"] for roi_id in dict_roi_coords.keys()}
         skip_roi_types = self.control_manager.getSharedAttr(self.app_key, "skip_roi_types") # skip celltype, checkbox
         dict_roi_skip = {roi_id: shouldSkipROI(roi_id, 
-                                               self.config_manager.getTableColumns(self.app_key).getColumns(),
+                                               self.config_manager.getTableColumns(self.app_key),
                                                self.widget_manager.dict_table[self.app_key],
                                                skip_roi_types) 
                         for roi_id in dict_roi_med.keys()}

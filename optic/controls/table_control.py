@@ -6,6 +6,7 @@ import numpy as np
 from ..visualization.info_visual import updateROIPropertyDisplay, updateROICountDisplay
 from ..utils.dialog_utils import showConfirmationDialog
 from ..utils.info_utils import extractRangeValues
+from ..visualization.view_visual_roi import shouldSkipROI
 
 class TableControl:
     def __init__(
@@ -275,10 +276,8 @@ class TableControl:
             self.selected_column = min(self.q_table.columnCount() - 1, self.selected_column + step)
         elif move_type == 'cell_type':
             self.moveToSameCellType(self.selected_row, step)
-        elif move_type == 'skip_checked':
-            self.moveSkippingChecked(self.selected_row, step, True)
-        elif move_type == 'skip_unchecked':
-            self.moveSkippingChecked(self.selected_row, step, False)
+        elif move_type == 'skip_roi':
+            self.moveSkippingROI(self.selected_row, step)
         elif move_type == 'selected_type':
             self.moveToSelectedType(self.selected_row, step)
 
@@ -314,8 +313,8 @@ class TableControl:
                 self.selected_row = new_row
                 return
             
-    # move row with skipping "Check checked" or "Check unchecked"
-    def moveSkippingChecked(self, start_row: int, direction: Literal[-1, 1], skip_checked: bool) -> None:
+    # move row with skipping "Skip XXX ROI" checked or unchecked
+    def moveSkippingROI(self, start_row: int, direction: Literal[-1, 1]) -> None:
         total_rows = self.q_table.rowCount()
         new_row = start_row
 
@@ -323,7 +322,14 @@ class TableControl:
             new_row = (new_row + direction) % total_rows
             if new_row == start_row:
                 break
-            if self.getRowChecked(new_row) != skip_checked:
+
+            # if the ROI is not skipped, select it
+            if not shouldSkipROI(
+                roi_id=new_row,
+                table_columns=self.table_columns,
+                q_table=self.q_table,
+                skip_roi_types=self.control_manager.getSharedAttr(self.app_key, "skip_roi_types")
+            ):
                 self.selected_row = new_row
                 return
             
