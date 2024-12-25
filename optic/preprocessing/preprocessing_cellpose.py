@@ -21,7 +21,7 @@ def convertCellposeMaskToDictROICoords(
         ypix, xpix = np.where(masks == roi_id_cellpose) # XY reversed
         xpix, ypix = xpix.astype("uint16"), ypix.astype("uint16")
 
-        med = (int(np.median(xpix)), int(np.median(ypix)))
+        med = (int(np.median(ypix)), int(np.median(xpix))) # XY reversed, follow Suite2p format
         dict_roi_coords[roi_id] = {"xpix": xpix, "ypix": ypix, "med": med}
     return dict_roi_coords
 
@@ -36,7 +36,7 @@ def convertCellposeMaskToDictROICoordsXYCT(
             ypix, xpix = np.where(mask == roi_id_cellpose) # XY reversed
             xpix, ypix = xpix.astype("uint16"), ypix.astype("uint16")
 
-            med = (int(np.median(xpix)), int(np.median(ypix)))
+            med = (int(np.median(ypix)), int(np.median(xpix))) # XY reversed, follow Suite2p format
             dict_roi_coords_xyct[t_plane][roi_id] = {"xpix": xpix, "ypix": ypix, "med": med}
     return dict_roi_coords_xyct
 

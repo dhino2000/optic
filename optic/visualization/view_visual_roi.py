@@ -114,7 +114,10 @@ def updateLayerROI_MicrogliaTracking(
     plane_t = view_control.getPlaneT()
     
     # WARNING: this code often causes crash, be careful when data_manager.dict_roi_coords_xyct is None
-    dict_roi_coords_xyct = data_manager.getDictROICoordsXYCT()
+    if view_control.getShowRegImROI(): # show registered ROIs
+        dict_roi_coords_xyct = data_manager.getDictROICoordsXYCTRegistered()
+    else:
+        dict_roi_coords_xyct = data_manager.getDictROICoordsXYCT()
     dict_roi_coords_xyct_tplane = dict_roi_coords_xyct.get(plane_t)
     if not len(dict_roi_coords_xyct_tplane) == 0:
         for roiId, dict_roi_coords_single in dict_roi_coords_xyct_tplane.items():
@@ -224,8 +227,8 @@ def drawROIPair(
 def findClosestROI(
         x: int, 
         y: int, 
-        dict_roi_med: dict, 
-        skip_roi: dict = None
+        dict_roi_med: Dict[int, Tuple[int, int]],
+        skip_roi: Dict[int, bool] = None
         ) -> Optional[int]:
     if not dict_roi_med:
         return None

@@ -306,12 +306,13 @@ class ViewControl:
         self.view_handler.handleWheelEvent(event)
 
     # With click, get the closest ROI id and update view
-    def getROIwithClick(self, x:int, y:int, reg:bool=False, xyct:bool=False) -> None:
+    def getROIwithClick(self, x:int, y:int, reg:bool=False, xyct:bool=False, roi_skip:bool=True) -> None:
         if xyct: # for Microglia Tracking XYCT
             if reg:
                 dict_roi_coords = self.data_manager.getDictROICoordsXYCTRegistered()
             else:
                 dict_roi_coords = self.data_manager.getDictROICoordsXYCT()
+                print(dict_roi_coords)
             if dict_roi_coords is not None:
                 dict_roi_coords = dict_roi_coords.get(self.getPlaneT())
         else: # for Suite2pROICheck, Suite2pROITracking
@@ -323,12 +324,17 @@ class ViewControl:
             return # No ROI data
 
         dict_roi_med = {roi_id: dict_roi_coords[roi_id]["med"] for roi_id in dict_roi_coords.keys()}
-        skip_roi_types = self.control_manager.getSharedAttr(self.app_key, "skip_roi_types") # skip celltype, checkbox
-        dict_roi_skip = {roi_id: shouldSkipROI(roi_id, 
-                                               self.config_manager.getTableColumns(self.app_key),
-                                               self.widget_manager.dict_table[self.app_key],
-                                               skip_roi_types) 
-                        for roi_id in dict_roi_med.keys()}
+        
+        if roi_skip: # skip celltype, checkbox
+            skip_roi_types = self.control_manager.getSharedAttr(self.app_key, "skip_roi_types")
+            dict_roi_skip = {roi_id: shouldSkipROI(roi_id, 
+                                                self.config_manager.getTableColumns(self.app_key),
+                                                self.widget_manager.dict_table[self.app_key],
+                                                skip_roi_types) 
+                            for roi_id in dict_roi_med.keys()}
+        else:
+            dict_roi_skip = None
+            
         closest_roi_id = findClosestROI(x, y, dict_roi_med, dict_roi_skip)
         if closest_roi_id is not None:
             self.control_manager.setSharedAttr(self.app_key, 'roi_selected_id', closest_roi_id)

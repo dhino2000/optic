@@ -133,10 +133,11 @@ class ViewHandler:
             pass
 
         def mousePressEvent(self, event: QMouseEvent):
+            scene_pos = self.view_control.q_view.mapToScene(event.pos())
+            x, y = int(scene_pos.x()), int(scene_pos.y())
             if event.button() == Qt.LeftButton: # for "pri", "sec" views
-                scene_pos = self.view_control.q_view.mapToScene(event.pos())
                 reg = self.view_control.getShowRegImROI() # registered ROI
-                self.view_control.getROIwithClick(int(scene_pos.x()), int(scene_pos.y()), reg)
+                self.view_control.getROIwithClick(x, y , reg)
                 roi_selected_id = self.view_control.control_manager.getSharedAttr(self.view_control.app_key, 'roi_selected_id')
                 self.table_control.updateSelectedROI(roi_selected_id)
                 self.table_control.q_table.setFocus()
@@ -145,9 +146,8 @@ class ViewHandler:
                     self.view_control_sec: ViewControl = self.control_manager.view_controls[AppKeys.SEC]
                     self.table_control_sec: TableControl = self.control_manager.table_controls[AppKeys.SEC]
                     
-                    scene_pos = self.view_control.q_view.mapToScene(event.pos())
                     reg = self.view_control.getShowRegImROI() # registered ROI
-                    self.view_control_sec.getROIwithClick(int(scene_pos.x()), int(scene_pos.y()), reg)
+                    self.view_control_sec.getROIwithClick(x, y , reg)
                     roi_selected_id = self.view_control_sec.control_manager.getSharedAttr(self.view_control_sec.app_key, 'roi_selected_id')
                     self.table_control_sec.updateSelectedROI(roi_selected_id)
                     self.table_control_sec.q_table.setFocus()
@@ -242,9 +242,10 @@ class ViewHandler:
                 self.view_control.dict_key_pushed[event.key()] = False
 
         def mousePressEvent(self, event: QMouseEvent):
+            scene_pos = self.view_control.q_view.mapToScene(event.pos())
+            x, y = int(scene_pos.x()), int(scene_pos.y())
             if self.view_control.roi_edit_mode:
-                scene_pos = self.view_control.q_view.mapToScene(event.pos())
-                x, y = int(scene_pos.x()), int(scene_pos.y())
+                # Edit ROI
                 if event.button() == Qt.LeftButton: 
                     self.is_dragging_edit = True
                     xmin, xmax, ymin, ymax = 0, self.view_control.image_sizes[0], 0, self.view_control.image_sizes[1]
@@ -254,13 +255,23 @@ class ViewHandler:
                     editROIerase(self.roi_points_edit, x, y, radius=self.view_control.roi_edit_radius) 
             else:
                 # Select ROI
-                if event.button() == Qt.LeftButton:
-                    scene_pos = self.view_control.q_view.mapToScene(event.pos())
-                    reg = self.view_control.getShowRegImROI() # registered ROI
-                    self.view_control.getROIwithClick(int(scene_pos.x()), int(scene_pos.y()), reg, xyct=True)
+                reg = self.view_control.getShowRegImROI() # registered ROI
+                if event.button() == Qt.LeftButton: # for "pri", "sec" views
+                    self.view_control.getROIwithClick(x, y, reg, xyct=True, roi_skip=False)
+                    print(f"ROI selected: {self.view_control.control_manager.getSharedAttr(self.view_control.app_key, 'roi_selected_id')}")
                     roi_selected_id = self.view_control.control_manager.getSharedAttr(self.view_control.app_key, 'roi_selected_id')
                     self.table_control.updateSelectedROI(roi_selected_id)
                     self.table_control.q_table.setFocus()
+                elif event.button() == Qt.RightButton: # for "pri" view
+                    if self.view_control.app_key == AppKeys.PRI:
+                        self.view_control_sec: ViewControl = self.control_manager.view_controls[AppKeys.SEC]
+                        self.table_control_sec: TableControl = self.control_manager.table_controls[AppKeys.SEC]
+                        
+                        self.view_control_sec.getROIwithClick(x, y, reg, xyct=True, roi_skip=False)
+                        roi_selected_id = self.view_control_sec.control_manager.getSharedAttr(self.view_control_sec.app_key, 'roi_selected_id')
+                        self.table_control_sec.updateSelectedROI(roi_selected_id)
+                        self.table_control_sec.q_table.setFocus()
+                        self.view_control.updateView()
                 # Pan
                 elif event.button() == Qt.MiddleButton:
                     self.is_dragging = True

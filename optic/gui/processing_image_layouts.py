@@ -55,6 +55,75 @@ def makeLayoutFallRegistration(
     layout.addLayout(layout_slider)
     return layout
 
+# Microglia XYCT Stack Image Registration config
+def makeLayoutMicrogliaXYCTStackRegistration(
+        widget_manager              : WidgetManager, 
+        data_manager                : DataManager,
+        app_key                     : str,
+        key_label_elastix_method    : str, 
+        key_label_ref_c             : str,
+        key_label_ref_t             : str,
+        key_label_opacity_pair      : str,
+        key_combobox_elastix_method : str, 
+        key_combobox_ref_c          : str,
+        key_combobox_ref_t          : str,
+        key_button_config           : str,
+        key_button_run_t            : str,
+        key_button_export           : str,
+        key_checkbox_show_roi_match : str,
+        key_checkbox_show_roi_pair  : str,
+        key_checkbox_show_reg_im_bg : str,
+        key_checkbox_show_reg_im_roi: str,
+        key_slider_opacity_pair     : str,
+        ) -> QVBoxLayout:
+    layout = QVBoxLayout()
+    layout.addWidget(widget_manager.makeWidgetLabel(key=key_label_elastix_method, label="Image Registration", bold=True, italic=True, use_global_style=False))
+    layout_elastix = QHBoxLayout()
+    layout_elastix.addLayout(makeLayoutComboBoxLabel(
+        widget_manager, 
+        key_label_elastix_method, 
+        key_combobox_elastix_method, 
+        "Elastix method:", 
+        axis="horizontal", 
+        items=["rigid", "affine", "bspline"]
+        ))
+    layout_elastix.addLayout(makeLayoutElastixConfig(widget_manager, key_button_config))
+    layout_ref_plane = QHBoxLayout()
+    layout_ref_plane.addLayout(makeLayoutComboBoxLabel(
+        widget_manager, 
+        key_label_ref_c, 
+        key_combobox_ref_c, 
+        "Reference channel:", 
+        axis="horizontal",
+        items=[str(i) for i in range(data_manager.getSizeOfC(app_key))]
+        ))
+    layout_ref_plane.addLayout(makeLayoutComboBoxLabel(
+        widget_manager, 
+        key_label_ref_t, 
+        key_combobox_ref_t, 
+        "Reference T plane:", 
+        axis="horizontal",
+        items=[str(i) for i in range(data_manager.getSizeOfT(app_key))]
+        ))
+    
+    layout_run = QHBoxLayout()
+    layout_run.addWidget(widget_manager.makeWidgetButton(key=key_button_run_t, label="Run Elastix (t-axis)"))
+    layout_checkbox = QHBoxLayout()
+    layout_checkbox.addWidget(widget_manager.makeWidgetCheckBox(key=key_checkbox_show_roi_match, label="Show Matched ROI", checked=True))
+    layout_checkbox.addWidget(widget_manager.makeWidgetCheckBox(key=key_checkbox_show_roi_pair, label="Show ROI pairs", checked=True))
+    layout_checkbox.addWidget(widget_manager.makeWidgetCheckBox(key=key_checkbox_show_reg_im_bg, label="Show Registered Image", checked=False))
+    layout_checkbox.addWidget(widget_manager.makeWidgetCheckBox(key=key_checkbox_show_reg_im_roi, label="Show Registered ROI", checked=False))
+    layout_slider = QHBoxLayout()
+    layout_slider.addLayout(makeLayoutSliderLabel(widget_manager, key_label_opacity_pair, key_slider_opacity_pair, "Opacity of ROI pair", value_set=255))
+
+    layout.addLayout(layout_elastix)
+    layout.addLayout(layout_ref_plane)
+    layout.addLayout(layout_run)
+    layout.addLayout(layout_checkbox)
+    layout.addLayout(layout_slider)
+    layout.addWidget(widget_manager.makeWidgetButton(key=key_button_export, label="Export Image"))
+    return layout
+
 # Stack Image Registration config
 def makeLayoutStackRegistration(
         widget_manager              : WidgetManager, 
