@@ -878,9 +878,6 @@ def bindFuncPlaneTSliderWithXYCTTracking(
                 q_slider_pri.setValue(value - 1)
 
         control_manager.view_controls[app_key].setPlaneT(value)
-        # hardcoded !!!
-        control_manager.view_controls["pri"].updateView()
-        control_manager.view_controls["sec"].updateView()
         control_manager.table_controls[app_key].setPlaneT(value)
 
         try:
@@ -890,6 +887,10 @@ def bindFuncPlaneTSliderWithXYCTTracking(
             
             control_manager.table_controls["pri"].updateWidgetDynamicTableWithT(data_manager.dict_roi_matching, t_plane_pri, t_plane_sec, True)
             control_manager.table_controls["sec"].updateWidgetDynamicTableWithT(data_manager.dict_roi_matching, t_plane_pri, t_plane_sec, False)
+
+            # hardcoded !!!
+            control_manager.view_controls["pri"].updateView()
+            control_manager.view_controls["sec"].updateView()
         except Exception as e:
             # raise e
             pass

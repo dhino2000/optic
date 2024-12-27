@@ -291,11 +291,6 @@ def applyDictROICoordsTransform(
             print(f"processing {i}/{len(dict_roi_coords)}")
         i += 1
         med = np.array([dict_coords["med"]])
-        """
-        WARNING !!!
-        Suite2p Fall's ROI center (med) is in the format of (y, x),
-        """
-        med = np.flip(med)
         xpix_ypix = np.array([dict_coords["xpix"], dict_coords["ypix"]]).T
 
         generateTmpTextforRegistration(xpix_ypix, path_points_txt)
@@ -313,7 +308,6 @@ def applyDictROICoordsTransform(
             path_points_txt, 
             output_directory
             )
-        med_reg = np.flip(med_reg) # convert back to (x, y)
 
         # clip the coords
         med_reg = np.clip(med_reg, 0, [x_max, y_max])

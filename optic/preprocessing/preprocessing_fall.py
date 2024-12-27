@@ -11,6 +11,9 @@ def convertMatToDictFall(Fall: Dict[str, Any]) -> Dict[str, Any]:
     dict_Fall_stat = {}
     for i, value in enumerate(Fall_stat):
         dict_Fall_stat[i] = value
+        for stat_key in dict_Fall_stat[i].keys():
+            if stat_key == "med":
+                dict_Fall_stat[i]["med"] = dict_Fall_stat[i]["med"][::-1] # reverse x and y
 
     dict_Fall = {"stat": dict_Fall_stat, "F": Fall["F"], "Fneu": Fall["Fneu"], "spks": Fall["spks"], "ops": Fall["ops"], "iscell": Fall["iscell"]}
 

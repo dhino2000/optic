@@ -129,6 +129,11 @@ def updateLayerROI_MicrogliaTracking(
         # draw selected ROI
         if draw_selected_roi and ROISelectedId is not None:
             highlightROISelectedWithTrackingXYCT(view_control, painter, data_manager, control_manager, app_key, app_key_sec, plane_t)
+            
+        # draw ROI pairs
+        if app_key_sec is not None:
+            plane_t_sec = control_manager.view_controls[app_key_sec].getPlaneT()
+            drawROIPairsXYCT(view_control, painter, data_manager, control_manager, ROISelectedId, app_key, app_key_sec, plane_t, plane_t_sec)
 
     painter.end()
     view_control.layer_roi.setPixmap(pixmap)
@@ -196,15 +201,14 @@ def drawROIContour(
         painter.drawPoint(int(x), int(y))
 
 # draw single ROI pair
-# WARNING !!! Suite2p Fall's ROI center (med) is in the format of (y, x),
 def drawROIPair(
         painter: QPainter,
         coords_pri: Tuple[int, int],
         coords_sec: Tuple[int, int],
         opacity: int,
 ) -> None:
-    y_pri, x_pri = coords_pri
-    y_sec, x_sec = coords_sec
+    x_pri, y_pri = coords_pri
+    x_sec, y_sec = coords_sec
     color = PenColors.ROI_PAIR
     width = PenWidth.ROI_PAIR
     
@@ -236,11 +240,7 @@ def findClosestROI(
     for roi_id, med in dict_roi_med.items():
         if skip_roi and skip_roi.get(roi_id, False):
             continue
-        """
-        WARNING !!!
-        Suite2p Fall's ROI center (med) is in the format of (y, x),
-        """
-        distance = np.sqrt((x - med[1])**2 + (y - med[0])**2)
+        distance = np.sqrt((x - med[0])**2 + (y - med[1])**2)
         if distance < min_distance:
             min_distance = distance
             closest_roi_id = roi_id
@@ -332,11 +332,12 @@ def highlightROISelectedWithTrackingXYCT(
             dict_roi_coords_xyct = data_manager.getDictROICoordsXYCT()
         dict_roi_coords_xyct_tplane = dict_roi_coords_xyct.get(plane_t_sec)
         if not len(dict_roi_coords_xyct_tplane) == 0:
-            for roiId, dict_roi_coords_single in dict_roi_coords_xyct_tplane.items():
-                if roiId != ROISelectedId:
-                    color = (0, 0, 255) # blue
-                    opacity = view_control_sec.getHighlightOpacity()
-                    drawROI(painter, dict_roi_coords_single, color, opacity)
+            ROISelectedId = control_manager.getSharedAttr(app_key_sec, "roi_selected_id")
+            if ROISelectedId is not None:
+                dict_roi_coords_single = dict_roi_coords_xyct_tplane[ROISelectedId]
+                color = (0, 0, 255) # blue
+                opacity = view_control_sec.getHighlightOpacity()
+                drawROI(painter, dict_roi_coords_single, color, opacity)
 
 
 # draw ROI pairs
@@ -367,6 +368,42 @@ def drawROIPairsOnlyDisplay(
                 if roi_display_pri[roiId_pri] and roi_display_sec[roiId_sec] and roiId_pri != ROISelectedId:
                     drawROIPair(painter, coords_pri, coords_sec, view_control.getROIPairOpacity())
                 elif roiId_pri == ROISelectedId:
+                    coords_pri_selected, coords_sec_selected = coords_pri, coords_sec
+        except (TypeError, KeyError):
+            pass
+        # selected ROI pair 
+        try:
+            drawROIPair(painter, coords_pri_selected, coords_sec_selected, view_control.getROIPairOpacity())
+        except (NameError, UnboundLocalError):
+            pass
+
+# draw ROI pairs for XYCT stack
+def drawROIPairsXYCT(
+        view_control: ViewControl, 
+        painter: QPainter, 
+        data_manager: DataManager, 
+        control_manager: ControlManager, 
+        ROISelectedId: int,
+        app_key_pri: AppKeys,
+        app_key_sec: AppKeys,
+        plane_t: int,
+        plane_t_sec: int
+        ) -> None:
+    if view_control.show_roi_pair and app_key_sec is not None:
+        try:
+            table_control_pri = control_manager.table_controls[app_key_pri]
+            table_control_sec = control_manager.table_controls[app_key_sec]
+            roiId_pairs = table_control_pri.getMatchedROIPairs(table_control_sec)
+            # all ROI pairs
+            for roiId_pri, roiId_sec in roiId_pairs:
+                coords_pri = data_manager.getDictROICoordsXYCT()[plane_t][roiId_pri]["med"]
+                if view_control.getShowRegImROI():
+                    coords_sec = data_manager.getDictROICoordsXYCTRegistered()[plane_t_sec][roiId_sec]["med"]
+                else:
+                    coords_sec = data_manager.getDictROICoordsXYCT()[plane_t_sec][roiId_sec]["med"]
+
+                drawROIPair(painter, coords_pri, coords_sec, view_control.getROIPairOpacity())
+                if roiId_pri == ROISelectedId:
                     coords_pri_selected, coords_sec_selected = coords_pri, coords_sec
         except (TypeError, KeyError):
             pass

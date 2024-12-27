@@ -223,7 +223,8 @@ class ViewHandler:
                     # With "Add ROI" mode
                     if self.roi_add_mode:
                         self.data_manager.dict_roi_matching["id"][self.plane_t] += [self.roi_id_edit]
-                        self.data_manager.dict_roi_matching["match"][self.plane_t_pri][self.plane_t_sec][self.roi_id_edit] = None
+                        for plane_t_sec in self.data_manager.dict_roi_matching["match"][self.plane_t].keys(): # for all sec planes
+                            self.data_manager.dict_roi_matching["match"][self.plane_t][plane_t_sec][self.roi_id_edit] = None
                         # hardcoded !!!
                         self.control_manager.view_controls["pri"].roi_colors_xyct[self.plane_t][self.roi_id_edit] = generateRandomColor()
                         self.control_manager.view_controls["sec"].roi_colors_xyct[self.plane_t][self.roi_id_edit] = self.control_manager.view_controls["pri"].roi_colors_xyct[self.plane_t][self.roi_id_edit]
