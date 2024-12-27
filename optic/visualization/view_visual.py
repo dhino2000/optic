@@ -155,6 +155,7 @@ def updateView_MicrogliaTracking(
     min_val_image = np.min(data_manager.getTiffStack(app_key))
     max_val_image = np.max(data_manager.getTiffStack(app_key))
 
+    # chan 1
     if view_control.getBackgroundVisibility(ChannelKeys.CHAN1):
         bg_image_chan1 = adjustChannelContrast(
             image=data_manager.getImageFromXYCZTTiffStack(app_key, plane_z, plane_t, 0, view_control.show_reg_stack),
@@ -163,6 +164,7 @@ def updateView_MicrogliaTracking(
             min_val_image=min_val_image,
             max_val_image=max_val_image
             )
+    # chan 2
     if view_control.getBackgroundVisibility(ChannelKeys.CHAN2):
         bg_image_chan2 = adjustChannelContrast(
             image=data_manager.getImageFromXYCZTTiffStack(app_key, plane_z, plane_t, 1, view_control.show_reg_stack),
