@@ -1,4 +1,4 @@
-from .preprocessing_image import convertImageDtypeToINT, resizeImageShape
+from .preprocessing_image import convertImageDtypeToINT, resizeImageShape, getDictROIImageXYCTFromDictROICoords, getROIImageFromDictROICoords
 from .preprocessing_fall import convertMatToDictFall, convertMatToDictROICheck, getROICoordsFromDictFall
 from .preprocessing_roi import getROIContour, updateROIImage
 from .preprocessing_table import convertTableDataToDictROICheck, convertDictROICheckToMatROICheck, convertMatROICheckToDictROICheck

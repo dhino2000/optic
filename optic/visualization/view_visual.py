@@ -171,14 +171,24 @@ def updateView_MicrogliaTracking(
             min_val_image=min_val_image,
             max_val_image=max_val_image
             )
-    if view_control.getBackgroundVisibility(ChannelKeys.CHAN3):
-        bg_image_chan3 = adjustChannelContrast(
-            image=data_manager.getImageFromXYCZTTiffStack(app_key, plane_z, plane_t, 2, view_control.show_reg_stack),
-            min_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN3, 'min'),
-            max_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN3, 'max'),
-            min_val_image=min_val_image,
-            max_val_image=max_val_image
-            )
+    # ROI image, only "pri" view
+    if app_key_sec:
+        plane_t_sec = control_manager.view_controls[app_key_sec].getPlaneT()
+        if view_control.getBackgroundVisibility(ChannelKeys.CHAN3):
+            if view_control.getShowRegImROI():
+                image = data_manager.getDictROIImageRegisteredXYCT().get(plane_t_sec)
+            else:
+                image = data_manager.getDictROIImageXYCT().get(plane_t_sec)
+            if image is None:
+                bg_image_chan3 = None
+            else:
+                image = image.get("all")     
+                bg_image_chan3 = adjustChannelContrast(
+                    image=image,
+                    min_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN3, 'min'),
+                    max_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN3, 'max'),
+                    scaling=False,
+                    )
 
     (width, height) = view_control.getImageSize()
     bg_image = convertMonoImageToRGBImage(

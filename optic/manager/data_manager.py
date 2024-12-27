@@ -41,6 +41,8 @@ class DataManager:
         self.dict_roi_matching:         Dict[str, Dict[int, List[int] | Dict[int, Dict[int, Optional[int]]]]] = {"id": {}, "match": {}}
         self.dict_roi_coords_xyct:      Dict[int, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]] = CustomDict()
         self.dict_roi_coords_xyct_reg:  Dict[int, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]] = CustomDict()
+        self.dict_im_roi_xyct:          Dict[int, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
+        self.dict_im_roi_reg_xyct:      Dict[int, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
 
         self.dict_eventfile:            Dict[AppKeys, Dict[str, np.ndarray[Tuple[int]]]] = defaultdict(dict)
         self.dict_roicheck:             Dict[AppKeys, Any] = {}
@@ -223,6 +225,12 @@ class DataManager:
     
     def getDictROIMatching(self) -> Dict[int, Dict[int, Dict[int, Optional[int]]]]:
         return self.dict_roi_matching
+    
+    def getDictROIImageXYCT(self) -> Dict[int, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]]:
+        return self.dict_im_roi_xyct
+    
+    def getDictROIImageRegisteredXYCT(self) -> Dict[int, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]]:
+        return self.dict_im_roi_reg_xyct
     
     # Elastix
     def getParameterMap(self, app_key: AppKeys) -> mapstringvectorstring:

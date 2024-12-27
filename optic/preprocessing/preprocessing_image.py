@@ -74,3 +74,30 @@ def getROIImageFromFall(
         roi_img[ypix, xpix] = value
     dict_im_roi["all"] = roi_img
     return dict_im_roi
+
+# make ROI Image from dict_roi_coords, Dict[roi_id, Dict["xpix", "ypix", "med"]]
+def getROIImageFromDictROICoords(
+        dict_roi_coords: Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]], 
+        shape: Tuple[int, int],
+        dtype: str="uint8", 
+        value: int=50
+        ) -> Dict[str, np.ndarray]:
+    dict_im_roi = {}
+    roi_img = np.zeros(shape, dtype=dtype)
+    for coords in dict_roi_coords.values():
+        xpix, ypix = coords["xpix"], coords["ypix"]
+        roi_img[xpix, ypix] = value
+    dict_im_roi["all"] = roi_img
+    return dict_im_roi
+
+# make dict_roi_im_xyct from dict_roi_coords_xyct, Dict[plane_t, Dict[roi_id, Dict["xpix", "ypix", "med"]]]
+def getDictROIImageXYCTFromDictROICoords(
+        dict_roi_coords_xyct: Dict[int, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]], 
+        shape: Tuple[int, int],
+        dtype: str="uint8", 
+        value: int=50
+        ) -> Dict[str, np.ndarray]:
+    dict_im_roi_xyct = {}
+    for plane_t, dict_roi_coords in dict_roi_coords_xyct.items():
+        dict_im_roi_xyct[plane_t] = getROIImageFromDictROICoords(dict_roi_coords, shape, dtype=dtype, value=value)
+    return dict_im_roi_xyct

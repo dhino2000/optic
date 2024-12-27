@@ -6,6 +6,7 @@ from PyQt5.QtWidgets import QGraphicsView, QGraphicsScene, QGraphicsRectItem, QT
 from ..visualization.view_visual import zoomView, resetZoomView
 from ..visualization.view_visual_rectangle import initializeDragRectangle, updateDragRectangle, clipRectangleRange
 from ..visualization.roi_edit import editROIdraw, editROIerase, updateROIEditLayer
+from ..preprocessing.preprocessing_image import getDictROIImageXYCTFromDictROICoords
 from ..utils.view_utils import generateRandomColor
 from ..config.constants import AppKeys, PenColors, PenWidth
 import numpy as np
@@ -178,6 +179,7 @@ class ViewHandler:
             self.view_control:               ViewControl = view_control
             self.table_control:             TableControl = view_control.control_manager.table_controls[view_control.app_key]
             self.control_manager:         ControlManager = view_control.control_manager
+            self.data_manager:               DataManager = view_control.data_manager
             self.is_dragging:                       bool = False
             self.is_dragging_edit:                  bool = False
             self.drag_start_pos:         Tuple[int, int] = None
@@ -216,14 +218,16 @@ class ViewHandler:
                     med = (np.median(xpix).astype("uint16"), np.median(ypix).astype("uint16"))
                     dict_roi_coords_xyct_edit = {"xpix": xpix, "ypix": ypix, "med": med}
 
-                    self.view_control.data_manager.dict_roi_coords_xyct[self.plane_t][self.roi_id_edit] = dict_roi_coords_xyct_edit
+                    self.data_manager.dict_roi_coords_xyct[self.plane_t][self.roi_id_edit] = dict_roi_coords_xyct_edit # ROI update
+                    self.data_manager.dict_im_roi_xyct = getDictROIImageXYCTFromDictROICoords(self.data_manager.dict_roi_coords_xyct, self.data_manager.getImageSize("pri"))
                     # With "Add ROI" mode
                     if self.roi_add_mode:
-                        self.view_control.data_manager.dict_roi_matching["id"][self.plane_t] += [self.roi_id_edit]
-                        self.view_control.data_manager.dict_roi_matching["match"][self.plane_t_pri][self.plane_t_sec][self.roi_id_edit] = None
+                        self.data_manager.dict_roi_matching["id"][self.plane_t] += [self.roi_id_edit]
+                        self.data_manager.dict_roi_matching["match"][self.plane_t_pri][self.plane_t_sec][self.roi_id_edit] = None
                         # hardcoded !!!
                         self.control_manager.view_controls["pri"].roi_colors_xyct[self.plane_t][self.roi_id_edit] = generateRandomColor()
                         self.control_manager.view_controls["sec"].roi_colors_xyct[self.plane_t][self.roi_id_edit] = self.control_manager.view_controls["pri"].roi_colors_xyct[self.plane_t][self.roi_id_edit]
+                        
 
                 except IndexError as e: # no roi_points_edit
                     pass
@@ -234,7 +238,7 @@ class ViewHandler:
                 # hardcoded !!!
                 for app_key in ["pri", "sec"]:
                     self.control_manager.table_controls[app_key].updateWidgetDynamicTableWithT(
-                    self.view_control.data_manager.dict_roi_matching, self.plane_t_pri, self.plane_t_sec, True if app_key == "pri" else False)
+                    self.data_manager.dict_roi_matching, self.plane_t_pri, self.plane_t_sec, True if app_key == "pri" else False)
                     self.control_manager.view_controls[app_key].updateView()
 
         def keyReleaseEvent(self, event: QKeyEvent):

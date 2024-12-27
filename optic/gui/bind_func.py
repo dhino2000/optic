@@ -260,6 +260,7 @@ def bindFuncROIMaskNpyIO(
         )
         data_manager.dict_roi_coords_xyct = convertCellposeMaskToDictROICoordsXYCT(data_manager.getROIMask(app_key))
         data_manager.dict_roi_matching = convertCellposeMaskToDictROIMatching(data_manager.getROIMask(app_key))
+        data_manager.dict_im_roi_xyct = getDictROIImageXYCTFromDictROICoords(data_manager.dict_roi_coords_xyct, data_manager.getImageSize(app_key)) 
 
         # initialize ROI XYCT Colors
         for plane_t in data_manager.dict_roi_coords_xyct.keys():
@@ -877,7 +878,9 @@ def bindFuncPlaneTSliderWithXYCTTracking(
                 q_slider_pri.setValue(value - 1)
 
         control_manager.view_controls[app_key].setPlaneT(value)
-        control_manager.view_controls[app_key].updateView()
+        # hardcoded !!!
+        control_manager.view_controls["pri"].updateView()
+        control_manager.view_controls["sec"].updateView()
         control_manager.table_controls[app_key].setPlaneT(value)
 
         try:
