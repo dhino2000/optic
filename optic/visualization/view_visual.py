@@ -158,7 +158,7 @@ def updateView_MicrogliaTracking(
     # chan 1
     if view_control.getBackgroundVisibility(ChannelKeys.CHAN1):
         bg_image_chan1 = adjustChannelContrast(
-            image=data_manager.getImageFromXYCZTTiffStack(app_key, plane_z, plane_t, 0, view_control.show_reg_stack),
+            image=data_manager.getImageFromXYCZTTiffStack(app_key, plane_z, plane_t, 0, view_control.getShowRegStack()),
             min_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN1, 'min'),
             max_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN1, 'max'),
             min_val_image=min_val_image,
@@ -167,7 +167,7 @@ def updateView_MicrogliaTracking(
     # chan 2
     if view_control.getBackgroundVisibility(ChannelKeys.CHAN2):
         bg_image_chan2 = adjustChannelContrast(
-            image=data_manager.getImageFromXYCZTTiffStack(app_key, plane_z, plane_t, 1, view_control.show_reg_stack),
+            image=data_manager.getImageFromXYCZTTiffStack(app_key, plane_z, plane_t, 1, view_control.getShowRegStack()),
             min_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN2, 'min'),
             max_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN2, 'max'),
             min_val_image=min_val_image,

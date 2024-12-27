@@ -427,12 +427,13 @@ def bindFuncCheckboxShowRegisteredROIImage(
 # -> processing_image_layouts.makeLayoutStackRegistration
 def bindFuncCheckboxShowRegisteredStack(
     q_checkbox: 'QCheckBox',
-    view_control: 'ViewControl'
+    view_controls: Dict[AppKeys, ViewControl]
 ) -> None:
     def onVisibilityChanged(state: int) -> None:
         is_visible = (state == Qt.Checked)
-        view_control.setShowRegStack(is_visible)
-        view_control.updateView()
+        for view_control in view_controls.values():
+            view_control.setShowRegStack(is_visible)
+            view_control.updateView()
     q_checkbox.stateChanged.connect(onVisibilityChanged)
 
 # -> processing_image_layouts.makeLayoutExportFallLike
