@@ -62,6 +62,10 @@ def convertDictROICheckToMatROICheck(
             "name_Fall": path_fall.split("/")[-1],
             "manualROIcheck": {},
         }
+    else:
+        if path_fall: # rewrite Fall.mat path
+            mat_roicheck["path_Fall"] = path_fall
+            mat_roicheck["name_Fall"] = path_fall.split("/")[-1]
 
     mat_roicheck["manualROIcheck"][date] = {
         "user": user,
@@ -140,6 +144,13 @@ def convertDictROITrackingToMatROITracking(
             "name_Fall_sec": path_fall_sec.split("/")[-1],
             "ROITracking": {},
         }
+    else: # rewrite Fall.mat path
+        if path_fall_pri:
+            mat_roi_tracking["path_Fall_pri"] = path_fall_pri
+            mat_roi_tracking["name_Fall_pri"] = path_fall_pri.split("/")[-1]
+        if path_fall_sec:
+            mat_roi_tracking["path_Fall_sec"] = path_fall_sec
+            mat_roi_tracking["name_Fall_sec"] = path_fall_sec.split("/")[-1]    
 
     mat_roi_tracking["ROITracking"][date] = {
         **{"user": user},

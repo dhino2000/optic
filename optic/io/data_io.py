@@ -201,7 +201,8 @@ def saveROICheck(
                     dict_roicheck,
                     mat_roicheck=mat_roicheck,
                     date=now,
-                    user=user
+                    user=user,
+                    path_fall=path_src,
                     )
             else:
                 dict_roicheck = convertTableDataToDictROICheck(q_table, table_columns, local_var)
@@ -274,7 +275,7 @@ def saveROITracking(
             if dialog.exec_() == QDialog.Accepted:
                 dialog.getUser()
                 user = dialog.user
-            now = f"save_{datetime.datetime.now().strftime('%y%m%d_%H%M%S')}"
+            now = f"save_{datetime.datetime.now().strftime('%y%m%d_%H%M%S')}" # key of struct
             if is_overwrite:
                 mat_roi_tracking = loadmat(path_dst, simplify_cells=True)
                 dict_roi_tracking_pri = convertTableDataToDictROITracking(q_table_pri, q_table_sec, table_column_pri, local_var)
@@ -284,7 +285,9 @@ def saveROITracking(
                     dict_roi_check_sec,
                     mat_roi_tracking=mat_roi_tracking,
                     date=now,
-                    user=user
+                    user=user,
+                    path_fall_pri=path_src_pri,
+                    path_fall_sec=path_src_sec,
                     )
             else:
                 dict_roi_tracking_pri = convertTableDataToDictROITracking(q_table_pri, q_table_sec, table_column_pri, local_var)
