@@ -1,10 +1,11 @@
-# file, directoryのパス取得用関数
+from __future__ import annotations
+from ..type_definitions import *
 import re
 import os
 
 # 指定したディレクトリの下流のすべてのディレクトリのパスを取得
 # 下る階層数を指定することも可能
-def getAllSubDirectories(path, depth=None):
+def getAllSubDirectories(path: str, depth: Optional[int]=None):
     dirs_sub = [dirpath.replace("\\", "/") for dirpath, dirnames, filenames in os.walk(path)] # \\ -> /
     if type(depth) == int:
         sep_num = len(path.rsplit("/")) # 基準となるフォルダの階層数
@@ -13,7 +14,7 @@ def getAllSubDirectories(path, depth=None):
     return dirs_sub
 
 # 指定したディレクトリの下流のすべてのファイルのパスを取得
-def getAllSubFiles(path, depth=None):
+def getAllSubFiles(path: str, depth: Optional[int]=None):
     paths_sub = []
     sep_num = len(path.rsplit("/")) # 基準となるフォルダの階層数
     for root, dirs, files in os.walk(path):
@@ -28,7 +29,7 @@ def getAllSubFiles(path, depth=None):
     return paths_sub
 
 # 指定したフォルダのサブディレクトリリストから正規表現を用いてプロジェクトディレクトリのみを選択
-def getProjectDirectories(path, depth=None):
+def getProjectDirectories(path: str, depth: Optional[int]=None):
     dirs_sub = getAllSubDirectories(path, depth)
     dirs_project = []
     for dir_sub in dirs_sub:
@@ -47,7 +48,14 @@ def getProjectDirectories(path, depth=None):
 # case_sensitive=Trueで大文字小文字を区別する
 # 拡張子が .nd2 のファイルを取得するパターン
 # list_str_include = [r"\.nd2$"]
-def getMatchedPaths(list_path, list_str_include=None, list_str_exclude=None, match_include="and", match_exclude="or", case_sensitive=True):
+def getMatchedPaths(
+        list_path: List[str], 
+        list_str_include: List[str]=None, 
+        list_str_exclude: List[str]=None, 
+        match_include: Literal["and", "or"]="and", 
+        match_exclude: Literal["and", "or"]="or", 
+        case_sensitive: bool=True
+        ):
     if list_str_include is None:
         list_str_include = []
     if list_str_exclude is None:
