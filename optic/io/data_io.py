@@ -6,11 +6,6 @@ from scipy.io import loadmat, savemat
 import tifffile
 import datetime
 import numpy as np
-from ..gui.table_setup import applyDictROICheckToTable, applyDictROITrackingToTable
-from ..preprocessing.preprocessing_fall import convertMatToDictFall, convertMatToDictROICheck
-from ..preprocessing.preprocessing_image import getBGImageFromFall, convertImageDtypeToINT
-from ..preprocessing.preprocessing_table import convertTableDataToDictROICheck, convertDictROICheckToMatROICheck, convertMatROICheckToDictROICheck, convertTableDataToDictROITracking, convertDictROITrackingToMatROITracking
-from ..preprocessing.preprocessing_tiff import standardizeTIFFStack
 from .file_dialog import openFileDialog, saveFileDialog
 
 # load Fall.mat data
@@ -20,6 +15,7 @@ def loadFallMat(
         ) -> Dict[str, Any]:
     Fall = loadmat(path_fall, simplify_cells=True)
     if preprocessing:
+        from ..preprocessing.preprocessing_fall import convertMatToDictFall
         dict_Fall = convertMatToDictFall(Fall)
     else:
         dict_Fall = Fall
@@ -40,6 +36,7 @@ def loadTifImage(
         ) -> np.array:
     im = tifffile.imread(path_image)
     if preprocessing:
+        from ..preprocessing.preprocessing_image import convertImageDtypeToINT
         im = convertImageDtypeToINT(im)
     return im
 
@@ -70,6 +67,7 @@ def loadTiffStack(
         ) -> np.ndarray:
     if path_tiff:
         if preprocessing:
+            from ..preprocessing.preprocessing_tiff import standardizeTIFFStack
             with tifffile.TiffFile(path_tiff) as tif:
                 series = tif.series[0]
                 axes_src = series.axes
@@ -189,6 +187,7 @@ def saveROICheck(
     if path_dst:
         try:
             from ..dialog.user_select import UserSelectDialog
+            from ..preprocessing.preprocessing_table import convertTableDataToDictROICheck, convertDictROICheckToMatROICheck
             dialog = UserSelectDialog(parent=q_window, gui_defaults=gui_defaults, json_config=json_config)
             if dialog.exec_() == QDialog.Accepted:
                 dialog.getUser()
@@ -245,6 +244,7 @@ def loadROICheck(
             dict_roicheck = mat_roicheck["manualROIcheck"][date]
             dict_roicheck = {k.replace(" ", "_"): v for k, v in dict_roicheck.items()} # this is temporary fix for old ROIcheck files !!!
             
+            from ..gui.table_setup import applyDictROICheckToTable
             applyDictROICheckToTable(q_table, table_columns, dict_roicheck)
             QMessageBox.information(q_window, "File load", "ROICheck file loaded!")
         except Exception as e:
@@ -271,6 +271,7 @@ def saveROITracking(
     if path_dst:
         try:
             from ..dialog.user_select import UserSelectDialog
+            from ..preprocessing.preprocessing_table import convertTableDataToDictROICheck, convertTableDataToDictROITracking, convertDictROITrackingToMatROITracking
             dialog = UserSelectDialog(parent=q_window, gui_defaults=gui_defaults, json_config=json_config)
             if dialog.exec_() == QDialog.Accepted:
                 dialog.getUser()
@@ -344,6 +345,7 @@ def loadROITracking(
             dict_roi_tracking_pri = {k.replace(" ", "_"): v for k, v in dict_roi_tracking_pri.items()} # this is temporary fix for old ROIcheck files !!!
             dict_roi_check_sec = {k.replace(" ", "_"): v for k, v in dict_roi_check_sec.items()} # this is temporary fix for old ROIcheck files !!!
             
+            from ..gui.table_setup import applyDictROICheckToTable, applyDictROITrackingToTable
             applyDictROITrackingToTable(q_table_pri, table_column_pri, dict_roi_tracking_pri)
             applyDictROICheckToTable(q_table_sec, table_column_sec, dict_roi_check_sec)
             QMessageBox.information(q_window, "File load", "ROICheck file loaded!")

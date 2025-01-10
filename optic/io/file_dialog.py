@@ -2,7 +2,6 @@ from __future__ import annotations
 from ..type_definitions import *
 import os
 from PyQt5.QtWidgets import QLineEdit, QFileDialog, QMessageBox
-from ..config.constants import FILE_FILTERS
 
 # 開くファイルのファイルパスを返す
 def openFileDialog(
@@ -15,6 +14,7 @@ def openFileDialog(
     """
     :file_type: ".mat", ".tif", ".npy", ".h5"
     """
+    from ..config.constants import FILE_FILTERS
     options = QFileDialog.Options()
     file_filter = FILE_FILTERS.get(file_type, "All Files (*)")
 
@@ -33,6 +33,7 @@ def saveFileDialog(
         title               : str="Save File", 
         initial_dir         : str=""
         ) -> Tuple[Optional[str], bool]:
+    from ..config.constants import FILE_FILTERS
     options = QFileDialog.Options()
     file_filter = FILE_FILTERS.get(file_type, "All Files (*)")
     while True:
