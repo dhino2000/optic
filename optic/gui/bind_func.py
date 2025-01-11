@@ -256,7 +256,6 @@ def bindFuncMicrogliaTrackingIO(
     def _saveMicrogliaTracking():
         dict_roi_coords_xyct = data_manager.getDictROICoordsXYCT()
         dict_roi_matching = data_manager.getDictROIMatching()
-        print(dict_roi_matching)
         saveMicrogliaTracking(
             q_window, 
             q_lineedit,
@@ -790,7 +789,7 @@ def bindFuncButtonsROIManagerForTable(
                 del data_manager.dict_roi_matching["match"][plane_t][plane_t_sec_tmp][roi_selected_id]
 
             del data_manager.dict_roi_coords_xyct[plane_t][roi_selected_id]
-        print("ROI", roi_selected_id, "is removed.")
+            print("ROI", roi_selected_id, "is removed.")
         table_control.setSharedAttr_ROISelected(None) # clear selected roi
         view_control.updateView()
         control_manager.table_controls[app_key_pri].updateWidgetDynamicTableWithT(data_manager.dict_roi_matching, plane_t_pri, plane_t_sec, True)

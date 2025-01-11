@@ -377,7 +377,6 @@ def saveMicrogliaTracking(
             if is_overwrite:
                 pass
             else:
-                print(dict_roi_matching)
                 mat_microglia_tracking = convertDictROIMatchingAndDictROICoordsToMatMicrogliaTracking(
                     dict_roi_matching,
                     dict_roi_coords_xyct,

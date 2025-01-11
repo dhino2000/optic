@@ -160,6 +160,58 @@ def convertDictROITrackingToMatROITracking(
 
     return mat_roi_tracking
 
+# convert dict_roi_matching and dict_roi_coords_xyct to save appropriately as .mat file
+"""
+-- WARNING --
+With savemat, if the key of dict is number (ex. 0, 1, 2, ...), the value convert to empty automatically.
+To prevent this, convert contents of dict to array.
+"""
+def convertContentsOfDictROIMatchingAndDictROICoordsToArray(
+    dict_roi_matching: Dict[str, Dict[int, List[int] | Dict[int, Dict[int, Optional[int]]]]],
+    dict_roi_coords_xyct: Dict[int, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]],
+) -> Tuple[np.ndarray, Dict]:
+    # dict_roi_coords_xyct -> arr_roi_coords_xyct
+    arr_roi_coords_xyct = []
+    for t_plane in dict_roi_coords_xyct.keys():
+        arr_roi_coords_xyct_t = []
+        for idx_roi in dict_roi_coords_xyct[t_plane].keys():
+            try:
+                dict_roi_coords_xyct_t_roi = dict_roi_coords_xyct[t_plane][idx_roi]
+                arr_roi_coords_xyct_t.append(dict_roi_coords_xyct_t_roi)
+            except KeyError:
+                arr_roi_coords_xyct_t.append(np.array([]))
+        arr_roi_coords_xyct.append(np.array(arr_roi_coords_xyct_t, dtype=object))
+    arr_roi_coords_xyct = np.array(arr_roi_coords_xyct, dtype=object)
+
+    # dict_roi_matching["id"], dict_roi_matching["match"] -> arr_roi_matching_id, arr_roi_matching_match
+    arr_roi_matching_id = []
+    arr_roi_matching_match = []
+    for t_plane in dict_roi_matching["id"].keys():
+        arr_roi_matching_id.append(dict_roi_matching["id"][t_plane])
+    for t_plane_pri in dict_roi_matching["match"].keys():
+        arr_roi_matching_match_pri = []
+        for t_plane_sec in dict_roi_matching["match"][t_plane_pri].keys():
+            idx_roi_pri_max = max(dict_roi_matching["match"][t_plane_pri][t_plane_sec].keys())
+            arr_roi_matching_match_pri_sec = []
+            for idx_roi_pri in range(idx_roi_pri_max + 1): # check ROIs 
+                try:
+                    if dict_roi_matching["match"][t_plane_pri][t_plane_sec][idx_roi_pri] == None:
+                        # To distinguish ROI itself is empty or match ROI number is empty, 
+                        # set -1 for the latter case
+                        arr_roi_matching_match_pri_sec.append(-1)
+                    else:
+                        arr_roi_matching_match_pri_sec.append(dict_roi_matching["match"][t_plane_pri][t_plane_sec][idx_roi_pri])
+                except KeyError: # check the ROI number is empty or not. ex) 0, 1, 2, 4, 6, 7, 8, ...
+                    arr_roi_matching_match_pri_sec.append(np.array([]))
+            arr_roi_matching_match_pri.append(np.array(arr_roi_matching_match_pri_sec, dtype=object))
+        arr_roi_matching_match.append(np.array(arr_roi_matching_match_pri, dtype=object))
+
+    arr_roi_matching_id = np.array(arr_roi_matching_id, dtype=object)
+    arr_roi_matching_match = np.array(arr_roi_matching_match, dtype=object)
+
+    dict_roi_coords_xyct_converted = {"id": arr_roi_matching_id, "match": arr_roi_matching_match}
+    return arr_roi_coords_xyct, dict_roi_coords_xyct_converted
+
 # convert dict_roi_matching and dict_roi_coords_xyct to mat_microglia_tracking 
 def convertDictROIMatchingAndDictROICoordsToMatMicrogliaTracking(
     dict_roi_matching       : Dict[str, Any], 
@@ -181,11 +233,14 @@ def convertDictROIMatchingAndDictROICoordsToMatMicrogliaTracking(
             mat_microglia_tracking["path_Fall"] = path_tif
             mat_microglia_tracking["name_Fall"] = path_tif.split("/")[-1]
 
-    print(dict_roi_matching)
+    # convert dict_roi_matching and dict_roi_coords_xyct to appropriate format
+    arr_roi_coords_xyct, dict_roi_coords_xyct_converted = convertContentsOfDictROIMatchingAndDictROICoordsToArray(
+        dict_roi_matching, dict_roi_coords_xyct
+    )
     mat_microglia_tracking["ROI"][date] = {
         "user": user,
-        "ROITracking": dict_roi_matching,
-        "ROICoords": dict_roi_coords_xyct,
+        "ROITracking": dict_roi_coords_xyct_converted,
+        "ROICoords": arr_roi_coords_xyct,
     }
 
     return mat_microglia_tracking
