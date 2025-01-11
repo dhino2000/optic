@@ -1,7 +1,7 @@
 from __future__ import annotations
 from ..type_definitions import *
 from ..io.file_dialog import openFileDialogAndSetLineEdit, saveFileDialog
-from ..io.data_io import saveROICheck, loadROICheck, loadEventFilesNPY, generateSavePath, saveTiffStack, saveROITracking, loadROITracking, loadCellposeMaskNPY
+from ..io.data_io import saveROICheck, loadROICheck, loadEventFilesNPY, generateSavePath, saveTiffStack, saveROITracking, loadROITracking, loadCellposeMaskNPY, saveMicrogliaTracking
 from ..visualization.info_visual import updateROICountDisplay
 from ..processing import *
 from ..preprocessing import *
@@ -241,6 +241,46 @@ def bindFuncROITrackingIO(
         local_var
         ))
     q_button_load.clicked.connect(lambda: _loadROITracking())
+
+# -> io_layouts.makeLayoutROITrackingIO MicrogliaTracking
+def bindFuncMicrogliaTrackingIO(
+    q_button_save: 'QPushButton', 
+    q_button_load: 'QPushButton', 
+    q_window: 'QWidget', 
+    q_lineedit: 'QLineEdit', 
+    config_manager: 'ConfigManager',
+    data_manager: 'DataManager',
+) -> None:
+    gui_defaults = config_manager.gui_defaults
+    json_config = config_manager.json_config
+    def _saveMicrogliaTracking():
+        dict_roi_coords_xyct = data_manager.getDictROICoordsXYCT()
+        dict_roi_matching = data_manager.getDictROIMatching()
+        print(dict_roi_matching)
+        saveMicrogliaTracking(
+            q_window, 
+            q_lineedit,
+            gui_defaults, 
+            json_config, 
+            dict_roi_matching,
+            dict_roi_coords_xyct
+            )
+
+    # def _loadROITracking() -> None:
+    #     loadROITracking(
+    #         q_window, 
+    #         q_table_pri, 
+    #         q_table_sec, 
+    #         gui_defaults, 
+    #         control_manager.table_controls[app_key_pri].table_columns, 
+    #         control_manager.table_controls[app_key_sec].table_columns, 
+    #         control_manager.table_controls[app_key_pri], 
+    #         control_manager.table_controls[app_key_sec]
+    #     )
+    #     updateROICountDisplay(widget_manager, config_manager, app_key_pri)
+    #     updateROICountDisplay(widget_manager, config_manager, app_key_sec)
+    q_button_save.clicked.connect(lambda: _saveMicrogliaTracking())
+    # q_button_load.clicked.connect(lambda: _loadROITracking())
 
 # -> io_layouts.makeLayoutMaskNpyIO
 def bindFuncROIMaskNpyIO(
@@ -738,13 +778,20 @@ def bindFuncButtonsROIManagerForTable(
         # remove selected roi from dict_roi_coords_xyct, dict_roi_matching
         if roi_selected_id:
             data_manager.dict_roi_matching["id"][plane_t].remove(roi_selected_id)
-            if view_control.app_key == app_key_pri: # pri
-                del data_manager.dict_roi_matching["match"][plane_t_pri][plane_t_sec][roi_selected_id]
-            elif view_control.app_key == app_key_sec: # sec
-                data_manager.dict_roi_matching["match"][plane_t_pri][plane_t_sec][roi_selected_id] = None
+            # remove all sec ROI of pri-sec pair
+            for plane_t_pri_tmp in data_manager.dict_roi_matching["match"].keys(): # search all plane_t_pri
+                for plane_t_sec_tmp in data_manager.dict_roi_matching["match"][plane_t_pri_tmp].keys(): # search all plane_t_sec
+                    if plane_t == plane_t_sec_tmp: # choosed plane_t
+                        for roi_pri, roi_sec in data_manager.dict_roi_matching["match"][plane_t_pri_tmp][plane_t].items():
+                            if roi_sec == roi_selected_id:
+                                data_manager.dict_roi_matching["match"][plane_t_pri_tmp][plane_t_sec_tmp][roi_pri] = None
+            # remove all pri ROI of pri-sec pair
+            for plane_t_sec_tmp in data_manager.dict_roi_matching["match"][plane_t].keys():
+                del data_manager.dict_roi_matching["match"][plane_t][plane_t_sec_tmp][roi_selected_id]
+
             del data_manager.dict_roi_coords_xyct[plane_t][roi_selected_id]
-            deleteIndexedRow(q_table, row)
         print("ROI", roi_selected_id, "is removed.")
+        table_control.setSharedAttr_ROISelected(None) # clear selected roi
         view_control.updateView()
         control_manager.table_controls[app_key_pri].updateWidgetDynamicTableWithT(data_manager.dict_roi_matching, plane_t_pri, plane_t_sec, True)
         control_manager.table_controls[app_key_sec].updateWidgetDynamicTableWithT(data_manager.dict_roi_matching, plane_t_pri, plane_t_sec, False)
@@ -880,6 +927,13 @@ def bindFuncPlaneTSliderWithXYCTTracking(
 
         control_manager.view_controls[app_key].setPlaneT(value)
         control_manager.table_controls[app_key].setPlaneT(value)
+
+        """
+        Critical Bug
+        To avoid app crash, clear selected_roi of both tables
+        """
+        table_control_pri.setSharedAttr_ROISelected(None)
+        table_control_sec.setSharedAttr_ROISelected(None)
 
         try:
             # hardcoded !!!

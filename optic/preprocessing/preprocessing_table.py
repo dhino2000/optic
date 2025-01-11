@@ -159,3 +159,33 @@ def convertDictROITrackingToMatROITracking(
     }
 
     return mat_roi_tracking
+
+# convert dict_roi_matching and dict_roi_coords_xyct to mat_microglia_tracking 
+def convertDictROIMatchingAndDictROICoordsToMatMicrogliaTracking(
+    dict_roi_matching       : Dict[str, Any], 
+    dict_roi_coords_xyct    : Dict[str, Any], 
+    mat_microglia_tracking  : Dict[str, Any]=None, 
+    date                    : str="",
+    user                    : str="",
+    path_tif                : str=""
+)-> Dict[str, Any]:
+
+    if mat_microglia_tracking is None:
+        mat_microglia_tracking = {
+            "path_tif": path_tif,
+            "name_tif": path_tif.split("/")[-1],
+            "ROI": {},
+        }
+    else:
+        if path_tif: # rewrite tif file path
+            mat_microglia_tracking["path_Fall"] = path_tif
+            mat_microglia_tracking["name_Fall"] = path_tif.split("/")[-1]
+
+    print(dict_roi_matching)
+    mat_microglia_tracking["ROI"][date] = {
+        "user": user,
+        "ROITracking": dict_roi_matching,
+        "ROICoords": dict_roi_coords_xyct,
+    }
+
+    return mat_microglia_tracking

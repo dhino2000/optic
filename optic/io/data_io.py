@@ -351,3 +351,43 @@ def loadROITracking(
             QMessageBox.information(q_window, "File load", "ROICheck file loaded!")
         except Exception as e:
             QMessageBox.warning(q_window, "File load failed", f"Error loading ROICheck file: {e}")
+
+# save MicrogliaTracking.mat
+def saveMicrogliaTracking(
+        q_window             : QMainWindow, 
+        q_lineedit           : QLineEdit, 
+        gui_defaults         : GuiDefaults,
+        json_config          : JsonConfig, 
+        dict_roi_matching    : Dict[str, Any],
+        dict_roi_coords_xyct : Dict[str, Any],
+        ) -> None:
+    path_src = q_lineedit.text()
+    path_dst = generateSavePath(path_src, prefix="Microgliatracking_", remove_strings="Fall_", new_extension=".mat") # .tif -> MicrogliaTracking_.mat
+    path_dst, is_overwrite = saveFileDialog(q_widget=q_window, file_type=".mat", title="Save Microglia tracking mat File", initial_dir=path_dst)
+    
+    if path_dst:
+        try:
+            from ..dialog.user_select import UserSelectDialog
+            from ..preprocessing.preprocessing_table import convertDictROIMatchingAndDictROICoordsToMatMicrogliaTracking
+            dialog = UserSelectDialog(parent=q_window, gui_defaults=gui_defaults, json_config=json_config)
+            if dialog.exec_() == QDialog.Accepted:
+                dialog.getUser()
+                user = dialog.user
+            now = f"save_{datetime.datetime.now().strftime('%y%m%d_%H%M%S')}" # key of struct
+            if is_overwrite:
+                pass
+            else:
+                print(dict_roi_matching)
+                mat_microglia_tracking = convertDictROIMatchingAndDictROICoordsToMatMicrogliaTracking(
+                    dict_roi_matching,
+                    dict_roi_coords_xyct,
+                    date=now,
+                    user=user,
+                    path_tif=path_src,
+                )
+            
+            savemat(path_dst, mat_microglia_tracking)
+            QMessageBox.information(q_window, "File save", f"Microglia Tracking file saved!\nuser: {user}, date: {now}")
+        except Exception as e:
+            # raise e
+            QMessageBox.warning(q_window, "File save failed", f"Error saving Microglia Tracking file: {e}")

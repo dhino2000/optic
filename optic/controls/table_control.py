@@ -175,8 +175,10 @@ class TableControl:
     roi_display: Which ROIs should be displayed
     display_celltype: Which celltype should be displayed
     """
-    def setSharedAttr_ROISelected(self, roi_id: int) -> None:
-        if not isinstance(roi_id, int) or roi_id < 0 or roi_id >= self.len_row:
+    def setSharedAttr_ROISelected(self, roi_id: Optional[int]) -> None:
+        if roi_id == None: # clear selection
+            self.control_manager.setSharedAttr(self.app_key, 'roi_selected_id', None)
+        elif roi_id < 0 or roi_id >= self.len_row: # out of range
             return
         else:
             self.control_manager.setSharedAttr(self.app_key, 'roi_selected_id', roi_id)
