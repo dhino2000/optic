@@ -320,7 +320,7 @@ def loadROITracking(
         table_column_sec   : TableColumns,
         table_control_pri  : TableControl,
         table_control_sec  : TableControl,
-        ) -> Union[Dict[str, Any], None]:
+        ) -> None:
     path_roi_tracking = openFileDialog(q_widget=q_window, file_type=".mat", title="Open ROItracking mat File")
     if path_roi_tracking:
         try:
@@ -390,3 +390,30 @@ def saveMicrogliaTracking(
         except Exception as e:
             # raise e
             QMessageBox.warning(q_window, "File save failed", f"Error saving Microglia Tracking file: {e}")
+
+# load Microgliatracking.mat
+def loadMicrogliaTracking(
+        q_window        : QMainWindow, 
+        gui_defaults    : GuiDefaults,
+        ) -> Union[Tuple[Dict[str, Dict[int, List[int] | Dict[int, Dict[int, Optional[int]]]]], Dict[int, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]]], None]:
+    path_src = openFileDialog(q_widget=q_window, file_type=".mat", title="Open Microglia Tracking mat File")
+    if path_src:
+        try:
+            from ..dialog.date_select import DateSelectDialog
+            from ..preprocessing.preprocessing_table import convertMatMicrogliaTrackingToDictROIMatchingAndDictROICoords
+            mat_microglia_tracking = loadmat(path_src, simplify_cells=True)
+            mat_microglia_tracking_roi = mat_microglia_tracking["ROI"]
+
+            list_date = list(mat_microglia_tracking_roi.keys())
+            dialog = DateSelectDialog(parent=q_window, gui_defaults=gui_defaults, list_date=list_date)
+            if dialog.exec_() == QDialog.Accepted:
+                date = dialog.date
+            
+            # select saved date
+            mat_microglia_tracking_roi_date = mat_microglia_tracking_roi[date]
+            dict_roi_matching, dict_roi_coords_xyct = convertMatMicrogliaTrackingToDictROIMatchingAndDictROICoords(mat_microglia_tracking_roi_date)
+            
+            QMessageBox.information(q_window, "File load", "Microglia Tracking file loaded!")
+            return dict_roi_matching, dict_roi_coords_xyct
+        except Exception as e:
+            QMessageBox.warning(q_window, "File load failed", f"Error loading Microglia Tracking file: {e}")

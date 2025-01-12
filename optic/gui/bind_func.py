@@ -1,7 +1,7 @@
 from __future__ import annotations
 from ..type_definitions import *
 from ..io.file_dialog import openFileDialogAndSetLineEdit, saveFileDialog
-from ..io.data_io import saveROICheck, loadROICheck, loadEventFilesNPY, generateSavePath, saveTiffStack, saveROITracking, loadROITracking, loadCellposeMaskNPY, saveMicrogliaTracking
+from ..io.data_io import saveROICheck, loadROICheck, loadEventFilesNPY, generateSavePath, saveTiffStack, saveROITracking, loadROITracking, loadCellposeMaskNPY, saveMicrogliaTracking, loadMicrogliaTracking
 from ..visualization.info_visual import updateROICountDisplay
 from ..processing import *
 from ..preprocessing import *
@@ -250,6 +250,7 @@ def bindFuncMicrogliaTrackingIO(
     q_lineedit: 'QLineEdit', 
     config_manager: 'ConfigManager',
     data_manager: 'DataManager',
+    control_manager: 'ControlManager',
 ) -> None:
     gui_defaults = config_manager.gui_defaults
     json_config = config_manager.json_config
@@ -265,21 +266,32 @@ def bindFuncMicrogliaTrackingIO(
             dict_roi_coords_xyct
             )
 
-    # def _loadROITracking() -> None:
-    #     loadROITracking(
-    #         q_window, 
-    #         q_table_pri, 
-    #         q_table_sec, 
-    #         gui_defaults, 
-    #         control_manager.table_controls[app_key_pri].table_columns, 
-    #         control_manager.table_controls[app_key_sec].table_columns, 
-    #         control_manager.table_controls[app_key_pri], 
-    #         control_manager.table_controls[app_key_sec]
-    #     )
-    #     updateROICountDisplay(widget_manager, config_manager, app_key_pri)
-    #     updateROICountDisplay(widget_manager, config_manager, app_key_sec)
+    def _loadMicrogliaTracking() -> None:
+        dict_roi_matching, dict_roi_coords_xyct = loadMicrogliaTracking(
+            q_window, 
+            gui_defaults, 
+        )
+        data_manager.dict_roi_matching = dict_roi_matching
+        data_manager.dict_roi_coords_xyct = dict_roi_coords_xyct
+
+        # hardcoded !!!
+        # initialize ROI XYCT Colors
+        for plane_t in data_manager.dict_roi_coords_xyct.keys():
+            for roi_id in data_manager.dict_roi_coords_xyct[plane_t].keys():
+                control_manager.view_controls["pri"].roi_colors_xyct[plane_t][roi_id] = generateRandomColor()
+                control_manager.view_controls["sec"].roi_colors_xyct[plane_t][roi_id] = control_manager.view_controls["pri"].roi_colors_xyct[plane_t][roi_id]
+                
+        control_manager.view_controls["pri"].updateView()
+        control_manager.view_controls["sec"].updateView()
+
+        t_plane_pri = control_manager.view_controls["pri"].getPlaneT()
+        t_plane_sec = control_manager.view_controls["sec"].getPlaneT()
+        
+        control_manager.table_controls["pri"].updateWidgetDynamicTableWithT(data_manager.dict_roi_matching, t_plane_pri, t_plane_sec, True)
+        control_manager.table_controls["sec"].updateWidgetDynamicTableWithT(data_manager.dict_roi_matching, t_plane_pri, t_plane_sec, False)
+
     q_button_save.clicked.connect(lambda: _saveMicrogliaTracking())
-    # q_button_load.clicked.connect(lambda: _loadROITracking())
+    q_button_load.clicked.connect(lambda: _loadMicrogliaTracking())
 
 # -> io_layouts.makeLayoutMaskNpyIO
 def bindFuncROIMaskNpyIO(

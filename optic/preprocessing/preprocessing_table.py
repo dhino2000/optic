@@ -174,11 +174,13 @@ def convertContentsOfDictROIMatchingAndDictROICoordsToArray(
     arr_roi_coords_xyct = []
     for t_plane in dict_roi_coords_xyct.keys():
         arr_roi_coords_xyct_t = []
-        for idx_roi in dict_roi_coords_xyct[t_plane].keys():
+        idx_roi_max = max(dict_roi_coords_xyct[t_plane].keys())
+        for idx_roi in range(idx_roi_max + 1): # check ROIs
             try:
                 dict_roi_coords_xyct_t_roi = dict_roi_coords_xyct[t_plane][idx_roi]
                 arr_roi_coords_xyct_t.append(dict_roi_coords_xyct_t_roi)
             except KeyError:
+                print(idx_roi)
                 arr_roi_coords_xyct_t.append(np.array([]))
         arr_roi_coords_xyct.append(np.array(arr_roi_coords_xyct_t, dtype=object))
     arr_roi_coords_xyct = np.array(arr_roi_coords_xyct, dtype=object)
@@ -244,3 +246,44 @@ def convertDictROIMatchingAndDictROICoordsToMatMicrogliaTracking(
     }
 
     return mat_microglia_tracking
+
+# mat_microglia_tracking -> dict_roi_matching, dict_roi_coords_xyct
+def convertMatMicrogliaTrackingToDictROIMatchingAndDictROICoords(
+    mat_microglia_tracking: Dict[str, Any],
+) -> Tuple[Dict[str, Dict[int, List[int] | Dict[int, Dict[int, Optional[int]]]]], Dict[int, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]]]:
+    mat_roi_matching = mat_microglia_tracking["ROITracking"]
+    mat_roi_coords = mat_microglia_tracking["ROICoords"]
+
+    # convert dict_roi_matching for the GUI
+    dict_roi_matching_id = {t_plane: mat_roi_matching["id"][t_plane].tolist() for t_plane in range(len(mat_roi_matching["id"]))}
+    dict_roi_matching_match = {}
+
+    mat_roi_matching_match = mat_roi_matching["match"]
+    for t_plane_pri in range(len(mat_roi_matching_match)):
+        dict_roi_matching_match[t_plane_pri] = {}
+        mat_roi_matching_match_pri = mat_roi_matching_match[t_plane_pri]
+        if mat_roi_matching_match_pri.ndim == 1: # length of last array is 1
+            mat_roi_matching_match_pri = mat_roi_matching_match_pri.reshape(1, -1)
+        for t_plane_sec in range(len(mat_roi_matching_match_pri)):
+            dict_roi_matching_match[t_plane_pri][t_plane_sec + t_plane_pri + 1] = {}
+            for roi_pri in range(len(mat_roi_matching_match_pri[t_plane_sec])):
+                roi_sec = mat_roi_matching_match_pri[t_plane_sec][roi_pri]
+                if isinstance(roi_sec, int): # if roi itself is empty, the valus is np.array([])
+                    if roi_sec == -1: # if match roi id is None, the value is -1
+                        roi_sec = None
+                    dict_roi_matching_match[t_plane_pri][t_plane_sec + t_plane_pri + 1][roi_pri] = roi_sec
+    dict_roi_matching = {"id": dict_roi_matching_id, "match": dict_roi_matching_match}
+
+    # convert dict_roi_coords for the GUI
+    dict_roi_coords_xyct = {}
+    for t_plane in range(len(mat_roi_coords)):
+        dict_roi_coords_xyct[t_plane] = {}
+        for roi in range(len(mat_roi_coords[t_plane])):
+            if not isinstance(mat_roi_coords[t_plane][roi], np.ndarray): # if roi itself is empty, the value is np.array([])
+                dict_roi_coords_xyct[t_plane][roi] = {}
+                for fieldname in mat_roi_coords[t_plane][roi]._fieldnames: # convert mat_struct to dict
+                    attr = getattr(mat_roi_coords[t_plane][roi], fieldname)
+                    if fieldname in ["xpix", "ypix"] and isinstance(attr, int): # if npix of ROI is 1, the value is int
+                        attr = np.array([attr]) # convert int to np.array
+                    dict_roi_coords_xyct[t_plane][roi][fieldname] = attr
+    return dict_roi_matching, dict_roi_coords_xyct
