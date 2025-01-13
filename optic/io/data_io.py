@@ -368,14 +368,36 @@ def saveMicrogliaTracking(
     if path_dst:
         try:
             from ..dialog.user_select import UserSelectDialog
-            from ..preprocessing.preprocessing_table import convertDictROIMatchingAndDictROICoordsToMatMicrogliaTracking
+            from ..preprocessing.preprocessing_table import convertDictROIMatchingAndDictROICoordsToMatMicrogliaTracking, convertMatMicrogliaTrackingToDictROIMatchingAndDictROICoords, convertContentsOfDictROIMatchingAndDictROICoordsToArray
             dialog = UserSelectDialog(parent=q_window, gui_defaults=gui_defaults, json_config=json_config)
             if dialog.exec_() == QDialog.Accepted:
                 dialog.getUser()
                 user = dialog.user
             now = f"save_{datetime.datetime.now().strftime('%y%m%d_%H%M%S')}" # key of struct
             if is_overwrite:
-                pass
+                mat_microglia_tracking = loadmat(path_dst, simplify_cells=True)
+
+                # load ROITracking, ROICoords of all dates
+                for date_ in mat_microglia_tracking["ROI"].keys():
+                    dict_roi_matching_, dict_roi_coords_xyct_ = convertMatMicrogliaTrackingToDictROIMatchingAndDictROICoords(mat_microglia_tracking["ROI"][date_])
+                    user_ = mat_microglia_tracking["ROI"][date_]["user"]
+                    dict_roi_matching_converted_, arr_roi_coords_xyct_ = convertContentsOfDictROIMatchingAndDictROICoordsToArray(
+                        dict_roi_matching_, dict_roi_coords_xyct_
+                    )
+                    mat_microglia_tracking["ROI"][date_] = {
+                        "ROITracking": dict_roi_matching_converted_, 
+                        "ROICoords": arr_roi_coords_xyct_, 
+                        "user": user_
+                        }
+
+                mat_microglia_tracking = convertDictROIMatchingAndDictROICoordsToMatMicrogliaTracking(
+                    dict_roi_matching,
+                    dict_roi_coords_xyct,
+                    mat_microglia_tracking,
+                    date=now,
+                    user=user,
+                    path_tif=path_src,
+                )
             else:
                 mat_microglia_tracking = convertDictROIMatchingAndDictROICoordsToMatMicrogliaTracking(
                     dict_roi_matching,
@@ -388,8 +410,8 @@ def saveMicrogliaTracking(
             savemat(path_dst, mat_microglia_tracking)
             QMessageBox.information(q_window, "File save", f"Microglia Tracking file saved!\nuser: {user}, date: {now}")
         except Exception as e:
-            # raise e
-            QMessageBox.warning(q_window, "File save failed", f"Error saving Microglia Tracking file: {e}")
+            raise e
+            # QMessageBox.warning(q_window, "File save failed", f"Error saving Microglia Tracking file: {e}")
 
 # load Microgliatracking.mat
 def loadMicrogliaTracking(

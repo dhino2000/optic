@@ -211,8 +211,8 @@ def convertContentsOfDictROIMatchingAndDictROICoordsToArray(
     arr_roi_matching_id = np.array(arr_roi_matching_id, dtype=object)
     arr_roi_matching_match = np.array(arr_roi_matching_match, dtype=object)
 
-    dict_roi_coords_xyct_converted = {"id": arr_roi_matching_id, "match": arr_roi_matching_match}
-    return arr_roi_coords_xyct, dict_roi_coords_xyct_converted
+    dict_roi_matching_converted = {"id": arr_roi_matching_id, "match": arr_roi_matching_match}
+    return dict_roi_matching_converted, arr_roi_coords_xyct
 
 # convert dict_roi_matching and dict_roi_coords_xyct to mat_microglia_tracking 
 def convertDictROIMatchingAndDictROICoordsToMatMicrogliaTracking(
@@ -232,16 +232,16 @@ def convertDictROIMatchingAndDictROICoordsToMatMicrogliaTracking(
         }
     else:
         if path_tif: # rewrite tif file path
-            mat_microglia_tracking["path_Fall"] = path_tif
-            mat_microglia_tracking["name_Fall"] = path_tif.split("/")[-1]
+            mat_microglia_tracking["path_tif"] = path_tif
+            mat_microglia_tracking["name_tif"] = path_tif.split("/")[-1]
 
     # convert dict_roi_matching and dict_roi_coords_xyct to appropriate format
-    arr_roi_coords_xyct, dict_roi_coords_xyct_converted = convertContentsOfDictROIMatchingAndDictROICoordsToArray(
+    dict_roi_matching_converted, arr_roi_coords_xyct = convertContentsOfDictROIMatchingAndDictROICoordsToArray(
         dict_roi_matching, dict_roi_coords_xyct
     )
     mat_microglia_tracking["ROI"][date] = {
         "user": user,
-        "ROITracking": dict_roi_coords_xyct_converted,
+        "ROITracking": dict_roi_matching_converted,
         "ROICoords": arr_roi_coords_xyct,
     }
 
