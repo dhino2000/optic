@@ -1068,6 +1068,55 @@ def bindFuncButtonFilterROI(
     )
     view_control.updateView()
 
+# -> MicrogliaTracking, ROI Table
+def bindFuncTableCellChangedWithMicrogliaTracking(
+    q_table_pri: 'QTableWidget',
+    control_manager: 'ControlManager',
+    data_manager: 'DataManager',
+) -> None:
+    def _onEditingFinished() -> None:
+        try:
+            current_row = q_table_pri.currentRow()
+
+            # get the maximum roi id of the secondary plane
+            t_plane_pri = control_manager.view_controls["pri"].getPlaneT()
+            t_plane_sec = control_manager.view_controls["sec"].getPlaneT()
+            max_roi_id_sec = data_manager.dict_roi_matching["id"][t_plane_sec][-1]
+
+            # get the new value
+            item_pri_id = q_table_pri.item(current_row, 0)
+            item_pri_id_match = q_table_pri.item(current_row, 1)
+
+            if item_pri_id is None: # skip
+                return
+            else:
+                if item_pri_id_match is None: # set blank
+                    data_manager.dict_roi_matching["match"][t_plane_pri][t_plane_sec][roi_id_pri] = None
+                    return
+            roi_id_pri = item_pri_id.text()
+            roi_id_sec = item_pri_id_match.text()
+            if roi_id_sec == "": # set blank
+                roi_id_pri = int(roi_id_pri)
+                data_manager.dict_roi_matching["match"][t_plane_pri][t_plane_sec][roi_id_pri] = None
+                return
+
+            roi_id_pri = int(roi_id_pri)
+            roi_id_sec = int(roi_id_sec)
+
+            # check the validity of the roi id
+            if 0 <= roi_id_sec <= max_roi_id_sec:
+                data_manager.dict_roi_matching["match"][t_plane_pri][t_plane_sec][roi_id_pri] = roi_id_sec
+        except ValueError:
+            print("Invalid input: not an integer")
+        except KeyError as e:
+            print(f"KeyError: {e}")
+        except AttributeError as e: # set blank
+            data_manager.dict_roi_matching["match"][t_plane_pri][t_plane_sec][roi_id_pri] = None
+        except IndexError as e:
+            print(f"IndexError: {e}")
+
+    q_table_pri.itemChanged.connect(_onEditingFinished)
+
 """
 view_layouts
 """

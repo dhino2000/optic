@@ -38,7 +38,7 @@ def setupWidgetROITable(
             
             if cell_type == "id":
                 cell = QTableWidgetItem(str(cellid))
-                cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)
+                cell.setFlags(cell.flags() & ~Qt.ItemIsEditable) # make cell not editable
                 q_table.setItem(cellid, col_info['order'], cell)
             elif cell_type == "id_match":
                 cell = QTableWidgetItem()
@@ -89,7 +89,7 @@ def setupWidgetDynamicTable(
             
             if cell_type == "id":
                 cell = QTableWidgetItem(str(cellid))
-                cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)
+                cell.setFlags(cell.flags() & ~Qt.ItemIsEditable) # make cell not editable
                 q_table.setItem(cellid, col_info['order'], cell)
             elif cell_type == "id_match":
                 cell = QTableWidgetItem()
@@ -186,6 +186,7 @@ def applyDictROIMatchingToTable(
         if col_info['type'] == 'id':  # Primary ROI IDs
             for row, (roi_id, _) in enumerate(matching_data.items()):
                 item = QTableWidgetItem(str(roi_id))
+                item.setFlags(item.flags() & ~Qt.ItemIsEditable) # make cell not editable
                 q_table.setItem(row, col_index, item)
         elif col_info['type'] == 'id_match':  # Matched Secondary ROI IDs
             for row, (_, matched_id) in enumerate(matching_data.items()):
