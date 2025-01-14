@@ -310,6 +310,7 @@ def bindFuncROIMaskNpyIO(
             ndim=3,
         )
         data_manager.dict_roi_coords_xyct = convertCellposeMaskToDictROICoordsXYCT(data_manager.getROIMask(app_key))
+        data_manager.dict_roi_coords_xyct_reg = deepcopy(data_manager.dict_roi_coords_xyct)
         data_manager.dict_roi_matching = convertCellposeMaskToDictROIMatching(data_manager.getROIMask(app_key))
         data_manager.dict_im_roi_xyct = getDictROIImageXYCTFromDictROICoords(data_manager.dict_roi_coords_xyct, data_manager.getImageSize(app_key)) 
 
@@ -552,7 +553,7 @@ def bindFuncButtonRunElastixForFall(
 
         # get fixed image and moving image, (meanImg, meanImgE, max_proj, Vcorr)
         img_type_pri = control_manager.view_controls[app_key].getBackgroundImageType()
-        img_fix= data_manager.getDictBackgroundImage(app_key).get(img_type_pri)
+        img_fix = data_manager.getDictBackgroundImage(app_key).get(img_type_pri)
         img_type_sec = control_manager.view_controls[app_key_sec].getBackgroundImageType()
         img_mov = data_manager.getDictBackgroundImage(app_key_sec).get(img_type_sec)
         # run elastix
@@ -572,7 +573,7 @@ def bindFuncButtonRunElastixForFall(
         data_manager.dict_im_roi_reg[app_key_sec]["all"] = img_roi_mov_reg_clipped
         
         # ROI coordinates
-        path_transform_parameters_file = os.path.join(output_directory,"TransformParameters.0.txt")
+        path_transform_parameters_file = os.path.join(output_directory,"TransformParameters.0.txt") # hardcoded !!!
         dict_roi_coords = data_manager.getDictROICoords(app_key_sec)
         dict_roi_coords_reg = applyDictROICoordsTransform(
             img_fix, img_mov, 
@@ -588,6 +589,7 @@ def bindFuncButtonRunElastixForFall(
         control_manager.view_controls[app_key_sec].updateView()
 
         shutil.rmtree(output_directory)
+        os.remove(path_points_txt)
         QMessageBox.information(q_widget, "Image Registration Finish", "Image Registration Finished!")
     q_button.clicked.connect(lambda: _runElastix())
 
@@ -607,18 +609,20 @@ def bindFuncButtonRunElastixForSingleStack(
     def _runElastix():
         os.makedirs(output_directory, exist_ok=True)
 
-        elastix_method = combobox_elastix_method.currentText()
-        channel_ref = int(combobox_channel_ref.currentText())
-        idx_ref = int(combobox_idx_ref.currentText())
+        elastix_method = combobox_elastix_method.currentText() # rigid, affine, bspline
+        channel_ref = int(combobox_channel_ref.currentText()) # 0, 1, 2
+        idx_ref = int(combobox_idx_ref.currentText()) # 0, 1, 2, ...
         print(f"{elastix_method} transform")
         print("Reference channel:", channel_ref)
         print(f"Reference {axis} plane:", idx_ref)
+        # get image stack and elastix parameters
         img_stack = data_manager.getTiffStack(app_key)
         dict_params = config_manager.json_config.get("elastix_params")[elastix_method]
         data_manager.dict_parameter_map[app_key] = convertDictToElastixFormat(dict_params)
         parameter_object = makeElastixParameterObject(data_manager.getParameterMap(app_key))
         print("Elastix Parameters", dict_params)
 
+        # stack registration
         dict_transform_parameters, img_stack_reg = runStackRegistration(img_stack, parameter_object, channel_ref, idx_ref, axis, output_directory)
         data_manager.dict_transform_parameters[app_key] = dict_transform_parameters
         data_manager.dict_tiff_reg[app_key] = img_stack_reg
@@ -683,6 +687,76 @@ def bindFuncButtonApplyElastixTransform_XYCTtoXYCZT(
         QMessageBox.information(q_widget, "Image Registration Finish", "Image Registration Finished!")
     q_button.clicked.connect(_applyElastixTransform_XYCTtoXYCZT)
 
+# -> processing_image_layouts.makeLayoutMicrogliaXYCTStackRegistration
+def bindFuncButtonRunElastixForMicrogliaXYCTStackRegistration(
+        q_widget: 'QWidget',
+        q_button: 'QPushButton',
+        data_manager: 'DataManager',
+        config_manager: 'ConfigManager',
+        app_keys: List[str],
+        combobox_elastix_method: QComboBox,
+        combobox_channel_ref: QComboBox,
+        combobox_idx_ref: QComboBox,
+        path_points_txt: str="./elastix/points_tmp.txt",
+        output_directory: str="./elastix"
+) -> None:
+    def _runElastix():
+        axis = "t"
+        app_key_pri = app_keys[0]
+        z_ref = 0
+        c_ref = 0
+        os.makedirs(output_directory, exist_ok=True)
+
+        elastix_method = combobox_elastix_method.currentText()
+        channel_ref = int(combobox_channel_ref.currentText())
+        idx_ref = int(combobox_idx_ref.currentText())
+        print(f"{elastix_method} transform")
+        print("Reference channel:", channel_ref)
+        print(f"Reference {axis} plane:", idx_ref)
+        img_stack = data_manager.getTiffStack(app_key_pri)
+        dict_params = config_manager.json_config.get("elastix_params")[elastix_method]
+        data_manager.dict_parameter_map[app_key_pri] = convertDictToElastixFormat(dict_params)
+        parameter_object = makeElastixParameterObject(data_manager.getParameterMap(app_key_pri))
+        print("Elastix Parameters", dict_params)
+
+        dict_transform_parameters, img_stack_reg = runStackRegistration(img_stack, parameter_object, channel_ref, idx_ref, axis, output_directory)
+
+        for app_key in app_keys:
+            data_manager.dict_transform_parameters[app_key] = dict_transform_parameters
+            # background image
+            data_manager.dict_tiff_reg[app_key] = img_stack_reg
+
+            # # ROI image
+            # img_roi_mov = deepcopy(data_manager.getDictROIImage(app_key_sec).get("all"))
+            # val_max = np.max(img_roi_mov)
+            # img_roi_mov_reg = applySingleTransform(img_roi_mov, transform_parameters, output_directory)
+            # img_roi_mov_reg_clipped = np.minimum(img_roi_mov_reg, val_max) # avoid making contours of ROIs
+            # data_manager.dict_im_roi_reg[app_key_sec]["all"] = img_roi_mov_reg_clipped
+            
+        # ROI coordinates
+        # save transform parameters for applying ROI transform
+        for zt_plane in dict_transform_parameters.keys(): # zt_plane: z0_t0, z0_t1, z0_t2, ...
+            t_plane_pri = int(zt_plane.split("t")[1])
+            param = dict_transform_parameters[zt_plane]
+            path_dst = f"{output_directory}/TransformParameters_{zt_plane}.txt"
+            param.WriteParameterFile(param, path_dst)
+
+            img_fix = data_manager.getImageFromXYCZTTiffStack(app_keys[0], z_ref, t_plane_pri, c_ref)
+            img_mov = img_fix.copy() # tmp
+            dict_roi_coords_xyct_reg_singlet = applyDictROICoordsTransform(
+                img_fix, img_mov, 
+                data_manager.dict_roi_coords_xyct[t_plane_pri], 
+                data_manager.getParameterMap(app_key_pri),
+                path_dst, 
+                path_points_txt, 
+                output_directory
+                )
+
+            data_manager.dict_roi_coords_xyct_reg[t_plane_pri] = dict_roi_coords_xyct_reg_singlet
+        # shutil.rmtree(output_directory)
+
+        QMessageBox.information(q_widget, "Image Registration Finish", "Image Registration Finished!")
+    q_button.clicked.connect(lambda: _runElastix())
 
 """
 processing_roi_layouts
@@ -778,6 +852,7 @@ def bindFuncButtonsROIManagerForTable(
             view_control.view_handler.handler.plane_t_sec = plane_t_sec
             view_control.view_handler.handler.plane_t = plane_t
 
+            view_control.view_handler.handler.roi_reg = view_control.show_reg_im_roi # registered roi or not
             view_control.view_handler.handler.roi_add_mode = True
 
     def _removeSelectedROIfromTable() -> None:
@@ -786,7 +861,7 @@ def bindFuncButtonsROIManagerForTable(
         plane_t_pri = control_manager.view_controls[app_key_pri].getPlaneT()
         plane_t_sec = control_manager.view_controls[app_key_sec].getPlaneT()
         plane_t = plane_t_pri if view_control.app_key == app_key_pri else plane_t_sec # pri or sec
-        # remove selected roi from dict_roi_coords_xyct, dict_roi_matching
+        # remove selected roi from dict_roi_matching, dict_roi_coords_xyct
         if roi_selected_id:
             data_manager.dict_roi_matching["id"][plane_t].remove(roi_selected_id)
             # remove all sec ROI of pri-sec pair
@@ -801,6 +876,7 @@ def bindFuncButtonsROIManagerForTable(
                 del data_manager.dict_roi_matching["match"][plane_t][plane_t_sec_tmp][roi_selected_id]
 
             del data_manager.dict_roi_coords_xyct[plane_t][roi_selected_id]
+            del data_manager.dict_roi_coords_xyct_reg[plane_t][roi_selected_id]
             print("ROI", roi_selected_id, "is removed.")
         table_control.setSharedAttr_ROISelected(None) # clear selected roi
         view_control.updateView()
@@ -826,7 +902,8 @@ def bindFuncButtonsROIManagerForTable(
             view_control.view_handler.handler.plane_t_sec = plane_t_sec
             view_control.view_handler.handler.plane_t = plane_t
 
-            dict_roi_coords_xyct_selected = data_manager.dict_roi_coords_xyct[plane_t][roi_id_edit]
+            # registered roi or not
+            dict_roi_coords_xyct_selected = data_manager.dict_roi_coords_xyct_reg[plane_t][roi_id_edit] if view_control.show_reg_im_roi else data_manager.dict_roi_coords_xyct[plane_t][roi_id_edit]
             view_control.view_handler.handler.roi_points_edit = set([(x, y) for x, y in zip(dict_roi_coords_xyct_selected["xpix"], dict_roi_coords_xyct_selected["ypix"])])
             view_control.view_handler.handler.roi_add_mode = False
 

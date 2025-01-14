@@ -188,7 +188,8 @@ class ViewHandler:
             self.plane_t:                            int = None
             self.plane_t_pri:                        int = None
             self.plane_t_sec:                        int = None
-            self.roi_add_mode:                     bool = False
+            self.roi_add_mode:                      bool = False
+            self.roi_reg:                           bool = False
 
         def updateROIEditLayer(self):
             updateROIEditLayer(
@@ -218,7 +219,10 @@ class ViewHandler:
                     med = (np.median(xpix).astype("uint16"), np.median(ypix).astype("uint16"))
                     dict_roi_coords_xyct_edit = {"xpix": xpix, "ypix": ypix, "med": med}
 
-                    self.data_manager.dict_roi_coords_xyct[self.plane_t][self.roi_id_edit] = dict_roi_coords_xyct_edit # ROI update
+                    # ROI update
+                    # WARNING: With adding ROI, the coordinates of ROI and that of Registred ROI are the same.
+                    self.data_manager.dict_roi_coords_xyct[self.plane_t][self.roi_id_edit] = dict_roi_coords_xyct_edit 
+                    self.data_manager.dict_roi_coords_xyct_reg[self.plane_t][self.roi_id_edit] = dict_roi_coords_xyct_edit
                     self.data_manager.dict_im_roi_xyct = getDictROIImageXYCTFromDictROICoords(self.data_manager.dict_roi_coords_xyct, self.data_manager.getImageSize("pri"))
                     # With "Add ROI" mode
                     if self.roi_add_mode:
