@@ -256,6 +256,7 @@ def bindFuncMicrogliaTrackingIO(
     json_config = config_manager.json_config
     def _saveMicrogliaTracking():
         dict_roi_coords_xyct = data_manager.getDictROICoordsXYCT()
+        dict_roi_coords_xyct_reg = data_manager.getDictROICoordsXYCTRegistered()
         dict_roi_matching = data_manager.getDictROIMatching()
         saveMicrogliaTracking(
             q_window, 
@@ -263,17 +264,18 @@ def bindFuncMicrogliaTrackingIO(
             gui_defaults, 
             json_config, 
             dict_roi_matching,
-            dict_roi_coords_xyct
+            dict_roi_coords_xyct,
+            dict_roi_coords_xyct_reg,
             )
 
     def _loadMicrogliaTracking() -> None:
-        dict_roi_matching, dict_roi_coords_xyct = loadMicrogliaTracking(
+        dict_roi_matching, dict_roi_coords_xyct, dict_roi_coords_xyct_reg = loadMicrogliaTracking(
             q_window, 
             gui_defaults, 
         )
         data_manager.dict_roi_matching = dict_roi_matching
         data_manager.dict_roi_coords_xyct = dict_roi_coords_xyct
-
+        data_manager.dict_roi_coords_xyct_reg = dict_roi_coords_xyct_reg
         # hardcoded !!!
         # initialize ROI XYCT Colors
         for plane_t in data_manager.dict_roi_coords_xyct.keys():

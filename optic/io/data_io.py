@@ -354,12 +354,13 @@ def loadROITracking(
 
 # save MicrogliaTracking.mat
 def saveMicrogliaTracking(
-        q_window             : QMainWindow, 
-        q_lineedit           : QLineEdit, 
-        gui_defaults         : GuiDefaults,
-        json_config          : JsonConfig, 
-        dict_roi_matching    : Dict[str, Any],
-        dict_roi_coords_xyct : Dict[str, Any],
+        q_window                    : QMainWindow, 
+        q_lineedit                  : QLineEdit, 
+        gui_defaults                : GuiDefaults,
+        json_config                 : JsonConfig, 
+        dict_roi_matching           : Dict[str, Dict[int, List[int] | Dict[int, Dict[int, Optional[int]]]]],
+        dict_roi_coords_xyct        : Dict[int, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]],
+        dict_roi_coords_xyct_reg    : Dict[int, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]]
         ) -> None:
     path_src = q_lineedit.text()
     path_dst = generateSavePath(path_src, prefix="Microgliatracking_", remove_strings="Fall_", new_extension=".mat") # .tif -> MicrogliaTracking_.mat
@@ -379,20 +380,22 @@ def saveMicrogliaTracking(
 
                 # load ROITracking, ROICoords of all dates
                 for date_ in mat_microglia_tracking["ROI"].keys():
-                    dict_roi_matching_, dict_roi_coords_xyct_ = convertMatMicrogliaTrackingToDictROIMatchingAndDictROICoords(mat_microglia_tracking["ROI"][date_])
+                    dict_roi_matching_, dict_roi_coords_xyct_, dict_roi_coords_xyct_reg_ = convertMatMicrogliaTrackingToDictROIMatchingAndDictROICoords(mat_microglia_tracking["ROI"][date_])
                     user_ = mat_microglia_tracking["ROI"][date_]["user"]
-                    dict_roi_matching_converted_, arr_roi_coords_xyct_ = convertContentsOfDictROIMatchingAndDictROICoordsToArray(
-                        dict_roi_matching_, dict_roi_coords_xyct_
+                    dict_roi_matching_converted_, arr_roi_coords_xyct_, arr_roi_coords_xyct_reg_ = convertContentsOfDictROIMatchingAndDictROICoordsToArray(
+                        dict_roi_matching_, dict_roi_coords_xyct_, dict_roi_coords_xyct_reg_
                     )
                     mat_microglia_tracking["ROI"][date_] = {
                         "ROITracking": dict_roi_matching_converted_, 
                         "ROICoords": arr_roi_coords_xyct_, 
+                        "ROICoordsRegistered": arr_roi_coords_xyct_reg_,
                         "user": user_
                         }
 
                 mat_microglia_tracking = convertDictROIMatchingAndDictROICoordsToMatMicrogliaTracking(
                     dict_roi_matching,
                     dict_roi_coords_xyct,
+                    dict_roi_coords_xyct_reg,
                     mat_microglia_tracking,
                     date=now,
                     user=user,
@@ -402,6 +405,7 @@ def saveMicrogliaTracking(
                 mat_microglia_tracking = convertDictROIMatchingAndDictROICoordsToMatMicrogliaTracking(
                     dict_roi_matching,
                     dict_roi_coords_xyct,
+                    dict_roi_coords_xyct_reg,
                     date=now,
                     user=user,
                     path_tif=path_src,
@@ -433,9 +437,10 @@ def loadMicrogliaTracking(
             
             # select saved date
             mat_microglia_tracking_roi_date = mat_microglia_tracking_roi[date]
-            dict_roi_matching, dict_roi_coords_xyct = convertMatMicrogliaTrackingToDictROIMatchingAndDictROICoords(mat_microglia_tracking_roi_date)
+            dict_roi_matching, dict_roi_coords_xyct, dict_roi_coords_xyct_reg = convertMatMicrogliaTrackingToDictROIMatchingAndDictROICoords(mat_microglia_tracking_roi_date)
             
             QMessageBox.information(q_window, "File load", "Microglia Tracking file loaded!")
-            return dict_roi_matching, dict_roi_coords_xyct
+            return dict_roi_matching, dict_roi_coords_xyct, dict_roi_coords_xyct_reg
         except Exception as e:
-            QMessageBox.warning(q_window, "File load failed", f"Error loading Microglia Tracking file: {e}")
+            raise e
+            # QMessageBox.warning(q_window, "File load failed", f"Error loading Microglia Tracking file: {e}")
