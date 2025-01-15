@@ -235,12 +235,15 @@ class TableControl:
 
     # with View mousePressEvent
     def updateSelectedROI(self, roi_id: int) -> None:
+        # WARNING !!!
+        # roi_id and row are not aloways the same
         if roi_id is not None:
-            self.q_table.selectRow(roi_id)
-            self.setSelectedRow(roi_id)
+            row = self.getRowFromCellId(roi_id)
+            self.q_table.selectRow(row)
+            self.setSelectedRow(row)
             self.setSharedAttr_ROISelected(roi_id)
-            self.q_table.scrollToItem(self.q_table.item(roi_id, 0), QAbstractItemView.PositionAtTop)
-            self.q_table.setCurrentCell(roi_id, 0)
+            self.q_table.scrollToItem(self.q_table.item(row, 0), QAbstractItemView.PositionAtTop)
+            self.q_table.setCurrentCell(row, 0)
 
     """
     KeyPressEvent
@@ -475,6 +478,18 @@ class TableControl:
     """
     Other Functions
     """
+    # get row from cell id
+    def getRowFromCellId(self, cell_id: int) -> Optional[int]:
+        col_id = self.table_columns.getColumns()['Cell_ID']['order'] # hardcoded !!!
+        dict_row_cellid = {row: int(self.q_table.item(row, col_id).text()) for row in range(self.len_row)}
+        dict_cellid_row = {v: k for k, v in dict_row_cellid.items()}
+        return dict_cellid_row.get(cell_id)
+    
+    # get cell id from row
+    def getCellIdFromRow(self, row: int) -> Optional[int]:
+        col_id = self.table_columns.getColumns()['Cell_ID']['order']
+        return int(self.q_table.item(row, col_id).text())
+    
     # set ROI celltype with 0/1 array
     def setROICellTypeFromArray(
         self,

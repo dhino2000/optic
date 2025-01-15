@@ -267,8 +267,8 @@ class ViewHandler:
                 reg = self.view_control.getShowRegImROI() # registered ROI
                 if event.button() == Qt.LeftButton: # for "pri", "sec" views
                     self.view_control.getROIwithClick(x, y, reg, xyct=True, roi_skip=False)
-                    print(f"ROI selected: {self.view_control.control_manager.getSharedAttr(self.view_control.app_key, 'roi_selected_id')}")
                     roi_selected_id = self.view_control.control_manager.getSharedAttr(self.view_control.app_key, 'roi_selected_id')
+                    print(f"ROI selected: {roi_selected_id}")
                     self.table_control.updateSelectedROI(roi_selected_id)
                     self.table_control.q_table.setFocus()
                 elif event.button() == Qt.RightButton: # for "pri" view
