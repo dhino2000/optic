@@ -62,7 +62,7 @@ def makeLayoutROIMatching(
         key_label_threshold_cost, 
         key_lineedit_threshold_cost,
         label="Max cost threshold:", 
-        text_set="10000", 
+        text_set="10", 
         axis="horizontal"
         ))
     layout_run = QHBoxLayout()

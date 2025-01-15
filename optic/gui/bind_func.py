@@ -822,6 +822,65 @@ def bindFuncButtonRunROIMatching(
         QMessageBox.information(q_widget, "ROI Matching Finish", "ROI Matching Finished!")
     q_button.clicked.connect(_runROIMatching)
 
+# Microglia XYCT ROI Matching
+def bindFuncButtonRunROIMatchingForXYCT(
+    q_widget: 'QWidget',
+    q_button: 'QPushButton',
+    widget_manager: 'WidgetManager',
+    data_manager: 'DataManager',
+    control_manager: 'ControlManager',
+    app_key_pri: str,
+    app_key_sec: str,
+):
+    def _runROIMatching():
+        view_control_pri = control_manager.view_controls[app_key_pri]
+        view_control_sec = control_manager.view_controls[app_key_sec]
+        table_control_pri = control_manager.table_controls[app_key_pri]
+        table_control_sec = control_manager.table_controls[app_key_sec]
+        t_plane_pri = view_control_pri.getPlaneT()
+        t_plane_sec = view_control_sec.getPlaneT()
+
+        result = showConfirmationDialog(
+            q_widget,
+            'Confirmation',
+            f"Match ROIs?"
+        )
+        if result != QMessageBox.Yes:
+            return 
+    
+        # use registered coordinates if show_reg_im_roi is True
+        if view_control_pri.show_reg_im_roi:
+            array_src = np.array([data_manager.getDictROICoordsXYCTRegistered()[t_plane_pri][roi_id]["med"] for roi_id in data_manager.getDictROICoordsXYCTRegistered()[t_plane_pri].keys()])
+            array_tgt = np.array([data_manager.getDictROICoordsXYCTRegistered()[t_plane_sec][roi_id]["med"] for roi_id in data_manager.getDictROICoordsXYCTRegistered()[t_plane_sec].keys()])
+        else:
+            array_src = np.array([data_manager.getDictROICoordsXYCT()[t_plane_pri][roi_id]["med"] for roi_id in data_manager.getDictROICoordsXYCT()[t_plane_pri].keys()])
+            array_tgt = np.array([data_manager.getDictROICoordsXYCT()[t_plane_sec][roi_id]["med"] for roi_id in data_manager.getDictROICoordsXYCT()[t_plane_sec].keys()])
+        
+        roi_matching = calculateROIMatching(
+                    array_src=array_src,
+                    array_tgt=array_tgt,
+                    method=widget_manager.dict_combobox["ot_method"].currentText(),
+                    loss_fun="square_loss",
+                    metric="minkowski",
+                    p=float(widget_manager.dict_lineedit["wd_exp"].text()),
+                    alpha=float(widget_manager.dict_lineedit["fgwd_alpha"].text()),
+                    threshold=float(widget_manager.dict_lineedit["ot_threshold_transport"].text()),
+                    max_cost=float(widget_manager.dict_lineedit["ot_threshold_cost"].text()),
+                )
+        
+        # convert roi_matching id to original id
+        for row_pri, row_sec in roi_matching.items():
+            roi_id_pri = table_control_pri.getCellIdFromRow(row_pri)
+            roi_id_sec = table_control_sec.getCellIdFromRow(row_sec)
+            data_manager.dict_roi_matching["match"][t_plane_pri][t_plane_sec][roi_id_pri] = roi_id_sec
+
+        # update Table, View
+        control_manager.table_controls[app_key_pri].updateWidgetDynamicTableWithT(data_manager.dict_roi_matching, t_plane_pri, t_plane_sec, True)
+        control_manager.table_controls[app_key_sec].updateWidgetDynamicTableWithT(data_manager.dict_roi_matching, t_plane_pri, t_plane_sec, False)
+        control_manager.view_controls[app_key_pri].updateView()
+        QMessageBox.information(q_widget, "ROI Matching Finish", "ROI Matching Finished!")
+    q_button.clicked.connect(_runROIMatching)
+
 # -> processing_roi_layouts.makeLayoutROIManagerForTable
 def bindFuncButtonsROIManagerForTable(
     q_button_add: 'QPushButton',
