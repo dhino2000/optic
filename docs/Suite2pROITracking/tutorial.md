@@ -5,6 +5,15 @@
 These ROI correspondence relationships are saved as .mat files to facilitate downstream analysis. 
 Since this application depends on analysis results of [**Suite2pROICheck**](https://github.com/dhino2000/optic/edit/main/docs/Suite2pROICheck/tutorial.md), it is recommended to first perform ROI check.
 
+## Workflow
+
+1. **Load Fall.mat**
+2. **Load ROICheck.mat**
+3. [**Image registration**](#image-registration)
+4. [**Auto ROI tracking**](#automatic-roi-matching)
+5. **Check ROI tracking manually**
+6. **Save ROITracking.mat file**
+
 ## Input
 Before using this application, please prepare **Fall.mat**, and **ROICheck.mat**, the result of ROI check.  
 - (Required): two **Fall.mat** and two **ROICheck.mat**
