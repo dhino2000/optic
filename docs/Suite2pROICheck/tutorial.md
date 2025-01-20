@@ -8,7 +8,7 @@
 ```mermaid
 flowchart TB
     A[Load Fall.mat] --> B[Set celltypes with table column config];
-    click B "#Custom Table Columns Configuration" "Jump to Table Columns Configuration"
+    click B "#custom-table-columns-configuration" "Jump to 'Custom Table Columns Configuration'"
     B[Set celltypes with table column config] --> C[Check ROIs];
     click C "##Check ROIs" "Jump to Check ROIs"
     C[Check ROIs] --> D[Save ROICheck.mat file];
