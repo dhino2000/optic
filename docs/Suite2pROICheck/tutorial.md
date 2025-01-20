@@ -3,6 +3,16 @@
 
 **Suite2pROICheck** is a specialized tool for quickly and efficiently classifying ROIs extracted by Suite2p into neurons and noise cells. The interface is designed to be intuitive and visually clear. It can be customized to classify cells beyond neurons, allowing users to define their own cell types. By loading event files (.npy) from behavioral experiments simultaneously done with imaging, users can identify event-responsive cells.
 
+## Workflow
+
+```mermaid
+flowchart TB
+    A[Load Fall.mat] --> B[Set celltypes with table column config];
+    click B "#Custom Table Columns Configuration" "Jump to Table Columns Configuration"
+    B[Set celltypes with table column config] --> C[Check ROIs];
+    click C "##Check ROIs" "Jump to Check ROIs"
+    C[Check ROIs] --> D[Save ROICheck.mat file];
+```
 
 ## Input
 
