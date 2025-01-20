@@ -5,16 +5,10 @@
 
 ## Workflow
 
-[hoge](#my-custom-id)
-
-```mermaid
-flowchart TB
-    A[Load Fall.mat] --> B[Set celltypes with table column config];
-    click B "#custom-table-columns-configuration" "Jump to 'Custom Table Columns Configuration'"
-    B[Set celltypes with table column config] --> C[Check ROIs];
-    click C "#check-rois" "Jump to Check ROIs"
-    C[Check ROIs] --> D[Save ROICheck.mat file];
-```
+1. **Load Fall.mat**
+2. [**Set celltypes with table column config**](#custom-table-columns-configuration)
+3. [**Check ROIs**](#check-rois)
+4. **Save ROICheck.mat file**
 
 ## Input
 
@@ -42,7 +36,7 @@ Suite2pROICheck supports 2-channel imaging Fall.mat but not support multi-plane 
 push "browse" button and choose single XY tif image file.  
 If you capture reference image as tif file, you can use it with blue-channel image.
 
-<h2 id="check-rois">Check ROIs</h2>
+## Check ROIs
 <img src="images/suite2p_roi_check_legend.png">
 
 Suite2pROICheck consists of 3 GUI sections, **Canvas**, **View**, and **Table**.
@@ -213,7 +207,7 @@ ex):
  - down-arrow : Move one row down       
 </pre>
 
-<h2 id="my-custom-id">Custom Table Columns Configuration</h2>
+## Custom Table Columns Configuration
 
 The default columns configuration of Suite2pROICheck is ["Cell_ID", "Astrocyte", "Neuron", "Not_Cell", "Check", "Tracking", "Memo"], but you can custom them with **Table Columns Config** of Table section.
 
