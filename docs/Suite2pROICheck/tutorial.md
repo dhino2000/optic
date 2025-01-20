@@ -42,7 +42,7 @@ Suite2pROICheck supports 2-channel imaging Fall.mat but not support multi-plane 
 push "browse" button and choose single XY tif image file.  
 If you capture reference image as tif file, you can use it with blue-channel image.
 
-## Check ROIs
+<h2 id="check-rois">Check ROIs</h2>
 <img src="images/suite2p_roi_check_legend.png">
 
 Suite2pROICheck consists of 3 GUI sections, **Canvas**, **View**, and **Table**.
@@ -213,7 +213,7 @@ ex):
  - down-arrow : Move one row down       
 </pre>
 
-## Custom Table Columns Configuration
+<h2 id="my-custom-id">Custom Table Columns Configuration</h2>
 
 The default columns configuration of Suite2pROICheck is ["Cell_ID", "Astrocyte", "Neuron", "Not_Cell", "Check", "Tracking", "Memo"], but you can custom them with **Table Columns Config** of Table section.
 
@@ -274,5 +274,3 @@ The Column width. it can be adjusted by dragging.
  - up-arrow   : Move one row up         
  - down-arrow : Move one row down       
 </pre>
-
-<h2 id="my-custom-id">My Heading</h2>
