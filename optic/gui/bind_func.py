@@ -923,7 +923,7 @@ def bindFuncButtonsROIManagerForTable(
         plane_t_sec = control_manager.view_controls[app_key_sec].getPlaneT()
         plane_t = plane_t_pri if view_control.app_key == app_key_pri else plane_t_sec # pri or sec
         # remove selected roi from dict_roi_matching, dict_roi_coords_xyct
-        if roi_selected_id:
+        if isinstance(roi_selected_id, int):
             data_manager.dict_roi_matching["id"][plane_t].remove(roi_selected_id)
             # remove all sec ROI of pri-sec pair
             for plane_t_pri_tmp in data_manager.dict_roi_matching["match"].keys(): # search all plane_t_pri
@@ -1219,7 +1219,6 @@ def bindFuncTableCellChangedWithMicrogliaTracking(
             # get the maximum roi id of the secondary plane
             t_plane_pri = control_manager.view_controls["pri"].getPlaneT()
             t_plane_sec = control_manager.view_controls["sec"].getPlaneT()
-            max_roi_id_sec = data_manager.dict_roi_matching["id"][t_plane_sec][-1]
 
             # get the new value
             item_pri_id = q_table_pri.item(current_row, 0)
@@ -1242,7 +1241,7 @@ def bindFuncTableCellChangedWithMicrogliaTracking(
             roi_id_sec = int(roi_id_sec)
 
             # check the validity of the roi id
-            if 0 <= roi_id_sec <= max_roi_id_sec:
+            if roi_id_sec in data_manager.dict_roi_matching["id"][t_plane_sec].values():
                 data_manager.dict_roi_matching["match"][t_plane_pri][t_plane_sec][roi_id_pri] = roi_id_sec
         except ValueError:
             print("Invalid input: not an integer")
@@ -1250,8 +1249,8 @@ def bindFuncTableCellChangedWithMicrogliaTracking(
             print(f"KeyError: {e}")
         except AttributeError as e: # set blank
             data_manager.dict_roi_matching["match"][t_plane_pri][t_plane_sec][roi_id_pri] = None
-        except IndexError as e:
-            print(f"IndexError: {e}")
+        # except IndexError as e:
+            # print(f"IndexError: {e}")
 
     q_table_pri.itemChanged.connect(_onEditingFinished)
 

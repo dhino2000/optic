@@ -233,7 +233,6 @@ class ViewHandler:
                         self.control_manager.view_controls["pri"].roi_colors_xyct[self.plane_t][self.roi_id_edit] = generateRandomColor()
                         self.control_manager.view_controls["sec"].roi_colors_xyct[self.plane_t][self.roi_id_edit] = self.control_manager.view_controls["pri"].roi_colors_xyct[self.plane_t][self.roi_id_edit]
                         
-
                 except IndexError as e: # no roi_points_edit
                     pass
 
