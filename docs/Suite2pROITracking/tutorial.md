@@ -45,8 +45,9 @@ About secondary view section and secondary table section, the function is same a
 
 - **View**
   
-  display ROIs of Fall.mat, and the choosed ROI is highlighted. If **Macth_Cell_ID** is filled, white line between pri **Cell_ID** ROI and sec **Macth_Cell_ID** ROI is drawn. The opacity of white line can be changed with the slider of **Image Registration** section.    
-  - **mouse click** : Choose the closest ROI after passing ROI skip conditions
+  display ROIs of Fall.mat, and the choosed ROI is highlighted. If **Macth_Cell_ID** is filled, white line between pri **Cell_ID** ROI and sec **Macth_Cell_ID** ROI is drawn. The opacity of white line can be changed with the slider of **Image Registration** section.
+  - **Left mouse click** : Choose the closest ROI after passing ROI skip conditions
+  - **Right mouse click** (only **pri** view) : Choose the closest ROI of **sec** view after passing ROI skip conditions
 
 - **ROI property**
   
