@@ -44,10 +44,10 @@ The primary (pri) and secondary (sec) sections have different functionalities an
 - **View**
   
   display ROIs of the table and the choosed ROI is highlighted. If **Macth_Cell_ID** is filled, white line between pri **Cell_ID** ROI and sec **Macth_Cell_ID** ROI is drawn. The opacity of white line can be changed with **Opacity of ROI pair** slider.    
-  - **left mouse click** : Choose the closest ROI
-  - **right mouse click** (only pri view) : Choose the closest ROI of sec view
+  - **Left mouse click** : Choose the closest ROI
+  - **Right mouse click** (only pri view) : Choose the closest ROI of sec view
   - **ctrl + mouse wheel** : Zoom in/out
-  - **middle mouse drag** : Pan
+  - **Middle mouse drag** : Pan
   - **R** : Reset view zoom
 
 - **T slider**
