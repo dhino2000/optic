@@ -111,9 +111,9 @@ T: time points
 1. Open the Anaconda Prompt and switch to the desired environment.  
 `activate optic`
   
-2. Execute the "suite2p_roi_tracking.py" script  
+2. Execute the "microglia_tracking.py" script  
 
-(ex) `python C:/Users/dhino2000/optic/scripts/suite2p_roi_tracking.py`
+(ex) `python C:/Users/dhino2000/optic/scripts/microglia_tracking.py`
 
 3. Track ROIs!
 ([MicrogliaTracking Tutorial](https://github.com/dhino2000/optic/blob/main/docs/MicrogliaTracking/tutorial.md))
@@ -122,9 +122,9 @@ T: time points
 1. Open the Anaconda Prompt and switch to the desired environment.  
 `activate optic`
   
-2. Execute the "suite2p_roi_tracking.py" script  
+2. Execute the "tif_stack_explorer.py" script  
 
-(ex) `python C:/Users/dhino2000/optic/scripts/suite2p_roi_tracking.py`
+(ex) `python C:/Users/dhino2000/optic/scripts/tif_stack_explorer.py`
 
 3. 
 ([TIFStackExplorer Tutorial](https://github.com/dhino2000/optic/blob/main/docs/TIFStackExplorer/tutorial.md))
