@@ -74,11 +74,65 @@ def makeLayoutROIMatching(
     return layout
 
 def makeLayoutROIMatchingTest(
-        widget_manager: WidgetManager,
-        key_button_roi_matching_test: str
+    widget_manager: WidgetManager,
+    key_button_roi_matching_test: str
 ) -> QHBoxLayout:
     layout = QHBoxLayout()
     layout.addWidget(widget_manager.makeWidgetButton(key_button_roi_matching_test, "ROI Matching Test"))
+    return layout
+
+# Cellpose layout
+def makeLayoutCellpose(
+    widget_manager: WidgetManager,
+    data_manager: DataManager,
+    app_key: AppKeys,
+    key_label_cellpose: str,
+    key_label_channel: str,
+    key_label_cellpose_model: str,
+    key_label_cellpose_restore: str,
+    key_label_diameter: str,
+    key_combobox_channel: str,
+    key_combobox_cellpose_model: str,
+    key_combobox_cellpose_restore: str,
+    key_spinbox_diameter: str,
+    key_button_run_cellpose: str
+) -> QVBoxLayout:
+    layout = QVBoxLayout()
+    layout.addWidget(widget_manager.makeWidgetLabel(key=key_label_cellpose, label="Cellpose", bold=True, italic=True, use_global_style=False))
+    layout.addLayout(makeLayoutComboBoxLabel(
+        widget_manager, 
+        key_label_channel, 
+        key_combobox_channel, 
+        "Channel:", 
+        axis="horizontal", 
+        items=[str(i) for i in range(data_manager.getSizeOfC(app_key))]
+        ))
+    layout.addLayout(makeLayoutComboBoxLabel(
+        widget_manager,
+        key_label_cellpose_model,
+        key_combobox_cellpose_model,
+        "Cellpose Model:",
+        axis="horizontal",
+        items=["cyto", "nuclei"]
+    ))
+    layout.addLayout(makeLayoutComboBoxLabel(
+        widget_manager,
+        key_label_cellpose_restore,
+        key_combobox_cellpose_restore,
+        "Restore Model:",
+        axis="horizontal",
+        items=["denoise_cyto3", "deblur_cyto3", "upsample_cyto3", "denoise_nuclei", "deblur_nuclei", "upsample_nuclei"]
+    ))
+    layout.addLayout(makeLayoutSpinBoxLabel(
+        widget_manager,
+        key_label_diameter,
+        key_spinbox_diameter,
+        "Diameter:",
+        axis="horizontal",
+        value_min=0,
+        value_set=20,
+    ))
+    layout.addWidget(widget_manager.makeWidgetButton(key=key_button_run_cellpose, label="Run Cellpose"))
     return layout
 
 # ROI Manager layout
