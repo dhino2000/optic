@@ -11,3 +11,4 @@ from .info_layouts import makeLayoutROIProperty
 from .view_layouts import makeLayoutViewWithZTSlider, makeLayoutROIThresholds, makeLayoutDislplayCelltype, makeLayoutBGImageTypeDisplay, makeLayoutROIChooseSkip, makeLayoutDisplayROIContourNext
 from .view_setup import setViewSize
 from .table_layouts import makeLayoutTableROICountLabel, makeLayoutSelectedROISetSameCelltype, makeLayoutSelectedROICheckboxToggle, makeLayoutROIFilterThreshold, makeLayoutROIFilterButton
+from .table_setup import setTableSize

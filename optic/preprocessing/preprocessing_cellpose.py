@@ -40,8 +40,28 @@ def convertCellposeMaskToDictROICoordsXYCT(
             dict_roi_coords_xyct[t_plane][roi_id] = {"xpix": xpix, "ypix": ypix, "med": med}
     return dict_roi_coords_xyct
 
-# convert Cellpose's mask into dict of ROI matching
-def convertCellposeMaskToDictROIMatching(
+# convert single Cellpose mask into dict of ROI matching
+def convertSingleCellposeMaskToDictROIMatching(
+    dict_roi_matching : Dict[str, Dict[int, List[int] | Dict[int, Dict[int, Optional[int]]]]],
+    mask              : np.ndarray[np.uint16, Tuple[int, int]], 
+    t_plane           : int,
+    only_id           : bool = False
+) -> Dict[str, Dict[int, List[int] | Dict[int, Dict[int, Optional[int]]]]]:
+    """
+    Convert a Cellpose mask array into a dict_roi_matching structure.
+    Dict["id", Dict[plane_t, List[roi_id]]], "match", Dict[plane_t_pri, Dict[plane_t_sec, Dict[roi_id, Optional[roi_id]]]]
+    """
+    # ROI id
+    dict_roi_matching["id"][t_plane] = list(np.arange(len(np.delete(np.unique(mask), 0)))) # cellpose mask's 0 is background
+
+    # ROI match
+    if not only_id:
+        for t_plane_sec in dict_roi_matching["match"][t_plane].keys():
+            dict_roi_matching["match"][t_plane][t_plane_sec] = {roi_id: None for roi_id in dict_roi_matching["id"][t_plane]}
+    return dict_roi_matching
+
+# convert Cellpose's mask into dict of ROI matching with loading cellpose mask
+def convertCellposeMasksToDictROIMatching(
     masks       : np.ndarray[np.uint16, Tuple[int, int, int]], 
 ) -> Dict[str, Dict[int, List[int] | Dict[int, Dict[int, Optional[int]]]]]:
     """

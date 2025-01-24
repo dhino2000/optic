@@ -5,6 +5,23 @@ from PyQt5.QtWidgets import QAbstractItemView, QTableWidgetItem, QRadioButton, Q
 from ..controls.event_filters import applyKeyPressEventIgnore
 import numpy as np
 
+# set TableWidget size
+def setTableSize(
+        q_table: QTableWidget, 
+        width_min: int=0, 
+        width_max: int=0, 
+        height_min: int=0, 
+        height_max: int=0
+        ) -> None:
+    if width_min:
+        q_table.setMinimumWidth(width_min)
+    if width_max:
+        q_table.setMaximumWidth(width_max)
+    if height_min:
+        q_table.setMinimumHeight(height_min)
+    if height_max:
+        q_table.setMaximumHeight(height_max)
+
 # for Suite2pROICheck, Suite2pROITracking
 def setupWidgetROITable(
         q_table: QTableWidget, 

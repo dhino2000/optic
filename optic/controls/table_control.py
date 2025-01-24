@@ -148,6 +148,9 @@ class TableControl:
     """
     set Functions
     """
+    def setTableSize(self, width_min: int=0, width_max: int=0, height_min: int=0, height_max: int=0) -> None:
+        setTableSize(self.q_table, width_min, width_max, height_min, height_max)
+
     def setSelectedRow(self, row: int) -> None:
         if not isinstance(row, int) or row < 0 or row >= self.len_row:
             return

@@ -23,7 +23,7 @@ def makeLayoutROIMatching(
         ) -> QVBoxLayout:
     layout = QVBoxLayout()
     layout.addWidget(widget_manager.makeWidgetLabel(key=key_label_roi_matching, label="ROI Matching", bold=True, italic=True, use_global_style=False))
-    layout_ot = QHBoxLayout()
+    layout_ot = QVBoxLayout()
     layout_ot.addLayout(makeLayoutComboBoxLabel(
         widget_manager, 
         key_label_ot_method, 
@@ -87,10 +87,12 @@ def makeLayoutCellpose(
     data_manager: DataManager,
     app_key: AppKeys,
     key_label_cellpose: str,
+    key_label_t_plane: str,
     key_label_channel: str,
     key_label_cellpose_model: str,
     key_label_cellpose_restore: str,
     key_label_diameter: str,
+    key_combobox_t_plane: str,
     key_combobox_channel: str,
     key_combobox_cellpose_model: str,
     key_combobox_cellpose_restore: str,
@@ -99,6 +101,14 @@ def makeLayoutCellpose(
 ) -> QVBoxLayout:
     layout = QVBoxLayout()
     layout.addWidget(widget_manager.makeWidgetLabel(key=key_label_cellpose, label="Cellpose", bold=True, italic=True, use_global_style=False))
+    layout.addLayout(makeLayoutComboBoxLabel(
+        widget_manager,
+        key_label_t_plane,
+        key_combobox_t_plane,
+        "T Plane:",
+        axis="horizontal",
+        items=[str(i) for i in range(-1, data_manager.getSizeOfT(app_key))]
+    ))
     layout.addLayout(makeLayoutComboBoxLabel(
         widget_manager, 
         key_label_channel, 
