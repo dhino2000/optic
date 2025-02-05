@@ -1,7 +1,7 @@
 from __future__ import annotations
 from ..type_definitions import *
 from ..io.file_dialog import openFileDialogAndSetLineEdit, saveFileDialog
-from ..io.data_io import saveROICheck, loadROICheck, loadEventFilesNPY, generateSavePath, saveTiffStack, saveROITracking, loadROITracking, loadCellposeMaskNPY, saveMicrogliaTracking, loadMicrogliaTracking
+from ..io.data_io import saveROICheck, loadROICheck, loadEventFilesNPY, generateSavePath, saveTiffStack, saveROITracking, loadROITracking, loadCellposeMaskNPY, saveRegisteredROICoordsAndBGImage, loadRegisteredROICoordsAndBGImage, saveMicrogliaTracking, loadMicrogliaTracking
 from ..visualization.info_visual import updateROICountDisplay
 from ..processing import *
 from ..preprocessing import *
@@ -241,6 +241,22 @@ def bindFuncROITrackingIO(
         local_var
         ))
     q_button_load.clicked.connect(lambda: _loadROITracking())
+
+# -> io_layouts.makeLayoutROITrackingIO
+def bindFuncRegisteredROIAndBGImageIO(
+    q_button_save: 'QPushButton',
+    q_button_load: 'QPushButton',
+    q_window: 'QWidget',
+    q_lineedit: 'QLineEdit',
+    data_manager: 'DataManager',
+    app_key: AppKeys,
+):
+    def _saveRegisteredROIAndBGImage():
+        saveRegisteredROICoordsAndBGImage(q_window, data_manager, q_lineedit, app_key)
+    def _loadRegisteredROIAndBGImage():
+        loadRegisteredROICoordsAndBGImage(q_window, data_manager, app_key)
+    q_button_save.clicked.connect(lambda: _saveRegisteredROIAndBGImage())
+    q_button_load.clicked.connect(lambda: _loadRegisteredROIAndBGImage())
 
 # -> io_layouts.makeLayoutROITrackingIO MicrogliaTracking
 def bindFuncMicrogliaTrackingIO(

@@ -352,6 +352,46 @@ def loadROITracking(
         except Exception as e:
             QMessageBox.warning(q_window, "File load failed", f"Error loading ROICheck file: {e}")
 
+# save registered ROI coordinates and background images
+def saveRegisteredROICoordsAndBGImage(
+        q_window: QMainWindow,
+        data_manager: DataManager, 
+        q_lineedit_fall: QLineEdit,
+        app_key: AppKeys
+        ) -> None:
+    path_fall = q_lineedit_fall.text()
+    path_dst = generateSavePath(path_fall, prefix="RegROIBGim_", remove_strings="Fall_")
+    path_dst, is_overwrite = saveFileDialog(q_widget=q_window, file_type=".mat", title="Save Registered ROI Coordinates, BG Image mat File", initial_dir=path_dst)
+
+    if path_dst:
+        dict_img_bg_reg = data_manager.dict_im_bg_reg[app_key]
+        dict_roi_coords_reg = data_manager.dict_roi_coords_reg[app_key]
+
+        mat_roi_img_reg = {
+            "dict_img_bg_reg": dict_img_bg_reg,
+            "dict_roi_coords_reg": dict_roi_coords_reg,
+        }
+
+        savemat(path_dst, mat_roi_img_reg)
+        QMessageBox.information(q_window, "File save", f"Registered ROI coordinates and BG Image file saved!")
+
+# load registered ROI coordinates and background images
+def loadRegisteredROICoordsAndBGImage(
+        q_window: QMainWindow,
+        data_manager: DataManager,
+        app_key: AppKeys
+        ) -> None:
+    path_roi_img_reg = openFileDialog(q_widget=q_window, file_type=".mat", title="Open Registered ROI coordinates and BG Image mat File")
+    if path_roi_img_reg:
+        mat_roi_img_reg = loadmat(path_roi_img_reg, simplify_cells=True)
+        dict_img_bg_reg = mat_roi_img_reg["dict_img_bg_reg"]
+        dict_roi_coords_reg = mat_roi_img_reg["dict_roi_coords_reg"]
+
+        data_manager.dict_im_bg_reg[app_key] = dict_img_bg_reg
+        data_manager.dict_roi_coords_reg[app_key] = dict_roi_coords_reg
+
+        QMessageBox.information(q_window, "File load", f"Registered ROI coordinates and BG Image file loaded!")
+
 # save MicrogliaTracking.mat
 def saveMicrogliaTracking(
         q_window                    : QMainWindow, 
