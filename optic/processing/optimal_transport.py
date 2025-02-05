@@ -7,10 +7,6 @@ import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-# import FGW package
-import external
-import FGW
-
 # get distance matrix
 def calculateDistanceMatrix(
         array_src: np.ndarray, 
@@ -19,9 +15,9 @@ def calculateDistanceMatrix(
         p: int=2
         ) -> np.ndarray[Tuple[float, float]]:
     if array_tgt is None:
-        return ot.dist(array_src, metric=metric, p=p) # intra group
+        return np.exp(ot.dist(array_src, metric=metric, p=p)) # intra group
     else:
-        return ot.dist(array_src, array_tgt, metric=metric, p=p) # inter group
+        return np.exp(ot.dist(array_src, array_tgt, metric=metric, p=p)) # inter group
         
 # get uniform weight (1, 1, 1,...)
 def getUniformWeight(n: int) -> np.ndarray[Tuple[float]]:
@@ -34,16 +30,18 @@ def getOptimalTransportPlan(
         cost_intra_tgt: np.ndarray[Tuple[float, float]],
         weight_src: np.ndarray[Tuple[float]], 
         weight_tgt: np.ndarray[Tuple[float]],
-        method: Literal["W", "GW", "FGW"],
-        loss_fun: str="square_loss",
-        alpha: float=0.1
+        method: Literal["OT", "OT_partial", "OT_partial_entropic", "OT_partial_lagrange"],
+        mass: float=None,
+        reg: float=1.0
         ) -> np.ndarray[Tuple[float, float]]:
-    if method == "W":
+    if method == "OT":
         return ot.emd(weight_src, weight_tgt, cost_inter)
-    elif method == "GW":
-        return ot.gromov.gromov_wasserstein(cost_intra_src, cost_intra_tgt, weight_src, weight_tgt, loss_fun)
-    elif method == "FGW":
-        return FGW.fgw_lp(cost_inter, cost_intra_src, cost_intra_tgt, weight_src, weight_tgt, loss_fun=loss_fun, alpha=alpha)
+    elif method == "OT_partial":
+        return ot.partial.partial_wasserstein(weight_src, weight_tgt, cost_inter, m=mass)
+    elif method == "OT_partial_entropic":
+        return ot.partial.entropic_partial_wasserstein(weight_src, weight_tgt, cost_inter, reg, m=mass)
+    elif method == "OT_partial_lagrange":
+        return ot.partial.partial_wasserstein_lagrange(weight_src, weight_tgt, cost_inter, reg)
     
 # get One-to-One matching from optimal transport plan
 def getOneToOneMatching(G, C, threshold=1e-6, max_cost=float('inf')):
@@ -99,10 +97,10 @@ def calculateROIMatching(
         array_src: np.ndarray,
         array_tgt: np.ndarray,
         method: str,
-        loss_fun: str="square_loss",
         metric: str="minkowski",
         p: float=2.0,
-        alpha: float=0.1,
+        mass: float=None,
+        reg: float=1.0,
         threshold: float=1e-6,
         max_cost: float=float('inf'),
         return_plan: bool=False # return transport plan matrix
@@ -113,13 +111,12 @@ def calculateROIMatching(
     a = getUniformWeight(len(array_src))
     b = getUniformWeight(len(array_tgt))
 
-    if method == "WD-shape" or method == "WD-distance":
-        method = "W"
-    elif method == "GWD":
-        method = "GW"
-    elif method == "FGWD":
-        method = "FGW"
-    G = getOptimalTransportPlan(C, C1, C2, a, b, method, loss_fun, alpha)
+    # filter cost matrix with max_cost
+    d_constant = 1e12
+    C[C > max_cost] = d_constant
+    print(np.max(C), np.min(C))
+
+    G = getOptimalTransportPlan(C, C1, C2, a, b, method, mass, reg)
     if return_plan:
         return G
     else:

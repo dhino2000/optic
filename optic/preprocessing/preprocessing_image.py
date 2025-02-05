@@ -1,7 +1,6 @@
 from __future__ import annotations
 from ..type_definitions import *
 import numpy as np
-from ..config.constants import BGImageTypeList
 from typing import Dict
 
 # 画像をint型に変換 型は指定可能
@@ -39,6 +38,7 @@ def getBGImageFromFall(
         dtype: str="uint8"
         ) -> Dict[str, np.ndarray]:
     # get image shape from meanImg
+    from ..config.constants import BGImageTypeList
     dict_im_bg = {}
     base_shape = data_manager.dict_Fall[app_key]["ops"]["meanImg"].shape
     for key_im in BGImageTypeList.FALL:

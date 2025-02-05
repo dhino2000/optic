@@ -9,11 +9,13 @@ def makeLayoutROIMatching(
         widget_manager                   : WidgetManager, 
         key_label_roi_matching           : str, 
         key_label_ot_method              : str,
-        key_label_fgwd_alpha             : str,
+        key_label_ot_partial_mass        : str,
+        key_label_ot_partial_reg         : str,
         key_label_wd_exp                 : str, 
         key_label_threshold_transport    : str,
         key_label_threshold_cost         : str,
-        key_lineedit_fgwd_alpha          : str,
+        key_lineedit_ot_partial_mass     : str,
+        key_lineedit_ot_partial_reg      : str,
         key_lineedit_wd_exp              : str,
         key_lineedit_threshold_transport : str,
         key_lineedit_threshold_cost      : str,
@@ -30,21 +32,29 @@ def makeLayoutROIMatching(
         key_combobox_ot_method, 
         "Optimal Transport method:", 
         axis="horizontal", 
-        items=["WD-shape", "WD-distance", "GWD", "FGWD"]
+        items=["OT", "OT_partial", "OT_partial_entropic", "OT_partial_lagrange"]
         ))
     layout_ot.addLayout(makeLayoutLineEditLabel(
         widget_manager, 
-        key_label_fgwd_alpha, 
-        key_lineedit_fgwd_alpha,
-        label="FGWD alpha:", 
-        text_set="0.1", 
+        key_label_ot_partial_mass, 
+        key_lineedit_ot_partial_mass,
+        label="Partial OT mass:", 
+        text_set="0.3", 
+        axis="horizontal"
+        ))
+    layout_ot.addLayout(makeLayoutLineEditLabel(
+        widget_manager, 
+        key_label_ot_partial_reg, 
+        key_lineedit_ot_partial_reg,
+        label="Partial OT regularization:", 
+        text_set="100", 
         axis="horizontal"
         ))
     layout_ot.addLayout(makeLayoutLineEditLabel(
         widget_manager, 
         key_label_wd_exp, 
         key_lineedit_wd_exp,
-        label="WD-distance exponent:", 
+        label="OT-distance exponent:", 
         text_set="2", 
         axis="horizontal"
         ))
@@ -54,15 +64,15 @@ def makeLayoutROIMatching(
         key_label_threshold_transport, 
         key_lineedit_threshold_transport,
         label="Min transport threshold:", 
-        text_set="0.001", 
+        text_set="0.00001", 
         axis="horizontal"
         ))
     layout_ot_threshold.addLayout(makeLayoutLineEditLabel(
         widget_manager, 
         key_label_threshold_cost, 
         key_lineedit_threshold_cost,
-        label="Max cost threshold:", 
-        text_set="10", 
+        label="Max distance threshold (px):", 
+        text_set="2", 
         axis="horizontal"
         ))
     layout_run = QHBoxLayout()
@@ -131,7 +141,7 @@ def makeLayoutCellpose(
         key_combobox_cellpose_restore,
         "Restore Model:",
         axis="horizontal",
-        items=["denoise_cyto3", "deblur_cyto3", "upsample_cyto3", "denoise_nuclei", "deblur_nuclei", "upsample_nuclei"]
+        items=["denoise_cyto3", "deblur_cyto3", "denoise_nuclei", "deblur_nuclei"]
     ))
     layout.addLayout(makeLayoutSpinBoxLabel(
         widget_manager,

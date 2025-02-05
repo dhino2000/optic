@@ -1,6 +1,5 @@
 from __future__ import annotations
 from ..type_definitions import *
-from ..config.constants_local import ROICheckMatKeysLocal
 import datetime
 import numpy as np
 from PyQt5.QtCore import Qt
@@ -12,6 +11,7 @@ def convertTableDataToDictROICheck(
         local_var: bool=False
         ) -> Dict[str, Any]:
     if local_var:
+        from ..config.constants_local import ROICheckMatKeysLocal
         cell_type_keys = ROICheckMatKeysLocal.cell_type_keys # local variables
     
     dict_roicheck = {}
