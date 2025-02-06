@@ -161,52 +161,46 @@ def convertDictROITrackingToMatROITracking(
     return mat_roi_tracking
 
 
+"""
+Save Microglia Tracking
+"""
 # convert dict_roi_matching and dict_roi_coords_xyct to save appropriately as .mat file
 """
 -- WARNING --
 With savemat, if the key of dict is number (ex. 0, 1, 2, ...), the value convert to empty automatically.
 To prevent this, convert contents of dict to array.
 """
-def convertContentsOfDictROIMatchingAndDictROICoordsToArray(
-    dict_roi_matching: Dict[str, Dict[int, List[int] | Dict[int, Dict[int, Optional[int]]]]],
-    dict_roi_coords_xyct: Dict[int, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]],
-    dict_roi_coords_xyct_reg: Dict[int, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]],
-) -> Tuple[np.ndarray, Dict]:
-    # dict_roi_coords_xyct -> arr_roi_coords_xyct
+# convert dict_roi_coords to arr_roi_coords for saving as mat file
+def convertDictROICoordsToArrayROICoords(dict_roi_coords: Dict[int, Dict[Literal["x", "y", "med"], np.ndarray]]) -> np.ndarray:
+    arr_roi_coords = []
+
+    idx_roi_max = max(dict_roi_coords.keys())
+    for idx_roi in range(idx_roi_max + 1): # check ROIs
+        try:
+            dict_roi_coords_roi = dict_roi_coords[idx_roi]
+            arr_roi_coords.append(dict_roi_coords_roi)
+        except KeyError: # if dict_roi_coords does not have {idx_roi} key
+            arr_roi_coords.append(np.array([]))
+
+    arr_roi_coords = np.array(arr_roi_coords, dtype=object)
+    return arr_roi_coords
+
+# multi t-plane
+# convert dict_roi_coords_xyct to arr_roi_coords_xyct for saving as mat file
+def convertDictROICoordsXYCTToArrayROICoordsXYCT(dict_roi_coords_xyct: Dict[int, Dict[int, Dict[Literal["x", "y", "med"], np.ndarray]]]) -> np.ndarray:
     arr_roi_coords_xyct = []
     for t_plane in dict_roi_coords_xyct.keys():
-        arr_roi_coords_xyct_t = []
         try:
-            idx_roi_max = max(dict_roi_coords_xyct[t_plane].keys())
-            for idx_roi in range(idx_roi_max + 1): # check ROIs
-                try:
-                    dict_roi_coords_xyct_t_roi = dict_roi_coords_xyct[t_plane][idx_roi]
-                    arr_roi_coords_xyct_t.append(dict_roi_coords_xyct_t_roi)
-                except KeyError:
-                    arr_roi_coords_xyct_t.append(np.array([]))
-            arr_roi_coords_xyct.append(np.array(arr_roi_coords_xyct_t, dtype=object))
+            dict_roi_coords = dict_roi_coords_xyct[t_plane]
+            arr_roi_coords_xyct.append(convertDictROICoordsToArrayROICoords(dict_roi_coords))
         except ValueError: # no ROI in the plane
             arr_roi_coords_xyct.append(np.array([[]]))
+
     arr_roi_coords_xyct = np.array(arr_roi_coords_xyct, dtype=object)
+    return arr_roi_coords_xyct
 
-    # dict_roi_coords_xyct_reg -> arr_roi_coords_xyct_reg
-    arr_roi_coords_xyct_reg = []
-    for t_plane in dict_roi_coords_xyct_reg.keys():
-        arr_roi_coords_xyct_reg_t = []
-        try:
-            idx_roi_max = max(dict_roi_coords_xyct_reg[t_plane].keys())
-            for idx_roi in range(idx_roi_max + 1): # check ROIs
-                try:
-                    dict_roi_coords_xyct_reg_t_roi = dict_roi_coords_xyct_reg[t_plane][idx_roi]
-                    arr_roi_coords_xyct_reg_t.append(dict_roi_coords_xyct_reg_t_roi)
-                except KeyError:
-                    arr_roi_coords_xyct_reg_t.append(np.array([]))
-            arr_roi_coords_xyct_reg.append(np.array(arr_roi_coords_xyct_reg_t, dtype=object))
-        except ValueError: # no ROI in the plane
-            arr_roi_coords_xyct_reg.append(np.array([[]]))
-    arr_roi_coords_xyct_reg = np.array(arr_roi_coords_xyct_reg, dtype=object)
-
-    # dict_roi_matching["id"], dict_roi_matching["match"] -> arr_roi_matching_id, arr_roi_matching_match
+# dict_roi_matching["id"], dict_roi_matching["match"] -> arr_roi_matching_id, arr_roi_matching_match
+def convertDictROIMathingToArrayROIMatching(dict_roi_matching: Dict[str, Dict[int, List[int] | Dict[int, Dict[int, Optional[int]]]]]) -> np.ndarray:
     arr_roi_matching_id = []
     arr_roi_matching_match = []
     for t_plane in dict_roi_matching["id"].keys():
@@ -234,6 +228,20 @@ def convertContentsOfDictROIMatchingAndDictROICoordsToArray(
 
     arr_roi_matching_id = np.array(arr_roi_matching_id, dtype=object)
     arr_roi_matching_match = np.array(arr_roi_matching_match, dtype=object)
+    return arr_roi_matching_id, arr_roi_matching_match
+
+# convert dict_roi_matching and dict_roi_coords_xyct to save appropriately as .mat file
+def convertContentsOfDictROIMatchingAndDictROICoordsToArray(
+    dict_roi_matching: Dict[str, Dict[int, List[int] | Dict[int, Dict[int, Optional[int]]]]],
+    dict_roi_coords_xyct: Dict[int, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]],
+    dict_roi_coords_xyct_reg: Dict[int, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]],
+) -> Tuple[np.ndarray, Dict]:
+    # dict_roi_coords_xyct -> arr_roi_coords_xyct
+    arr_roi_coords_xyct = convertDictROICoordsXYCTToArrayROICoordsXYCT(dict_roi_coords_xyct)
+    # dict_roi_coords_xyct_reg -> arr_roi_coords_xyct_reg
+    arr_roi_coords_xyct_reg = convertDictROICoordsXYCTToArrayROICoordsXYCT(dict_roi_coords_xyct_reg)
+    # dict_roi_matching["id"], dict_roi_matching["match"] -> arr_roi_matching_id, arr_roi_matching_match
+    arr_roi_matching_id, arr_roi_matching_match = convertDictROIMathingToArrayROIMatching(dict_roi_matching)
 
     dict_roi_matching_converted = {"id": arr_roi_matching_id, "match": arr_roi_matching_match}
     return dict_roi_matching_converted, arr_roi_coords_xyct, arr_roi_coords_xyct_reg
@@ -273,15 +281,49 @@ def convertDictROIMatchingAndDictROICoordsToMatMicrogliaTracking(
 
     return mat_microglia_tracking
 
+"""
+Load Microglia Tracking
+"""
 # mat_microglia_tracking -> dict_roi_matching, dict_roi_coords_xyct
 def convertMatMicrogliaTrackingToDictROIMatchingAndDictROICoords(
     mat_microglia_tracking: Dict[str, Any],
-) -> Tuple[Dict[str, Dict[int, List[int] | Dict[int, Dict[int, Optional[int]]]]], Dict[int, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]], Dict[int, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]]]:
+) -> Tuple[Dict[Literal["id", "match"], Dict[int, List[int] | Dict[int, Dict[int, Optional[int]]]]], Dict[int, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]], Dict[int, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]]]:
     mat_roi_matching = mat_microglia_tracking["ROITracking"]
     mat_roi_coords = mat_microglia_tracking["ROICoords"]
     mat_roi_coords_reg = mat_microglia_tracking["ROICoordsRegistered"]
 
     # convert dict_roi_matching for the GUI
+    dict_roi_matching = convertMatROIMatchingToDictROIMatching(mat_roi_matching)
+    # convert dict_roi_coords for the GUI
+    dict_roi_coords_xyct = convertMatROICoordsXYCTToDictROICoordsXYCT(mat_roi_coords)
+    # convert dict_roi_coords_reg for the GUI
+    dict_roi_coords_xyct_reg = convertMatROICoordsXYCTToDictROICoordsXYCT(mat_roi_coords_reg)
+
+    return dict_roi_matching, dict_roi_coords_xyct, dict_roi_coords_xyct_reg
+
+# convert mat_roi_coords to dict_roi_coords
+def convertMatROICoordsToDictROICoords(mat_roi_coords: Dict[int, Any]) -> Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]:
+    dict_roi_coords = {}
+    for roi in range(len(mat_roi_coords)):
+        if not isinstance(mat_roi_coords[roi], np.ndarray): # if roi itself is empty, the value is np.array([])
+            dict_roi_coords[roi] = {}
+            for fieldname in mat_roi_coords[roi]._fieldnames: # convert mat_struct to dict
+                attr = getattr(mat_roi_coords[roi], fieldname)
+                if fieldname in ["xpix", "ypix"] and isinstance(attr, int): # if npix of ROI is 1, the value is int
+                    attr = np.array([attr]) # convert int to np.array
+                dict_roi_coords[roi][fieldname] = attr
+    return dict_roi_coords
+
+# multi t_plane
+# convert mat_roi_coords to dict_roi_coords
+def convertMatROICoordsXYCTToDictROICoordsXYCT(mat_roi_coords_xyct: Dict[int, Dict[int, Any]]) -> Dict[int, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]]:
+    dict_roi_coords_xyct = {}
+    for t_plane in range(len(mat_roi_coords_xyct)):
+        dict_roi_coords_xyct[t_plane] = convertMatROICoordsToDictROICoords(mat_roi_coords_xyct[t_plane])
+    return dict_roi_coords_xyct
+
+# convert mat_roi_matching to dict_roi_matching
+def convertMatROIMatchingToDictROIMatching(mat_roi_matching: Dict[Literal["id", "match"], np.ndarray]) -> Dict[Literal["id", "match"], Dict[int, List[int] | Dict[int, Dict[int, Optional[int]]]]]:
     dict_roi_matching_id = {t_plane: mat_roi_matching["id"][t_plane].tolist() for t_plane in range(len(mat_roi_matching["id"]))}
     dict_roi_matching_match = {}
 
@@ -300,31 +342,4 @@ def convertMatMicrogliaTrackingToDictROIMatchingAndDictROICoords(
                         roi_sec = None
                     dict_roi_matching_match[t_plane_pri][t_plane_sec + t_plane_pri + 1][roi_pri] = roi_sec
     dict_roi_matching = {"id": dict_roi_matching_id, "match": dict_roi_matching_match}
-
-    # convert dict_roi_coords for the GUI
-    dict_roi_coords_xyct = {}
-    for t_plane in range(len(mat_roi_coords)):
-        dict_roi_coords_xyct[t_plane] = {}
-        for roi in range(len(mat_roi_coords[t_plane])):
-            if not isinstance(mat_roi_coords[t_plane][roi], np.ndarray): # if roi itself is empty, the value is np.array([])
-                dict_roi_coords_xyct[t_plane][roi] = {}
-                for fieldname in mat_roi_coords[t_plane][roi]._fieldnames: # convert mat_struct to dict
-                    attr = getattr(mat_roi_coords[t_plane][roi], fieldname)
-                    if fieldname in ["xpix", "ypix"] and isinstance(attr, int): # if npix of ROI is 1, the value is int
-                        attr = np.array([attr]) # convert int to np.array
-                    dict_roi_coords_xyct[t_plane][roi][fieldname] = attr
-
-    # convert dict_roi_coords_reg for the GUI
-    dict_roi_coords_xyct_reg = {}
-    for t_plane in range(len(mat_roi_coords_reg)):
-        dict_roi_coords_xyct_reg[t_plane] = {}
-        for roi in range(len(mat_roi_coords_reg[t_plane])):
-            if not isinstance(mat_roi_coords_reg[t_plane][roi], np.ndarray): # if roi itself is empty, the value is np.array([])
-                dict_roi_coords_xyct_reg[t_plane][roi] = {}
-                for fieldname in mat_roi_coords_reg[t_plane][roi]._fieldnames: # convert mat_struct to dict
-                    attr = getattr(mat_roi_coords_reg[t_plane][roi], fieldname)
-                    if fieldname in ["xpix", "ypix"] and isinstance(attr, int): # if npix of ROI is 1, the value is int
-                        attr = np.array([attr]) # convert int to np.array
-                    dict_roi_coords_xyct_reg[t_plane][roi][fieldname] = attr
-
-    return dict_roi_matching, dict_roi_coords_xyct, dict_roi_coords_xyct_reg
+    return dict_roi_matching
