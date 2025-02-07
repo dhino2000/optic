@@ -817,17 +817,54 @@ def bindFuncButtonRunROIMatching(
         else:
             pass
 
+        method = widget_manager.dict_combobox["ot_method"].currentText()
+        metric = "minkowski"
+        p = float(widget_manager.dict_lineedit["ot_dist_exp"].text())
+        mass = float(widget_manager.dict_lineedit["ot_partial_mass"].text())
+        reg = float(widget_manager.dict_lineedit["ot_partial_reg"].text())
+        threshold = float(widget_manager.dict_lineedit["ot_threshold_transport"].text())
+        max_cost = float(widget_manager.dict_lineedit["ot_threshold_cost"].text())
+
         roi_matching = calculateROIMatching(
                     array_src=array_src,
                     array_tgt=array_tgt,
-                    method=widget_manager.dict_combobox["ot_method"].currentText(),
-                    metric="minkowski",
-                    p=float(widget_manager.dict_lineedit["ot_dist_exp"].text()),
-                    mass=float(widget_manager.dict_lineedit["ot_partial_mass"].text()),
-                    reg=float(widget_manager.dict_lineedit["ot_partial_reg"].text()),
-                    threshold=float(widget_manager.dict_lineedit["ot_threshold_transport"].text()),
-                    max_cost=float(widget_manager.dict_lineedit["ot_threshold_cost"].text()),
+                    method=method,
+                    metric=metric,
+                    p=p,
+                    mass=mass,
+                    reg=reg,
+                    threshold=threshold,
+                    max_cost=max_cost,
                 )
+        
+        G = calculateROIMatching(
+            array_src=array_src,
+            array_tgt=array_tgt,
+            method=method,
+            metric=metric,
+            p=p,
+            mass=mass,
+            reg=reg,
+            threshold=threshold,
+            max_cost=max_cost,
+            return_plan=True
+        )
+        # 一時的に保存
+        dict_ot = {
+            "array_src": array_src,
+            "array_tgt": array_tgt,
+            "method": method,
+            "metric": metric,
+            "p": p,
+            "mass": mass,
+            "reg": reg,
+            "threshold": threshold,
+            "max_cost": max_cost,
+            "roi_matching": roi_matching,
+            "G": G
+        }
+        q_widget.dict_ot = dict_ot
+
         # convert roi_matching id to original id
         true_idxs_pri = np.nonzero(roi_display_pri)[0][list(roi_matching.keys())]
         true_idxs_sec = np.nonzero(roi_display_sec)[0][list(roi_matching.values())]

@@ -25,13 +25,13 @@ def makeLayoutROIMatching(
         ) -> QVBoxLayout:
     layout = QVBoxLayout()
     layout.addWidget(widget_manager.makeWidgetLabel(key=key_label_roi_matching, label="ROI Matching", bold=True, italic=True, use_global_style=False))
-    layout_ot = QVBoxLayout()
+    layout_ot = QHBoxLayout()
     layout_ot.addLayout(makeLayoutComboBoxLabel(
         widget_manager, 
         key_label_ot_method, 
         key_combobox_ot_method, 
         "Optimal Transport method:", 
-        axis="horizontal", 
+        axis="vertical", 
         items=["OT", "OT_partial", "OT_partial_entropic", "OT_partial_lagrange"]
         ))
     layout_ot.addLayout(makeLayoutLineEditLabel(
@@ -39,16 +39,16 @@ def makeLayoutROIMatching(
         key_label_ot_partial_mass, 
         key_lineedit_ot_partial_mass,
         label="Partial OT mass:", 
-        text_set="0.3", 
-        axis="horizontal"
+        text_set="0.99", 
+        axis="vertical"
         ))
     layout_ot.addLayout(makeLayoutLineEditLabel(
         widget_manager, 
         key_label_ot_partial_reg, 
         key_lineedit_ot_partial_reg,
         label="Partial OT regularization:", 
-        text_set="100", 
-        axis="horizontal"
+        text_set="10", 
+        axis="vertical"
         ))
     layout_ot.addLayout(makeLayoutLineEditLabel(
         widget_manager, 
@@ -56,7 +56,7 @@ def makeLayoutROIMatching(
         key_lineedit_wd_exp,
         label="OT-distance exponent:", 
         text_set="2", 
-        axis="horizontal"
+        axis="vertical"
         ))
     layout_ot_threshold = QHBoxLayout()
     layout_ot_threshold.addLayout(makeLayoutLineEditLabel(
@@ -65,15 +65,15 @@ def makeLayoutROIMatching(
         key_lineedit_threshold_transport,
         label="Min transport threshold:", 
         text_set="0.00001", 
-        axis="horizontal"
+        axis="vertical"
         ))
     layout_ot_threshold.addLayout(makeLayoutLineEditLabel(
         widget_manager, 
         key_label_threshold_cost, 
         key_lineedit_threshold_cost,
         label="Max distance threshold (px):", 
-        text_set="2", 
-        axis="horizontal"
+        text_set="5", 
+        axis="vertical"
         ))
     layout_run = QHBoxLayout()
     layout_run.addWidget(widget_manager.makeWidgetButton(key=key_button_run, label="Run Optimal Transport"))

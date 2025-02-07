@@ -15,9 +15,9 @@ def calculateDistanceMatrix(
         p: int=2
         ) -> np.ndarray[Tuple[float, float]]:
     if array_tgt is None:
-        return np.exp(ot.dist(array_src, metric=metric, p=p)) # intra group
+        return ot.dist(array_src, metric=metric, p=p) # intra group
     else:
-        return np.exp(ot.dist(array_src, array_tgt, metric=metric, p=p)) # inter group
+        return ot.dist(array_src, array_tgt, metric=metric, p=p) # inter group
         
 # get uniform weight (1, 1, 1,...)
 def getUniformWeight(n: int) -> np.ndarray[Tuple[float]]:
@@ -114,7 +114,7 @@ def calculateROIMatching(
     # filter cost matrix with max_cost
     d_constant = 1e12
     C[C > max_cost] = d_constant
-    print(np.max(C), np.min(C))
+    print(np.max(C), np.min(C), np.mean(C), np.std(C))
 
     G = getOptimalTransportPlan(C, C1, C2, a, b, method, mass, reg)
     if return_plan:

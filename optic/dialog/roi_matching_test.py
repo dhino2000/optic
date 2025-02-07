@@ -20,6 +20,7 @@ class ROIMatchingTestDialog(QDialog):
             control_manager: ControlManager,
             app_key_pri: AppKeys,
             app_key_sec: AppKeys,
+            reg: bool = False,
             ):
         super().__init__(parent)
         self.widget_manager = initManagers(WidgetManager())
@@ -28,6 +29,7 @@ class ROIMatchingTestDialog(QDialog):
         self.control_manager = control_manager
         self.app_key_pri = app_key_pri
         self.app_key_sec = app_key_sec
+        self.reg = reg  
 
         self.roi_matching = None
 
@@ -98,8 +100,12 @@ class ROIMatchingTestDialog(QDialog):
 
     # get med coordinates of ROIs
     def getMedCoords(self):
-        self.med_coords_pri = np.array([self.data_manager.getDictROICoords(self.app_key_pri)[idx]["med"] for idx in self.idx_roi_pri])
-        self.med_coords_sec = np.array([self.data_manager.getDictROICoords(self.app_key_sec)[idx]["med"] for idx in self.idx_roi_sec])
+        if self.reg: # registered
+            self.med_coords_pri = np.array([self.data_manager.getDictROICoordsRegistered(self.app_key_pri)[idx]["med"] for idx in self.idx_roi_pri])
+            self.med_coords_sec = np.array([self.data_manager.getDictROICoordsRegistered(self.app_key_sec)[idx]["med"] for idx in self.idx_roi_sec])
+        else: # not registered
+            self.med_coords_pri = np.array([self.data_manager.getDictROICoords(self.app_key_pri)[idx]["med"] for idx in self.idx_roi_pri])
+            self.med_coords_sec = np.array([self.data_manager.getDictROICoords(self.app_key_sec)[idx]["med"] for idx in self.idx_roi_sec])
 
     # get ROI shape parameters
     def getROIParams(self):
@@ -148,7 +154,7 @@ class ROIMatchingTestDialog(QDialog):
             idx_src, idx_tgt = int(idx_src), int(idx_tgt)
             ax.plot([self.med_coords_pri[idx_src, 0], self.med_coords_sec[idx_tgt, 0]], 
                     [self.med_coords_pri[idx_src, 1], self.med_coords_sec[idx_tgt, 1]], 
-                    c=color_pair, alpha=alpha, linewidth=linewidth)
+                    ".-", c=color_pair, alpha=alpha, linewidth=linewidth)
             
     def plotTransportPlan(self, ax, color_pair, alpha, linewidth):
         num_src, num_tgt = self.roi_matching.shape
@@ -160,7 +166,7 @@ class ROIMatchingTestDialog(QDialog):
                 else:
                     ax.plot([self.med_coords_pri[idx_src, 0], self.med_coords_sec[idx_tgt, 0]], 
                             [self.med_coords_pri[idx_src, 1], self.med_coords_sec[idx_tgt, 1]], 
-                            c=color_pair, alpha=alpha, linewidth=linewidth*value)
+                            ".-", c=color_pair, alpha=alpha, linewidth=linewidth*value)
 
     def runROIMatching(self):
         self.roi_matching = calculateROIMatching(

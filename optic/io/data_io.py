@@ -363,13 +363,15 @@ def saveRegisteredROICoordsAndBGImage(
     path_dst = generateSavePath(path_fall, prefix="RegROIBGim_", remove_strings="Fall_")
     path_dst, is_overwrite = saveFileDialog(q_widget=q_window, file_type=".mat", title="Save Registered ROI Coordinates, BG Image mat File", initial_dir=path_dst)
 
+    from ..preprocessing.preprocessing_table import convertDictROICoordsToArrayROICoords
     if path_dst:
         dict_img_bg_reg = data_manager.dict_im_bg_reg[app_key]
         dict_roi_coords_reg = data_manager.dict_roi_coords_reg[app_key]
+        arr_roi_coords_reg = convertDictROICoordsToArrayROICoords(dict_roi_coords_reg)
 
         mat_roi_img_reg = {
             "dict_img_bg_reg": dict_img_bg_reg,
-            "dict_roi_coords_reg": dict_roi_coords_reg,
+            "dict_roi_coords_reg": arr_roi_coords_reg,
         }
 
         savemat(path_dst, mat_roi_img_reg)
@@ -382,10 +384,13 @@ def loadRegisteredROICoordsAndBGImage(
         app_key: AppKeys
         ) -> None:
     path_roi_img_reg = openFileDialog(q_widget=q_window, file_type=".mat", title="Open Registered ROI coordinates and BG Image mat File")
+
+    from ..preprocessing.preprocessing_table import convertMatROICoordsToDictROICoords
     if path_roi_img_reg:
         mat_roi_img_reg = loadmat(path_roi_img_reg, simplify_cells=True)
         dict_img_bg_reg = mat_roi_img_reg["dict_img_bg_reg"]
-        dict_roi_coords_reg = mat_roi_img_reg["dict_roi_coords_reg"]
+        mat_roi_coords_reg = mat_roi_img_reg["dict_roi_coords_reg"]
+        dict_roi_coords_reg = {i: coords for i, coords in enumerate(mat_roi_coords_reg)}
 
         data_manager.dict_im_bg_reg[app_key] = dict_img_bg_reg
         data_manager.dict_roi_coords_reg[app_key] = dict_roi_coords_reg
