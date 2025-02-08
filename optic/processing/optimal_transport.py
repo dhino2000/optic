@@ -114,7 +114,6 @@ def calculateROIMatching(
     # filter cost matrix with max_cost
     d_constant = 1e12
     C[C > max_cost] = d_constant
-    print(np.max(C), np.min(C), np.mean(C), np.std(C))
 
     G = getOptimalTransportPlan(C, C1, C2, a, b, method, mass, reg)
     if return_plan:

@@ -85,7 +85,9 @@ def calculateSingleTransform(
         img_fix, 
         img_mov, 
         parameter_object, 
-        output_directory=output_directory
+        output_directory=output_directory,
+        log_to_file=True,
+        log_to_console=True
         )
     return transform_parameters
 
@@ -102,7 +104,9 @@ def applySingleTransform(
     img_reg = transformix_filter(
         img_mov, 
         transform_parameters, 
-        output_directory=output_directory
+        output_directory=output_directory,
+        log_to_file=True,
+        log_to_console=True
         )
     img_reg = itk.array_from_image(img_reg)
     return img_reg
