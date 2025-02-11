@@ -213,26 +213,33 @@ class ViewHandler:
                 print("Quit ROI edit mode")
 
                 try:
-                    print(f"add ROI {self.roi_id_edit}")
                     xpix = np.array(list(self.roi_points_edit)).astype("uint16")[:, 0]
                     ypix = np.array(list(self.roi_points_edit)).astype("uint16")[:, 1]
                     med = (np.median(xpix).astype("uint16"), np.median(ypix).astype("uint16"))
                     dict_roi_coords_xyct_edit = {"xpix": xpix, "ypix": ypix, "med": med}
 
                     # ROI update
-                    # WARNING: With adding ROI, the coordinates of ROI and that of Registred ROI are the same.
-                    self.data_manager.dict_roi_coords_xyct[self.plane_t][self.roi_id_edit] = dict_roi_coords_xyct_edit 
-                    self.data_manager.dict_roi_coords_xyct_reg[self.plane_t][self.roi_id_edit] = dict_roi_coords_xyct_edit
                     self.data_manager.dict_im_roi_xyct = getDictROIImageXYCTFromDictROICoords(self.data_manager.dict_roi_coords_xyct, self.data_manager.getImageSize("pri"))
                     # With "Add ROI" mode
                     if self.roi_add_mode:
+                        print(f"add ROI {self.roi_id_edit}")
+                        # WARNING: With adding ROI, the coordinates of ROI and that of Registred ROI are the same.
+                        self.data_manager.dict_roi_coords_xyct[self.plane_t][self.roi_id_edit] = dict_roi_coords_xyct_edit 
+                        self.data_manager.dict_roi_coords_xyct_reg[self.plane_t][self.roi_id_edit] = dict_roi_coords_xyct_edit
                         self.data_manager.dict_roi_matching["id"][self.plane_t] += [self.roi_id_edit]
                         for plane_t_sec in self.data_manager.dict_roi_matching["match"][self.plane_t].keys(): # for all sec planes
                             self.data_manager.dict_roi_matching["match"][self.plane_t][plane_t_sec][self.roi_id_edit] = None
                         # hardcoded !!!
                         self.control_manager.view_controls["pri"].roi_colors_xyct[self.plane_t][self.roi_id_edit] = generateRandomColor()
                         self.control_manager.view_controls["sec"].roi_colors_xyct[self.plane_t][self.roi_id_edit] = self.control_manager.view_controls["pri"].roi_colors_xyct[self.plane_t][self.roi_id_edit]
-                        
+                    # With "Edit ROI" mode
+                    else:
+                        print(f"edit ROI {self.roi_id_edit}")
+                        if self.view_control.show_reg_im_roi:
+                            self.data_manager.dict_roi_coords_xyct_reg[self.plane_t][self.roi_id_edit] = dict_roi_coords_xyct_edit
+                        else:
+                            self.data_manager.dict_roi_coords_xyct[self.plane_t][self.roi_id_edit] = dict_roi_coords_xyct_edit
+
                 except IndexError as e: # no roi_points_edit
                     pass
 

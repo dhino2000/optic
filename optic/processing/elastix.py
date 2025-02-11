@@ -63,7 +63,6 @@ def makeElastixParameterObjectInversed(
     parameter_object_inverse.AddParameterMap(parameter_map_inverse)
     return parameter_object_inverse
     
-    
 """
 elastix registration
 """
@@ -236,6 +235,7 @@ def calculateSingleTransformInverse(
         log_to_console=True,
         log_to_file=True
     )
+
     transform_parameters_inverse.SetParameter(0,"InitialTransformParameterFileName", "NoInitialTransform")
 
     return transform_parameters_inverse
@@ -277,7 +277,8 @@ def applyDictROICoordsTransform(
     parameter_map: mapstringvectorstring,
     path_transform_parameters_file: str,
     path_points_txt: str,
-    output_directory: str
+    output_directory: str,
+    xy_reverse: bool=False
 ) -> Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32], Tuple[int]]]:
     dict_roi_coords_reg = {}
     x_max, x_min, y_max, y_min = img_mov.shape[0]-1, 0, img_mov.shape[1]-1, 0
@@ -294,8 +295,19 @@ def applyDictROICoordsTransform(
         if i % 100 == 0:
             print(f"processing {i}/{len(dict_roi_coords)}")
         i += 1
-        med = np.array([dict_coords["med"]])
-        xpix_ypix = np.array([dict_coords["xpix"], dict_coords["ypix"]]).T
+
+        """
+        WARNING !!!
+        XY coordination relationships of Suite2pTracking and MicrogliaTracking are different
+        To modify this, set xy_reverse to True with MicrogliaTracking
+        """
+        # XY reverse
+        if xy_reverse:
+            med = np.array([dict_coords["med"]])[:, [1, 0]]
+            xpix_ypix = np.array([dict_coords["ypix"], dict_coords["xpix"]]).T
+        else:
+            med = np.array([dict_coords["med"]])
+            xpix_ypix = np.array([dict_coords["xpix"], dict_coords["ypix"]]).T
 
         generateTmpTextforRegistration(xpix_ypix, path_points_txt)
         xpix_ypix_reg = applyPointTransform(
@@ -321,7 +333,11 @@ def applyDictROICoordsTransform(
         if xpix_ypix_reg.ndim == 1:
             xpix_ypix_reg = np.array([xpix_ypix_reg])
 
-        dict_roi_coords_reg[roi_id] = {"xpix": xpix_ypix_reg[:,0], "ypix": xpix_ypix_reg[:, 1], "med": med_reg}
+        if xy_reverse:
+            med_reg = med_reg[::-1]
+            xpix_ypix_reg = xpix_ypix_reg[:, [1, 0]]
+
+        dict_roi_coords_reg[roi_id] = {"xpix": xpix_ypix_reg[:, 0], "ypix": xpix_ypix_reg[:, 1], "med": med_reg}
     return dict_roi_coords_reg
 
 """

@@ -767,7 +767,8 @@ def bindFuncButtonRunElastixForMicrogliaXYCTStackRegistration(
                 data_manager.getParameterMap(app_key_pri),
                 path_dst, 
                 path_points_txt, 
-                output_directory
+                output_directory,
+                xy_reverse=True # xy reversed
                 )
 
             data_manager.dict_roi_coords_xyct_reg[t_plane_pri] = dict_roi_coords_xyct_reg_singlet

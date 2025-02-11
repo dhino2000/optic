@@ -111,8 +111,8 @@ def makeLayoutMicrogliaXYCTStackRegistration(
     layout_checkbox = QHBoxLayout()
     layout_checkbox.addWidget(widget_manager.makeWidgetCheckBox(key=key_checkbox_show_roi_match, label="Show Matched ROI", checked=True))
     layout_checkbox.addWidget(widget_manager.makeWidgetCheckBox(key=key_checkbox_show_roi_pair, label="Show ROI pairs", checked=True))
-    layout_checkbox.addWidget(widget_manager.makeWidgetCheckBox(key=key_checkbox_show_reg_im_bg, label="Show Registered Image", checked=False))
-    layout_checkbox.addWidget(widget_manager.makeWidgetCheckBox(key=key_checkbox_show_reg_im_roi, label="Show Registered ROI", checked=False))
+    layout_checkbox.addWidget(widget_manager.makeWidgetCheckBox(key=key_checkbox_show_reg_im_bg, label="Show Registered Image", checked=True))
+    layout_checkbox.addWidget(widget_manager.makeWidgetCheckBox(key=key_checkbox_show_reg_im_roi, label="Show Registered ROI", checked=True))
     layout_slider = QHBoxLayout()
     layout_slider.addLayout(makeLayoutSliderLabel(widget_manager, key_label_opacity_pair, key_slider_opacity_pair, "Opacity of ROI pair", value_set=255))
 
