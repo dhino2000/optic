@@ -188,6 +188,7 @@ class ViewHandler:
             self.plane_t:                            int = None
             self.plane_t_pri:                        int = None
             self.plane_t_sec:                        int = None
+            self.plane_t_max:                        int = self.data_manager.getSizeOfT(view_control.app_key) - 1
             self.roi_add_mode:                      bool = False
             self.roi_reg:                           bool = False
 
@@ -227,8 +228,9 @@ class ViewHandler:
                         self.data_manager.dict_roi_coords_xyct[self.plane_t][self.roi_id_edit] = dict_roi_coords_xyct_edit 
                         self.data_manager.dict_roi_coords_xyct_reg[self.plane_t][self.roi_id_edit] = dict_roi_coords_xyct_edit
                         self.data_manager.dict_roi_matching["id"][self.plane_t] += [self.roi_id_edit]
-                        for plane_t_sec in self.data_manager.dict_roi_matching["match"][self.plane_t].keys(): # for all sec planes
-                            self.data_manager.dict_roi_matching["match"][self.plane_t][plane_t_sec][self.roi_id_edit] = None
+                        if self.plane_t < self.plane_t_max: # last plane_t does not have cell_id_match
+                            for plane_t_sec in self.data_manager.dict_roi_matching["match"][self.plane_t].keys(): # for all sec planes
+                                self.data_manager.dict_roi_matching["match"][self.plane_t][plane_t_sec][self.roi_id_edit] = None
                         # hardcoded !!!
                         self.control_manager.view_controls["pri"].roi_colors_xyct[self.plane_t][self.roi_id_edit] = generateRandomColor()
                         self.control_manager.view_controls["sec"].roi_colors_xyct[self.plane_t][self.roi_id_edit] = self.control_manager.view_controls["pri"].roi_colors_xyct[self.plane_t][self.roi_id_edit]

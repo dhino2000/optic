@@ -274,6 +274,7 @@ def bindFuncMicrogliaTrackingIO(
         dict_roi_coords_xyct = data_manager.getDictROICoordsXYCT()
         dict_roi_coords_xyct_reg = data_manager.getDictROICoordsXYCTRegistered()
         dict_roi_matching = data_manager.getDictROIMatching()
+        dict_tiff_reg = data_manager.dict_tiff_reg
         saveMicrogliaTracking(
             q_window, 
             q_lineedit,
@@ -282,16 +283,18 @@ def bindFuncMicrogliaTrackingIO(
             dict_roi_matching,
             dict_roi_coords_xyct,
             dict_roi_coords_xyct_reg,
+            dict_tiff_reg,
             )
 
     def _loadMicrogliaTracking() -> None:
-        dict_roi_matching, dict_roi_coords_xyct, dict_roi_coords_xyct_reg = loadMicrogliaTracking(
+        dict_roi_matching, dict_roi_coords_xyct, dict_roi_coords_xyct_reg, dict_tiff_reg = loadMicrogliaTracking(
             q_window, 
             gui_defaults, 
         )
         data_manager.dict_roi_matching = dict_roi_matching
         data_manager.dict_roi_coords_xyct = dict_roi_coords_xyct
         data_manager.dict_roi_coords_xyct_reg = dict_roi_coords_xyct_reg
+        data_manager.dict_tiff_reg = dict_tiff_reg
         # hardcoded !!!
         # initialize ROI XYCT Colors
         for plane_t in data_manager.dict_roi_coords_xyct.keys():
@@ -879,7 +882,8 @@ def bindFuncButtonRunROIMatching(
 # Microglia XYCT ROI Matching
 def bindFuncButtonRunROIMatchingForXYCT(
     q_widget: 'QWidget',
-    q_button: 'QPushButton',
+    q_button_run: 'QPushButton',
+    q_button_run_all_tplanes: 'QPushButton',
     widget_manager: 'WidgetManager',
     data_manager: 'DataManager',
     control_manager: 'ControlManager',
@@ -922,6 +926,8 @@ def bindFuncButtonRunROIMatchingForXYCT(
                     max_cost=float(widget_manager.dict_lineedit["ot_threshold_cost"].text()),
                 )
         
+        print(roi_matching)
+        
         # convert roi_matching id to original id
         for row_pri, row_sec in roi_matching.items():
             roi_id_pri = table_control_pri.getCellIdFromRow(row_pri)
@@ -933,7 +939,7 @@ def bindFuncButtonRunROIMatchingForXYCT(
         control_manager.table_controls[app_key_sec].updateWidgetDynamicTableWithT(data_manager.dict_roi_matching, t_plane_pri, t_plane_sec, False)
         control_manager.view_controls[app_key_pri].updateView()
         QMessageBox.information(q_widget, "ROI Matching Finish", "ROI Matching Finished!")
-    q_button.clicked.connect(_runROIMatching)
+    q_button_run.clicked.connect(_runROIMatching)
 
 # -> processing_roi_layouts.makeLayoutROIManagerForTable
 def bindFuncButtonsROIManagerForTable(
@@ -976,6 +982,7 @@ def bindFuncButtonsROIManagerForTable(
         plane_t_pri = control_manager.view_controls[app_key_pri].getPlaneT()
         plane_t_sec = control_manager.view_controls[app_key_sec].getPlaneT()
         plane_t = plane_t_pri if view_control.app_key == app_key_pri else plane_t_sec # pri or sec
+        plane_t_max = data_manager.getSizeOfT(app_key_pri) - 1
         # remove selected roi from dict_roi_matching, dict_roi_coords_xyct
         if isinstance(roi_selected_id, int):
             data_manager.dict_roi_matching["id"][plane_t].remove(roi_selected_id)
@@ -987,8 +994,9 @@ def bindFuncButtonsROIManagerForTable(
                             if roi_sec == roi_selected_id:
                                 data_manager.dict_roi_matching["match"][plane_t_pri_tmp][plane_t_sec_tmp][roi_pri] = None
             # remove all pri ROI of pri-sec pair
-            for plane_t_sec_tmp in data_manager.dict_roi_matching["match"][plane_t].keys():
-                del data_manager.dict_roi_matching["match"][plane_t][plane_t_sec_tmp][roi_selected_id]
+            if plane_t < plane_t_max: # last plane_t does not have cell_id_match
+                for plane_t_sec_tmp in data_manager.dict_roi_matching["match"][plane_t].keys():
+                    del data_manager.dict_roi_matching["match"][plane_t][plane_t_sec_tmp][roi_selected_id]
 
             del data_manager.dict_roi_coords_xyct[plane_t][roi_selected_id]
             del data_manager.dict_roi_coords_xyct_reg[plane_t][roi_selected_id]
@@ -1052,6 +1060,7 @@ def bindFuncButtonRunCellposeForXYCT(
                 mask, flow, style, img_dn = runCellposeDenoiseForMonoImage(img, diam, model_type, restore_type)
                 mask = mask.T # (x, y) -> (y, x)
                 data_manager.dict_roi_coords_xyct[t_plane] = convertCellposeMaskToDictROICoords(mask)
+                data_manager.dict_roi_coords_xyct_reg[t_plane] = data_manager.dict_roi_coords_xyct[t_plane].copy()
                 data_manager.dict_roi_matching = convertSingleCellposeMaskToDictROIMatching(data_manager.dict_roi_matching, mask, t_plane, only_id)
                 # initialize ROI XYCT Colors
                 for roi_id in data_manager.dict_roi_matching["id"][t_plane]:
@@ -1063,6 +1072,7 @@ def bindFuncButtonRunCellposeForXYCT(
             mask, flow, style, img_dn = runCellposeDenoiseForMonoImage(img, diam, model_type, restore_type)
             mask = mask.T # (x, y) -> (y, x)
             data_manager.dict_roi_coords_xyct[t_plane] = convertCellposeMaskToDictROICoords(mask)
+            data_manager.dict_roi_coords_xyct_reg[t_plane] = data_manager.dict_roi_coords_xyct[t_plane].copy()
             data_manager.dict_roi_matching = convertSingleCellposeMaskToDictROIMatching(data_manager.dict_roi_matching, mask, t_plane, only_id)
             # initialize ROI XYCT Colors
             for roi_id in data_manager.dict_roi_matching["id"][t_plane]:

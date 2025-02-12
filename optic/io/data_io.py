@@ -405,7 +405,8 @@ def saveMicrogliaTracking(
         json_config                 : JsonConfig, 
         dict_roi_matching           : Dict[str, Dict[int, List[int] | Dict[int, Dict[int, Optional[int]]]]],
         dict_roi_coords_xyct        : Dict[int, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]],
-        dict_roi_coords_xyct_reg    : Dict[int, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]]
+        dict_roi_coords_xyct_reg    : Dict[int, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]],
+        dict_tiff_reg               : Dict[AppKeys, np.ndarray[np.int32]]
         ) -> None:
     path_src = q_lineedit.text()
     path_dst = generateSavePath(path_src, prefix="Microgliatracking_", remove_strings="Fall_", new_extension=".mat") # .tif -> MicrogliaTracking_.mat
@@ -426,6 +427,11 @@ def saveMicrogliaTracking(
                 # load ROITracking, ROICoords of all dates
                 for date_ in mat_microglia_tracking["ROI"].keys():
                     dict_roi_matching_, dict_roi_coords_xyct_, dict_roi_coords_xyct_reg_ = convertMatMicrogliaTrackingToDictROIMatchingAndDictROICoords(mat_microglia_tracking["ROI"][date_])
+                    dict_tiff_reg = mat_microglia_tracking["ROI"][date_]["BGImageRegistered"]
+                    # loaded TIF shape is XYCT, so convert to XYCZT
+                    from ..preprocessing.preprocessing_tiff import standardizeTIFFStack
+                    for app_key in dict_tiff_reg.keys():
+                        dict_tiff_reg[app_key] = standardizeTIFFStack(dict_tiff_reg[app_key], "XYCT", "XYCZT")
                     user_ = mat_microglia_tracking["ROI"][date_]["user"]
                     dict_roi_matching_converted_, arr_roi_coords_xyct_, arr_roi_coords_xyct_reg_ = convertContentsOfDictROIMatchingAndDictROICoordsToArray(
                         dict_roi_matching_, dict_roi_coords_xyct_, dict_roi_coords_xyct_reg_
@@ -434,6 +440,7 @@ def saveMicrogliaTracking(
                         "ROITracking": dict_roi_matching_converted_, 
                         "ROICoords": arr_roi_coords_xyct_, 
                         "ROICoordsRegistered": arr_roi_coords_xyct_reg_,
+                        "BGImageRegistered": dict_tiff_reg,
                         "user": user_
                         }
 
@@ -441,6 +448,7 @@ def saveMicrogliaTracking(
                     dict_roi_matching,
                     dict_roi_coords_xyct,
                     dict_roi_coords_xyct_reg,
+                    dict_tiff_reg,
                     mat_microglia_tracking,
                     date=now,
                     user=user,
@@ -451,6 +459,7 @@ def saveMicrogliaTracking(
                     dict_roi_matching,
                     dict_roi_coords_xyct,
                     dict_roi_coords_xyct_reg,
+                    dict_tiff_reg,
                     date=now,
                     user=user,
                     path_tif=path_src,
@@ -466,7 +475,7 @@ def saveMicrogliaTracking(
 def loadMicrogliaTracking(
         q_window        : QMainWindow, 
         gui_defaults    : GuiDefaults,
-        ) -> Union[Tuple[Dict[str, Dict[int, List[int] | Dict[int, Dict[int, Optional[int]]]]], Dict[int, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]]], None]:
+        ) -> Union[Tuple[Dict[str, Dict[int, List[int] | Dict[int, Dict[int, Optional[int]]]]], Dict[int, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]], Dict[AppKeys, np.ndarray[Tuple[int, int, int, int, int]]]], None]:
     path_src = openFileDialog(q_widget=q_window, file_type=".mat", title="Open Microglia Tracking mat File")
     if path_src:
         try:
@@ -483,9 +492,14 @@ def loadMicrogliaTracking(
             # select saved date
             mat_microglia_tracking_roi_date = mat_microglia_tracking_roi[date]
             dict_roi_matching, dict_roi_coords_xyct, dict_roi_coords_xyct_reg = convertMatMicrogliaTrackingToDictROIMatchingAndDictROICoords(mat_microglia_tracking_roi_date)
-            
+            dict_tiff_reg = mat_microglia_tracking_roi_date["BGImageRegistered"]
+            # loaded TIF shape is XYCT, so convert to XYCZT
+            from ..preprocessing.preprocessing_tiff import standardizeTIFFStack
+            for app_key in dict_tiff_reg.keys():
+                dict_tiff_reg[app_key] = standardizeTIFFStack(dict_tiff_reg[app_key], "XYCT", "XYCZT")
+
             QMessageBox.information(q_window, "File load", "Microglia Tracking file loaded!")
-            return dict_roi_matching, dict_roi_coords_xyct, dict_roi_coords_xyct_reg
+            return dict_roi_matching, dict_roi_coords_xyct, dict_roi_coords_xyct_reg, dict_tiff_reg
         except Exception as e:
             raise e
             # QMessageBox.warning(q_window, "File load failed", f"Error loading Microglia Tracking file: {e}")

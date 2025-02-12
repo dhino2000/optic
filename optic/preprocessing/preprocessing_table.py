@@ -251,6 +251,7 @@ def convertDictROIMatchingAndDictROICoordsToMatMicrogliaTracking(
     dict_roi_matching       : Dict[str, Any], 
     dict_roi_coords_xyct    : Dict[str, Any], 
     dict_roi_coords_xyct_reg: Dict[str, Any],
+    dict_tiff_reg           : Dict[str, Any],
     mat_microglia_tracking  : Dict[str, Any]=None, 
     date                    : str="",
     user                    : str="",
@@ -277,6 +278,7 @@ def convertDictROIMatchingAndDictROICoordsToMatMicrogliaTracking(
         "ROITracking": dict_roi_matching_converted,
         "ROICoords": arr_roi_coords_xyct,
         "ROICoordsRegistered": arr_roi_coords_xyct_reg,
+        "BGImageRegistered": dict_tiff_reg,
     }
 
     return mat_microglia_tracking
