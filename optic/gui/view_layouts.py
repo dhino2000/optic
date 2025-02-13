@@ -107,12 +107,14 @@ def makeLayoutROIChooseSkip(
     return layout
 
 # show ROI contour, show next ROI
-def makeLayoutDisplayROIContourNext(
+def makeLayoutDisplayROIContours(
         widget_manager: WidgetManager, 
-        key_checkbox_contour: str,
-        key_checkbox_next: str,
+        key_checkbox_contour_all: str,
+        key_checkbox_contour_selected: str,
+        key_checkbox_contour_next: str,
         ) -> QHBoxLayout:
     layout = QHBoxLayout()
-    layout.addWidget(widget_manager.makeWidgetCheckBox(key=key_checkbox_contour, label="Show ROI Contour"))
-    layout.addWidget(widget_manager.makeWidgetCheckBox(key=key_checkbox_next, label="Show Next ROI Contour"))
+    layout.addWidget(widget_manager.makeWidgetCheckBox(key=key_checkbox_contour_all, label="Show All ROI Contour"))
+    layout.addWidget(widget_manager.makeWidgetCheckBox(key=key_checkbox_contour_selected, label="Show Selected ROI Contour"))
+    layout.addWidget(widget_manager.makeWidgetCheckBox(key=key_checkbox_contour_next, label="Show Next ROI Contour"))
     return layout

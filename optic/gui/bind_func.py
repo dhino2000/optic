@@ -989,7 +989,7 @@ def bindFuncButtonsROIManagerForTable(
             # remove all sec ROI of pri-sec pair
             for plane_t_pri_tmp in data_manager.dict_roi_matching["match"].keys(): # search all plane_t_pri
                 for plane_t_sec_tmp in data_manager.dict_roi_matching["match"][plane_t_pri_tmp].keys(): # search all plane_t_sec
-                    if plane_t == plane_t_sec_tmp: # choosed plane_t
+                    if plane_t == plane_t_sec_tmp: # selected plane_t
                         for roi_pri, roi_sec in data_manager.dict_roi_matching["match"][plane_t_pri_tmp][plane_t].items():
                             if roi_sec == roi_selected_id:
                                 data_manager.dict_roi_matching["match"][plane_t_pri_tmp][plane_t_sec_tmp][roi_pri] = None
@@ -1413,17 +1413,19 @@ def bindFuncCheckBoxROIChooseSkip(
     for q_checkbox in list_q_checkbox:
         q_checkbox.stateChanged.connect(lambda state, q_checkbox_text=q_checkbox.text(): _onCheckBoxChanged(state, q_checkbox_text))
 
-# -> view_layouts.makeLayoutDisplayROIContourNext
-def bindFuncCheckBoxDisplayROIContourNext(
-    q_checkbox_contour: 'QCheckBox', 
-    q_checkbox_next: 'QCheckBox',
+# -> view_layouts.makeLayoutDisplayROIContours
+def bindFuncCheckBoxDisplayROIContours(
+    q_checkbox_contour_all: 'QCheckBox',
+    q_checkbox_contour_selected: 'QCheckBox',
+    q_checkbox_contour_next: 'QCheckBox',
     view_control: 'ViewControl'
 ) -> None:
     def _onCheckBoxChanged(state: int, prop: str) -> None:
         is_checked = (state == Qt.Checked)
         view_control.setROIDisplayProp(prop, is_checked)
         view_control.updateView()
-    q_checkbox_contour.stateChanged.connect(lambda state: _onCheckBoxChanged(state, "contour"))
-    q_checkbox_next.stateChanged.connect(lambda state: _onCheckBoxChanged(state, "next"))
+    q_checkbox_contour_all.stateChanged.connect(lambda state: _onCheckBoxChanged(state, "contour_all"))
+    q_checkbox_contour_selected.stateChanged.connect(lambda state: _onCheckBoxChanged(state, "contour_selected"))
+    q_checkbox_contour_next.stateChanged.connect(lambda state: _onCheckBoxChanged(state, "contour_next"))
 
 

@@ -231,10 +231,11 @@ class Suite2pROICheckGUI(QMainWindow):
             key_slider=self.app_key_pri, 
             label=self.app_key_pri
         ))
-        layout.addLayout(makeLayoutDisplayROIContourNext(
+        layout.addLayout(makeLayoutDisplayROIContours(
             self.widget_manager,
-            key_checkbox_contour=f"{self.app_key_pri}_display_contour",
-            key_checkbox_next=f"{self.app_key_pri}_display_next_roi",
+            key_checkbox_contour_all=f"{self.app_key_pri}_display_contour_all",
+            key_checkbox_contour_selected=f"{self.app_key_pri}_display_contour_selected",
+            key_checkbox_contour_next=f"{self.app_key_pri}_display_contour_next",
         ))
         return layout
 
@@ -434,10 +435,11 @@ class Suite2pROICheckGUI(QMainWindow):
                 view_control=self.control_manager.view_controls[self.app_key_pri],
                 channel=channel,
             )
-        # display Selected ROI Contour, Next ROI
-        bindFuncCheckBoxDisplayROIContourNext(
-            q_checkbox_contour=self.widget_manager.dict_checkbox[f"{self.app_key_pri}_display_contour"],
-            q_checkbox_next=self.widget_manager.dict_checkbox[f"{self.app_key_pri}_display_next_roi"],
+        # display all, selected, next ROI Contour
+        bindFuncCheckBoxDisplayROIContours(
+            q_checkbox_contour_all=self.widget_manager.dict_checkbox[f"{self.app_key_pri}_display_contour_all"],
+            q_checkbox_contour_selected=self.widget_manager.dict_checkbox[f"{self.app_key_pri}_display_contour_selected"],
+            q_checkbox_contour_next=self.widget_manager.dict_checkbox[f"{self.app_key_pri}_display_contour_next"],
             view_control=self.control_manager.view_controls[self.app_key_pri],
         )
         # View Events

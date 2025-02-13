@@ -33,7 +33,11 @@ def updateLayerROI_Suite2pROICheck(
         if roi_display[roiId] and roiId != ROISelectedId:
             color = view_control.getROIColor(roiId)
             opacity = view_control.getROIOpacity()
-            drawROI(painter, dict_roi_coords_single, color, opacity)
+            # draw contour of all ROIs except selected ROI
+            if view_control.getROIDisplayProp("contour_all"):
+                drawROIContour(painter, dict_roi_coords_single, color, opacity)
+            else:
+                drawROI(painter, dict_roi_coords_single, color, opacity)
 
     # draw selected ROI
     if draw_selected_roi:
@@ -41,13 +45,13 @@ def updateLayerROI_Suite2pROICheck(
         color_selected = view_control.getROIColor(ROISelectedId)
         opacity_selected = view_control.getHighlightOpacity()
         # draw contour of selected ROI
-        if view_control.getROIDisplayProp("contour"):
+        if view_control.getROIDisplayProp("contour_selected"):
             drawROIContour(painter, dict_roi_coords_selected, color_selected, opacity_selected)
         else:
             drawROI(painter, dict_roi_coords_selected, color_selected, opacity_selected)
 
     # draw next ROI of selected ROI, with White color
-    if view_control.getROIDisplayProp("next"):
+    if view_control.getROIDisplayProp("contour_next"):
         dict_roi_coords_selected_next = dict_roi_coords.get(ROISelectedId+1)
         if dict_roi_coords_selected_next:
             drawROIContour(painter, dict_roi_coords_selected_next, (255, 255, 255), opacity_selected)
