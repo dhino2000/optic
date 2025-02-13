@@ -1,6 +1,8 @@
 # OPTIC
 ## OPTIC(OPtimized Toolbox for Image-based Cellular analysis)
 
+[**OPTIC Documantation**](https://optic-doc.readthedocs.io/en/latest/)
+
 OPTIC consists of four specialized applications:
 ### 1. Suite2pROICheck
 <img src="docs/Suite2pROICheck/images/suite2p_roi_check.png">
