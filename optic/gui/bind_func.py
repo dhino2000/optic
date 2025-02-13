@@ -840,34 +840,6 @@ def bindFuncButtonRunROIMatching(
                     threshold=threshold,
                     max_cost=max_cost,
                 )
-        
-        G = calculateROIMatching(
-            array_src=array_src,
-            array_tgt=array_tgt,
-            method=method,
-            metric=metric,
-            p=p,
-            mass=mass,
-            reg=reg,
-            threshold=threshold,
-            max_cost=max_cost,
-            return_plan=True
-        )
-        # 一時的に保存
-        dict_ot = {
-            "array_src": array_src,
-            "array_tgt": array_tgt,
-            "method": method,
-            "metric": metric,
-            "p": p,
-            "mass": mass,
-            "reg": reg,
-            "threshold": threshold,
-            "max_cost": max_cost,
-            "roi_matching": roi_matching,
-            "G": G
-        }
-        q_widget.dict_ot = dict_ot
 
         # convert roi_matching id to original id
         true_idxs_pri = np.nonzero(roi_display_pri)[0][list(roi_matching.keys())]
@@ -890,6 +862,68 @@ def bindFuncButtonRunROIMatchingForXYCT(
     app_key_pri: str,
     app_key_sec: str,
 ):
+    def _ROIMatching(view_control_pri, view_control_sec, table_control_pri, table_control_sec, t_plane_pri, t_plane_sec):
+        # use registered coordinates if show_reg_im_roi is True
+        if view_control_pri.show_reg_im_roi:
+            array_src = np.array([data_manager.getDictROICoordsXYCTRegistered()[t_plane_pri][roi_id]["med"] for roi_id in data_manager.getDictROICoordsXYCTRegistered()[t_plane_pri].keys()])
+            array_tgt = np.array([data_manager.getDictROICoordsXYCTRegistered()[t_plane_sec][roi_id]["med"] for roi_id in data_manager.getDictROICoordsXYCTRegistered()[t_plane_sec].keys()])
+        else:
+            array_src = np.array([data_manager.getDictROICoordsXYCT()[t_plane_pri][roi_id]["med"] for roi_id in data_manager.getDictROICoordsXYCT()[t_plane_pri].keys()])
+            array_tgt = np.array([data_manager.getDictROICoordsXYCT()[t_plane_sec][roi_id]["med"] for roi_id in data_manager.getDictROICoordsXYCT()[t_plane_sec].keys()])
+        
+        method = widget_manager.dict_combobox["ot_method"].currentText()
+        metric = "minkowski"
+        p = float(widget_manager.dict_lineedit["ot_dist_exp"].text())
+        mass = float(widget_manager.dict_lineedit["ot_partial_mass"].text())
+        reg = float(widget_manager.dict_lineedit["ot_partial_reg"].text())
+        threshold = float(widget_manager.dict_lineedit["ot_threshold_transport"].text())
+        max_cost = float(widget_manager.dict_lineedit["ot_threshold_cost"].text())
+
+        roi_matching: Dict[int, int] = calculateROIMatching(
+                    array_src=array_src,
+                    array_tgt=array_tgt,
+                    method=method,
+                    metric=metric,
+                    p=p,
+                    mass=mass,
+                    reg=reg,
+                    threshold=threshold,
+                    max_cost=max_cost,
+                )
+        
+        # clear ROI Matching
+        dict_roi_matching_ = data_manager.dict_roi_matching["match"][t_plane_pri][t_plane_sec]
+        data_manager.dict_roi_matching["match"][t_plane_pri][t_plane_sec] = {roi_id: None for roi_id in dict_roi_matching_.keys()}
+        # convert roi_matching id to original id
+        for row_pri, row_sec in roi_matching.items():
+            roi_id_pri = table_control_pri.getCellIdFromRow(row_pri)
+            roi_id_sec = table_control_sec.getCellIdFromRow(row_sec)
+            data_manager.dict_roi_matching["match"][t_plane_pri][t_plane_sec][roi_id_pri] = roi_id_sec
+
+    def _runROIMatchingAllTPlanes():
+        view_control_pri = control_manager.view_controls[app_key_pri]
+        view_control_sec = control_manager.view_controls[app_key_sec]
+        table_control_pri = control_manager.table_controls[app_key_pri]
+        table_control_sec = control_manager.table_controls[app_key_sec]
+
+        result = showConfirmationDialog(
+            q_widget,
+            'Confirmation',
+            f"Match ROIs for all t_planes?"
+        )
+        if result != QMessageBox.Yes:
+            return 
+
+        for t_plane_pri in data_manager.dict_roi_matching["match"].keys():
+            for t_plane_sec in data_manager.dict_roi_matching["match"][t_plane_pri].keys():
+                _ROIMatching(view_control_pri, view_control_sec, table_control_pri, table_control_sec, t_plane_pri, t_plane_sec)
+
+        # update Table, View
+        table_control_pri.updateWidgetDynamicTableWithT(data_manager.dict_roi_matching, t_plane_pri, t_plane_sec, True)
+        table_control_sec.updateWidgetDynamicTableWithT(data_manager.dict_roi_matching, t_plane_pri, t_plane_sec, False)
+        view_control_pri.updateView()
+        QMessageBox.information(q_widget, "ROI Matching Finish", "ROI Matching Finished!")
+
     def _runROIMatching():
         view_control_pri = control_manager.view_controls[app_key_pri]
         view_control_sec = control_manager.view_controls[app_key_sec]
@@ -905,41 +939,43 @@ def bindFuncButtonRunROIMatchingForXYCT(
         )
         if result != QMessageBox.Yes:
             return 
-    
-        # use registered coordinates if show_reg_im_roi is True
-        if view_control_pri.show_reg_im_roi:
-            array_src = np.array([data_manager.getDictROICoordsXYCTRegistered()[t_plane_pri][roi_id]["med"] for roi_id in data_manager.getDictROICoordsXYCTRegistered()[t_plane_pri].keys()])
-            array_tgt = np.array([data_manager.getDictROICoordsXYCTRegistered()[t_plane_sec][roi_id]["med"] for roi_id in data_manager.getDictROICoordsXYCTRegistered()[t_plane_sec].keys()])
-        else:
-            array_src = np.array([data_manager.getDictROICoordsXYCT()[t_plane_pri][roi_id]["med"] for roi_id in data_manager.getDictROICoordsXYCT()[t_plane_pri].keys()])
-            array_tgt = np.array([data_manager.getDictROICoordsXYCT()[t_plane_sec][roi_id]["med"] for roi_id in data_manager.getDictROICoordsXYCT()[t_plane_sec].keys()])
         
-        roi_matching = calculateROIMatching(
-                    array_src=array_src,
-                    array_tgt=array_tgt,
-                    method=widget_manager.dict_combobox["ot_method"].currentText(),
-                    metric="minkowski",
-                    p=float(widget_manager.dict_lineedit["ot_dist_exp"].text()),
-                    mass=float(widget_manager.dict_lineedit["ot_partial_mass"].text()),
-                    reg=float(widget_manager.dict_lineedit["ot_partial_reg"].text()),
-                    threshold=float(widget_manager.dict_lineedit["ot_threshold_transport"].text()),
-                    max_cost=float(widget_manager.dict_lineedit["ot_threshold_cost"].text()),
-                )
-        
-        print(roi_matching)
-        
-        # convert roi_matching id to original id
-        for row_pri, row_sec in roi_matching.items():
-            roi_id_pri = table_control_pri.getCellIdFromRow(row_pri)
-            roi_id_sec = table_control_sec.getCellIdFromRow(row_sec)
-            data_manager.dict_roi_matching["match"][t_plane_pri][t_plane_sec][roi_id_pri] = roi_id_sec
+        _ROIMatching(view_control_pri, view_control_sec, table_control_pri, table_control_sec, t_plane_pri, t_plane_sec)
 
         # update Table, View
-        control_manager.table_controls[app_key_pri].updateWidgetDynamicTableWithT(data_manager.dict_roi_matching, t_plane_pri, t_plane_sec, True)
-        control_manager.table_controls[app_key_sec].updateWidgetDynamicTableWithT(data_manager.dict_roi_matching, t_plane_pri, t_plane_sec, False)
-        control_manager.view_controls[app_key_pri].updateView()
+        table_control_pri.updateWidgetDynamicTableWithT(data_manager.dict_roi_matching, t_plane_pri, t_plane_sec, True)
+        table_control_sec.updateWidgetDynamicTableWithT(data_manager.dict_roi_matching, t_plane_pri, t_plane_sec, False)
+        view_control_pri.updateView()
         QMessageBox.information(q_widget, "ROI Matching Finish", "ROI Matching Finished!")
     q_button_run.clicked.connect(_runROIMatching)
+    q_button_run_all_tplanes.clicked.connect(_runROIMatchingAllTPlanes)
+
+# clear ROI Matching
+def bindFuncButtonClearROIMatching(
+    q_button: 'QPushButton',
+    data_manager: 'DataManager',
+    control_manager: 'ControlManager',
+    app_key_pri: str,
+    app_key_sec: str,
+):
+    def _clearROIMatching():
+        view_control_pri = control_manager.view_controls[app_key_pri]
+        view_control_sec = control_manager.view_controls[app_key_sec]
+        table_control_pri = control_manager.table_controls[app_key_pri]
+        table_control_sec = control_manager.table_controls[app_key_sec]
+        t_plane_pri = view_control_pri.getPlaneT()
+        t_plane_sec = view_control_sec.getPlaneT()
+
+        # clear ROI Matching
+        dict_roi_matching = data_manager.dict_roi_matching["match"][t_plane_pri][t_plane_sec]
+        data_manager.dict_roi_matching["match"][t_plane_pri][t_plane_sec] = {roi_id: None for roi_id in dict_roi_matching.keys()}
+
+        # update Table, View
+        table_control_pri.updateWidgetDynamicTableWithT(data_manager.dict_roi_matching, t_plane_pri, t_plane_sec, True)
+        table_control_sec.updateWidgetDynamicTableWithT(data_manager.dict_roi_matching, t_plane_pri, t_plane_sec, False)
+        view_control_pri.updateView()
+
+    q_button.clicked.connect(_clearROIMatching)
 
 # -> processing_roi_layouts.makeLayoutROIManagerForTable
 def bindFuncButtonsROIManagerForTable(
