@@ -395,9 +395,10 @@ def drawROIPairsXYCT(
         ) -> None:
     if view_control.show_roi_pair and app_key_sec is not None:
         try:
-            table_control_pri = control_manager.table_controls[app_key_pri]
-            table_control_sec = control_manager.table_controls[app_key_sec]
-            roiId_pairs = table_control_pri.getMatchedROIPairs(table_control_sec)
+            roiId_pairs = data_manager.getDictROIMatching()["match"][plane_t][plane_t_sec]
+            roiId_pairs = {k:v for k,v in roiId_pairs.items() if v != None} # remove None values
+            print(roiId_pairs)
+
             # all ROI pairs
             for roiId_pri, roiId_sec in roiId_pairs:
                 coords_pri = data_manager.getDictROICoordsXYCT()[plane_t][roiId_pri]["med"]

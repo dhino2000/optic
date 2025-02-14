@@ -118,7 +118,7 @@ def updateView_Suite2pROITracking(
     # ROI image, only "pri" view
     if app_key_sec:
         if view_control.getBackgroundVisibility(ChannelKeys.CHAN3):
-            control_manager.view_controls[app_key_sec].updateROIImage()
+            control_manager.view_controls[app_key_sec].updateROIImage() # update ROI image for pri view
             if view_control.getShowRegImROI():
                 image = data_manager.getDictROIImageRegistered(app_key_sec).get("all")
             else:
@@ -186,16 +186,15 @@ def updateView_MicrogliaTracking(
             )
     # ROI image, only "pri" view
     if app_key_sec:
-        plane_t_sec = control_manager.view_controls[app_key_sec].getPlaneT()
         if view_control.getBackgroundVisibility(ChannelKeys.CHAN3):
+            control_manager.view_controls[app_key_sec].updateROIImageForXYCT() # update ROI image for pri view
             if view_control.getShowRegImROI():
-                image = data_manager.getDictROIImageRegisteredXYCT().get(plane_t_sec)
+                image = data_manager.getDictROIImageRegistered(app_key_sec).get("all")
             else:
-                image = data_manager.getDictROIImageXYCT().get(plane_t_sec)
+                image = data_manager.getDictROIImage(app_key_sec).get("all")
             if image is None:
                 bg_image_chan3 = None
             else:
-                image = image.get("all")     
                 bg_image_chan3 = adjustChannelContrast(
                     image=image,
                     min_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN3, 'min'),

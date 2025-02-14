@@ -223,7 +223,7 @@ class DataManager:
     def getDictROICoordsXYCTRegistered(self) -> Dict[int, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]]:
         return self.dict_roi_coords_xyct_reg
     
-    def getDictROIMatching(self) -> Dict[int, Dict[int, Dict[int, Optional[int]]]]:
+    def getDictROIMatching(self) -> Dict[str, Dict[int, List[int] | Dict[int, Dict[int, Optional[int]]]]]:
         return self.dict_roi_matching
     
     def getDictROIImageXYCT(self) -> Dict[int, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]]:

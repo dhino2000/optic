@@ -5,7 +5,7 @@ from ..visualization.view_visual import updateView_Suite2pROICheck, updateView_T
 from ..visualization.view_visual_roi import findClosestROI, shouldSkipROI
 from ..visualization.view_visual_rectangle import initializeDragRectangle, updateDragRectangle
 from ..visualization.info_visual import updateZPlaneDisplay, updateTPlaneDisplay
-from ..preprocessing.preprocessing_roi import updateROIImage
+from ..preprocessing.preprocessing_roi import updateROIImage, updateROIImageForXYCT
 from ..gui.view_setup import setViewSize
 from ..config.constants import BGImageTypeList, Extension
 from ..utils.view_utils import generateRandomColor
@@ -353,5 +353,10 @@ class ViewControl:
     # update ROI image, show only choosed celltype, show registered ROI image or not
     def updateROIImage(self) -> None:
         dict_im_roi, dict_im_roi_reg = updateROIImage(self.data_manager, self.control_manager, self.app_key, dtype="uint8", value=50, reg=True)
+        self.data_manager.dict_im_roi[self.app_key] = dict_im_roi
+        self.data_manager.dict_im_roi_reg[self.app_key] = dict_im_roi_reg
+
+    def updateROIImageForXYCT(self) -> None:
+        dict_im_roi, dict_im_roi_reg = updateROIImageForXYCT(self.data_manager, self.control_manager, self.app_key, dtype="uint8", value=50, reg=True, t_plane=self.getPlaneT())
         self.data_manager.dict_im_roi[self.app_key] = dict_im_roi
         self.data_manager.dict_im_roi_reg[self.app_key] = dict_im_roi_reg

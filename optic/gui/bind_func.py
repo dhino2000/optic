@@ -862,7 +862,7 @@ def bindFuncButtonRunROIMatchingForXYCT(
     app_key_pri: str,
     app_key_sec: str,
 ):
-    def _ROIMatching(view_control_pri, view_control_sec, table_control_pri, table_control_sec, t_plane_pri, t_plane_sec):
+    def _ROIMatching(widget_manager: WidgetManager, data_manager: DataManager, view_control_pri: ViewControl, t_plane_pri: int, t_plane_sec: int):
         # use registered coordinates if show_reg_im_roi is True
         if view_control_pri.show_reg_im_roi:
             array_src = np.array([data_manager.getDictROICoordsXYCTRegistered()[t_plane_pri][roi_id]["med"] for roi_id in data_manager.getDictROICoordsXYCTRegistered()[t_plane_pri].keys()])
@@ -896,8 +896,8 @@ def bindFuncButtonRunROIMatchingForXYCT(
         data_manager.dict_roi_matching["match"][t_plane_pri][t_plane_sec] = {roi_id: None for roi_id in dict_roi_matching_.keys()}
         # convert roi_matching id to original id
         for row_pri, row_sec in roi_matching.items():
-            roi_id_pri = table_control_pri.getCellIdFromRow(row_pri)
-            roi_id_sec = table_control_sec.getCellIdFromRow(row_sec)
+            roi_id_pri = data_manager.dict_roi_matching["id"][t_plane_pri][row_pri]
+            roi_id_sec = data_manager.dict_roi_matching["id"][t_plane_sec][row_sec]
             data_manager.dict_roi_matching["match"][t_plane_pri][t_plane_sec][roi_id_pri] = roi_id_sec
 
     def _runROIMatchingAllTPlanes():
@@ -909,16 +909,18 @@ def bindFuncButtonRunROIMatchingForXYCT(
         result = showConfirmationDialog(
             q_widget,
             'Confirmation',
-            f"Match ROIs for all t_planes?"
+            f"Match ROIs for all t planes?"
         )
         if result != QMessageBox.Yes:
             return 
 
         for t_plane_pri in data_manager.dict_roi_matching["match"].keys():
             for t_plane_sec in data_manager.dict_roi_matching["match"][t_plane_pri].keys():
-                _ROIMatching(view_control_pri, view_control_sec, table_control_pri, table_control_sec, t_plane_pri, t_plane_sec)
+                _ROIMatching(widget_manager, data_manager, view_control_pri, t_plane_pri, t_plane_sec)
 
         # update Table, View
+        t_plane_pri = view_control_pri.getPlaneT()
+        t_plane_sec = view_control_sec.getPlaneT()
         table_control_pri.updateWidgetDynamicTableWithT(data_manager.dict_roi_matching, t_plane_pri, t_plane_sec, True)
         table_control_sec.updateWidgetDynamicTableWithT(data_manager.dict_roi_matching, t_plane_pri, t_plane_sec, False)
         view_control_pri.updateView()
@@ -940,7 +942,7 @@ def bindFuncButtonRunROIMatchingForXYCT(
         if result != QMessageBox.Yes:
             return 
         
-        _ROIMatching(view_control_pri, view_control_sec, table_control_pri, table_control_sec, t_plane_pri, t_plane_sec)
+        _ROIMatching(widget_manager, data_manager, view_control_pri, t_plane_pri, t_plane_sec)
 
         # update Table, View
         table_control_pri.updateWidgetDynamicTableWithT(data_manager.dict_roi_matching, t_plane_pri, t_plane_sec, True)

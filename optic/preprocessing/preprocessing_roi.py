@@ -29,7 +29,7 @@ def getROIContour(
 def updateROIImage(
         data_manager: DataManager, 
         control_manager: ControlManager, 
-        app_key: str, 
+        app_key: AppKeys, 
         dtype: str="uint8", 
         value: int=50, 
         reg: bool=False
@@ -41,7 +41,7 @@ def updateROIImage(
     for roiId, coords in data_manager.getDictROICoords(app_key).items():
         if roi_display[roiId]:
             xpix, ypix = coords["xpix"], coords["ypix"]
-            roi_img[ypix, xpix] = value
+            roi_img[ypix, xpix] = value # XY reversed
     dict_im_roi["all"] = roi_img
     # for registered ROI image
     if reg:
@@ -49,7 +49,44 @@ def updateROIImage(
         for roiId, coords in data_manager.getDictROICoordsRegistered(app_key).items():
             if roi_display[roiId]:
                 xpix, ypix = coords["xpix"], coords["ypix"]
-                roi_img[ypix, xpix] = value
+                roi_img[ypix, xpix] = value # XY reversed
+        dict_im_roi_reg["all"] = roi_img
+        return dict_im_roi, dict_im_roi_reg
+    else:
+        return dict_im_roi
+    
+# update ROI Image for MicrogliaTracking
+def updateROIImageForXYCT(
+    data_manager: DataManager, 
+    control_manager: ControlManager, 
+    app_key: AppKeys, 
+    dtype: str="uint8", 
+    value: int=50, 
+    reg: bool=False,
+    t_plane: int=0,
+    ) -> Dict[str, np.ndarray]:
+    dict_im_roi, dict_im_roi_reg = {}, {}
+    dict_roi_coords_xyct = data_manager.getDictROICoordsXYCT()
+    dict_roi_coords_xyct_reg = data_manager.getDictROICoordsXYCTRegistered()
+    roi_img = np.zeros(data_manager.getImageSize(app_key), dtype=dtype)
+
+    dict_roi_coords_xyct_tplane = dict_roi_coords_xyct.get(t_plane, None)
+    dict_roi_coords_xyct_reg_tplane = dict_roi_coords_xyct_reg.get(t_plane, None)
+
+    if dict_roi_coords_xyct_tplane is not None:
+        for roiId, coords in dict_roi_coords_xyct_tplane.items():
+            xpix, ypix = coords["xpix"], coords["ypix"]
+            roi_img[xpix, ypix] = value
+
+    dict_im_roi["all"] = roi_img
+    # for registered ROI image
+    if reg:
+        roi_img = np.zeros(data_manager.getImageSize(app_key), dtype=dtype)
+        if dict_roi_coords_xyct_reg_tplane is not None:
+            for roiId, coords in dict_roi_coords_xyct_reg_tplane.items():
+                xpix, ypix = coords["xpix"], coords["ypix"]
+                roi_img[xpix, ypix] = value
+
         dict_im_roi_reg["all"] = roi_img
         return dict_im_roi, dict_im_roi_reg
     else:
