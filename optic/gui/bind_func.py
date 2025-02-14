@@ -1054,7 +1054,6 @@ def bindFuncButtonsROIManagerForTable(
 
             view_control.roi_edit_mode = True
             view_control.q_view.setFocus()
-            print("roi_edit_mode:", view_control.roi_edit_mode)
 
             plane_t_pri = control_manager.view_controls[app_key_pri].getPlaneT()
             plane_t_sec = control_manager.view_controls[app_key_sec].getPlaneT()
@@ -1395,16 +1394,21 @@ def bindFuncTableCellChangedWithMicrogliaTracking(
             roi_id_sec = int(roi_id_sec)
 
             # check the validity of the roi id
-            if roi_id_sec in data_manager.dict_roi_matching["id"][t_plane_sec].values():
+            if roi_id_sec in data_manager.dict_roi_matching["id"][t_plane_sec]:
                 data_manager.dict_roi_matching["match"][t_plane_pri][t_plane_sec][roi_id_pri] = roi_id_sec
-        except ValueError:
+        except ValueError as e:
             print("Invalid input: not an integer")
+            raise e
         except KeyError as e:
             print(f"KeyError: {e}")
+            raise e
         except AttributeError as e: # set blank
+            print(f"AttributeError: {e}")
             data_manager.dict_roi_matching["match"][t_plane_pri][t_plane_sec][roi_id_pri] = None
-        # except IndexError as e:
-            # print(f"IndexError: {e}")
+            raise e
+        except IndexError as e:
+            print(f"IndexError: {e}")
+            raise e
 
     q_table_pri.itemChanged.connect(_onEditingFinished)
 
