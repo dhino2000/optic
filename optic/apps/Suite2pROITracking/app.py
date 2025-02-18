@@ -227,6 +227,8 @@ class Suite2pROITrackingGUI(QMainWindow):
             f"show_reg_im_roi",
             f"opacity_roi_pair",
         )
+        layout.addWidget(self.widget_manager.makeWidgetButton(key="save_reg_roi_bg", label="Save registered ROI and images"))
+        layout.addWidget(self.widget_manager.makeWidgetButton(key="load_reg_roi_bg", label="Load registered ROI and images"))
         return layout
     
     # Optimal Transport ROI Matching
@@ -236,12 +238,14 @@ class Suite2pROITrackingGUI(QMainWindow):
             self.widget_manager,
             "roi_matching",
             "ot_method",
-            "fgwd_alpha",
-            "wd_exp",
+            "ot_partial_mass",
+            "ot_partial_reg",
+            "ot_dist_exp",
             "ot_threshold_transport",
             "ot_threshold_cost",
-            "fgwd_alpha",
-            "wd_exp",
+            "ot_partial_mass",
+            "ot_partial_reg",
+            "ot_dist_exp",
             "ot_threshold_transport",
             "ot_threshold_cost",
             "ot_method",
@@ -340,6 +344,7 @@ class Suite2pROITrackingGUI(QMainWindow):
             self.control_manager,
             self.app_keys[0],
             self.app_keys[1],
+            self.control_manager.view_controls[self.app_keys[0]].getShowRegImROI()
         )
         if config_window.exec_() == QDialog.Accepted:
             pass
@@ -482,6 +487,15 @@ class Suite2pROITrackingGUI(QMainWindow):
         # Elastix config
         self.widget_manager.dict_button[f"elastix_config"].clicked.connect(
             lambda: self.showSubWindowElastixParamsConfig()
+        )
+        # Registerd ROI and images IO
+        bindFuncRegisteredROIAndBGImageIO(
+            q_button_save=self.widget_manager.dict_button['save_reg_roi_bg'],
+            q_button_load=self.widget_manager.dict_button['load_reg_roi_bg'],
+            q_window=self,
+            q_lineedit=self.widget_manager.dict_lineedit[f"path_fall_{self.app_keys[1]}"],
+            data_manager=self.data_manager,
+            app_key=self.app_keys[1],
         )
         # ROI Tracking IO
         bindFuncROITrackingIO(
