@@ -1120,6 +1120,7 @@ def bindFuncButtonRunCellposeForXYCT(
         t_plane_pri = control_manager.view_controls["pri"].getPlaneT()
         t_plane_sec = control_manager.view_controls["sec"].getPlaneT()
         for app_key, use_match in zip(config_manager.gui_defaults["APP_KEYS"], [True, False]):
+            control_manager.table_controls[app_key].setSharedAttr_ROISelected(None) # clear selected roi to avoid error
             control_manager.view_controls[app_key].updateView()
             control_manager.table_controls[app_key].updateWidgetDynamicTableWithT(data_manager.dict_roi_matching, t_plane_pri, t_plane_sec, use_match)
         QMessageBox.information(q_button_run, "Cellpose Finish", "Cellpose Finished!")

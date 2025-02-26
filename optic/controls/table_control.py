@@ -42,7 +42,11 @@ class TableControl:
         self.q_table, self.groups_celltype = setupWidgetROITable(self.q_table, self.len_row, self.table_columns, key_event_ignore=True)
         self.setKeyPressEvent()
         self.initalizeSharedAttr_ROIDisplay()
-        self.setROICellTypeFromArray(self.data_manager.getDictFall("pri")["iscell"][:,0], "Neuron", "Not_Cell") # set celltype with "iscell" array
+        # set celltype with TableColumns
+        # if celltype columns are ["Neuron", "Astrocyte", "Not_Cell"], set "Neuron" or "Not_Cell" radiobutton
+        celltype_pos = [col_name for col_name in self.table_columns.getColumns().keys() if self.table_columns.getColumns()[col_name]["type"] == "celltype"][0] # first celltype except "Not_Cell"
+        celltype_neg = "Not_Cell"
+        self.setROICellTypeFromArray(self.data_manager.getDictFall("pri")["iscell"][:,0], celltype_pos, celltype_neg) # set celltype with "iscell" array
         updateROICountDisplay(self.widget_manager, self.config_manager, self.app_key)
 
     def setupWidgetDynamicTable(self, app_key: str) -> None:
