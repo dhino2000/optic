@@ -327,7 +327,7 @@ class TIFStackExplorerGUI(QMainWindow):
         # show registration result
         bindFuncCheckboxShowRegisteredStack(
             q_checkbox=self.widget_manager.dict_checkbox[f"show_reg_result"],
-            view_control=self.control_manager.view_controls[self.app_key_pri]
+            view_controls=self.control_manager.view_controls,
         )
         # run Elastix registration t-axis
         bindFuncButtonRunElastixForSingleStack(
