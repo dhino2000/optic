@@ -273,14 +273,22 @@ class GuiDefaults:
         "ROI_MATCHING_METHOD": ["None", "affine", "bspline"],
         "TABLE_COLUMNS": {
             AppKeys.PRI: {
-                "Cell_ID"       : {"order": 0, "type": "id",       "width": 160},
-                "Cell_ID_Match" : {"order": 1, "type": "id_match", "width": 160},
+                "Cell_ID"       : {"order": 0, "type": "id",       "width": 120,  "removable": False, "name_fixed": True, "editable": False},
+                "Cell_ID_Match" : {"order": 1, "type": "id_match", "width": 120,  "removable": False, "name_fixed": True, "editable": False},
+                "Check"         : {"order": 2, "type": "checkbox", "width": 80,  "removable": True,  "default": False},
             },
             AppKeys.SEC: {
-                "Cell_ID"   : {"order": 0, "type": "id",       "width": 160},
+                "Cell_ID"   : {"order": 0, "type": "id",       "width": 120,  "removable": False, "name_fixed": True, "editable": False},
+                "Check"     : {"order": 1, "type": "checkbox", "width": 80,  "removable": True,  "default": False},
             },
         },
         "KEY_FUNCTION_MAP": {
+            AppKeys.PRI: {
+                Qt.Key_Delete: ('row', 'remove', 1),
+            },
+            AppKeys.SEC: {
+                Qt.Key_Delete: ('row', 'remove', 1),
+            },
         },
     }
 

@@ -1015,34 +1015,37 @@ def bindFuncButtonsROIManagerForTable(
             view_control.view_handler.handler.roi_add_mode = True
 
     def _removeSelectedROIfromTable() -> None:
-        row = q_table.currentRow()
-        roi_selected_id = table_control.getCellIdFromRow(row)
-        plane_t_pri = control_manager.view_controls[app_key_pri].getPlaneT()
-        plane_t_sec = control_manager.view_controls[app_key_sec].getPlaneT()
-        plane_t = plane_t_pri if view_control.app_key == app_key_pri else plane_t_sec # pri or sec
-        plane_t_max = data_manager.getSizeOfT(app_key_pri) - 1
-        # remove selected roi from dict_roi_matching, dict_roi_coords_xyct
-        if isinstance(roi_selected_id, int):
-            data_manager.dict_roi_matching["id"][plane_t].remove(roi_selected_id)
-            # remove all sec ROI of pri-sec pair
-            for plane_t_pri_tmp in data_manager.dict_roi_matching["match"].keys(): # search all plane_t_pri
-                for plane_t_sec_tmp in data_manager.dict_roi_matching["match"][plane_t_pri_tmp].keys(): # search all plane_t_sec
-                    if plane_t == plane_t_sec_tmp: # selected plane_t
-                        for roi_pri, roi_sec in data_manager.dict_roi_matching["match"][plane_t_pri_tmp][plane_t].items():
-                            if roi_sec == roi_selected_id:
-                                data_manager.dict_roi_matching["match"][plane_t_pri_tmp][plane_t_sec_tmp][roi_pri] = None
-            # remove all pri ROI of pri-sec pair
-            if plane_t < plane_t_max: # last plane_t does not have cell_id_match
-                for plane_t_sec_tmp in data_manager.dict_roi_matching["match"][plane_t].keys():
-                    del data_manager.dict_roi_matching["match"][plane_t][plane_t_sec_tmp][roi_selected_id]
+        try:
+            row = q_table.currentRow()
+            roi_selected_id = table_control.getCellIdFromRow(row)
+            plane_t_pri = control_manager.view_controls[app_key_pri].getPlaneT()
+            plane_t_sec = control_manager.view_controls[app_key_sec].getPlaneT()
+            plane_t = plane_t_pri if view_control.app_key == app_key_pri else plane_t_sec # pri or sec
+            plane_t_max = data_manager.getSizeOfT(app_key_pri) - 1
+            # remove selected roi from dict_roi_matching, dict_roi_coords_xyct
+            if isinstance(roi_selected_id, int):
+                data_manager.dict_roi_matching["id"][plane_t].remove(roi_selected_id)
+                # remove all sec ROI of pri-sec pair
+                for plane_t_pri_tmp in data_manager.dict_roi_matching["match"].keys(): # search all plane_t_pri
+                    for plane_t_sec_tmp in data_manager.dict_roi_matching["match"][plane_t_pri_tmp].keys(): # search all plane_t_sec
+                        if plane_t == plane_t_sec_tmp: # selected plane_t
+                            for roi_pri, roi_sec in data_manager.dict_roi_matching["match"][plane_t_pri_tmp][plane_t].items():
+                                if roi_sec == roi_selected_id:
+                                    data_manager.dict_roi_matching["match"][plane_t_pri_tmp][plane_t_sec_tmp][roi_pri] = None
+                # remove all pri ROI of pri-sec pair
+                if plane_t < plane_t_max: # last plane_t does not have cell_id_match
+                    for plane_t_sec_tmp in data_manager.dict_roi_matching["match"][plane_t].keys():
+                        del data_manager.dict_roi_matching["match"][plane_t][plane_t_sec_tmp][roi_selected_id]
 
-            del data_manager.dict_roi_coords_xyct[plane_t][roi_selected_id]
-            del data_manager.dict_roi_coords_xyct_reg[plane_t][roi_selected_id]
-            print("ROI", roi_selected_id, "is removed.")
-        table_control.setSharedAttr_ROISelected(None) # clear selected roi
-        view_control.updateView()
-        control_manager.table_controls[app_key_pri].updateWidgetDynamicTableWithT(data_manager.dict_roi_matching, plane_t_pri, plane_t_sec, True)
-        control_manager.table_controls[app_key_sec].updateWidgetDynamicTableWithT(data_manager.dict_roi_matching, plane_t_pri, plane_t_sec, False)
+                del data_manager.dict_roi_coords_xyct[plane_t][roi_selected_id]
+                del data_manager.dict_roi_coords_xyct_reg[plane_t][roi_selected_id]
+                print("ROI", roi_selected_id, "is removed.")
+            table_control.setSharedAttr_ROISelected(None) # clear selected roi
+            view_control.updateView()
+            control_manager.table_controls[app_key_pri].updateWidgetDynamicTableWithT(data_manager.dict_roi_matching, plane_t_pri, plane_t_sec, True)
+            control_manager.table_controls[app_key_sec].updateWidgetDynamicTableWithT(data_manager.dict_roi_matching, plane_t_pri, plane_t_sec, False)
+        except AttributeError as e:
+            pass
 
     def _editSelectedROI() -> None:
         if not view_control.roi_edit_mode:
@@ -1067,9 +1070,23 @@ def bindFuncButtonsROIManagerForTable(
             view_control.view_handler.handler.roi_points_edit = set([(x, y) for x, y in zip(dict_roi_coords_xyct_selected["xpix"], dict_roi_coords_xyct_selected["ypix"])])
             view_control.view_handler.handler.roi_add_mode = False
 
+    # keyPressEvent
+    """
+    TEMPORARY: keyPressEvent for deleting ROI
+    This function is temporary and will be removed in the future !!!
+    """
+    def _keyPressEvent(event):
+        if event.key() == Qt.Key_A: # add ROI
+            _addROItoTable()
+        elif event.key() == Qt.Key_D: # delete ROI
+            _removeSelectedROIfromTable()
+        elif event.key() == Qt.Key_E: # edit ROI
+            _editSelectedROI()
+
     q_button_add.clicked.connect(_addROItoTable)
     q_button_remove.clicked.connect(_removeSelectedROIfromTable)
     q_button_edit.clicked.connect(_editSelectedROI)
+    q_table.keyPressEvent = _keyPressEvent
 
 # -> processing_roi_layouts.makeLayoutCellpose
 def bindFuncButtonRunCellposeForXYCT(
