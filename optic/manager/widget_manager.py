@@ -208,9 +208,9 @@ def makeWidgetView(
 ) -> QGraphicsView:
     widget = QGraphicsView(scene)
     if width_min:
-        widget.setMinimumHeight(width_min)
+        widget.setMinimumWidth(width_min)
     if height_min:
-        widget.setMinimumWidth(height_min)
+        widget.setMinimumHeight(height_min)
     widget.setStyleSheet(f"background-color: {color};")  # 背景色を黒に設定
     widget.setViewportUpdateMode(QGraphicsView.FullViewportUpdate)
     widget.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
