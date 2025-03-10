@@ -212,6 +212,9 @@ def saveROICheck(
                     n_roi=q_table.rowCount(),
                     path_fall=path_src,
                     )
+                
+            # WARNING !!!
+            # "savemat" can not save np.array([[1]]) as [1], automatically convert to 1  
             savemat(path_dst, mat_roicheck)
             QMessageBox.information(q_window, "File save", f"ROICheck file saved!\nuser: {user}, date: {now}")
         except Exception as e:
@@ -243,7 +246,13 @@ def loadROICheck(
             # select saved date
             dict_roicheck = mat_roicheck["manualROIcheck"][date]
             dict_roicheck = {k.replace(" ", "_"): v for k, v in dict_roicheck.items()} # this is temporary fix for old ROIcheck files !!!
-            
+
+            # MATLAB convert [1] to 1
+            # so, convert 1 to [1]
+            for key in dict_roicheck.keys():
+                if isinstance(dict_roicheck[key], int):
+                    dict_roicheck[key] = [dict_roicheck[key]]
+
             from ..gui.table_setup import applyDictROICheckToTable
             applyDictROICheckToTable(q_table, table_columns, dict_roicheck)
             QMessageBox.information(q_window, "File load", "ROICheck file loaded!")
@@ -427,11 +436,11 @@ def saveMicrogliaTracking(
                 # load ROITracking, ROICoords of all dates
                 for date_ in mat_microglia_tracking["ROI"].keys():
                     dict_roi_matching_, dict_roi_coords_xyct_, dict_roi_coords_xyct_reg_ = convertMatMicrogliaTrackingToDictROIMatchingAndDictROICoords(mat_microglia_tracking["ROI"][date_])
-                    dict_tiff_reg = mat_microglia_tracking["ROI"][date_]["BGImageRegistered"]
+                    dict_tiff_reg_ = mat_microglia_tracking["ROI"][date_]["BGImageRegistered"]
                     # loaded TIF shape is XYCT, so convert to XYCZT
                     from ..preprocessing.preprocessing_tiff import standardizeTIFFStack
-                    for app_key in dict_tiff_reg.keys():
-                        dict_tiff_reg[app_key] = standardizeTIFFStack(dict_tiff_reg[app_key], "XYCT", "XYCZT")
+                    for app_key in dict_tiff_reg_.keys():
+                        dict_tiff_reg_[app_key] = standardizeTIFFStack(dict_tiff_reg_[app_key], "XYCT", "XYCZT")
                     user_ = mat_microglia_tracking["ROI"][date_]["user"]
                     dict_roi_matching_converted_, arr_roi_coords_xyct_, arr_roi_coords_xyct_reg_ = convertContentsOfDictROIMatchingAndDictROICoordsToArray(
                         dict_roi_matching_, dict_roi_coords_xyct_, dict_roi_coords_xyct_reg_
@@ -440,7 +449,7 @@ def saveMicrogliaTracking(
                         "ROITracking": dict_roi_matching_converted_, 
                         "ROICoords": arr_roi_coords_xyct_, 
                         "ROICoordsRegistered": arr_roi_coords_xyct_reg_,
-                        "BGImageRegistered": dict_tiff_reg,
+                        "BGImageRegistered": dict_tiff_reg_,
                         "user": user_
                         }
 

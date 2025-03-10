@@ -291,9 +291,13 @@ def bindFuncMicrogliaTrackingIO(
             q_window, 
             gui_defaults, 
         )
-        data_manager.dict_roi_matching = dict_roi_matching
-        data_manager.dict_roi_coords_xyct = dict_roi_coords_xyct
-        data_manager.dict_roi_coords_xyct_reg = dict_roi_coords_xyct_reg
+        # no ROI data, temporary fix
+        if len(dict_roi_matching["id"]) == 0:
+            pass
+        else:
+            data_manager.dict_roi_matching = dict_roi_matching
+            data_manager.dict_roi_coords_xyct = dict_roi_coords_xyct
+            data_manager.dict_roi_coords_xyct_reg = dict_roi_coords_xyct_reg
         data_manager.dict_tiff_reg = dict_tiff_reg
         # hardcoded !!!
         # initialize ROI XYCT Colors
