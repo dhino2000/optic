@@ -354,6 +354,15 @@ def loadROITracking(
             dict_roi_tracking_pri = {k.replace(" ", "_"): v for k, v in dict_roi_tracking_pri.items()} # this is temporary fix for old ROIcheck files !!!
             dict_roi_check_sec = {k.replace(" ", "_"): v for k, v in dict_roi_check_sec.items()} # this is temporary fix for old ROIcheck files !!!
             
+            # MATLAB convert [1] to 1
+            # so, convert 1 to [1]
+            for key in dict_roi_tracking_pri.keys():
+                if isinstance(dict_roi_tracking_pri[key], int):
+                    dict_roi_tracking_pri[key] = [dict_roi_tracking_pri[key]]
+            for key in dict_roi_check_sec.keys():
+                if isinstance(dict_roi_check_sec[key], int):
+                    dict_roi_check_sec[key] = [dict_roi_check_sec[key]]
+
             from ..gui.table_setup import applyDictROICheckToTable, applyDictROITrackingToTable
             applyDictROITrackingToTable(q_table_pri, table_column_pri, dict_roi_tracking_pri)
             applyDictROICheckToTable(q_table_sec, table_column_sec, dict_roi_check_sec)
