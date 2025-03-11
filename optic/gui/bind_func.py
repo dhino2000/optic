@@ -1,7 +1,7 @@
 from __future__ import annotations
 from ..type_definitions import *
 from ..io.file_dialog import openFileDialogAndSetLineEdit, saveFileDialog
-from ..io.data_io import saveROICheck, loadROICheck, loadEventFilesNPY, generateSavePath, saveTiffStack, saveROITracking, loadROITracking, loadCellposeMaskNPY, saveRegisteredROICoordsAndBGImage, loadRegisteredROICoordsAndBGImage, saveMicrogliaTracking, loadMicrogliaTracking
+from ..io.data_io import saveROICheck, loadROICheck, loadEventFilesNPY, generateSavePath, saveTiffStack, saveROITracking, loadROITracking, loadCellposeMaskNPY, loadROIManagerZip, saveRegisteredROICoordsAndBGImage, loadRegisteredROICoordsAndBGImage, saveMicrogliaTracking, loadMicrogliaTracking
 from ..visualization.info_visual import updateROICountDisplay
 from ..processing import *
 from ..preprocessing import *
@@ -355,6 +355,55 @@ def bindFuncROIMaskNpyIO(
         control_manager.table_controls["sec"].updateWidgetDynamicTableWithT(data_manager.dict_roi_matching, t_plane_pri, t_plane_sec, False)
 
     q_button_load.clicked.connect(lambda: _loadMaskNpy())
+
+# -> io_layouts.makeLayoutROIManager
+def bindFuncROIManagerZipIO(
+    q_button_save: 'QPushButton', 
+    q_button_load: 'QPushButton', 
+    q_window: 'QWidget', 
+    data_manager: 'DataManager',
+    control_manager: 'ControlManager',
+) -> None:
+    def _loadROIManagerZip() -> None:
+        loadROIManagerZip(
+            q_window, 
+            data_manager, 
+        )
+        rois = data_manager.list_roi_imagej
+        dict_roi_matching = data_manager.getDictROIMatching()
+        dict_roi_coords_xyct = data_manager.getDictROICoordsXYCT()
+        # hardcoded !!!
+        width, height = data_manager.getImageSize("pri")
+
+        dict_roi_matching, dict_roi_coords_xyct = convertImagejRoiToDictROIMatchingAndDictROICoords(
+            rois, 
+            dict_roi_matching,
+            dict_roi_coords_xyct,
+            width,
+            height
+        )
+
+        data_manager.dict_roi_coords_xyct = dict_roi_coords_xyct
+        data_manager.dict_roi_coords_xyct_reg = deepcopy(data_manager.dict_roi_coords_xyct)
+        data_manager.dict_roi_matching = dict_roi_matching
+
+        # initialize ROI XYCT Colors
+        for plane_t in data_manager.dict_roi_coords_xyct.keys():
+            for roi_id in data_manager.dict_roi_coords_xyct[plane_t].keys():
+                control_manager.view_controls["pri"].roi_colors_xyct[plane_t][roi_id] = generateRandomColor()
+                control_manager.view_controls["sec"].roi_colors_xyct[plane_t][roi_id] = control_manager.view_controls["pri"].roi_colors_xyct[plane_t][roi_id]
+
+        control_manager.view_controls["pri"].updateView()
+        control_manager.view_controls["sec"].updateView()
+
+        t_plane_pri = control_manager.view_controls["pri"].getPlaneT()
+        t_plane_sec = control_manager.view_controls["sec"].getPlaneT()
+        
+        control_manager.table_controls["pri"].updateWidgetDynamicTableWithT(data_manager.dict_roi_matching, t_plane_pri, t_plane_sec, True)
+        control_manager.table_controls["sec"].updateWidgetDynamicTableWithT(data_manager.dict_roi_matching, t_plane_pri, t_plane_sec, False)
+
+    q_button_load.clicked.connect(lambda: _loadROIManagerZip())
+
 
 """
 processing_image_layouts

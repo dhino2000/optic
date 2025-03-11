@@ -3,6 +3,7 @@ from ..type_definitions import *
 from collections import defaultdict
 import numpy as np
 from itk.elxParameterObjectPython import elastixParameterObject, mapstringvectorstring
+from roifile import ImagejRoi
 from ..preprocessing.preprocessing_image import getBGImageFromFall, getBGImageChannel2FromFall, getROIImageFromFall
 from ..preprocessing.preprocessing_fall import getROICoordsFromDictFall
 from ..config.constants import Extension
@@ -36,6 +37,9 @@ class DataManager:
         # ROI mask, coordinates
         self.dict_roi_mask:             Dict[AppKeys, np.ndarray[np.uint16, Tuple[int, int, int]]] = {}
         self.dict_roi_mask_reg:         Dict[AppKeys, np.ndarray[np.uint16, Tuple[int, int, int]]] = {}
+        # for ImageJ ROI Manager
+        self.list_roi_imagej:           List[ImagejRoi] = []
+        self.list_roi_imagej_reg:       List[ImagejRoi] = []
         # for MicrogliaTracking
         # ROI matching, XYCT
         self.dict_roi_matching:         Dict[str, Dict[int, List[int] | Dict[int, Dict[int, Optional[int]]]]] = {"id": {}, "match": {}}

@@ -246,6 +246,7 @@ class TableControl:
         # roi_id and row are not aloways the same
         if roi_id is not None:
             row = self.getRowFromCellId(roi_id)
+            print(roi_id, row)
             self.q_table.selectRow(row)
             self.setSelectedRow(row)
             self.setSharedAttr_ROISelected(roi_id)

@@ -3,6 +3,7 @@ from ..type_definitions import *
 import os
 from PyQt5.QtWidgets import QMessageBox, QDialog
 from scipy.io import loadmat, savemat
+from roifile import roiread, roiwrite, ImagejRoi
 import tifffile
 import datetime
 import numpy as np
@@ -128,6 +129,21 @@ def loadCellposeMaskNPY(
         
         data_manager.dict_roi_mask[app_key] = masks
         data_manager.dict_roi_mask_reg[app_key] = masks
+        return True
+    else:
+        return False
+    
+# load imagej ROI Manager zip file
+def loadROIManagerZip(        
+        q_window        : QMainWindow, 
+        data_manager    : DataManager, 
+        ) -> None | List[ImagejRoi]:
+    path_roi_zip = openFileDialog(q_widget=q_window, file_type=".zip", title="Open ImageJ ROI Manager zip file").replace("\\", "/")
+    rois = roiread(path_roi_zip)
+
+    if path_roi_zip:
+        data_manager.list_roi_imagej = rois
+        data_manager.list_roi_imagej_reg = rois
         return True
     else:
         return False
