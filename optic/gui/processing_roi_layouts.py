@@ -2,7 +2,7 @@ from __future__ import annotations
 from ..type_definitions import *
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout
 from ..gui.base_layouts import makeLayoutComboBoxLabel, makeLayoutLineEditLabel, makeLayoutSliderLabel, makeLayoutSpinBoxLabel
-from ..gui.io_layouts import makeLayoutROIManagerIO, makeLayoutMaskNpyIO
+from ..gui.io_layouts import makeLayoutROIManagerIO, makeLayoutCellposeMaskNpyIO
 
 # Optimal transport ROI Matching config
 def makeLayoutROIMatching(
@@ -107,7 +107,9 @@ def makeLayoutCellpose(
     key_combobox_cellpose_model: str,
     key_combobox_cellpose_restore: str,
     key_spinbox_diameter: str,
-    key_button_run_cellpose: str
+    key_button_run_cellpose: str,
+    key_button_save_mask: str,
+    key_button_load_mask: str
 ) -> QVBoxLayout:
     layout = QVBoxLayout()
     layout.addWidget(widget_manager.makeWidgetLabel(key=key_label_cellpose, label="Cellpose", bold=True, italic=True, use_global_style=False))
@@ -153,6 +155,7 @@ def makeLayoutCellpose(
         value_set=20,
     ))
     layout.addWidget(widget_manager.makeWidgetButton(key=key_button_run_cellpose, label="Run Cellpose"))
+    layout.addLayout(makeLayoutCellposeMaskNpyIO(widget_manager, key_button_save_mask, key_button_load_mask))
     return layout
 
 # ROI Manager layout
@@ -161,13 +164,10 @@ def makeLayoutROIManager(
         key_label_roi_manager: str,
         key_button_save_roi: str,
         key_button_load_roi: str,
-        key_button_save_mask: str,
-        key_button_load_mask: str
         ) -> QVBoxLayout:
     layout = QVBoxLayout()
-    layout.addWidget(widget_manager.makeWidgetLabel(key=key_label_roi_manager, label="ROI Manager", bold=True, italic=True, use_global_style=False))
+    layout.addWidget(widget_manager.makeWidgetLabel(key=key_label_roi_manager, label="ImageJ ROI Manager", bold=True, italic=True, use_global_style=False))
     layout.addLayout(makeLayoutROIManagerIO(widget_manager, key_button_save_roi, key_button_load_roi))
-    layout.addLayout(makeLayoutMaskNpyIO(widget_manager, key_button_save_mask, key_button_load_mask))
     return layout
 
 # ROI Manager layout for Table

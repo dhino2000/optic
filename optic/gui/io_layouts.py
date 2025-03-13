@@ -53,20 +53,22 @@ def makeLayoutROIManagerIO(
         )-> QHBoxLayout:
     layout = QHBoxLayout()
     list_key = [key_button_save, key_button_load]
-    list_label = ["Save ROI", "Load ROI"]
+    list_label = ["Save ROI.zip", "Load ROI.zip"]
     for key, label in zip(list_key, list_label):
         layout.addWidget(widget_manager.makeWidgetButton(key=key, label=label))
     return layout
 
-# Mask npy IO
-def makeLayoutMaskNpyIO(
+# Cellpose Mask npy IO
+def makeLayoutCellposeMaskNpyIO(
         widget_manager: WidgetManager, 
         key_button_save: str,
         key_button_load: str,
         )-> QHBoxLayout:
     layout = QHBoxLayout()
-    list_key = [key_button_save, key_button_load]
-    list_label = ["Save Mask", "Load Mask"]
+    # list_key = [key_button_save, key_button_load]
+    # list_label = ["Save Mask", "Load Mask"]
+    list_key = [key_button_load]
+    list_label = ["Load Cellpose Mask"]
     for key, label in zip(list_key, list_label):
         layout.addWidget(widget_manager.makeWidgetButton(key=key, label=label))
     return layout

@@ -554,5 +554,4 @@ def loadMicrogliaTracking(
             QMessageBox.information(q_window, "File load", "Microglia Tracking file loaded!")
             return dict_roi_matching, dict_roi_coords_xyct, dict_roi_coords_xyct_reg, dict_tiff_reg
         except Exception as e:
-            raise e
-            # QMessageBox.warning(q_window, "File load failed", f"Error loading Microglia Tracking file: {e}")
+            QMessageBox.warning(q_window, "File load failed", f"Error loading Microglia Tracking file: {e}")

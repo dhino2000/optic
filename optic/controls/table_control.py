@@ -185,7 +185,7 @@ class TableControl:
     def setSharedAttr_ROISelected(self, roi_id: Optional[int]) -> None:
         if roi_id == None: # clear selection
             self.control_manager.setSharedAttr(self.app_key, 'roi_selected_id', None)
-        elif roi_id < 0 or roi_id >= self.len_row: # out of range
+        elif roi_id < 0: # out of range
             return
         else:
             self.control_manager.setSharedAttr(self.app_key, 'roi_selected_id', roi_id)

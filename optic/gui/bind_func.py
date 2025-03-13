@@ -328,12 +328,14 @@ def bindFuncROIMaskNpyIO(
     app_key: str
 ) -> None:
     def _loadMaskNpy() -> None:
-        loadCellposeMaskNPY(
+        is_load = loadCellposeMaskNPY(
             q_window, 
             data_manager, 
             app_key, 
             ndim=3,
         )
+        if not is_load:
+            return
         data_manager.dict_roi_coords_xyct = convertCellposeMaskToDictROICoordsXYCT(data_manager.getROIMask(app_key))
         data_manager.dict_roi_coords_xyct_reg = deepcopy(data_manager.dict_roi_coords_xyct)
         data_manager.dict_roi_matching = convertCellposeMasksToDictROIMatching(data_manager.getROIMask(app_key))
