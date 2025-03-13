@@ -3,6 +3,7 @@ from ..type_definitions import *
 from PyQt5.QtWidgets import QRadioButton, QButtonGroup, QMessageBox, QAbstractItemView, QTableWidget, QTableWidgetItem
 from PyQt5.QtCore import Qt
 import numpy as np
+from ..handlers.table_handler import TableHandler
 from ..visualization.info_visual import updateROIPropertyDisplay, updateROICountDisplay
 from ..utils.dialog_utils import showConfirmationDialog
 from ..utils.info_utils import extractRangeValues
@@ -25,6 +26,7 @@ class TableControl:
         self.config_manager                             = config_manager
         self.control_manager                            = control_manager
         self.table_columns:                TableColumns = self.config_manager.getTableColumns(self.app_key)
+
         if not self.config_manager.getKeyFunctionMap(self.app_key) is None:
             self.key_function_map:    Dict[Qt.Key, Any] = self.config_manager.getKeyFunctionMap(self.app_key).getAllMappings()
         else:
@@ -35,6 +37,9 @@ class TableControl:
         self.len_row:                               int = 0
         # for Microglia Tracking
         self.plane_t:                               int = 0
+
+        # set TableHandler
+        self.table_handler:                TableHandler = TableHandler(self)
 
     def setupWidgetROITable(self, app_key: str) -> None:
         from ..gui.table_setup import setupWidgetROITable
@@ -52,6 +57,7 @@ class TableControl:
     def setupWidgetDynamicTable(self, app_key: str) -> None:
         from ..gui.table_setup import setupWidgetDynamicTable
         self.q_table, self.groups_celltype = setupWidgetDynamicTable(self.q_table, self.table_columns, self.len_row)
+        self.setKeyPressEvent()
 
     def updateWidgetROITable(self) -> None:
         from ..gui.table_setup import setupWidgetROITable
@@ -168,7 +174,7 @@ class TableControl:
         self.len_row = len_row
 
     def setKeyPressEvent(self) -> None:
-        self.q_table.keyPressEvent = self.keyPressEvent
+        self.q_table.keyPressEvent = self.table_handler.handleKeyPress
 
     def setTableColumns(self, table_columns: TableColumns) -> None:
         self.table_columns = table_columns
@@ -251,113 +257,6 @@ class TableControl:
             self.setSharedAttr_ROISelected(roi_id)
             self.q_table.scrollToItem(self.q_table.item(row, 0), QAbstractItemView.PositionAtTop)
             self.q_table.setCurrentCell(row, 0)
-
-    """
-    KeyPressEvent
-    """
-    def keyPressEvent(self, event: QKeyEvent) -> None:
-        if self.selected_row is not None and event.key() in self.key_function_map:
-            action = self.key_function_map[event.key()]
-            self.executeAction(action)
-            self.q_table.setCurrentCell(self.selected_row, self.selected_column)
-            self.q_table.scrollToItem(self.q_table.item(self.selected_row, self.selected_column))
-
-    def executeAction(self, action: Tuple) -> None:
-        action_type = action[0] # radio, checkbox, move
-        if action_type == 'move':
-            move_type = action[1] # cell_type, skip_checked, skip_unchecked, selected_type
-            step = action[2]
-            self.moveCell(move_type, step) 
-        elif action_type == 'toggle':
-            col_order = action[1]
-            self.toggleColumn(self.selected_row, col_order)
-        updateROICountDisplay(self.widget_manager, self.config_manager, self.app_key)
-
-    """
-    Function of executeAction
-    """
-    # move table cell
-    def moveCell(self, move_type: str, step: Literal[-1, 1]) -> None:
-        if move_type == 'up':
-            self.selected_row = max(0, self.selected_row - step)
-        elif move_type == 'down':
-            self.selected_row = min(self.q_table.rowCount() - 1, self.selected_row + step)
-        elif move_type == 'left':
-            self.selected_column = max(0, self.selected_column - step)
-        elif move_type == 'right':
-            self.selected_column = min(self.q_table.columnCount() - 1, self.selected_column + step)
-        elif move_type == 'cell_type':
-            self.moveToSameCellType(self.selected_row, step)
-        elif move_type == 'skip_roi':
-            self.moveSkippingROI(self.selected_row, step)
-        elif move_type == 'selected_type':
-            self.moveToSelectedType(self.selected_row, step)
-
-    # toggle radiobutton, checkbox
-    def toggleColumn(self, row: int, col_order: int) -> None:
-        for col_name, col_info in self.table_columns.getColumns().items():
-            if col_info['order'] == col_order:
-                if col_info['type'] == 'celltype':
-                    button_group = self.groups_celltype.get(row)
-                    if button_group:
-                        for button in button_group.buttons():
-                            if self.q_table.cellWidget(row, col_order) == button:
-                                button.setChecked(True)
-                                self.changeRadiobuttonOfTable(row)
-                                break
-                elif col_info['type'] == 'checkbox':
-                    check_box_item = self.q_table.item(row, col_order)
-                    if check_box_item:
-                        check_box_item.setCheckState(Qt.Unchecked if check_box_item.checkState() == Qt.Checked else Qt.Checked)
-                break
-
-    # move Neuron->Neuron, Astrocyte->Astrocyte
-    def moveToSameCellType(self, start_row: int, direction: Literal[-1, 1]) -> None:
-        current_cell_type = self.getCurrentCellType(start_row)
-        total_rows = self.q_table.rowCount()
-        new_row = start_row
-
-        while True:
-            new_row = (new_row + direction) % total_rows
-            if new_row == start_row:
-                break
-            if self.getCurrentCellType(new_row) == current_cell_type:
-                self.selected_row = new_row
-                return
-            
-    # move row with skipping "Skip XXX ROI" checked or unchecked
-    def moveSkippingROI(self, start_row: int, direction: Literal[-1, 1]) -> None:
-        total_rows = self.q_table.rowCount()
-        new_row = start_row
-
-        while True:
-            new_row = (new_row + direction) % total_rows
-            if new_row == start_row:
-                break
-
-            # if the ROI is not skipped, select it
-            if not shouldSkipROI(
-                roi_id=new_row,
-                table_columns=self.table_columns,
-                q_table=self.q_table,
-                skip_roi_types=self.control_manager.getSharedAttr(self.app_key, "skip_roi_types")
-            ):
-                self.selected_row = new_row
-                return
-            
-    # if "Neuron" radiobutton is checked, move to next "Neuron"
-    def moveToSelectedType(self, start_row: int, direction: Literal[-1, 1]) -> None:
-        roi_display = self.getSharedAttr_ROIDisplay()
-        total_rows = self.q_table.rowCount()
-        new_row = start_row
-
-        while True:
-            new_row = (new_row + direction) % total_rows
-            if new_row == start_row:
-                break
-            if roi_display[new_row]:
-                self.selected_row = new_row
-                return
             
     """
     Sub Function

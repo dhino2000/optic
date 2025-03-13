@@ -66,31 +66,31 @@ class GuiDefaults:
             "PLOT_POINTS": 10,
         },
         "TABLE_COLUMNS": {
-            # AppKeys.PRI: {
-            #     "Cell_ID"   : {"order": 0, "type": "id",       "width": 80,  "removable": False, "name_fixed": True, "editable": False},
-            #     "Neuron"    : {"order": 1, "type": "celltype", "width": 80,  "removable": True,  "default": True},
-            #     "Astrocyte" : {"order": 2, "type": "celltype", "width": 80,  "removable": True,  "default": False},
-            #     "Not_Cell"  : {"order": 3, "type": "celltype", "width": 80,  "removable": False, "name_fixed": True, "default": False},
-            #     "Check"     : {"order": 4, "type": "checkbox", "width": 80,  "removable": True,  "default": False},
-            #     "Tracking"  : {"order": 5, "type": "checkbox", "width": 80,  "removable": True,  "default": False},
-            #     "Memo"      : {"order": 6, "type": "string",   "width": 200, "removable": True, }
-            # },
-            # for takeda sensei
             AppKeys.PRI: {
                 "Cell_ID"   : {"order": 0, "type": "id",       "width": 80,  "removable": False, "name_fixed": True, "editable": False},
-                "W"    : {"order": 1, "type": "celltype", "width": 40,  "removable": True,  "default": True},
-                "A" : {"order": 2, "type": "celltype", "width": 40,  "removable": True,  "default": False},
-                "V" : {"order": 3, "type": "celltype", "width": 40,  "removable": True,  "default": False},
-                "WA" : {"order": 4, "type": "celltype", "width": 40,  "removable": True,  "default": False},
-                "WV" : {"order": 5, "type": "celltype", "width": 40,  "removable": True,  "default": False},
-                "AV" : {"order": 6, "type": "celltype", "width": 40,  "removable": True,  "default": False},
-                "WAV" : {"order": 7, "type": "celltype", "width": 40,  "removable": True,  "default": False},
-                "N" : {"order": 8, "type": "celltype", "width": 40,  "removable": True,  "default": False},
-                "Not_Cell"  : {"order": 9, "type": "celltype", "width": 80,  "removable": False, "name_fixed": True, "default": False},
-                "Check"     : {"order": 10, "type": "checkbox", "width": 80,  "removable": True,  "default": False},
-                "Tracking"  : {"order": 11, "type": "checkbox", "width": 80,  "removable": True,  "default": False},
-                "Memo"      : {"order": 12, "type": "string",   "width": 200, "removable": True, }
+                "Neuron"    : {"order": 1, "type": "celltype", "width": 80,  "removable": True,  "default": True},
+                "Astrocyte" : {"order": 2, "type": "celltype", "width": 80,  "removable": True,  "default": False},
+                "Not_Cell"  : {"order": 3, "type": "celltype", "width": 80,  "removable": False, "name_fixed": True, "default": False},
+                "Check"     : {"order": 4, "type": "checkbox", "width": 80,  "removable": True,  "default": False},
+                "Tracking"  : {"order": 5, "type": "checkbox", "width": 80,  "removable": True,  "default": False},
+                "Memo"      : {"order": 6, "type": "string",   "width": 200, "removable": True, }
             },
+            # for takeda sensei
+            # AppKeys.PRI: {
+            #     "Cell_ID"   : {"order": 0, "type": "id",       "width": 80,  "removable": False, "name_fixed": True, "editable": False},
+            #     "W"    : {"order": 1, "type": "celltype", "width": 40,  "removable": True,  "default": True},
+            #     "A" : {"order": 2, "type": "celltype", "width": 40,  "removable": True,  "default": False},
+            #     "V" : {"order": 3, "type": "celltype", "width": 40,  "removable": True,  "default": False},
+            #     "WA" : {"order": 4, "type": "celltype", "width": 40,  "removable": True,  "default": False},
+            #     "WV" : {"order": 5, "type": "celltype", "width": 40,  "removable": True,  "default": False},
+            #     "AV" : {"order": 6, "type": "celltype", "width": 40,  "removable": True,  "default": False},
+            #     "WAV" : {"order": 7, "type": "celltype", "width": 40,  "removable": True,  "default": False},
+            #     "N" : {"order": 8, "type": "celltype", "width": 40,  "removable": True,  "default": False},
+            #     "Not_Cell"  : {"order": 9, "type": "celltype", "width": 80,  "removable": False, "name_fixed": True, "default": False},
+            #     "Check"     : {"order": 10, "type": "checkbox", "width": 80,  "removable": True,  "default": False},
+            #     "Tracking"  : {"order": 11, "type": "checkbox", "width": 80,  "removable": True,  "default": False},
+            #     "Memo"      : {"order": 12, "type": "string",   "width": 200, "removable": True, }
+            # },
         },
         "KEY_FUNCTION_MAP": {
             AppKeys.PRI: {
@@ -223,6 +223,7 @@ class GuiDefaults:
                 Qt.Key_J: ('move', 'cell_type', 1),
                 Qt.Key_I: ('move', 'skip_roi', -1),
                 Qt.Key_K: ('move', 'skip_roi', 1),
+                Qt.Key_S: ('roi_match', 'set', 1),
             },
             AppKeys.SEC: {
                 Qt.Key_Up: ('move', 'up', 1),
@@ -245,6 +246,7 @@ class GuiDefaults:
                 Qt.Key_J: ('move', 'cell_type', 1),
                 Qt.Key_I: ('move', 'skip_roi', -1),
                 Qt.Key_K: ('move', 'skip_roi', 1),
+                Qt.Key_S: ('roi_match', 'set', 1),
             },
         },
     }
@@ -291,11 +293,11 @@ class GuiDefaults:
             AppKeys.PRI: {
                 "Cell_ID"       : {"order": 0, "type": "id",       "width": 120,  "removable": False, "name_fixed": True, "editable": False},
                 "Cell_ID_Match" : {"order": 1, "type": "id_match", "width": 120,  "removable": False, "name_fixed": True, "editable": False},
-                "Check"         : {"order": 2, "type": "checkbox", "width": 80,  "removable": True,  "default": False},
+                # "Check"         : {"order": 2, "type": "checkbox", "width": 80,  "removable": True,  "default": False},
             },
             AppKeys.SEC: {
                 "Cell_ID"   : {"order": 0, "type": "id",       "width": 120,  "removable": False, "name_fixed": True, "editable": False},
-                "Check"     : {"order": 1, "type": "checkbox", "width": 80,  "removable": True,  "default": False},
+                # "Check"     : {"order": 1, "type": "checkbox", "width": 80,  "removable": True,  "default": False},
             },
         },
         "KEY_FUNCTION_MAP": {
@@ -304,14 +306,14 @@ class GuiDefaults:
                 Qt.Key_Down: ('move', 'down', 1),
                 Qt.Key_Left: ('move', 'left', 1),
                 Qt.Key_Right: ('move', 'right', 1),
-                Qt.Key_Delete: ('row', 'remove', 1),
+                Qt.Key_S: ('roi_match', 'set', 1),
             },
             AppKeys.SEC: {
                 Qt.Key_Up: ('move', 'up', 1),
                 Qt.Key_Down: ('move', 'down', 1),
                 Qt.Key_Left: ('move', 'left', 1),
                 Qt.Key_Right: ('move', 'right', 1),
-                Qt.Key_Delete: ('row', 'remove', 1),
+                Qt.Key_S: ('roi_match', 'set', 1),
             },
         },
     }
