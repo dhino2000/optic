@@ -300,9 +300,17 @@ class GuiDefaults:
         },
         "KEY_FUNCTION_MAP": {
             AppKeys.PRI: {
+                Qt.Key_Up: ('move', 'up', 1),
+                Qt.Key_Down: ('move', 'down', 1),
+                Qt.Key_Left: ('move', 'left', 1),
+                Qt.Key_Right: ('move', 'right', 1),
                 Qt.Key_Delete: ('row', 'remove', 1),
             },
             AppKeys.SEC: {
+                Qt.Key_Up: ('move', 'up', 1),
+                Qt.Key_Down: ('move', 'down', 1),
+                Qt.Key_Left: ('move', 'left', 1),
+                Qt.Key_Right: ('move', 'right', 1),
                 Qt.Key_Delete: ('row', 'remove', 1),
             },
         },

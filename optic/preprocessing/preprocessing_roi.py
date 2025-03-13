@@ -4,9 +4,12 @@ import cv2
 import numpy as np
 
 # get ROI contour from the ROI's xpix array and ypix array
+# method = "dilate" : for displaying on view
+# method = "edge" : for making ImageJ ROI zip file
 def getROIContour(
         xpix: np.ndarray, 
-        ypix: np.ndarray
+        ypix: np.ndarray,
+        method: Literal["dilate", "edge"] = 'dilate'
         ) -> Tuple[np.ndarray, np.ndarray]:
     x_min, x_max = np.min(xpix), np.max(xpix)
     y_min, y_max = np.min(ypix), np.max(ypix)
@@ -15,15 +18,35 @@ def getROIContour(
     mask = np.zeros((y_max - y_min + 1 + 2*margin, x_max - x_min + 1 + 2*margin), dtype=np.uint8)
     mask[ypix - y_min + margin, xpix - x_min + margin] = 255
 
-    kernel = np.ones((3,3), np.uint8)
-    mask = cv2.dilate(mask, kernel, iterations=1)
+    if method == 'dilate':
+        kernel = np.ones((3,3), np.uint8)
+        mask = cv2.dilate(mask, kernel, iterations=1)
 
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    
+    if len(contours) == 0:
+        return np.array([]), np.array([])
+    
     contour = contours[0].squeeze()
-
+    
+    if len(contour.shape) == 1:
+        contour = np.array([contour]).reshape(1, 2)
+    
     xpix_contour = contour[:, 0] + x_min - margin
     ypix_contour = contour[:, 1] + y_min - margin
     return xpix_contour, ypix_contour
+
+# convert ROI contour to filled ROI
+def convertROIContourToFilled(
+        roi_contour: np.ndarray[int, int], 
+        width: int, 
+        height: int
+        ) -> np.ndarray[int, int]:
+    img = np.zeros((height, width), dtype=np.uint8)
+    cv2.fillPoly(img, [roi_contour], 1)
+    y, x = np.where(img > 0)
+    roi_filled = np.column_stack((x, y))
+    return roi_filled
 
 # update ROI Image, show only choosed celltype, show registered ROI image or not
 def updateROIImage(

@@ -106,6 +106,8 @@ def loadEventFilesNPY(
     else:
         return False
     
+# save npy cell pose mask file
+    
 # load npy cell pose mask file
 def loadCellposeMaskNPY(
         q_window        : QMainWindow, 
@@ -133,15 +135,32 @@ def loadCellposeMaskNPY(
     else:
         return False
     
+# save imagej ROI Manager zip file
+def saveROIManagerZip(
+        q_window        : QMainWindow, 
+        q_lineedit      : QLineEdit, 
+        list_roi        : List[ImagejRoi],
+        ) -> None:
+    path_src = q_lineedit.text()
+    path_dst = generateSavePath(path_src, prefix="RoiSet_", new_extension=".zip")
+    path_dst, is_overwrite = saveFileDialog(q_widget=q_window, file_type=".zip", title="Save ROI Manager zip File", initial_dir=path_dst)
+    
+    if path_dst:
+        try:
+            roiwrite(path_dst, list_roi, mode='w')
+            QMessageBox.information(q_window, "File save", f"ROI set zip file saved.")
+        except Exception as e:
+            QMessageBox.warning(q_window, "File save failed", f"Error saving ROICheck file: {e}")
+    
 # load imagej ROI Manager zip file
 def loadROIManagerZip(        
         q_window        : QMainWindow, 
         data_manager    : DataManager, 
         ) -> None | List[ImagejRoi]:
     path_roi_zip = openFileDialog(q_widget=q_window, file_type=".zip", title="Open ImageJ ROI Manager zip file").replace("\\", "/")
-    rois = roiread(path_roi_zip)
-
+    
     if path_roi_zip:
+        rois = roiread(path_roi_zip)
         data_manager.list_roi_imagej = rois
         data_manager.list_roi_imagej_reg = rois
         return True

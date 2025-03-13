@@ -1,7 +1,7 @@
 from __future__ import annotations
 from ..type_definitions import *
 from ..io.file_dialog import openFileDialogAndSetLineEdit, saveFileDialog
-from ..io.data_io import saveROICheck, loadROICheck, loadEventFilesNPY, generateSavePath, saveTiffStack, saveROITracking, loadROITracking, loadCellposeMaskNPY, loadROIManagerZip, saveRegisteredROICoordsAndBGImage, loadRegisteredROICoordsAndBGImage, saveMicrogliaTracking, loadMicrogliaTracking
+from ..io.data_io import saveROICheck, loadROICheck, loadEventFilesNPY, generateSavePath, saveTiffStack, saveROITracking, loadROITracking, loadCellposeMaskNPY, saveROIManagerZip, loadROIManagerZip, saveRegisteredROICoordsAndBGImage, loadRegisteredROICoordsAndBGImage, saveMicrogliaTracking, loadMicrogliaTracking
 from ..visualization.info_visual import updateROICountDisplay
 from ..processing import *
 from ..preprocessing import *
@@ -361,14 +361,28 @@ def bindFuncROIManagerZipIO(
     q_button_save: 'QPushButton', 
     q_button_load: 'QPushButton', 
     q_window: 'QWidget', 
+    q_lineedit: 'QLineEdit',
     data_manager: 'DataManager',
     control_manager: 'ControlManager',
 ) -> None:
+    def _saveROIManagerZip() -> None:
+        dict_roi_matching = data_manager.dict_roi_matching
+        dict_roi_coords_xyct_reg = data_manager.dict_roi_coords_xyct_reg
+        list_roi = convertDictROIMatchingAndDictROICoordsToImagejRoi(dict_roi_matching, dict_roi_coords_xyct_reg)
+        saveROIManagerZip(
+            q_window,
+            q_lineedit,
+            list_roi
+        )
+
     def _loadROIManagerZip() -> None:
-        loadROIManagerZip(
+        is_load = loadROIManagerZip(
             q_window, 
             data_manager, 
         )
+        if not is_load:
+            return
+
         rois = data_manager.list_roi_imagej
         dict_roi_matching = data_manager.getDictROIMatching()
         dict_roi_coords_xyct = data_manager.getDictROICoordsXYCT()
@@ -402,6 +416,7 @@ def bindFuncROIManagerZipIO(
         control_manager.table_controls["pri"].updateWidgetDynamicTableWithT(data_manager.dict_roi_matching, t_plane_pri, t_plane_sec, True)
         control_manager.table_controls["sec"].updateWidgetDynamicTableWithT(data_manager.dict_roi_matching, t_plane_pri, t_plane_sec, False)
 
+    q_button_save.clicked.connect(lambda: _saveROIManagerZip())
     q_button_load.clicked.connect(lambda: _loadROIManagerZip())
 
 
@@ -1124,6 +1139,7 @@ def bindFuncButtonsROIManagerForTable(
             view_control.view_handler.handler.roi_add_mode = False
 
     # keyPressEvent
+    key_press_event_original = q_table.keyPressEvent # keep original keyPressEvent
     """
     TEMPORARY: keyPressEvent for deleting ROI
     This function is temporary and will be removed in the future !!!
@@ -1135,6 +1151,8 @@ def bindFuncButtonsROIManagerForTable(
             _removeSelectedROIfromTable()
         elif event.key() == Qt.Key_E: # edit ROI
             _editSelectedROI()
+        else:
+            key_press_event_original(event) # UP, DOWN, LEFT, RIGHT
 
     q_button_add.clicked.connect(_addROItoTable)
     q_button_remove.clicked.connect(_removeSelectedROIfromTable)

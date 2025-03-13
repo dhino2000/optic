@@ -243,10 +243,9 @@ class TableControl:
     # with View mousePressEvent
     def updateSelectedROI(self, roi_id: int) -> None:
         # WARNING !!!
-        # roi_id and row are not aloways the same
+        # roi_id and row are not always the same
         if roi_id is not None:
             row = self.getRowFromCellId(roi_id)
-            print(roi_id, row)
             self.q_table.selectRow(row)
             self.setSelectedRow(row)
             self.setSharedAttr_ROISelected(roi_id)
