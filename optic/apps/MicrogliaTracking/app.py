@@ -100,8 +100,8 @@ class MicrogliaTrackingGUI(QMainWindow):
                 config_manager=self.config_manager,
                 control_manager=self.control_manager,
             )
-            
             self.control_manager.table_controls[app_key].setupWidgetDynamicTable(app_key)
+
             self.control_manager.view_controls[app_key] = ViewControl(
                 app_key=app_key,
                 q_view=self.widget_manager.dict_view[app_key], 
@@ -112,9 +112,9 @@ class MicrogliaTrackingGUI(QMainWindow):
                 control_manager=self.control_manager,
                 app_key_sec=self.app_keys[1] if app_key == self.app_keys[0] else None # only "pri" app_key has sec app_key
             )
-            self.control_manager.view_controls[app_key].setViewSize()
-            self.control_manager.view_controls[app_key].setShowRegImROI(False)
-            self.control_manager.view_controls[app_key].setShowRegStack(False)
+            # self.control_manager.view_controls[app_key].setViewSize()
+            # self.control_manager.view_controls[app_key].setShowRegImROI(False)
+            # self.control_manager.view_controls[app_key].setShowRegStack(False)
 
         # set "sec" view's slider to "1"
         self.widget_manager.dict_slider[f"{self.app_keys[1]}_plane_t"].setValue(1)
@@ -254,18 +254,21 @@ class MicrogliaTrackingGUI(QMainWindow):
             self.widget_manager,
             "roi_matching",
             "ot_method",
-            "fgwd_alpha",
-            "wd_exp",
+            "ot_partial_mass",
+            "ot_partial_reg",
+            "ot_dist_exp",
             "ot_threshold_transport",
             "ot_threshold_cost",
-            "fgwd_alpha",
-            "wd_exp",
+            "ot_partial_mass",
+            "ot_partial_reg",
+            "ot_dist_exp",
             "ot_threshold_transport",
             "ot_threshold_cost",
             "ot_method",
             "ot_run",
             "ot_clear",
         ))
+        layout.addWidget(self.widget_manager.makeWidgetButton("ot_run_all_tplanes", "Run Optimal Transport for all t-planes"))
         layout.addLayout(makeLayoutROIMatchingTest(
             self.widget_manager,
             "roi_matching_test",
@@ -278,15 +281,32 @@ class MicrogliaTrackingGUI(QMainWindow):
         return layout
     
     # ROI Manager
-    def makeLayoutComponentROIManager(self):
+    def makeLayoutComponentCellposeROIManager(self):
         layout = QVBoxLayout()
+        layout.addLayout(makeLayoutCellpose(
+            self.widget_manager,
+            self.data_manager,
+            self.app_keys[0],
+            "cellpose",
+            "cellpose_t_plane",
+            "cellpose_channel",
+            "cellpose_model",
+            "cellpose_restore",
+            "cellpose_diameter",
+            "cellpose_t_plane",
+            "cellpose_channel",
+            "cellpose_model",
+            "cellpose_restore",
+            "cellpose_diameter",
+            "cellpose_run",
+            "cellpose_save",
+            "cellpose_load",
+        ))
         layout.addLayout(makeLayoutROIManager(
             self.widget_manager,
             "roi_manager",
             "roi_save",
             "roi_load",
-            "mask_save",
-            "mask_load",
         ))
         return layout
 
@@ -295,17 +315,18 @@ class MicrogliaTrackingGUI(QMainWindow):
     領域レベルの大Layout
     """
     # 上段, 左
+    # View size : Table size = 2 : 1
     def makeLayoutSectionLeftUpper(self):
         layout = QHBoxLayout()
-        layout.addLayout(self.makeLayoutComponent_View_Slider(self.app_keys[0]))
-        layout.addLayout(self.makeLayoutComponentTable_Button(self.app_keys[0]))
+        layout.addLayout(self.makeLayoutComponent_View_Slider(self.app_keys[0]), 2)
+        layout.addLayout(self.makeLayoutComponentTable_Button(self.app_keys[0]), 1)
         return layout
     
     # 上段. 右
     def makeLayoutSectionRightUpper(self):
         layout = QHBoxLayout()
-        layout.addLayout(self.makeLayoutComponent_View_Slider(self.app_keys[1]))
-        layout.addLayout(self.makeLayoutComponentTable_Button(self.app_keys[1]))
+        layout.addLayout(self.makeLayoutComponent_View_Slider(self.app_keys[1]), 2)
+        layout.addLayout(self.makeLayoutComponentTable_Button(self.app_keys[1]), 1)
         return layout
 
     # 下段
@@ -318,7 +339,7 @@ class MicrogliaTrackingGUI(QMainWindow):
         layout = QHBoxLayout()
         layout.addLayout(self.makeLayoutComponenImageRegistration())
         layout.addLayout(self.makeLayoutComponentROIMatching())
-        layout.addLayout(self.makeLayoutComponentROIManager())
+        layout.addLayout(self.makeLayoutComponentCellposeROIManager())
         return layout
     
     """
@@ -426,12 +447,21 @@ class MicrogliaTrackingGUI(QMainWindow):
         )
         # Cellpose ROI mask IO
         bindFuncROIMaskNpyIO(
-            q_button_save=self.widget_manager.dict_button["mask_save"],
-            q_button_load=self.widget_manager.dict_button["mask_load"],
+            q_button_save=self.widget_manager.dict_button["cellpose_load"], # temporary fix
+            q_button_load=self.widget_manager.dict_button["cellpose_load"],
             q_window=self,
             data_manager=self.data_manager,
             control_manager=self.control_manager,
             app_key=self.app_keys[0]
+        )
+        # ImageJ ROI Manager zip IO
+        bindFuncROIManagerZipIO(
+            q_button_save=self.widget_manager.dict_button["roi_save"],
+            q_button_load=self.widget_manager.dict_button["roi_load"],
+            q_window=self,
+            q_lineedit=self.widget_manager.dict_lineedit["path_tiff"],
+            data_manager=self.data_manager,
+            control_manager=self.control_manager,
         )
         # Show matched ROI
         bindFuncCheckboxShowMatchedROI(
@@ -460,14 +490,14 @@ class MicrogliaTrackingGUI(QMainWindow):
         )
         # run Elastix registration t-axis
         bindFuncButtonRunElastixForMicrogliaXYCTStackRegistration(
-                self,
-                q_button=self.widget_manager.dict_button[f"elastix_run_t"],
-                data_manager=self.data_manager,
-                config_manager=self.config_manager,
-                app_keys=self.app_keys,
-                combobox_elastix_method=self.widget_manager.dict_combobox[f"elastix_method"],
-                combobox_channel_ref=self.widget_manager.dict_combobox[f"elastix_ref_c"],
-                combobox_idx_ref=self.widget_manager.dict_combobox[f"elastix_ref_plane_t"],
+            self,
+            q_button=self.widget_manager.dict_button[f"elastix_run_t"],
+            data_manager=self.data_manager,
+            config_manager=self.config_manager,
+            app_keys=self.app_keys,
+            combobox_elastix_method=self.widget_manager.dict_combobox[f"elastix_method"],
+            combobox_channel_ref=self.widget_manager.dict_combobox[f"elastix_ref_c"],
+            combobox_idx_ref=self.widget_manager.dict_combobox[f"elastix_ref_plane_t"],
         )
         # Elastix config
         self.widget_manager.dict_button[f"elastix_config"].clicked.connect(
@@ -486,7 +516,8 @@ class MicrogliaTrackingGUI(QMainWindow):
         # ROI Matching Run
         bindFuncButtonRunROIMatchingForXYCT(
             self,
-            q_button=self.widget_manager.dict_button['ot_run'],
+            q_button_run=self.widget_manager.dict_button['ot_run'],
+            q_button_run_all_tplanes=self.widget_manager.dict_button['ot_run_all_tplanes'],
             widget_manager=self.widget_manager,
             data_manager=self.data_manager,
             control_manager=self.control_manager,
@@ -494,8 +525,22 @@ class MicrogliaTrackingGUI(QMainWindow):
             app_key_sec=self.app_keys[1],
         )
         # Clear ROI Matching result
-        bindFuncButtonClearColumnCells(
+        bindFuncButtonClearROIMatching(
             q_button=self.widget_manager.dict_button['ot_clear'],
-            q_table=self.widget_manager.dict_table[self.app_keys[0]],
-            idx_col=self.config_manager.table_columns[self.app_keys[0]].getColumns()["Cell_ID_Match"]["order"], # hardcoded !!!
+            data_manager=self.data_manager,
+            control_manager=self.control_manager,
+            app_key_pri=self.app_keys[0],
+            app_key_sec=self.app_keys[1],
+        )
+        # run Cellpose
+        bindFuncButtonRunCellposeForXYCT(
+            self.data_manager,
+            self.control_manager,
+            self.config_manager,
+            self.widget_manager.dict_button["cellpose_run"],
+            self.widget_manager.dict_combobox["cellpose_t_plane"],
+            self.widget_manager.dict_combobox["cellpose_channel"],
+            self.widget_manager.dict_combobox["cellpose_model"],
+            self.widget_manager.dict_combobox["cellpose_restore"],
+            self.widget_manager.dict_spinbox["cellpose_diameter"],
         )

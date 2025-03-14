@@ -15,6 +15,7 @@ class TableHandler:
         self.table_control = table_control
         self.app_key = table_control.app_key
         self.key_function_map = table_control.key_function_map
+        self.data_manager = table_control.data_manager
         self.config_manager = table_control.config_manager
         self.widget_manager = table_control.widget_manager
         self.control_manager = table_control.control_manager
@@ -24,10 +25,8 @@ class TableHandler:
         Handle key press events
         Execute actions based on KEY_FUNCTION_MAP in gui_defaults
         """
-        print(event.key())
         if self.table_control.selected_row is not None and event.key() in self.key_function_map:
             action = self.key_function_map[event.key()]
-            print(action)
             self.executeAction(action)
             self.table_control.q_table.setCurrentCell(
                 self.table_control.selected_row, 
@@ -160,10 +159,10 @@ class TableHandler:
         """
         Set the currently selected ROI in sec view as match for the selected ROI in pri view
         """
-        if self.app_key != "pri":
-            QMessageBox.warning(None, "'sec' table choosed", "Please select 'pri' table!")
-            return
-            
+        # hardcoded !!!
+        table_control_pri = self.control_manager.table_controls["pri"]
+        table_control_sec = self.control_manager.table_controls["sec"]
+
         # get roi_selected_id of "sec" table
         sec_roi_id = self.control_manager.getSharedAttr("sec", "roi_selected_id")
         if sec_roi_id is None:
@@ -171,7 +170,7 @@ class TableHandler:
             
         # get column of "id_match"
         id_match_col_order = None
-        for col_name, col_info in self.table_control.table_columns.getColumns().items():
+        for col_name, col_info in table_control_pri.table_columns.getColumns().items():
             if col_info['type'] == 'id_match':
                 id_match_col_order = col_info['order']
                 break
@@ -180,29 +179,28 @@ class TableHandler:
             return
             
         # get roi_selected_id of "pri" table
-        pri_row = self.table_control.selected_row
+        pri_row = table_control_pri.selected_row
         if pri_row is None:
             return
             
         # update "ROI Match ID"
         item = QTableWidgetItem(str(sec_roi_id))
-        self.table_control.q_table.setItem(pri_row, id_match_col_order, item)
+        table_control_pri.q_table.setItem(pri_row, id_match_col_order, item)
         
         # update dict_roi_matching["match"]
-        pri_roi_id = self.table_control.getCellIdFromRow(pri_row)
+        pri_roi_id = table_control_pri.getCellIdFromRow(pri_row)
         if pri_roi_id is not None:
-            pri_plane_t = self.table_control.getPlaneT()
-            sec_plane_t = self.control_manager.table_controls["sec"].getPlaneT()
+            pri_plane_t = table_control_pri.getPlaneT()
+            sec_plane_t = table_control_sec.getPlaneT()
             
-            if pri_plane_t in self.table_control.data_manager.dict_roi_matching["match"] and \
-               sec_plane_t in self.table_control.data_manager.dict_roi_matching["match"][pri_plane_t]:
-                self.table_control.data_manager.dict_roi_matching["match"][pri_plane_t][sec_plane_t][pri_roi_id] = sec_roi_id
+            if pri_plane_t in self.data_manager.dict_roi_matching["match"] and \
+               sec_plane_t in self.data_manager.dict_roi_matching["match"][pri_plane_t]:
+                self.data_manager.dict_roi_matching["match"][pri_plane_t][sec_plane_t][pri_roi_id] = sec_roi_id
         
         # update view
         for app_key in self.control_manager.view_controls:
             self.control_manager.view_controls[app_key].updateView()
 
-        print("update!")
     
     # def removeSelectedRow(self) -> None:
     #     """
