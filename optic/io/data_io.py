@@ -269,7 +269,11 @@ def loadROICheck(
             mat_roicheck = loadmat(path_roicheck, simplify_cells=True)
             # check number of ROIs between of Fall file and of ROICheck file
             if table_control.len_row != mat_roicheck["NumberOfROI"]:
-                QMessageBox.warning(q_window, "File load failed", f"Length of data does not match! \nTable: {table_control.len_row}, ROICheck: {mat_roicheck['NumberOfROI']}")
+                QMessageBox.warning(
+                    q_window, 
+                    "File load failed", 
+                    f"Length of data does not match! \nTable: {table_control.len_row}, ROICheck: {mat_roicheck['NumberOfROI']}"
+                    )
                 return
 
             from ..dialog.date_select import DateSelectDialog
@@ -281,6 +285,21 @@ def loadROICheck(
             # select saved date
             dict_roicheck = mat_roicheck["manualROIcheck"][date]
             dict_roicheck = {k.replace(" ", "_"): v for k, v in dict_roicheck.items()} # this is temporary fix for old ROIcheck files !!!
+
+            # check table column names
+            list_table_columns = list(table_control.table_columns.getColumns().keys())
+            list_table_columns.remove("Cell_ID")
+            list_roicheck_columns = list(dict_roicheck.keys())
+            list_roicheck_columns.remove("user")
+            if not list_table_columns == list_roicheck_columns: # check also order of columns
+                reply = QMessageBox.warning(
+                    q_window, 
+                    "Column names match error", 
+                    f"Column names do not match! \nTable: {list_table_columns} \n ROICheck: {list_roicheck_columns} \n Do you want to load it anyway?",
+                    QMessageBox.Yes | QMessageBox.No,
+                    )
+                if reply == QMessageBox.No:
+                    return
 
             # MATLAB convert [1] to 1
             # so, convert 1 to [1]

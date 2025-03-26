@@ -330,6 +330,10 @@ def convertMatROIMatchingToDictROIMatching(mat_roi_matching: Dict[Literal["id", 
     dict_roi_matching_match = {}
 
     mat_roi_matching_match = mat_roi_matching["match"]
+    # if the number of t_plane is only 2, the data shape is different
+    if mat_roi_matching_match[0].ndim == 1:
+        mat_roi_matching_match = np.array([mat_roi_matching_match])
+
     for t_plane_pri in range(len(mat_roi_matching_match)):
         dict_roi_matching_match[t_plane_pri] = {}
         mat_roi_matching_match_pri = mat_roi_matching_match[t_plane_pri]

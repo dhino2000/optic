@@ -27,6 +27,11 @@ def convertImagejRoiToDictROIMatchingAndDictROICoords(
         img_height: int
     ) -> Tuple[Dict[str, Dict[int, List[int] | Dict[int, Dict[int, Optional[int]]]]], 
                Dict[int, Dict[int, Dict[Literal["x", "y", "med"], np.ndarray]]]]:
+    """
+    TEMPORARY WARNING !!!
+    """
+    dict_error = {}
+
     # anchor dict for dict_roi_matching["match"]
     # ex) {"m001": {0: 1, 1: 2, 2: 4, 3: 2}, "m002": {0: 3, 1: 4, 2: 5, 3: 6}}
     dict_roi_matching_anchor: Dict[str, Dict[int, int]] = {}
@@ -41,6 +46,7 @@ def convertImagejRoiToDictROIMatchingAndDictROICoords(
         if roi.name in list_duplicate_roi_name:
             print("ROI load error: ", roi.name)
             print("DUPLICATED")
+            dict_error[roi.name] = "DUPLICATED"
             continue
         roi_name = roi.name # MXXX_SXX
         roi_name = roi_name.replace(" ", "") # remove space
@@ -76,11 +82,13 @@ def convertImagejRoiToDictROIMatchingAndDictROICoords(
                 if not re.match(r'^M\d+_S\d+$', roi_name):
                     print("ROI load error: ", roi.name)
                     print("WRONG NAMING")
+                    dict_error[roi.name] = "WRONG NAMING"
                     continue
                         
                 if not int(roi_name.split("_")[1].split("S")[1]) == roi_t_plane + 1:
                     print("ROI load error: ", roi.name)
                     print("WRONG NAMING AND WRONG T_PLANE")
+                    dict_error[roi.name] = "WRONG NAMING AND WRONG T_PLANE"
                     continue
 
                 name = roi_name.split("_")[0]
@@ -90,6 +98,7 @@ def convertImagejRoiToDictROIMatchingAndDictROICoords(
                 if roi.t_position == 0:
                     print("ROI load error: ", roi.name)
                     print("NOT CONTAIN t_position")
+                    dict_error[roi.name] = "NOT CONTAIN t_position"
                     continue
                 
                 dict_roi_matching["id"][roi_t_plane].append(roi_id)
@@ -106,9 +115,19 @@ def convertImagejRoiToDictROIMatchingAndDictROICoords(
             except IndexError:
                 print("ROI load error: ", roi.name)
                 print("INDEX ERROR")
+                dict_error[roi.name] = "INDEX ERROR"
         else:
             print("ROI load error: ", roi.name)
             print(f"INVALID ROI TYPE {roi.roitype.name}")
+            dict_error[roi.name] = f"INVALID ROI TYPE {roi.roitype.name}"
+
+    """
+    TEMPORARY WARNING !!!
+    """
+    import pandas as pd
+    df_error = pd.DataFrame(dict_error.items(), columns=["roi_name", "error"])
+    df_error.to_csv("ROIManager_load_error.csv", index=False, header=None)
+
 
     # initialize roi_matching["match"]
     for t_plane_pri in list(dict_roi_matching["id"].keys())[:-1]: # except last t_plane 
