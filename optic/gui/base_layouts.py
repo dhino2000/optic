@@ -1,6 +1,6 @@
 from __future__ import annotations
 from ..type_definitions import *
-from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QRadioButton, QButtonGroup, QSlider
+from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QRadioButton, QButtonGroup, QSlider, QWidget
 from PyQt5.QtCore import Qt
 from typing import Literal
 from ..manager.widget_manager import WidgetManager
@@ -20,7 +20,7 @@ def makeLayoutLineEditLabel(
         color          :str = "black",
         bold           :bool = False,
         italic         :bool = False
-        ) -> QVBoxLayout:
+        ) -> Union[QHBoxLayout, QVBoxLayout]:
     if axis == "vertical":
         layout = QVBoxLayout()
     elif axis == "horizontal":
@@ -48,7 +48,7 @@ def makeLayoutComboBoxLabel(
         color          :str = "black", 
         bold           :bool = False, 
         italic         :bool = False
-        ) -> QVBoxLayout:
+        ) -> Union[QHBoxLayout, QVBoxLayout]:
     if axis == "vertical":
         layout = QVBoxLayout()
     elif axis == "horizontal":
@@ -63,14 +63,21 @@ def makeLayoutComboBoxLabel(
 
 # QButtonGroup Layout
 def makeLayoutButtonGroup(
-        q_widget: QWidget, 
-        widget_manager: WidgetManager, 
-        key_buttongroup: str, 
-        list_label_buttongroup: List[str], 
-        set_exclusive: bool=True, 
-        idx_check: int=0
-        ) -> QHBoxLayout:
-    layout = QHBoxLayout()
+        q_widget                : QWidget, 
+        widget_manager          : WidgetManager, 
+        key_buttongroup         : str, 
+        list_label_buttongroup  : List[str], 
+        axis                    : Literal["vertical", "horizontal"] = "vertical", 
+        set_exclusive           : bool=True, 
+        idx_check               : int=0,
+        is_scroll               : bool=True,
+        ) -> Union[QHBoxLayout, QVBoxLayout, QWidget]:
+    if axis == "vertical":
+        layout = QVBoxLayout()
+    elif axis == "horizontal":
+        layout = QHBoxLayout()
+    else:
+        raise ValueError(f"Invalid axis value: {axis}. Expected 'vertical' or 'horizontal'.")
     button_group = QButtonGroup(q_widget)
     button_group.setExclusive(set_exclusive)
 
@@ -82,7 +89,14 @@ def makeLayoutButtonGroup(
         button_group.addButton(radio_button, i)
 
     widget_manager.dict_buttongroup[key_buttongroup] = button_group
-    return layout
+
+    # if use with QScrollArea, return as QWidget
+    if is_scroll:
+        widget = QWidget()
+        widget.setLayout(layout)
+        return widget
+    else:
+        return layout
 
 # QSlider + QLabel Layout
 def makeLayoutSliderLabel(
@@ -98,7 +112,7 @@ def makeLayoutSliderLabel(
         value_set: int=10, 
         height: int=10, 
         axis_slider: Qt.Orientation=Qt.Horizontal
-    ) -> QVBoxLayout:
+    ) -> Union[QHBoxLayout, QVBoxLayout]:
     if axis == "vertical":
         layout = QVBoxLayout()
     elif axis == "horizontal":
@@ -123,7 +137,7 @@ def makeLayoutSpinBoxLabel(
         value_max: int=100, 
         value_set: int=5,
         step: int=1,
-        ) -> QVBoxLayout:
+        ) -> Union[QHBoxLayout, QVBoxLayout]:
     if axis == "vertical":
         layout = QVBoxLayout()
     elif axis == "horizontal":

@@ -24,8 +24,8 @@ class ViewHandler:
         self.handler = self._initializeHandler(self.current_app)
 
     def _initializeHandler(self, current_app):
-        if current_app == "SUITE2P_ROI_CHECK":
-            return self.Suite2pROICheckHandler(self.view_control, self.view_control.control_manager.table_controls[self.app_key])
+        if current_app == "SUITE2P_ROI_CURATION":
+            return self.Suite2pROICurationHandler(self.view_control, self.view_control.control_manager.table_controls[self.app_key])
         elif current_app == "SUITE2P_ROI_TRACKING":
             return self.Suite2pROITrackingHandler(self.view_control)
         elif current_app == "MICROGLIA_TRACKING":
@@ -54,13 +54,13 @@ class ViewHandler:
         self.handler.wheelEvent(event)
 
     """
-    Suite2pROICheck Handler
+    Suite2pROICuration Handler
     left click : select roi
     middle click + drag : pan
     ctrl + scroll : zoom in/out
     R : reset zoom
     """
-    class Suite2pROICheckHandler:
+    class Suite2pROICurationHandler:
         def __init__(self, view_control: ViewControl, table_control: TableControl):
             self.view_control = view_control
             self.table_control = table_control

@@ -7,9 +7,9 @@ from optic.io import *
 from optic.manager import *
 from optic.gui.bind_func import *
 
-class Suite2pROICheckGUI(QMainWindow):
+class Suite2pROICurationGUI(QMainWindow):
     def __init__(self):
-        APP_NAME = "SUITE2P_ROI_CHECK"
+        APP_NAME = "SUITE2P_ROI_CURATION"
         QMainWindow.__init__(self)
         self.widget_manager, self.config_manager, self.data_manager, self.control_manager, self.layout_manager = initManagers(
             WidgetManager(), ConfigManager(), DataManager(), ControlManager(), LayoutManager()
@@ -190,18 +190,18 @@ class Suite2pROICheckGUI(QMainWindow):
     # ROI display, background image button group, checkbox
     def makeLayoutComponentROIDisplay_BGImageDisplay_ROISkip(self):
         layout = QVBoxLayout()
-        layout.addLayout(makeLayoutDislplayCelltype(
+        layout.addLayout(makeLayoutWidgetDislplayCelltype(
             self, 
             self.widget_manager, 
             key_buttongroup=f'{self.app_key_pri}_display_celltype', 
             table_columns=self.config_manager.table_columns[self.app_key_pri]
         ))
-        layout.addLayout(makeLayoutBGImageTypeDisplay(
+        layout.addLayout(makeLayoutWidgetBGImageTypeDisplay(
             self, 
             self.widget_manager, 
             key_buttongroup=f'{self.app_key_pri}_im_bg_type'
         ))
-        layout.addLayout(makeLayoutROIChooseSkip(
+        layout.addLayout(makeLayoutWidgetROIChooseSkip(
             self.widget_manager, 
             key_checkbox=f'{self.app_key_pri}', 
             table_columns=self.config_manager.table_columns[self.app_key_pri]

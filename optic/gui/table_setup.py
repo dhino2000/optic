@@ -22,7 +22,7 @@ def setTableSize(
     if height_max:
         q_table.setMaximumHeight(height_max)
 
-# for Suite2pROICheck, Suite2pROITracking
+# for Suite2pROICuration, Suite2pROITracking
 def setupWidgetROITable(
         q_table: QTableWidget, 
         len_row: int, 

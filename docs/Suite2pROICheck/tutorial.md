@@ -1,7 +1,7 @@
-# Suite2pROICheck Tutorial
+# Suite2pROICuration Tutorial
 <img src="images/suite2p_roi_check.png">
 
-**Suite2pROICheck** is a specialized tool for quickly and efficiently classifying ROIs extracted by Suite2p into neurons and noise cells. The interface is designed to be intuitive and visually clear. It can be customized to classify cells beyond neurons, allowing users to define their own cell types. By loading event files (.npy) from behavioral experiments simultaneously done with imaging, users can identify event-responsive cells.
+**Suite2pROICuration** is a specialized tool for quickly and efficiently classifying ROIs extracted by Suite2p into neurons and noise cells. The interface is designed to be intuitive and visually clear. It can be customized to classify cells beyond neurons, allowing users to define their own cell types. By loading event files (.npy) from behavioral experiments simultaneously done with imaging, users can identify event-responsive cells.
 
 ## Workflow
 
@@ -29,7 +29,7 @@ If you want to track ROIs between the different dates, please use [**Suite2pROIT
 **Fall mat file path (Required):**   
 
 push "browse" button and choose "Fall.mat" file.  
-Suite2pROICheck supports 2-channel imaging Fall.mat but not support multi-plane imaging data.  
+Suite2pROICuration supports 2-channel imaging Fall.mat but not support multi-plane imaging data.  
 
 **Reference tif image file path (Optional):**   
 
@@ -39,7 +39,7 @@ If you capture reference image as tif file, you can use it with blue-channel ima
 ## Check ROIs
 <img src="images/suite2p_roi_check_legend.png">
 
-Suite2pROICheck consists of 3 GUI sections, **Canvas**, **View**, and **Table**.
+Suite2pROICuration consists of 3 GUI sections, **Canvas**, **View**, and **Table**.
 
 ### Canvas Section
 <table>
@@ -209,7 +209,7 @@ ex):
 
 ## Custom Table Columns Configuration
 
-The default columns configuration of Suite2pROICheck is ["Cell_ID", "Astrocyte", "Neuron", "Not_Cell", "Check", "Tracking", "Memo"], but you can custom them with **Table Columns Config** of Table section.
+The default columns configuration of Suite2pROICuration is ["Cell_ID", "Astrocyte", "Neuron", "Not_Cell", "Check", "Tracking", "Memo"], but you can custom them with **Table Columns Config** of Table section.
 
 ### Table Columns Config
 <table>

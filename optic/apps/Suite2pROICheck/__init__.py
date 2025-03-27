@@ -1,1 +1,1 @@
-from .app import Suite2pROICheckGUI
+from .app import Suite2pROICurationGUI

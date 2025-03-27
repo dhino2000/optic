@@ -225,7 +225,7 @@ The number of ROI pairs with ROI matching often exceeds 100, manual ROI matching
 This automatic ROI matching function can significantly reduce the time and effort. 
 Furthermore, combining it with manual corrections enables highly efficient and accurate ROI tracking.   
 This section provides the tutorial of automatic ROI matching with [optimal transport](https://github.com/PythonOT/POT). 
-The typical ROI tracking workflow involves first performing ROI classification with [Suite2pROICheck](https://github.com/dhino2000/optic/edit/main/docs/Suite2pROICheck/tutorial.md), then applying automatic ROI matching for specific cell types, and finally making manual adjustments to ensure matching accuracy. 
+The typical ROI tracking workflow involves first performing ROI classification with [Suite2pROICuration](https://github.com/dhino2000/optic/edit/main/docs/Suite2pROICuration/tutorial.md), then applying automatic ROI matching for specific cell types, and finally making manual adjustments to ensure matching accuracy. 
 Image registration support can be utilized when necessary to improve the matching results.
 
 - **Parameters for Optimal Transport**

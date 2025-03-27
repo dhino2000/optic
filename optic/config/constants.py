@@ -132,7 +132,7 @@ class ROIMatchingTest_Config:
 # URL with button access
 class AccessURL:
     HELP = {
-        "SUITE2P_ROI_CHECK": "https://github.com/dhino2000/optic/blob/main/docs/Suite2pROICheck/tutorial.md",
+        "SUITE2P_ROI_CURATION": "https://github.com/dhino2000/optic/blob/main/docs/Suite2pROICuration/tutorial.md",
         "SUITE2P_ROI_TRACKING": "https://github.com/dhino2000/optic/blob/main/docs/Suite2pROITracking/tutorial.md",
         "MICROGLIA_TRACKING": "https://github.com/dhino2000/optic/blob/main/docs/MicrogliaTracking/tutorial.md",
         "TIFSTACK_EXPLORER": "https://github.com/dhino2000/optic/blob/main/docs/TIFStackExplorer/tutorial.md",

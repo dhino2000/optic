@@ -5,7 +5,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QGraphicsScene, QGraphicsView
 import numpy as np
 from ..config.constants import ChannelKeys, PenColors, PenWidth
-from .view_visual_roi import updateLayerROI_Suite2pROICheck, updateLayerROI_Suite2pROITracking, updateLayerROI_MicrogliaTracking, updateLayerROI_TIFStackExplorer
+from .view_visual_roi import updateLayerROI_Suite2pROICuration, updateLayerROI_Suite2pROITracking, updateLayerROI_MicrogliaTracking, updateLayerROI_TIFStackExplorer
 from ..preprocessing.preprocessing_roi import updateROIImage
 
 """
@@ -13,7 +13,7 @@ update View
 """
 # q_view widget visualization
 # update view for Fall data
-def updateView_Suite2pROICheck(
+def updateView_Suite2pROICuration(
         q_scene: QGraphicsScene, 
         q_view: QGraphicsView, 
         view_control: ViewControl, 
@@ -65,7 +65,7 @@ def updateView_Suite2pROICheck(
     view_control.layer_bg.setPixmap(pixmap)
 
     # update ROI layer
-    updateLayerROI_Suite2pROICheck(view_control, data_manager, control_manager, app_key)
+    updateLayerROI_Suite2pROICuration(view_control, data_manager, control_manager, app_key)
 
 # update view for Fall data for ROI Tracking
 def updateView_Suite2pROITracking(

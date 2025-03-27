@@ -4,8 +4,8 @@
 [**OPTIC Documantation**](https://optic-doc.readthedocs.io/en/latest/)
 
 OPTIC consists of four specialized applications:
-### 1. Suite2pROICheck
-<img src="docs/Suite2pROICheck/images/suite2p_roi_check.png">
+### 1. Suite2pROICuration
+<img src="docs/Suite2pROICuration/images/suite2p_roi_check.png">
 
 #### Input Format
 - Fall.mat: Suite2p output file containing ROI information  
@@ -87,7 +87,7 @@ T: time points
 - create OPTIC environment with `conda env create -f optic.yml`
 
 ## How to use
-### Suite2pROICheck
+### Suite2pROICuration
 1. Open the Anaconda Prompt and switch to the desired environment.  
 `activate optic`
   
@@ -96,7 +96,7 @@ T: time points
 (ex) `python C:/Users/dhino2000/optic/scripts/suite2p_roi_check.py`
 
 3. Sort and Check ROIs!
-([Suite2pROICheck Tutorial](https://github.com/dhino2000/optic/blob/main/docs/Suite2pROICheck/tutorial.md))
+([Suite2pROICuration Tutorial](https://github.com/dhino2000/optic/blob/main/docs/Suite2pROICuration/tutorial.md))
 
 ### Suite2pROITracking
 1. Open the Anaconda Prompt and switch to the desired environment.  

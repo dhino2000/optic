@@ -233,7 +233,30 @@ def addWidgetAxisOnFigure(
     figure = figure.add_subplot(num_row, num_col, position)
     return figure
 
-
+# QScrollArea Widget
+def makeWidgetScrollArea(
+    width_min: int, 
+    height_min: int, 
+    width_max: int, 
+    height_max: int,
+    use_global_style: bool,
+) -> QScrollArea:
+    widget = QScrollArea()
+    widget.setWidgetResizable(True)
+    
+    if width_min:
+        widget.setMinimumWidth(width_min)
+    if height_min:
+        widget.setMinimumHeight(height_min)
+    if width_max:
+        widget.setMaximumWidth(width_max)
+    if height_max:
+        widget.setMaximumHeight(height_max)
+        
+    if use_global_style:
+        widget.setObjectName('use-global')
+    
+    return widget
 
 """
 GUI Widget管理用クラス
@@ -255,6 +278,8 @@ class WidgetManager:
         self.dict_table       :Dict[str, QTableWidget] = {}
         self.dict_figure      :Dict[str, Figure] = {}
         self.dict_canvas      :Dict[str, FigureCanvasQTAgg] = {}
+        self.dict_scrollarea  :Dict[str, QScrollArea] = {}
+        self.dict_container   :Dict[str, QWidget] = {}
 
     def makeWidgetLabel(
         self, 
@@ -405,3 +430,15 @@ class WidgetManager:
     ) -> Axes:
         self.dict_ax[key] = addWidgetAxisOnFigure(figure, num_row, num_col, position, use_global_style)
         return self.dict_ax[key]
+    
+    def makeWidgetScrollArea(
+        self,
+        key: str,
+        width_min: int=0,
+        height_min: int=0,
+        width_max: int=0,
+        height_max: int=0,
+        use_global_style: bool=True,
+    ) -> QScrollArea:
+        self.dict_scrollarea[key] = makeWidgetScrollArea(width_min, height_min, width_max, height_max, use_global_style)
+        return self.dict_scrollarea[key]

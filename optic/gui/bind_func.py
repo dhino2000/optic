@@ -1506,7 +1506,7 @@ def bindFuncTableCellChangedWithMicrogliaTracking(
 """
 view_layouts
 """
-# -> view_layouts.makeLayoutDislplayCelltype, All ROI, None, Neuron ,Not Cell, ...
+# -> view_layouts.makeLayoutWidgetDislplayCelltype, All ROI, None, Neuron ,Not Cell, ...
 def bindFuncRadiobuttonDisplayCelltypeChanged(
     q_buttongroup: 'QButtonGroup', 
     view_control: 'ViewControl', 
@@ -1520,7 +1520,7 @@ def bindFuncRadiobuttonDisplayCelltypeChanged(
     checked_button = q_buttongroup.checkedButton()
     _onROIDisplayTypeChanged(q_buttongroup.id(checked_button))
 
-# -> view_layouts.makeLayoutBGImageTypeDisplay, meanImg, meanImgE, ... 
+# -> view_layouts.makeLayoutWidgetBGImageTypeDisplay, meanImg, meanImgE, ... 
 def bindFuncRadiobuttonBGImageTypeChanged(
     q_buttongroup: 'QButtonGroup', 
     view_control: 'ViewControl'
@@ -1533,7 +1533,7 @@ def bindFuncRadiobuttonBGImageTypeChanged(
     checked_button = q_buttongroup.checkedButton()
     _onBGImageTypeChanged(q_buttongroup.id(checked_button))
 
-# -> view_layouts.makeLayoutROIChooseSkip, Neuron, Not Cell, Check, ...
+# -> view_layouts.makeLayoutWidgetROIChooseSkip, Neuron, Not Cell, Check, ...
 def bindFuncCheckBoxROIChooseSkip(
     list_q_checkbox: List['QCheckBox'],
     control_manager: 'ControlManager',

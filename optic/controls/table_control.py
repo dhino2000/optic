@@ -195,7 +195,7 @@ class TableControl:
             return
         else:
             self.control_manager.setSharedAttr(self.app_key, 'roi_selected_id', roi_id)
-            if self.config_manager.current_app == "SUITE2P_ROI_CHECK" or self.config_manager.current_app == "SUITE2P_ROI_TRACKING":
+            if self.config_manager.current_app == "SUITE2P_ROI_CURATION" or self.config_manager.current_app == "SUITE2P_ROI_TRACKING":
                 updateROIPropertyDisplay(self.control_manager, self.data_manager, self.widget_manager, self.app_key)
 
     def getSharedAttr_ROISelected(self) -> int:

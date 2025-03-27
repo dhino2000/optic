@@ -3,7 +3,7 @@
 
 **Suite2pROITracking** is an application developed for efficiently ROI tracking between different imaging sessions of the same subject. 
 These ROI correspondence relationships are saved as .mat files to facilitate downstream analysis. 
-Since this application depends on analysis results of [**Suite2pROICheck**](https://github.com/dhino2000/optic/edit/main/docs/Suite2pROICheck/tutorial.md), it is recommended to first perform ROI check.
+Since this application depends on analysis results of [**Suite2pROICuration**](https://github.com/dhino2000/optic/edit/main/docs/Suite2pROICuration/tutorial.md), it is recommended to first perform ROI check.
 
 ## Workflow
 
@@ -36,7 +36,7 @@ It is used to determine which ROIs in "pri" correspond to which ROIs in "sec".
 <img src="images/suite2p_roi_tracking_legend.png">
 
 **Suite2pROITracking** consists of two major sections, **primary (pri)** and **secondary (sec)**, and each section consists of two minor sections, **View** and **Table**. 
-About secondary view section and secondary table section, the function is same as that of **Suite2pROICheck**.  
+About secondary view section and secondary table section, the function is same as that of **Suite2pROICuration**.  
 
 ### Pri View Section
 <table>
@@ -101,7 +101,7 @@ About secondary view section and secondary table section, the function is same a
 - **Cell_ID_Match**
   
   The table has additionaly column, **Cell_ID_Match**, the secondary ROI ID matched to the primary ROI ID.   
-  Although ROI check is possible in also this application, creating ROICheck files using Suite2pROICheck is recommended for its more comprehensive functionality.  
+  Although ROI check is possible in also this application, creating ROICheck files using Suite2pROICuration is recommended for its more comprehensive functionality.  
 
   > ⚠️ **WARNING:**  
   > Before load ROICheck, please match the table columns with the table columns of the ROIcheck file.  
@@ -215,7 +215,7 @@ The number of ROI pairs with ROI matching often exceeds 100, manual ROI matching
 This automatic ROI matching function can significantly reduce the time and effort. 
 Furthermore, combining it with manual corrections enables highly efficient and accurate ROI tracking.   
 This section provides the tutorial of automatic ROI matching with [optimal transport](https://github.com/PythonOT/POT). 
-The typical ROI tracking workflow involves first performing ROI classification with [Suite2pROICheck](https://github.com/dhino2000/optic/edit/main/docs/Suite2pROICheck/tutorial.md), then applying automatic ROI matching for specific cell types, and finally making manual adjustments to ensure matching accuracy. 
+The typical ROI tracking workflow involves first performing ROI classification with [Suite2pROICuration](https://github.com/dhino2000/optic/edit/main/docs/Suite2pROICuration/tutorial.md), then applying automatic ROI matching for specific cell types, and finally making manual adjustments to ensure matching accuracy. 
 Image registration support can be utilized when necessary to improve the matching results.
 
 - **Parameters for Optimal Transport**

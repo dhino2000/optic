@@ -1,6 +1,6 @@
 from __future__ import annotations
 from ..type_definitions import *
-from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout
+from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget
 from .base_layouts import makeLayoutButtonGroup
 from ..config.constants import BGImageTypeList
 from ..gui.table_layouts import makeLayoutROIFilterThreshold
@@ -69,42 +69,60 @@ def makeLayoutROIThresholds(
     return layout
 
 # Select ROI display type of the buttongroup
-def makeLayoutDislplayCelltype(
+def makeLayoutWidgetDislplayCelltype(
         q_widget: QWidget, 
         widget_manager: WidgetManager, 
         key_buttongroup: str, 
+        key_scrollarea: str,
         table_columns: TableColumns
-        ) -> QHBoxLayout:
+        ) -> QScrollArea:
     # change ROI display, All, Cell, Not Cell
     roidisp_options = ["All ROI", "None"]
     roidisp_options.extend([key for key, value in table_columns.getColumns().items() if value['type'] == 'celltype'])
-    layout = makeLayoutButtonGroup(q_widget, widget_manager, key_buttongroup=key_buttongroup, list_label_buttongroup=roidisp_options)
-    return layout
+    widget = makeLayoutButtonGroup(q_widget, 
+                                   widget_manager, 
+                                   key_buttongroup=key_buttongroup, 
+                                   list_label_buttongroup=roidisp_options, 
+                                   axis="vertical",
+                                   is_scroll=True)
+    scrollarea = widget_manager.makeWidgetScrollArea(key=key_scrollarea)
+    scrollarea.setWidget(widget)
+    return scrollarea
 
 # Select background image display type of the buttongroup
-def makeLayoutBGImageTypeDisplay(
+def makeLayoutWidgetBGImageTypeDisplay(
         q_widget: QWidget, 
         widget_manager: WidgetManager, 
         key_buttongroup: str
-        ) -> QHBoxLayout:
+        ) -> QWidget:
     # meanImg, meanImgE, max_proj, Vcorr
     bg_types = BGImageTypeList.FALL
-    layout = makeLayoutButtonGroup(q_widget, widget_manager, key_buttongroup=key_buttongroup, list_label_buttongroup=bg_types)
-    return layout
+    widget = makeLayoutButtonGroup(q_widget, 
+                                   widget_manager, 
+                                   key_buttongroup=key_buttongroup, 
+                                   list_label_buttongroup=bg_types, 
+                                   axis="vertical",
+                                   is_scroll=True)
+    return widget
 
 # Skip ROI choose
-def makeLayoutROIChooseSkip(
+def makeLayoutWidgetROIChooseSkip(
         widget_manager: WidgetManager, 
         key_checkbox: str, 
+        key_scrollarea: str,
         table_columns: TableColumns
-        ) -> QHBoxLayout:
-    layout = QHBoxLayout()
+        ) -> QWidget:
+    widget = QWidget()
+    layout = QVBoxLayout()
     skip_items = [key for key, value in table_columns.getColumns().items() if value['type'] in ['celltype', 'checkbox']]
     for item in skip_items:
         key_checkbox_item = f"skip_choose_{item}"
         label_checkbox_item = f"Skip {item} ROI"
         layout.addWidget(widget_manager.makeWidgetCheckBox(key=f"{key_checkbox}_{key_checkbox_item}", label=label_checkbox_item))
-    return layout
+    widget.setLayout(layout)
+    scrollarea = widget_manager.makeWidgetScrollArea(key=key_scrollarea)
+    scrollarea.setWidget(widget)
+    return scrollarea
 
 # show ROI contour, show next ROI
 def makeLayoutDisplayROIContours(

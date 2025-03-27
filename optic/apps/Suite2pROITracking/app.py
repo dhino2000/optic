@@ -134,18 +134,18 @@ class Suite2pROITrackingGUI(QMainWindow):
     # ROI display, background image button group, checkbox
     def makeLayoutComponentROIDisplay_BGImageDisplay_ROISkip(self, app_key):
         layout = QVBoxLayout()
-        layout.addLayout(makeLayoutDislplayCelltype(
+        layout.addLayout(makeLayoutWidgetDislplayCelltype(
             self, 
             self.widget_manager, 
             key_buttongroup=f'{app_key}_display_celltype', 
             table_columns=self.config_manager.table_columns[app_key]
         ))
-        layout.addLayout(makeLayoutBGImageTypeDisplay(
+        layout.addLayout(makeLayoutWidgetBGImageTypeDisplay(
             self, 
             self.widget_manager, 
             key_buttongroup=f'{app_key}_im_bg_type'
         ))
-        layout.addLayout(makeLayoutROIChooseSkip(
+        layout.addLayout(makeLayoutWidgetROIChooseSkip(
             self.widget_manager, 
             key_checkbox=f'{app_key}', 
             table_columns=self.config_manager.table_columns[app_key]

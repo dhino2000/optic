@@ -1,7 +1,7 @@
 from __future__ import annotations
 from ..type_definitions import *
 from ..handlers.view_handler import ViewHandler
-from ..visualization.view_visual import updateView_Suite2pROICheck, updateView_TIFStackExplorer, updateView_Suite2pROITracking, updateView_MicrogliaTracking, zoomView, resetZoomView
+from ..visualization.view_visual import updateView_Suite2pROICuration, updateView_TIFStackExplorer, updateView_Suite2pROITracking, updateView_MicrogliaTracking, zoomView, resetZoomView
 from ..visualization.view_visual_roi import findClosestROI, shouldSkipROI
 from ..visualization.view_visual_rectangle import initializeDragRectangle, updateDragRectangle
 from ..visualization.info_visual import updateZPlaneDisplay, updateTPlaneDisplay
@@ -98,8 +98,8 @@ class ViewControl:
             self.setTIFFShape()
 
     def updateView(self) -> None:
-        if self.config_manager.current_app == "SUITE2P_ROI_CHECK":
-            updateView_Suite2pROICheck(self.q_scene, self.q_view, self, self.data_manager, self.control_manager, self.app_key)
+        if self.config_manager.current_app == "SUITE2P_ROI_CURATION":
+            updateView_Suite2pROICuration(self.q_scene, self.q_view, self, self.data_manager, self.control_manager, self.app_key)
         elif self.config_manager.current_app == "SUITE2P_ROI_TRACKING":
             updateView_Suite2pROITracking(self.q_scene, self.q_view, self, self.data_manager, self.control_manager, self.app_key, self.app_key_sec)
         elif self.config_manager.current_app == "MICROGLIA_TRACKING":
@@ -314,7 +314,7 @@ class ViewControl:
                 dict_roi_coords = self.data_manager.getDictROICoordsXYCT()
             if dict_roi_coords is not None:
                 dict_roi_coords = dict_roi_coords.get(self.getPlaneT())
-        else: # for Suite2pROICheck, Suite2pROITracking
+        else: # for Suite2pROICuration, Suite2pROITracking
             if reg:
                 dict_roi_coords = self.data_manager.getDictROICoordsRegistered(self.app_key)
             else:

@@ -10,8 +10,8 @@ import numpy as np
 """
 update layer_roi
 """
-# update layer_roi for Suite2pROICheck
-def updateLayerROI_Suite2pROICheck(
+# update layer_roi for Suite2pROICuration
+def updateLayerROI_Suite2pROICuration(
         view_control: ViewControl, 
         data_manager: DataManager, 
         control_manager: ControlManager, 
