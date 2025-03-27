@@ -47,10 +47,11 @@ class TableControl:
         self.q_table, self.groups_celltype = setupWidgetROITable(self.q_table, self.len_row, self.table_columns, key_event_ignore=True)
         self.setKeyPressEvent()
         self.initalizeSharedAttr_ROIDisplay()
+        self.initalizeSharedAttr_CelltypeVisibility()
         # set celltype with TableColumns
         # if celltype columns are ["Neuron", "Astrocyte", "Not_Cell"], set "Neuron" or "Not_Cell" radiobutton
         celltype_pos = [col_name for col_name in self.table_columns.getColumns().keys() if self.table_columns.getColumns()[col_name]["type"] == "celltype"][0] # first celltype except "Not_Cell"
-        celltype_neg = "Not_Cell"
+        celltype_neg = [col_name for col_name in self.table_columns.getColumns().keys() if self.table_columns.getColumns()[col_name]["type"] == "celltype"][-1]
         self.setROICellTypeFromArray(self.data_manager.getDictFall("pri")["iscell"][:,0], celltype_pos, celltype_neg) # set celltype with "iscell" array
         updateROICountDisplay(self.widget_manager, self.config_manager, self.app_key)
 
@@ -217,34 +218,41 @@ class TableControl:
         roi_display = {roi_id: True for roi_id in range(self.len_row)}
         self.control_manager.setSharedAttr(self.app_key, 'roi_display', roi_display)
 
-    def setSharedAttr_DisplayCelltype(self, roi_display_type: str) -> None:
-        self.control_manager.setSharedAttr(self.app_key, 'display_celltype', roi_display_type)
+    def getSharedAttr_CelltypeVisibility(self) -> Dict[str, bool]:
+        return self.control_manager.getSharedAttr(self.app_key, 'celltype_visibility')
 
-    def getSharedAttr_DisplayCelltype(self) -> str:
-        return self.control_manager.getSharedAttr(self.app_key, 'display_celltype')
+    def setSharedAttr_CelltypeVisibility(self, celltype_visibility: Dict[str, bool]) -> None:
+        self.control_manager.setSharedAttr(self.app_key, 'celltype_visibility', celltype_visibility)
 
-    # with dict_buttongroup["{app_key}_display_celltype"] change
-    def updateROIDisplayWithCelltype(self, roi_display_type: str) -> None:
+    def initalizeSharedAttr_CelltypeVisibility(self) -> None:
+        list_celltype = [col_name for col_name in self.table_columns.getColumns().keys() if self.table_columns.getColumns()[col_name]["type"] == "celltype"]
+        celltype_visibility = {celltype: True for celltype in list_celltype}
+        self.setSharedAttr_CelltypeVisibility(celltype_visibility)
+
+    # with dict_checkbox["{app_key}_display_celltype"] change
+    def updateROIDisplayWithCelltype(self, dict_celltype_visibility: Dict[str, bool]) -> None:
         roi_display = self.getSharedAttr_ROIDisplay()
-        for roi_id in roi_display.keys():
-            if roi_display_type == 'All ROI':
-                roi_display[roi_id] = True
-            elif roi_display_type == 'None':
+        # if all checkboxes of celltype are not checked
+        if not any(dict_celltype_visibility.values()):
+            for roi_id in roi_display.keys():
                 roi_display[roi_id] = False
-            else:
-                roi_display[roi_id] = (self.getCurrentCellType(roi_id) == roi_display_type)
-        self.setSharedAttr_DisplayCelltype(roi_display_type)
+        else:
+            # check each ROI celltype is in list_checked_celltype
+            for roi_id in roi_display.keys():
+                current_celltype = self.getCurrentCellType(roi_id)
+                roi_display[roi_id] = dict_celltype_visibility.get(current_celltype, False)
+        
         self.setSharedAttr_ROIDisplay(roi_display)
+        self.setSharedAttr_CelltypeVisibility(dict_celltype_visibility)
 
     # with table's "celltype" radiobutton change
     def changeRadiobuttonOfTable(self, row: int) -> None:
         roi_display = self.getSharedAttr_ROIDisplay()
-        current_display_type = self.getSharedAttr_DisplayCelltype()
-        
-        if current_display_type not in ['All ROI', 'None']:
-            new_cell_type = self.getCurrentCellType(row)
-            roi_display[row] = (new_cell_type == current_display_type)
-            self.setSharedAttr_ROIDisplay(roi_display)
+        # check celltype of changed ROI
+        new_cell_type = self.getCurrentCellType(row)
+        dict_celltype_visibility = self.getSharedAttr_CelltypeVisibility()
+        roi_display[row] = dict_celltype_visibility.get(new_cell_type, False)
+        self.setSharedAttr_ROIDisplay(roi_display)
 
     # with View mousePressEvent
     def updateSelectedROI(self, roi_id: int) -> None:

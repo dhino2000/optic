@@ -70,21 +70,20 @@ def makeLayoutROIThresholds(
 
 # Select ROI display type of the buttongroup
 def makeLayoutWidgetDislplayCelltype(
-        q_widget: QWidget, 
         widget_manager: WidgetManager, 
-        key_buttongroup: str, 
+        key_checkbox: str, 
         key_scrollarea: str,
         table_columns: TableColumns
         ) -> QScrollArea:
-    # change ROI display, All, Cell, Not Cell
-    roidisp_options = ["All ROI", "None"]
-    roidisp_options.extend([key for key, value in table_columns.getColumns().items() if value['type'] == 'celltype'])
-    widget = makeLayoutButtonGroup(q_widget, 
-                                   widget_manager, 
-                                   key_buttongroup=key_buttongroup, 
-                                   list_label_buttongroup=roidisp_options, 
-                                   axis="vertical",
-                                   is_scroll=True)
+    # change ROI display celltypes
+    widget = QWidget()
+    layout = QVBoxLayout()
+    list_celltype = [key for key, value in table_columns.getColumns().items() if value['type'] == 'celltype']
+    for celltype in list_celltype:
+        key_checkbox_item = f"roi_display_{celltype}"
+        label_checkbox_item = f"{celltype}"
+        layout.addWidget(widget_manager.makeWidgetCheckBox(key=f"{key_checkbox}_{key_checkbox_item}", label=label_checkbox_item, checked=True))
+    widget.setLayout(layout)
     scrollarea = widget_manager.makeWidgetScrollArea(key=key_scrollarea)
     scrollarea.setWidget(widget)
     return scrollarea

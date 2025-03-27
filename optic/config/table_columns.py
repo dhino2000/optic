@@ -4,6 +4,7 @@ from copy import deepcopy
 class TableColumns:
     def __init__(self, columns_config: Dict[str, Dict[str, Any]]):
         self._columns = deepcopy(columns_config)
+        self._celltype = [col for col, info in self.getColumns().items() if info['type'] == 'celltype']
 
     def getColumns(self) -> Dict[str, Dict[str, Any]]:
         return deepcopy(self._columns)
@@ -11,6 +12,7 @@ class TableColumns:
     def setColumns(self, new_columns: Dict[str, Dict[str, Any]]):
         self._columns = new_columns
         self._column_order = sorted(self._columns.keys(), key=lambda x: self._columns[x]['order'])
+        self._celltype = [col for col, info in self.getColumns().items() if info['type'] == 'celltype']
     
     def openConfigWindow(self, parent, gui_defaults):
         from ..dialog.table_columns_config import TableColumnConfigDialog

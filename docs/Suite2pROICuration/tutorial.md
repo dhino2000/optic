@@ -1,5 +1,5 @@
 # Suite2pROICuration Tutorial
-<img src="images/suite2p_roi_check.png">
+<img src="images/suite2p_roi_curation.png">
 
 **Suite2pROICuration** is a specialized tool for quickly and efficiently classifying ROIs extracted by Suite2p into neurons and noise cells. The interface is designed to be intuitive and visually clear. It can be customized to classify cells beyond neurons, allowing users to define their own cell types. By loading event files (.npy) from behavioral experiments simultaneously done with imaging, users can identify event-responsive cells.
 
@@ -23,7 +23,7 @@ If you want to track ROIs between the different dates, please use [**Suite2pROIT
 - **ROICheck_{name_of_the_Fall_file}.mat**
 
 ## Load Fall.mat file
-<img src="images/suite2p_roi_check_file_load.png">
+<img src="images/suite2p_roi_curation_file_load.png">
 
 
 **Fall mat file path (Required):**   
@@ -37,7 +37,7 @@ push "browse" button and choose single XY tif image file.
 If you capture reference image as tif file, you can use it with blue-channel image.
 
 ## Check ROIs
-<img src="images/suite2p_roi_check_legend.png">
+<img src="images/suite2p_roi_curation_legend.png">
 
 Suite2pROICuration consists of 3 GUI sections, **Canvas**, **View**, and **Table**.
 
@@ -75,12 +75,12 @@ Suite2pROICuration consists of 3 GUI sections, **Canvas**, **View**, and **Table
 </td>
 <td width="50%">
 
-<img src="images/suite2p_roi_check_canvas.png">
+<img src="images/suite2p_roi_curation_canvas.png">
 
 - **With event file load**  
   1: Whisker stimulation ON, 0: Whisker simulation OFF
 
-<img src="images/suite2p_roi_check_event_canvas.png">
+<img src="images/suite2p_roi_curation_event_canvas.png">
 
 </td>
 </tr>
@@ -135,7 +135,7 @@ Suite2pROICuration consists of 3 GUI sections, **Canvas**, **View**, and **Table
 </td>
 <td width="50%">
 
-<img src="images/suite2p_roi_check_view.png">
+<img src="images/suite2p_roi_curation_view.png">
 
 </td>
 </tr>
@@ -176,11 +176,11 @@ ex):
 </td>
 <td width="50%">
 
-<img src="images/suite2p_roi_check_table.png">
+<img src="images/suite2p_roi_curation_table.png">
 
 - **ROI celltype set**
 
-<img src="images/suite2p_roi_check_roi_set.png">
+<img src="images/suite2p_roi_curation_roi_set.png">
 
 - **Save Dialog**
 
@@ -242,17 +242,17 @@ The Column width. it can be adjusted by dragging.
 <td width="50%">
 
 - **Default**  
-<img src="images/suite2p_roi_check_table_config.png">
+<img src="images/suite2p_roi_curation_table_config.png">
 
 - **After Customization**  
-<img src="images/suite2p_roi_check_table_config_custom.png">
+<img src="images/suite2p_roi_curation_table_config_custom.png">
 
 </td>
 </tr>
 </table>
 
 
-<img src="images/suite2p_roi_check_custom.png">
+<img src="images/suite2p_roi_curation_custom.png">
 
 #### Key operation of table
 

@@ -1426,7 +1426,7 @@ def bindFuncTableSelectionChangedWithTracking(
 # -> table_layouts.makeLayoutTableROICountLabel
 def bindFuncRadiobuttonOfTableChanged(
     table_control: 'TableControl', 
-    view_control: 'ViewControl'
+    view_control: 'ViewControl',
 ) -> None:
     def __onButtonClicked(row: int) -> Callable[[QPushButton], None]:
         def _onButtonClicked(button: 'QPushButton') -> None:
@@ -1506,19 +1506,19 @@ def bindFuncTableCellChangedWithMicrogliaTracking(
 """
 view_layouts
 """
-# -> view_layouts.makeLayoutWidgetDislplayCelltype, All ROI, None, Neuron ,Not Cell, ...
-def bindFuncRadiobuttonDisplayCelltypeChanged(
-    q_buttongroup: 'QButtonGroup', 
+# -> view_layouts.makeLayoutWidgetDislplayCelltype, Neuron, Astrocyte, Not Cell, ...
+def bindFuncCheckBoxDisplayCelltypeChanged(
+    dict_q_checkbox: Dict[str, QCheckBox], 
     view_control: 'ViewControl', 
     table_control: 'TableControl'
 ) -> None:
-    def _onROIDisplayTypeChanged(button_id: int) -> None:
-        roi_display_type = q_buttongroup.button(button_id).text()
-        table_control.updateROIDisplayWithCelltype(roi_display_type)
+    def updateDisplay() -> None:
+        dict_celltype_visibility = {celltype: q_checkbox.isChecked() for celltype, q_checkbox in dict_q_checkbox.items()}
+        table_control.updateROIDisplayWithCelltype(dict_celltype_visibility)
         view_control.updateView()
-    q_buttongroup.buttonClicked[int].connect(_onROIDisplayTypeChanged)
-    checked_button = q_buttongroup.checkedButton()
-    _onROIDisplayTypeChanged(q_buttongroup.id(checked_button))
+    
+    for q_checkbox in dict_q_checkbox.values():
+        q_checkbox.stateChanged.connect(updateDisplay)
 
 # -> view_layouts.makeLayoutWidgetBGImageTypeDisplay, meanImg, meanImgE, ... 
 def bindFuncRadiobuttonBGImageTypeChanged(
@@ -1535,16 +1535,15 @@ def bindFuncRadiobuttonBGImageTypeChanged(
 
 # -> view_layouts.makeLayoutWidgetROIChooseSkip, Neuron, Not Cell, Check, ...
 def bindFuncCheckBoxROIChooseSkip(
-    list_q_checkbox: List['QCheckBox'],
+    dict_q_checkbox: Dict[str, QCheckBox], 
     control_manager: 'ControlManager',
     app_key: AppKeys,
 ) -> None:
-    def _onCheckBoxChanged(state: int, q_checkbox_text: str) -> None:
+    def _onCheckBoxChanged(state: int, celltype: str) -> None:
         is_checked = (state == Qt.Checked)
-        celltype = q_checkbox_text.split(" ")[1]
         control_manager.setSharedAttrDictValue(app_key, "skip_roi_types", celltype, is_checked)
-    for q_checkbox in list_q_checkbox:
-        q_checkbox.stateChanged.connect(lambda state, q_checkbox_text=q_checkbox.text(): _onCheckBoxChanged(state, q_checkbox_text))
+    for celltype, q_checkbox in dict_q_checkbox.items():
+        q_checkbox.stateChanged.connect(lambda state: _onCheckBoxChanged(state, celltype))
 
 # -> view_layouts.makeLayoutDisplayROIContours
 def bindFuncCheckBoxDisplayROIContours(
