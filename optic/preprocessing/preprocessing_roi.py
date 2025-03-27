@@ -2,6 +2,8 @@ from __future__ import annotations
 from ..type_definitions import *
 import cv2
 import numpy as np
+import rasterio.features
+from shapely.geometry import Polygon
 
 # get ROI contour from the ROI's xpix array and ypix array
 # method = "dilate" : for displaying on view
@@ -46,6 +48,21 @@ def convertROIContourToFilled(
     cv2.fillPoly(img, [roi_contour], 1)
     y, x = np.where(img > 0)
     roi_filled = np.column_stack((x, y))
+    return roi_filled
+
+# convert ROI contour to filled ROI for ROI_TYPE.RECT
+def convertROIContourToFilledForRECT(
+        roi_contour: np.ndarray[int, int], 
+        width: int, 
+        height: int
+        ) -> np.ndarray[int, int]:
+    polygon = Polygon(roi_contour)
+    mask = rasterio.features.rasterize(
+        [(polygon, 1)],
+        out_shape=(height, width)
+    )
+    y_indices, x_indices = np.where(mask > 0)
+    roi_filled = np.column_stack((x_indices, y_indices))
     return roi_filled
 
 # update ROI Image, show only choosed celltype, show registered ROI image or not

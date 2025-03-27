@@ -1,6 +1,6 @@
 from __future__ import annotations
 from ..type_definitions import *
-from .preprocessing_roi import getROIContour, convertROIContourToFilled
+from .preprocessing_roi import getROIContour, convertROIContourToFilled, convertROIContourToFilledForRECT
 from typing import Tuple, Dict, List, Optional, Literal
 from roifile import ImagejRoi
 import numpy as np
@@ -53,20 +53,46 @@ def convertImagejRoiToDictROIMatchingAndDictROICoords(
         roi_name = roi_name.upper() # mXXX_sXX -> MXXX_SXX
         roi_name = roi_name.replace("-", "_") # MXXX-SXX -> MXXX_SXX
 
-        # only FREEHAND roi !
-        if roi.roitype == 7 or roi.roitype == 8:
+        # only RECT, TRACED, FREEHAND !!!
+        if roi.roitype == 1 or roi.roitype == 7 or roi.roitype == 8:
             try:
-                roi_x_start = roi.left
-                roi_y_start = roi.top
-                roi_xy_coords = roi.integer_coordinates
+                # RECT
+                if roi.roitype == 1: 
+                    roi_xy_coords = roi.multi_coordinates
+                    list_roi_coords_segment = []
 
-                xpix_contour = roi_xy_coords[:, 0] + roi_x_start
-                ypix_contour = roi_xy_coords[:, 1] + roi_y_start
-                xpix_ypix_contour = np.column_stack((xpix_contour, ypix_contour))
-                # convert contour to filled roi
-                xpix_ypix = convertROIContourToFilled(xpix_ypix_contour, img_width, img_height)
+                    seg_start = 0
+                    seg_end = len(roi_xy_coords)
+                    for i in range(len(roi_xy_coords)):
+                        try:
+                            # pick up 2 elements
+                            pri, sec = roi_xy_coords[i], roi_xy_coords[i+1]
+                            if pri == 4 and sec == 0: # border of segments (4, 0)
+                                seg_end = i
+                                list_roi_coords_segment.append(roi_xy_coords[seg_start:seg_end+1])
+                                seg_start = i+1
+                        except IndexError: # end of list
+                            seg_end = i
+                            list_roi_coords_segment.append(roi_xy_coords[seg_start:seg_end+1])
+                    xpix_contour = np.concatenate([roi_coords_segment[1::3] for roi_coords_segment in list_roi_coords_segment])
+                    ypix_contour = np.concatenate([roi_coords_segment[2::3] for roi_coords_segment in list_roi_coords_segment])
+                    xpix_ypix_contour = np.column_stack((xpix_contour, ypix_contour))
+                    # RECT ROI contour is so complicated !!!
+                    # use specialzed function for RECT
+                    xpix_ypix = convertROIContourToFilledForRECT(xpix_ypix_contour, img_width, img_height)
+                # TRACED, FREEHAND
+                elif roi.roitype == 7 or roi.roitype == 8: 
+                    roi_x_start = roi.left
+                    roi_y_start = roi.top
+                    roi_xy_coords = roi.integer_coordinates
+
+                    xpix_contour = roi_xy_coords[:, 0] + roi_x_start
+                    ypix_contour = roi_xy_coords[:, 1] + roi_y_start
+                    xpix_ypix_contour = np.column_stack((xpix_contour, ypix_contour))
+                    # convert contour to filled roi
+                    xpix_ypix = convertROIContourToFilled(xpix_ypix_contour, img_width, img_height)
+
                 xpix, ypix = xpix_ypix[:, 0], xpix_ypix[:, 1]
-
                 med = np.array([np.median(xpix).astype("uint16"), np.median(ypix).astype("uint16")])
 
                 roi_z_plane = roi.z_position - 1
@@ -121,13 +147,12 @@ def convertImagejRoiToDictROIMatchingAndDictROICoords(
             print(f"INVALID ROI TYPE {roi.roitype.name}")
             dict_error[roi.name] = f"INVALID ROI TYPE {roi.roitype.name}"
 
-    """
-    TEMPORARY WARNING !!!
-    """
-    import pandas as pd
-    df_error = pd.DataFrame(dict_error.items(), columns=["roi_name", "error"])
-    df_error.to_csv("ROIManager_load_error.csv", index=False, header=None)
-
+    # """
+    # TEMPORARY WARNING !!!
+    # """
+    # import pandas as pd
+    # df_error = pd.DataFrame(dict_error.items(), columns=["roi_name", "error"])
+    # df_error.to_csv("ROIManager_load_error.csv", index=False, header=None)
 
     # initialize roi_matching["match"]
     for t_plane_pri in list(dict_roi_matching["id"].keys())[:-1]: # except last t_plane 
