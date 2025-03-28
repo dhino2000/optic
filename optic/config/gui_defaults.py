@@ -181,24 +181,56 @@ class GuiDefaults:
         },
         "ROI_MATCHING_METHOD": ["None", "affine", "bspline"],
         "TABLE_COLUMNS": {
+            # AppKeys.PRI: {
+            #     "Cell_ID"       : {"order": 0, "type": "id",       "width": 80,  "removable": False, "name_fixed": True, "editable": False},
+            #     "Cell_ID_Match" : {"order": 1, "type": "id_match", "width": 80,  "removable": False, "name_fixed": True, "editable": False},
+            #     "Neuron"        : {"order": 2, "type": "celltype", "width": 80,  "removable": True,  "default": True},
+            #     "Astrocyte"     : {"order": 3, "type": "celltype", "width": 80,  "removable": True,  "default": False},
+            #     "Not_Cell"      : {"order": 4, "type": "celltype", "width": 80,  "removable": False, "name_fixed": True, "default": False},
+            #     "Check"         : {"order": 5, "type": "checkbox", "width": 80,  "removable": True,  "default": False},
+            #     "Tracking"      : {"order": 6, "type": "checkbox", "width": 80,  "removable": True,  "default": False},
+            #     "Memo"          : {"order": 7, "type": "string",   "width": 200, "removable": True, }
+            # },
+            # AppKeys.SEC: {
+            #     "Cell_ID"   : {"order": 0, "type": "id",       "width": 80,  "removable": False, "name_fixed": True, "editable": False},
+            #     "Neuron"    : {"order": 1, "type": "celltype", "width": 80,  "removable": True,  "default": True},
+            #     "Astrocyte" : {"order": 2, "type": "celltype", "width": 80,  "removable": True,  "default": False},
+            #     "Not_Cell"  : {"order": 3, "type": "celltype", "width": 80,  "removable": False, "name_fixed": True, "default": False},
+            #     "Check"     : {"order": 4, "type": "checkbox", "width": 80,  "removable": True,  "default": False},
+            #     "Tracking"  : {"order": 5, "type": "checkbox", "width": 80,  "removable": True,  "default": False},
+            #     "Memo"      : {"order": 6, "type": "string",   "width": 200, "removable": True, }
+            # },
+            # for takeda sensei
             AppKeys.PRI: {
                 "Cell_ID"       : {"order": 0, "type": "id",       "width": 80,  "removable": False, "name_fixed": True, "editable": False},
                 "Cell_ID_Match" : {"order": 1, "type": "id_match", "width": 80,  "removable": False, "name_fixed": True, "editable": False},
-                "Neuron"        : {"order": 2, "type": "celltype", "width": 80,  "removable": True,  "default": True},
-                "Astrocyte"     : {"order": 3, "type": "celltype", "width": 80,  "removable": True,  "default": False},
-                "Not_Cell"      : {"order": 4, "type": "celltype", "width": 80,  "removable": False, "name_fixed": True, "default": False},
-                "Check"         : {"order": 5, "type": "checkbox", "width": 80,  "removable": True,  "default": False},
-                "Tracking"      : {"order": 6, "type": "checkbox", "width": 80,  "removable": True,  "default": False},
-                "Memo"          : {"order": 7, "type": "string",   "width": 200, "removable": True, }
+                "W"             : {"order": 2, "type": "celltype", "width": 40,  "removable": True,  "default": True},
+                "A"             : {"order": 3, "type": "celltype", "width": 40,  "removable": True,  "default": False},
+                "V"             : {"order": 4, "type": "celltype", "width": 40,  "removable": True,  "default": False},
+                "WA"            : {"order": 5, "type": "celltype", "width": 40,  "removable": True,  "default": False},
+                "WV"            : {"order": 6, "type": "celltype", "width": 40,  "removable": True,  "default": False},
+                "AV"            : {"order": 7, "type": "celltype", "width": 40,  "removable": True,  "default": False},
+                "WAV"           : {"order": 8, "type": "celltype", "width": 40,  "removable": True,  "default": False},
+                "N"             : {"order": 9, "type": "celltype", "width": 40,  "removable": True,  "default": False},
+                "Not_Cell"      : {"order": 10, "type": "celltype", "width": 80,  "removable": False, "name_fixed": True, "default": False},
+                "Check"         : {"order": 11, "type": "checkbox", "width": 80,  "removable": True,  "default": False},
+                "Tracking"      : {"order": 12, "type": "checkbox", "width": 80,  "removable": True,  "default": False},
+                "Memo"          : {"order": 13, "type": "string",   "width": 200, "removable": True, }
             },
             AppKeys.SEC: {
-                "Cell_ID"   : {"order": 0, "type": "id",       "width": 80,  "removable": False, "name_fixed": True, "editable": False},
-                "Neuron"    : {"order": 1, "type": "celltype", "width": 80,  "removable": True,  "default": True},
-                "Astrocyte" : {"order": 2, "type": "celltype", "width": 80,  "removable": True,  "default": False},
-                "Not_Cell"  : {"order": 3, "type": "celltype", "width": 80,  "removable": False, "name_fixed": True, "default": False},
-                "Check"     : {"order": 4, "type": "checkbox", "width": 80,  "removable": True,  "default": False},
-                "Tracking"  : {"order": 5, "type": "checkbox", "width": 80,  "removable": True,  "default": False},
-                "Memo"      : {"order": 6, "type": "string",   "width": 200, "removable": True, }
+                "Cell_ID"       : {"order": 0, "type": "id",       "width": 80,  "removable": False, "name_fixed": True, "editable": False},
+                "W"             : {"order": 1, "type": "celltype", "width": 40,  "removable": True,  "default": True},
+                "A"             : {"order": 2, "type": "celltype", "width": 40,  "removable": True,  "default": False},
+                "V"             : {"order": 3, "type": "celltype", "width": 40,  "removable": True,  "default": False},
+                "WA"            : {"order": 4, "type": "celltype", "width": 40,  "removable": True,  "default": False},
+                "WV"            : {"order": 5, "type": "celltype", "width": 40,  "removable": True,  "default": False},
+                "AV"            : {"order": 6, "type": "celltype", "width": 40,  "removable": True,  "default": False},
+                "WAV"           : {"order": 7, "type": "celltype", "width": 40,  "removable": True,  "default": False},
+                "N"             : {"order": 8, "type": "celltype", "width": 40,  "removable": True,  "default": False},
+                "Not_Cell"      : {"order": 9, "type": "celltype", "width": 80,  "removable": False, "name_fixed": True, "default": False},
+                "Check"         : {"order": 10, "type": "checkbox", "width": 80,  "removable": True,  "default": False},
+                "Tracking"      : {"order": 11, "type": "checkbox", "width": 80,  "removable": True,  "default": False},
+                "Memo"          : {"order": 12, "type": "string",   "width": 200, "removable": True, }
             },
         },
         "KEY_FUNCTION_MAP": {

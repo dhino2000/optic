@@ -856,8 +856,6 @@ processing_roi_layouts
 def bindFuncButtonRunROIMatching(
     q_widget: 'QWidget',
     q_button: 'QPushButton',
-    q_buttongroup_celltype_pri: 'QButtonGroup',
-    q_buttongroup_celltype_sec: 'QButtonGroup',
     widget_manager: 'WidgetManager',
     data_manager: 'DataManager',
     control_manager: 'ControlManager',
@@ -866,12 +864,13 @@ def bindFuncButtonRunROIMatching(
 ):
     def _runROIMatching():
         view_control_pri = control_manager.view_controls[app_key_pri]
-        roi_display_type_pri = q_buttongroup_celltype_pri.checkedButton().text()
-        roi_display_type_sec = q_buttongroup_celltype_sec.checkedButton().text()
+        roi_vis_type_pri = [celltype for celltype, vis in control_manager.getSharedAttr("pri", "celltype_visibility").items() if vis]
+        roi_vis_type_sec = [celltype for celltype, vis in control_manager.getSharedAttr("sec", "celltype_visibility").items() if vis]
+
         result = showConfirmationDialog(
             q_widget,
             'Confirmation',
-            f"Match only displayed ROIs? \nYes: Match {roi_display_type_pri} ROIs and {roi_display_type_sec} ROIs \nNo: Match all ROIs \nCancel: Cancel"
+            f"Match only displayed ROIs? \nYes \npri: {roi_vis_type_pri} ROIs \nsec:{roi_vis_type_sec} ROIs \nNo: Match all ROIs \nCancel: Cancel"
         )
         # use registered coordinates if show_reg_im_roi is True
         if view_control_pri.show_reg_im_roi:
@@ -886,10 +885,11 @@ def bindFuncButtonRunROIMatching(
             roi_display_sec = list(control_manager.getSharedAttr(app_key_sec, "roi_display").values())
             array_src = array_src[roi_display_pri]
             array_tgt = array_tgt[roi_display_sec]
+        elif result == QMessageBox.No: # all ROI
+            roi_display_pri = [True for roi_id in control_manager.getSharedAttr(app_key_pri, "roi_display").keys()]
+            roi_display_sec = [True for roi_id in control_manager.getSharedAttr(app_key_sec, "roi_display").keys()]
         elif result == QMessageBox.Cancel:
             return 
-        else:
-            pass
 
         method = widget_manager.dict_combobox["ot_method"].currentText()
         metric = "minkowski"

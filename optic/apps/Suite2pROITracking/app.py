@@ -133,21 +133,22 @@ class Suite2pROITrackingGUI(QMainWindow):
     
     # ROI display, background image button group, checkbox
     def makeLayoutComponentROIDisplay_BGImageDisplay_ROISkip(self, app_key):
-        layout = QVBoxLayout()
-        layout.addLayout(makeLayoutWidgetDislplayCelltype(
-            self, 
+        layout = QHBoxLayout()
+        layout.addWidget(makeLayoutWidgetDislplayCelltype(
             self.widget_manager, 
-            key_buttongroup=f'{app_key}_display_celltype', 
+            key_checkbox=f'{app_key}_display_celltype', 
+            key_scrollarea=f'{app_key}_display_celltype', 
             table_columns=self.config_manager.table_columns[app_key]
         ))
-        layout.addLayout(makeLayoutWidgetBGImageTypeDisplay(
+        layout.addWidget(makeLayoutWidgetBGImageTypeDisplay(
             self, 
             self.widget_manager, 
             key_buttongroup=f'{app_key}_im_bg_type'
         ))
-        layout.addLayout(makeLayoutWidgetROIChooseSkip(
+        layout.addWidget(makeLayoutWidgetROIChooseSkip(
             self.widget_manager, 
-            key_checkbox=f'{app_key}', 
+            key_checkbox=f'{app_key}_skip_celltype', 
+            key_scrollarea=f'{app_key}_skip_celltype', 
             table_columns=self.config_manager.table_columns[app_key]
         ))
         return layout
@@ -388,15 +389,18 @@ class Suite2pROITrackingGUI(QMainWindow):
                 q_buttongroup=self.widget_manager.dict_buttongroup[f"{app_key}_im_bg_type"], 
                 view_control=self.control_manager.view_controls[app_key],
             )
-            # Radiobutton ROIDisplayType buttonChanged
-            bindFuncRadiobuttonDisplayCelltypeChanged(
-                q_buttongroup=self.widget_manager.dict_buttongroup[f"{app_key}_display_celltype"], 
+            # Radiobutton ROIDisplayType checkboxChanged
+            dict_q_checkbox = {}
+            for celltype in self.config_manager.table_columns[app_key]._celltype:
+                dict_q_checkbox[celltype] = [checkbox for key, checkbox in self.widget_manager.dict_checkbox.items() if (celltype in key) and ("celltype_roi_display" in key) and (app_key in key)][0]
+            bindFuncCheckBoxDisplayCelltypeChanged(
+                dict_q_checkbox=dict_q_checkbox, 
                 view_control=self.control_manager.view_controls[app_key],
                 table_control=self.control_manager.table_controls[app_key],
             )
             # Checkbox ROISkip stateChanged
             bindFuncCheckBoxROIChooseSkip(
-                list_q_checkbox=[q_checkbox for key, q_checkbox in self.widget_manager.dict_checkbox.items() if (f"skip_choose_" in key) and (f"{app_key}" in key)],
+                dict_q_checkbox=dict_q_checkbox,
                 control_manager=self.control_manager,
                 app_key=app_key,
             )
@@ -516,8 +520,6 @@ class Suite2pROITrackingGUI(QMainWindow):
         bindFuncButtonRunROIMatching(
             self,
             q_button=self.widget_manager.dict_button['ot_run'],
-            q_buttongroup_celltype_pri=self.widget_manager.dict_buttongroup[f"{self.app_keys[0]}_display_celltype"],
-            q_buttongroup_celltype_sec=self.widget_manager.dict_buttongroup[f"{self.app_keys[1]}_display_celltype"],
             widget_manager=self.widget_manager,
             data_manager=self.data_manager,
             control_manager=self.control_manager,
