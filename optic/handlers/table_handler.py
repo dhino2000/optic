@@ -89,6 +89,8 @@ class TableHandler:
                             if table_control.q_table.cellWidget(row, col_order) == button:
                                 button.setChecked(True)
                                 table_control.changeRadiobuttonOfTable(row)
+                                # update data_manager.dict_roi_celltype
+                                self.data_manager.dict_roi_celltype[self.app_key][row] = col_name
                                 break
                 elif col_info['type'] == 'checkbox':
                     check_box_item = table_control.q_table.item(row, col_order)

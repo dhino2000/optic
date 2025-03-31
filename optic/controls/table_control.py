@@ -52,8 +52,9 @@ class TableControl:
         # if celltype columns are ["Neuron", "Astrocyte", "Not_Cell"], set "Neuron" or "Not_Cell" radiobutton
         celltype_pos = [col_name for col_name in self.table_columns.getColumns().keys() if self.table_columns.getColumns()[col_name]["type"] == "celltype"][0] # first celltype except "Not_Cell"
         celltype_neg = [col_name for col_name in self.table_columns.getColumns().keys() if self.table_columns.getColumns()[col_name]["type"] == "celltype"][-1]
-        self.setROICellTypeFromArray(self.data_manager.getDictFall("pri")["iscell"][:,0], celltype_pos, celltype_neg) # set celltype with "iscell" array
+        self.setROICellTypeFromArray(self.data_manager.getDictFall("pri")["iscell"][:,0], celltype_pos, celltype_neg, app_key) # set celltype with "iscell" array
         updateROICountDisplay(self.widget_manager, self.config_manager, self.app_key)
+
 
     def setupWidgetDynamicTable(self, app_key: str) -> None:
         from ..gui.table_setup import setupWidgetDynamicTable
@@ -156,6 +157,21 @@ class TableControl:
             return int(self.q_table.item(row, col_info['order']).text())
         except (ValueError, AttributeError):
             return None
+        
+    # get Table Column name from table column
+    def getTableColumnNameFromColumn(self, column: int) -> str:
+        for col_name, col_info in self.table_columns.getColumns().items():
+            if col_info["order"] == column:
+                return col_name
+            
+    # get celltype name from table column
+    def getCelltypeFromColumn(self, column: int) -> Optional[str]:
+        for col_name, col_info in self.table_columns.getColumns().items():
+            if col_info["order"] == column:
+                if col_info["type"] == "celltype": 
+                    return col_name 
+                else:
+                    return None
     """
     set Functions
     """
@@ -409,15 +425,18 @@ class TableControl:
         self,
         array_bool: np.ndarray[bool],
         celltype_pos: str = "Neuron",
-        celltype_neg: str = "Not_Cell"
+        celltype_neg: str = "Not_Cell",
+        app_key: AppKeys = "pri"
     ) -> None:
         # Get column indices
         columns = self.table_columns.getColumns()
         pos_col_idx = columns.get(celltype_pos, {}).get('order')
         neg_col_idx = columns.get(celltype_neg, {}).get('order')
 
-        # Update classifications
+        # Update classifications and initialize ROI celltype
+        self.data_manager.dict_roi_celltype[app_key] = {}
         for row, is_positive in enumerate(array_bool):
+            self.data_manager.dict_roi_celltype[app_key][row] = celltype_pos if is_positive else celltype_neg
             target_col = pos_col_idx if is_positive else neg_col_idx
             radio_button = self.q_table.cellWidget(row, target_col)
             if radio_button:

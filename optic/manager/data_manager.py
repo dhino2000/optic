@@ -18,6 +18,8 @@ class DataManager:
         self.dict_tiff_metadata:        Dict[AppKeys, Dict[str, Any]] = {}
         self.dict_tiff_reg:             Dict[AppKeys, np.ndarray[Tuple[int, int, int, int, int]]] = {}
 
+        # ROI celltype
+        self.dict_roi_celltype:         Dict[AppKeys, Dict[int, str]] = {}
         # ROI coordinates
         self.dict_roi_coords:           Dict[AppKeys, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]] = {}
         self.dict_roi_coords_reg:       Dict[AppKeys, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]] = {}
@@ -143,6 +145,12 @@ class DataManager:
     # get nchannels
     def getNChannels(self, app_key: AppKeys) -> int:
         return self.dict_Fall[app_key]["ops"]["nchannels"]
+    
+    # get ROI celltype
+    def getDictROICelltype(self, app_key: AppKeys, id_roi: int=None) -> Dict[int, str] | str:
+        if not id_roi == None:
+            return self.dict_roi_celltype.get(app_key).get(id_roi)
+        return self.dict_roi_celltype.get(app_key)
     # get ROI coordinates
     def getDictROICoords(self, app_key: AppKeys) -> Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32], Tuple[int]]]:
         return self.dict_roi_coords.get(app_key)
