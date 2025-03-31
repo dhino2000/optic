@@ -96,6 +96,10 @@ class TableControl:
 
             cell_id = self.getCellIdFromRow(row)
             self.setSharedAttr_ROISelected(cell_id)
+            # update data_manager.dict_roi_celltype
+            celltype = self.getCelltypeFromColumn(column)
+            if celltype is not None:
+                self.data_manager.dict_roi_celltype[self.app_key][row] = celltype
 
     def onSelectionChangedWithTracking(self, selected: QItemSelection, deselected: QItemSelection) -> None:
         if selected.indexes():

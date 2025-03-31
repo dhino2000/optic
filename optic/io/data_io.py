@@ -216,7 +216,7 @@ def saveROICheck(
         local_var       : bool=True
         ) -> None:
     path_src = q_lineedit.text()
-    path_dst = generateSavePath(path_src, prefix="ROIcheck_", remove_strings="Fall_")
+    path_dst = generateSavePath(path_src, prefix="ROIcuration_", remove_strings="Fall_")
     path_dst, is_overwrite = saveFileDialog(q_widget=q_window, file_type=".mat", title="Save ROIcheck mat File", initial_dir=path_dst)
     
     if path_dst:
@@ -289,13 +289,13 @@ def loadROICheck(
             # check table column names
             list_table_columns = list(table_control.table_columns.getColumns().keys())
             list_table_columns.remove("Cell_ID")
-            list_roicheck_columns = list(dict_roicheck.keys())
-            list_roicheck_columns.remove("user")
-            if not list_table_columns == list_roicheck_columns: # check also order of columns
+            list_roicuration_columns = list(dict_roicheck.keys())
+            list_roicuration_columns.remove("user")
+            if not list_table_columns == list_roicuration_columns: # check also order of columns
                 reply = QMessageBox.warning(
                     q_window, 
                     "Column names match error", 
-                    f"Column names do not match! \nTable: {list_table_columns} \n ROICheck: {list_roicheck_columns} \n Do you want to load it anyway?",
+                    f"Column names do not match! \nTable: {list_table_columns} \n ROICheck: {list_roicuration_columns} \n Do you want to load it anyway?",
                     QMessageBox.Yes | QMessageBox.No,
                     )
                 if reply == QMessageBox.No:

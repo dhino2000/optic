@@ -43,6 +43,8 @@ def convertTableDataToDictROICheck(
                 item = q_table.item(row, col_info['order'])
                 dict_roicheck[col_name][row] = item.text() if item else ''
 
+    dict_roicheck["TableColumns"] = table_columns.getColumns()
+
     return dict_roicheck
 
 # dict_roicheck -> mat_roicheck

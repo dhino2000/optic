@@ -190,8 +190,8 @@ class Suite2pROITrackingGUI(QMainWindow):
         layout.addWidget(self.widget_manager.makeWidgetButton(key=f"{app_key}_config_table", label="Table Columns Config"))
         layout.addLayout(makeLayoutROICheckIO(
             self.widget_manager, 
-            key_button_save=f"roicheck_save_{app_key}",
-            key_button_load=f"roicheck_load_{app_key}",
+            key_button_save=f"roicuration_save_{app_key}",
+            key_button_load=f"roicuration_load_{app_key}",
         ))
         return layout
 
@@ -371,8 +371,8 @@ class Suite2pROITrackingGUI(QMainWindow):
             bindFuncROICheckIO(
                 q_window=self, 
                 q_lineedit=self.widget_manager.dict_lineedit[f"path_fall_{app_key}"], 
-                q_button_save=self.widget_manager.dict_button[f"roicheck_save_{app_key}"], 
-                q_button_load=self.widget_manager.dict_button[f"roicheck_load_{app_key}"], 
+                q_button_save=self.widget_manager.dict_button[f"roicuration_save_{app_key}"], 
+                q_button_load=self.widget_manager.dict_button[f"roicuration_load_{app_key}"], 
                 q_table=self.widget_manager.dict_table[f"{app_key}"], 
                 widget_manager=self.widget_manager,
                 config_manager=self.config_manager,

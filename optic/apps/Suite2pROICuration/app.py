@@ -254,8 +254,8 @@ class Suite2pROICurationGUI(QMainWindow):
         layout.addWidget(self.widget_manager.makeWidgetButton(key=f"{self.app_key_pri}_roi_celltype_set", label="Set ROI Celltype"))
         layout.addLayout(makeLayoutROICheckIO(
             self.widget_manager, 
-            key_button_save=f"roicheck_save_{self.app_key_pri}",
-            key_button_load=f"roicheck_load_{self.app_key_pri}",
+            key_button_save=f"roicuration_save_{self.app_key_pri}",
+            key_button_load=f"roicuration_load_{self.app_key_pri}",
         ))
         return layout
 
@@ -361,8 +361,8 @@ class Suite2pROICurationGUI(QMainWindow):
         bindFuncROICheckIO(
             q_window=self, 
             q_lineedit=self.widget_manager.dict_lineedit[f"path_fall_{self.app_key_pri}"], 
-            q_button_save=self.widget_manager.dict_button[f"roicheck_save_{self.app_key_pri}"], 
-            q_button_load=self.widget_manager.dict_button[f"roicheck_load_{self.app_key_pri}"], 
+            q_button_save=self.widget_manager.dict_button[f"roicuration_save_{self.app_key_pri}"], 
+            q_button_load=self.widget_manager.dict_button[f"roicuration_load_{self.app_key_pri}"], 
             q_table=self.widget_manager.dict_table[f"{self.app_key_pri}"], 
             widget_manager=self.widget_manager,
             config_manager=self.config_manager,
