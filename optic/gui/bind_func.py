@@ -1179,11 +1179,12 @@ def bindFuncButtonRunCellposeForXYCT(
         model_type = q_combobox_model.currentText()
         restore_type = q_combobox_restore.currentText()
         diam = int(q_spinbox_diameter.value())
-        # run cellpose for all t_plane
+        get_reg = control_manager.view_controls["pri"].getShowRegStack() # hardcoded !!!
+        # run cellpose for all t_planes
         if t_plane == -1:
             for t_plane in range(data_manager.getSizeOfT("pri")):
                 only_id = (t_plane == data_manager.getSizeOfT("pri") - 1) # last t_plane, only dict_roi_matching["id"]
-                img = data_manager.getImageFromXYCZTTiffStack("pri", 0, t_plane, channel)
+                img = data_manager.getImageFromXYCZTTiffStack("pri", 0, t_plane, channel, get_reg)
                 mask, flow, style, img_dn = runCellposeDenoiseForMonoImage(img, diam, model_type, restore_type)
                 mask = mask.T # (x, y) -> (y, x)
                 data_manager.dict_roi_coords_xyct[t_plane] = convertCellposeMaskToDictROICoords(mask)
@@ -1191,11 +1192,13 @@ def bindFuncButtonRunCellposeForXYCT(
                 data_manager.dict_roi_matching = convertSingleCellposeMaskToDictROIMatching(data_manager.dict_roi_matching, mask, t_plane, only_id)
                 # initialize ROI XYCT Colors
                 for roi_id in data_manager.dict_roi_matching["id"][t_plane]:
+                    # hardcoded !!!
                     control_manager.view_controls["pri"].roi_colors_xyct[t_plane][roi_id] = generateRandomColor()
                     control_manager.view_controls["sec"].roi_colors_xyct[t_plane][roi_id] = control_manager.view_controls["pri"].roi_colors_xyct[t_plane][roi_id]
         else:
+            # hardcoded !!!
             only_id = (t_plane == data_manager.getSizeOfT("pri") - 1) # last t_plane, only dict_roi_matching["id"]
-            img = data_manager.getImageFromXYCZTTiffStack("pri", 0, t_plane, channel)
+            img = data_manager.getImageFromXYCZTTiffStack("pri", 0, t_plane, channel, get_reg)
             mask, flow, style, img_dn = runCellposeDenoiseForMonoImage(img, diam, model_type, restore_type)
             mask = mask.T # (x, y) -> (y, x)
             data_manager.dict_roi_coords_xyct[t_plane] = convertCellposeMaskToDictROICoords(mask)
@@ -1203,10 +1206,12 @@ def bindFuncButtonRunCellposeForXYCT(
             data_manager.dict_roi_matching = convertSingleCellposeMaskToDictROIMatching(data_manager.dict_roi_matching, mask, t_plane, only_id)
             # initialize ROI XYCT Colors
             for roi_id in data_manager.dict_roi_matching["id"][t_plane]:
+                # hardcoded !!!
                 control_manager.view_controls["pri"].roi_colors_xyct[t_plane][roi_id] = generateRandomColor()
                 control_manager.view_controls["sec"].roi_colors_xyct[t_plane][roi_id] = control_manager.view_controls["pri"].roi_colors_xyct[t_plane][roi_id]
 
         # update Table, View
+        # hardcoded !!!
         t_plane_pri = control_manager.view_controls["pri"].getPlaneT()
         t_plane_sec = control_manager.view_controls["sec"].getPlaneT()
         for app_key, use_match in zip(config_manager.gui_defaults["APP_KEYS"], [True, False]):
