@@ -85,7 +85,7 @@ def loadTiffStack(
 def loadEventFilesNPY(
         q_window        : QMainWindow, 
         data_manager    : DataManager, 
-        app_key         : str
+        app_key         : str,
         ) -> None | np.array:
     list_path_eventfile = openFileDialog(q_widget=q_window, file_type=".npy", title="Open Eventfile npy File", multiple=True)
     list_path_eventfile = [path.replace("\\", "/") for path in list_path_eventfile]
@@ -140,9 +140,13 @@ def saveROIManagerZip(
         q_window        : QMainWindow, 
         q_lineedit      : QLineEdit, 
         list_roi        : List[ImagejRoi],
+        is_save_reg     : bool=False,
         ) -> None:
     path_src = q_lineedit.text()
-    path_dst = generateSavePath(path_src, prefix="RoiSet_", new_extension=".zip")
+    if is_save_reg:
+        path_dst = generateSavePath(path_src, prefix="RoiSet_", new_extension="_reg.zip")
+    else:
+        path_dst = generateSavePath(path_src, prefix="RoiSet_", new_extension=".zip")
     path_dst, is_overwrite = saveFileDialog(q_widget=q_window, file_type=".zip", title="Save ROI Manager zip File", initial_dir=path_dst)
     
     if path_dst:

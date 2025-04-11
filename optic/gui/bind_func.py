@@ -361,20 +361,25 @@ def bindFuncROIMaskNpyIO(
 # -> io_layouts.makeLayoutROIManager
 def bindFuncROIManagerZipIO(
     q_button_save: 'QPushButton', 
+    q_button_save_reg: 'QPushButton',
     q_button_load: 'QPushButton', 
     q_window: 'QWidget', 
     q_lineedit: 'QLineEdit',
     data_manager: 'DataManager',
     control_manager: 'ControlManager',
 ) -> None:
-    def _saveROIManagerZip() -> None:
+    def _saveROIManagerZip(is_roi_reg: bool) -> None:
         dict_roi_matching = data_manager.dict_roi_matching
-        dict_roi_coords_xyct_reg = data_manager.dict_roi_coords_xyct_reg
-        list_roi = convertDictROIMatchingAndDictROICoordsToImagejRoi(dict_roi_matching, dict_roi_coords_xyct_reg)
+        if is_roi_reg: # registered ROIs
+            dict_roi_coords_xyct = data_manager.dict_roi_coords_xyct_reg
+        else:
+            dict_roi_coords_xyct = data_manager.dict_roi_coords_xyct
+        list_roi = convertDictROIMatchingAndDictROICoordsToImagejRoi(dict_roi_matching, dict_roi_coords_xyct)
         saveROIManagerZip(
             q_window,
             q_lineedit,
-            list_roi
+            list_roi,
+            is_roi_reg,
         )
 
     def _loadROIManagerZip() -> None:
@@ -418,7 +423,8 @@ def bindFuncROIManagerZipIO(
         control_manager.table_controls["pri"].updateWidgetDynamicTableWithT(data_manager.dict_roi_matching, t_plane_pri, t_plane_sec, True)
         control_manager.table_controls["sec"].updateWidgetDynamicTableWithT(data_manager.dict_roi_matching, t_plane_pri, t_plane_sec, False)
 
-    q_button_save.clicked.connect(lambda: _saveROIManagerZip())
+    q_button_save.clicked.connect(lambda: _saveROIManagerZip(is_roi_reg=False))
+    q_button_save_reg.clicked.connect(lambda: _saveROIManagerZip(is_roi_reg=True))
     q_button_load.clicked.connect(lambda: _loadROIManagerZip())
 
 

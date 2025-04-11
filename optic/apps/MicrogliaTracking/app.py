@@ -306,6 +306,7 @@ class MicrogliaTrackingGUI(QMainWindow):
             self.widget_manager,
             "roi_manager",
             "roi_save",
+            "roi_save_reg",
             "roi_load",
         ))
         return layout
@@ -457,6 +458,7 @@ class MicrogliaTrackingGUI(QMainWindow):
         # ImageJ ROI Manager zip IO
         bindFuncROIManagerZipIO(
             q_button_save=self.widget_manager.dict_button["roi_save"],
+            q_button_save_reg=self.widget_manager.dict_button["roi_save_reg"],
             q_button_load=self.widget_manager.dict_button["roi_load"],
             q_window=self,
             q_lineedit=self.widget_manager.dict_lineedit["path_tiff"],
@@ -498,6 +500,14 @@ class MicrogliaTrackingGUI(QMainWindow):
             combobox_elastix_method=self.widget_manager.dict_combobox[f"elastix_method"],
             combobox_channel_ref=self.widget_manager.dict_combobox[f"elastix_ref_c"],
             combobox_idx_ref=self.widget_manager.dict_combobox[f"elastix_ref_plane_t"],
+        )
+        # export registration result
+        bindFuncButtonSaveRegisterdImage(
+            q_widget=self,
+            q_button=self.widget_manager.dict_button[f"export_reg_tiff"],
+            data_manager=self.data_manager,
+            app_key=self.app_keys[0],
+            path_tif_src=self.widget_manager.dict_lineedit[f"path_tiff"].text(),
         )
         # Elastix config
         self.widget_manager.dict_button[f"elastix_config"].clicked.connect(

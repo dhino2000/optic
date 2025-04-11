@@ -121,7 +121,7 @@ def makeLayoutMicrogliaXYCTStackRegistration(
     layout.addLayout(layout_run)
     layout.addLayout(layout_checkbox)
     layout.addLayout(layout_slider)
-    layout.addWidget(widget_manager.makeWidgetButton(key=key_button_export, label="Export Image"))
+    layout.addWidget(widget_manager.makeWidgetButton(key=key_button_export, label="Export Registered Image"))
     return layout
 
 # Stack Image Registration config

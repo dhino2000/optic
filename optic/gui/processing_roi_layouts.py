@@ -163,11 +163,12 @@ def makeLayoutROIManager(
         widget_manager: WidgetManager,
         key_label_roi_manager: str,
         key_button_save_roi: str,
+        key_button_save_reg_roi: str,
         key_button_load_roi: str,
         ) -> QVBoxLayout:
     layout = QVBoxLayout()
     layout.addWidget(widget_manager.makeWidgetLabel(key=key_label_roi_manager, label="ImageJ ROI Manager", bold=True, italic=True, use_global_style=False))
-    layout.addLayout(makeLayoutROIManagerIO(widget_manager, key_button_save_roi, key_button_load_roi))
+    layout.addLayout(makeLayoutROIManagerIO(widget_manager, key_button_save_roi, key_button_save_reg_roi, key_button_load_roi))
     return layout
 
 # ROI Manager layout for Table
