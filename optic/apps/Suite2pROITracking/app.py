@@ -138,7 +138,8 @@ class Suite2pROITrackingGUI(QMainWindow):
             self.widget_manager, 
             key_checkbox=f'{app_key}_display_celltype', 
             key_scrollarea=f'{app_key}_display_celltype', 
-            table_columns=self.config_manager.table_columns[app_key]
+            table_columns=self.config_manager.table_columns[app_key],
+            gui_defaults=self.config_manager.gui_defaults,
         ))
         layout.addWidget(makeLayoutWidgetBGImageTypeDisplay(
             self, 
@@ -149,7 +150,8 @@ class Suite2pROITrackingGUI(QMainWindow):
             self.widget_manager, 
             key_checkbox=f'{app_key}_skip_celltype', 
             key_scrollarea=f'{app_key}_skip_celltype', 
-            table_columns=self.config_manager.table_columns[app_key]
+            table_columns=self.config_manager.table_columns[app_key],
+            gui_defaults=self.config_manager.gui_defaults,
         ))
         return layout
     

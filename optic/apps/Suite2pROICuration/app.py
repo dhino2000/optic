@@ -194,7 +194,8 @@ class Suite2pROICurationGUI(QMainWindow):
             self.widget_manager, 
             key_checkbox=f'{self.app_key_pri}_display_celltype', 
             key_scrollarea=f'{self.app_key_pri}_display_celltype', 
-            table_columns=self.config_manager.table_columns[self.app_key_pri]
+            table_columns=self.config_manager.table_columns[self.app_key_pri],
+            gui_defaults=self.config_manager.gui_defaults,
         ))
         layout.addWidget(makeLayoutWidgetBGImageTypeDisplay(
             self, 
@@ -205,7 +206,8 @@ class Suite2pROICurationGUI(QMainWindow):
             self.widget_manager, 
             key_checkbox=f'{self.app_key_pri}_skip_celltype', 
             key_scrollarea=f'{self.app_key_pri}_skip_celltype', 
-            table_columns=self.config_manager.table_columns[self.app_key_pri]
+            table_columns=self.config_manager.table_columns[self.app_key_pri],
+            gui_defaults=self.config_manager.gui_defaults,
         ))
         return layout
 
