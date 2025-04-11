@@ -73,7 +73,8 @@ def makeLayoutWidgetDislplayCelltype(
         widget_manager: WidgetManager, 
         key_checkbox: str, 
         key_scrollarea: str,
-        table_columns: TableColumns
+        table_columns: TableColumns,
+        gui_defaults: GuiDefaults,
         ) -> QScrollArea:
     # change ROI display celltypes
     widget = QWidget()
@@ -84,7 +85,7 @@ def makeLayoutWidgetDislplayCelltype(
         label_checkbox_item = f"{celltype}"
         layout.addWidget(widget_manager.makeWidgetCheckBox(key=f"{key_checkbox}_{key_checkbox_item}", label=label_checkbox_item, checked=True))
     widget.setLayout(layout)
-    scrollarea = widget_manager.makeWidgetScrollArea(key=key_scrollarea)
+    scrollarea = widget_manager.makeWidgetScrollArea(key=key_scrollarea, height_max=gui_defaults["SCROOLAREA_SETTINGS"]["MAX_HEIGHT"])
     scrollarea.setWidget(widget)
     return scrollarea
 
@@ -92,7 +93,7 @@ def makeLayoutWidgetDislplayCelltype(
 def makeLayoutWidgetBGImageTypeDisplay(
         q_widget: QWidget, 
         widget_manager: WidgetManager, 
-        key_buttongroup: str
+        key_buttongroup: str,
         ) -> QWidget:
     # meanImg, meanImgE, max_proj, Vcorr
     bg_types = BGImageTypeList.FALL
@@ -109,7 +110,8 @@ def makeLayoutWidgetROIChooseSkip(
         widget_manager: WidgetManager, 
         key_checkbox: str, 
         key_scrollarea: str,
-        table_columns: TableColumns
+        table_columns: TableColumns,
+        gui_defaults: GuiDefaults,
         ) -> QWidget:
     widget = QWidget()
     layout = QVBoxLayout()
@@ -119,7 +121,7 @@ def makeLayoutWidgetROIChooseSkip(
         label_checkbox_item = f"Skip {item} ROI"
         layout.addWidget(widget_manager.makeWidgetCheckBox(key=f"{key_checkbox}_{key_checkbox_item}", label=label_checkbox_item))
     widget.setLayout(layout)
-    scrollarea = widget_manager.makeWidgetScrollArea(key=key_scrollarea)
+    scrollarea = widget_manager.makeWidgetScrollArea(key=key_scrollarea, height_max=gui_defaults["SCROOLAREA_SETTINGS"]["MAX_HEIGHT"])
     scrollarea.setWidget(widget)
     return scrollarea
 
