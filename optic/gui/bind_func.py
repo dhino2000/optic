@@ -876,7 +876,7 @@ def bindFuncButtonRunROIMatching(
         result = showConfirmationDialog(
             q_widget,
             'Confirmation',
-            f"Match only displayed ROIs? \nYes \npri: {roi_vis_type_pri} ROIs \nsec:{roi_vis_type_sec} ROIs \nNo: Match all ROIs \nCancel: Cancel"
+            f"Match only displayed ROIs? \nNo: Match all ROIs \nCancel: Cancel"
         )
         # use registered coordinates if show_reg_im_roi is True
         if view_control_pri.show_reg_im_roi:
@@ -889,8 +889,8 @@ def bindFuncButtonRunROIMatching(
         if result == QMessageBox.Yes:
             dict_roi_display_pri = control_manager.getSharedAttr(app_key_pri, "dict_roi_display")
             dict_roi_display_sec = control_manager.getSharedAttr(app_key_sec, "dict_roi_display")
-            roi_display_pri = list(all(dict_roi_display_pri.values()))
-            roi_display_sec = list(all(dict_roi_display_sec.values()))
+            roi_display_pri = [all(dict_val.values()) for dict_val in dict_roi_display_pri.values()]
+            roi_display_sec = [all(dict_val.values()) for dict_val in dict_roi_display_sec.values()]
             array_src = array_src[roi_display_pri]
             array_tgt = array_tgt[roi_display_sec]
         elif result == QMessageBox.No: # all ROI
