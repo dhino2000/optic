@@ -15,9 +15,11 @@ class ControlManager:
         """
         self.shared_attr = defaultdict(dict)
 
+    # set value of shared_attr
     def setSharedAttr(self, app_key: Union[AppKeys, str], key_attr: str, value: Any) -> None:
         self.shared_attr[app_key][key_attr] = value
 
+    # set value of a dict in shared_attr
     def setSharedAttrDictValue(self, app_key: Union[AppKeys, str], key_attr: str, key_dict: str, value: Any) -> None:
         self.shared_attr[app_key][key_attr][key_dict] = value
 

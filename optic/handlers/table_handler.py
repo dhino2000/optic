@@ -105,7 +105,7 @@ class TableHandler:
         Move to the next/previous cell with the same cell type
         """
         table_control = self.table_control
-        current_cell_type = table_control.getCurrentCellType(start_row)
+        current_cell_type = table_control.getCurrentCellTypeOfRow(start_row)
         total_rows = table_control.q_table.rowCount()
         new_row = start_row
 
@@ -113,7 +113,7 @@ class TableHandler:
             new_row = (new_row + direction) % total_rows
             if new_row == start_row:
                 break
-            if table_control.getCurrentCellType(new_row) == current_cell_type:
+            if table_control.getCurrentCellTypeOfRow(new_row) == current_cell_type:
                 table_control.selected_row = new_row
                 return
             
@@ -145,7 +145,7 @@ class TableHandler:
         Move to the next/previous ROI of the selected type
         """
         table_control = self.table_control
-        roi_display = table_control.getSharedAttr_ROIDisplay()
+        dict_roi_display = table_control.getSharedAttr_DictROIDisplay()
         total_rows = table_control.q_table.rowCount()
         new_row = start_row
 
@@ -153,7 +153,7 @@ class TableHandler:
             new_row = (new_row + direction) % total_rows
             if new_row == start_row:
                 break
-            if roi_display[new_row]:
+            if dict_roi_display[new_row]:
                 table_control.selected_row = new_row
                 return
             
@@ -216,10 +216,10 @@ class TableHandler:
     #         roi_id = table_control.getCellIdFromRow(current_row)
     #         if roi_id is not None:
     #             # Remove ROI from display
-    #             roi_display = table_control.getSharedAttr_ROIDisplay()
+    #             roi_display = table_control.getSharedAttr_DictROIDisplay()
     #             if roi_id in roi_display:
     #                 del roi_display[roi_id]
-    #                 table_control.setSharedAttr_ROIDisplay(roi_display)
+    #                 table_control.setSharedAttr_DictROIDisplay(roi_display)
                 
     #             # Remove row from table
     #             table_control.q_table.removeRow(current_row)

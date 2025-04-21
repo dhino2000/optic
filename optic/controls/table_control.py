@@ -28,15 +28,15 @@ class TableControl:
         self.table_columns:                TableColumns = self.config_manager.getTableColumns(self.app_key)
 
         if not self.config_manager.getKeyFunctionMap(self.app_key) is None:
-            self.key_function_map:    Dict[Qt.Key, Any] = self.config_manager.getKeyFunctionMap(self.app_key).getAllMappings()
+            self.key_function_map   : Dict[Qt.Key, Any] = self.config_manager.getKeyFunctionMap(self.app_key).getAllMappings()
         else:
             self.key_function_map                       = {}
-        self.groups_celltype:   Dict[int, QButtonGroup] = {}
-        self.selected_row:                          int = 0
-        self.selected_column:                       int = 0
-        self.len_row:                               int = 0
+        self.groups_celltype        : Dict[int, QButtonGroup] = {}
+        self.selected_row           : int = 0
+        self.selected_column        : int = 0
+        self.len_row                : int = 0
         # for Microglia Tracking
-        self.plane_t:                               int = 0
+        self.plane_t                : int = 0
 
         # set TableHandler
         self.table_handler:                TableHandler = TableHandler(self)
@@ -46,8 +46,9 @@ class TableControl:
         self.setLenRow(len(self.data_manager.getStat(self.app_key))) # for Suite2p
         self.q_table, self.groups_celltype = setupWidgetROITable(self.q_table, self.len_row, self.table_columns, key_event_ignore=True)
         self.setKeyPressEvent()
-        self.initalizeSharedAttr_ROIDisplay()
+        self.initalizeSharedAttr_DictROIDisplay()
         self.initalizeSharedAttr_CelltypeVisibility()
+        self.initalizeSharedAttr_CheckboxVisibility()
         # set celltype with TableColumns
         # if celltype columns are ["Neuron", "Astrocyte", "Not_Cell"], set "Neuron" or "Not_Cell" radiobutton
         celltype_pos = [col_name for col_name in self.table_columns.getColumns().keys() if self.table_columns.getColumns()[col_name]["type"] == "celltype"][0] # first celltype except "Not_Cell"
@@ -64,7 +65,7 @@ class TableControl:
     def updateWidgetROITable(self) -> None:
         from ..gui.table_setup import setupWidgetROITable
         self.q_table.clear()
-        self.q_table = setupWidgetROITable(self.q_table, self.len_row, self.table_columns, key_event_ignore=True)
+        self.q_table, groups_celltype = setupWidgetROITable(self.q_table, self.len_row, self.table_columns, key_event_ignore=True)
 
     def updateWidgetDynamicTableWithT(
         self, 
@@ -228,15 +229,20 @@ class TableControl:
     def getSharedAttr_ROIMatch(self) -> int:
         return self.control_manager.getSharedAttr(self.app_key, 'roi_match_id')
     
-    def setSharedAttr_ROIDisplay(self, roi_display: Dict[int, bool]) -> None:
-        self.control_manager.setSharedAttr(self.app_key, 'roi_display', roi_display)
+    def setSharedAttr_DictROIDisplay(self, dict_roi_display: Dict[int, Dict[str, bool]]) -> None:
+        self.control_manager.setSharedAttr(self.app_key, 'dict_roi_display', dict_roi_display)
 
-    def getSharedAttr_ROIDisplay(self) -> Dict[int, bool]:
-        return self.control_manager.getSharedAttr(self.app_key, 'roi_display')
+    def getSharedAttr_DictROIDisplay(self) -> Dict[int, Dict[str, bool]]:
+        return self.control_manager.getSharedAttr(self.app_key, 'dict_roi_display')
 
-    def initalizeSharedAttr_ROIDisplay(self) -> None:
-        roi_display = {roi_id: True for roi_id in range(self.len_row)}
-        self.control_manager.setSharedAttr(self.app_key, 'roi_display', roi_display)
+    def initalizeSharedAttr_DictROIDisplay(self) -> None:
+        dict_roi_display = {
+            roi_id: {
+                "celltype": True,
+                "checkbox": True,
+            } for roi_id in range(self.len_row)
+        }
+        self.control_manager.setSharedAttr(self.app_key, 'dict_roi_display', dict_roi_display)
 
     def getSharedAttr_CelltypeVisibility(self) -> Dict[str, bool]:
         return self.control_manager.getSharedAttr(self.app_key, 'celltype_visibility')
@@ -244,35 +250,90 @@ class TableControl:
     def setSharedAttr_CelltypeVisibility(self, celltype_visibility: Dict[str, bool]) -> None:
         self.control_manager.setSharedAttr(self.app_key, 'celltype_visibility', celltype_visibility)
 
+    def getSharedAttr_CheckboxVisibility(self) -> Dict[str, bool]:
+        return self.control_manager.getSharedAttr(self.app_key, 'checkbox_visibility')
+
+    def setSharedAttr_CheckboxVisibility(self, checkbox_visibility: Dict[str, bool]) -> None:
+        self.control_manager.setSharedAttr(self.app_key, 'checkbox_visibility', checkbox_visibility)
+
     def initalizeSharedAttr_CelltypeVisibility(self) -> None:
         list_celltype = [col_name for col_name in self.table_columns.getColumns().keys() if self.table_columns.getColumns()[col_name]["type"] == "celltype"]
         celltype_visibility = {celltype: True for celltype in list_celltype}
         self.setSharedAttr_CelltypeVisibility(celltype_visibility)
 
+    def initalizeSharedAttr_CheckboxVisibility(self) -> None:
+        list_checkbox = [col_name for col_name in self.table_columns.getColumns().keys() if self.table_columns.getColumns()[col_name]["type"] == "checkbox"]
+        checkbox_visibility = {checkbox: False for checkbox in list_checkbox}
+        self.setSharedAttr_CheckboxVisibility(checkbox_visibility)
+
     # with dict_checkbox["{app_key}_display_celltype"] change
     def updateROIDisplayWithCelltype(self, dict_celltype_visibility: Dict[str, bool]) -> None:
-        roi_display = self.getSharedAttr_ROIDisplay()
+        dict_roi_display = self.getSharedAttr_DictROIDisplay()
         # if all checkboxes of celltype are not checked
         if not any(dict_celltype_visibility.values()):
-            for roi_id in roi_display.keys():
-                roi_display[roi_id] = False
+            for roi_id in dict_roi_display.keys():
+                dict_roi_display[roi_id]["celltype"] = False
         else:
             # check each ROI celltype is in list_checked_celltype
-            for roi_id in roi_display.keys():
-                current_celltype = self.getCurrentCellType(roi_id)
-                roi_display[roi_id] = dict_celltype_visibility.get(current_celltype, False)
+            for roi_id in dict_roi_display.keys():
+                current_celltype = self.getCurrentCellTypeOfRow(roi_id)
+                dict_roi_display[roi_id]["celltype"] = dict_celltype_visibility.get(current_celltype, False)
         
-        self.setSharedAttr_ROIDisplay(roi_display)
+        self.setSharedAttr_DictROIDisplay(dict_roi_display)
         self.setSharedAttr_CelltypeVisibility(dict_celltype_visibility)
+
+    # with dict_checkbox["{app_key}_display_checkbox"] change
+    def updateROIDisplayWithCheckbox(self, dict_checkbox_visibility: Dict[str, bool]) -> None:
+        dict_roi_display = self.getSharedAttr_DictROIDisplay()
+        # if all checkboxes of checkboxes are not checked
+        if not any(dict_checkbox_visibility.values()):
+            for roi_id in dict_roi_display.keys():
+                dict_roi_display[roi_id]["checkbox"] = True
+        else:
+            # check each ROI's checkbox states
+            for roi_id in dict_roi_display.keys():
+                row = self.getRowFromCellId(roi_id)
+                # get all checkbox states for this row
+                checkbox_states = self.getCheckboxStatesOfRow(row)
+                # check the ROI's checkbox states with dict_checkbox_visibility
+                is_visible = True
+                for checkbox, is_visible_checkbox in dict_checkbox_visibility.items():
+                    if is_visible_checkbox and not checkbox_states.get(checkbox, False):
+                        is_visible = False
+                        break
+                        
+                dict_roi_display[roi_id]["checkbox"] = is_visible
+        
+        self.setSharedAttr_DictROIDisplay(dict_roi_display)
+        self.setSharedAttr_CheckboxVisibility(dict_checkbox_visibility)
 
     # with table's "celltype" radiobutton change
     def changeRadiobuttonOfTable(self, row: int) -> None:
-        roi_display = self.getSharedAttr_ROIDisplay()
+        dict_roi_display = self.getSharedAttr_DictROIDisplay()
         # check celltype of changed ROI
-        new_cell_type = self.getCurrentCellType(row)
+        new_cell_type = self.getCurrentCellTypeOfRow(row)
         dict_celltype_visibility = self.getSharedAttr_CelltypeVisibility()
-        roi_display[row] = dict_celltype_visibility.get(new_cell_type, False)
-        self.setSharedAttr_ROIDisplay(roi_display)
+        dict_roi_display[row]["celltype"] = dict_celltype_visibility.get(new_cell_type, False)
+        self.setSharedAttr_DictROIDisplay(dict_roi_display)
+
+    # with table's "checkbox" checkbox change
+    def changeCheckboxOfTable(self, row: int) -> None:
+        dict_roi_display = self.getSharedAttr_DictROIDisplay()
+        # check checkbox of changed ROI
+        dict_checkbox_visibility: Dict[str, bool] = self.getSharedAttr_CheckboxVisibility()
+        # get all checkbox states for this row
+        checkbox_states_row: Dict[str, bool] = self.getCheckboxStatesOfRow(row)
+        # check the ROI's checkbox states with dict_checkbox_visibility
+        is_visible = True
+        for checkbox_name, check_checkbox in dict_checkbox_visibility.items():
+            if check_checkbox:
+                if checkbox_states_row[checkbox_name]:
+                    pass
+                else:
+                    is_visible = False
+                    break
+        dict_roi_display[row]["checkbox"] = is_visible
+        self.setSharedAttr_DictROIDisplay(dict_roi_display)
 
     # with View mousePressEvent
     def updateSelectedROI(self, roi_id: int) -> None:
@@ -291,7 +352,7 @@ class TableControl:
     """
             
     # get celltype of radiobutton, Neruon/Astrocyte/...
-    def getCurrentCellType(self, row: int) -> str:
+    def getCurrentCellTypeOfRow(self, row: int) -> str:
         button_group = self.groups_celltype.get(row)
         if button_group:
             checked_button = button_group.checkedButton()
@@ -300,6 +361,15 @@ class TableControl:
                     if col_info['type'] == 'celltype' and self.q_table.cellWidget(row, col_info['order']) == checked_button:
                         return col_name
         return None
+    
+    # get checkbox state of the table, Check/Tracking/...
+    def getCheckboxStatesOfRow(self, row: int) -> Dict[str, bool]:
+        table_columns_ = self.table_columns.getColumns()
+        dict_checkbox_state = {}
+        for column_name in table_columns_.keys():
+            if table_columns_[column_name]["type"] == "checkbox":
+                dict_checkbox_state[column_name] = self.getCheckboxStatesOfColumn(column_name)[row]
+        return dict_checkbox_state
 
     # detect "Check" is checked or not
     def getRowChecked(self, row: int) -> bool:
@@ -330,7 +400,7 @@ class TableControl:
                 f"Skip {column} checked ROI ? (ROI {idx_min} to {idx_max})"
             )
             if result == QMessageBox.Yes:
-                skip_states[column] = self.getCheckboxStates(column)
+                skip_states[column] = self.getCheckboxStatesOfColumn(column)
             elif result == QMessageBox.Cancel:
                 return  # 処理を中断
             else:  # No の場合
@@ -350,7 +420,7 @@ class TableControl:
     def getCheckboxColumns(self) -> List[str]:
         return [col_name for col_name, col_info in self.table_columns.getColumns().items() if col_info['type'] == 'checkbox']
 
-    def getCheckboxStates(self, column_name: str) -> List[bool]:
+    def getCheckboxStatesOfColumn(self, column_name: str) -> List[bool]:
         col_info = self.table_columns.getColumns()[column_name]
         if col_info['type'] != 'checkbox':
             return []

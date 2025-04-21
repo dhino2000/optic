@@ -24,13 +24,14 @@ def updateLayerROI_Suite2pROICuration(
 
     painter = QPainter(pixmap)
     painter.setRenderHint(QPainter.Antialiasing)
-    roi_display = control_manager.getSharedAttr(app_key, "roi_display")
+    dict_roi_display = control_manager.getSharedAttr(app_key, "dict_roi_display")
     ROISelectedId = control_manager.getSharedAttr(app_key, "roi_selected_id")
     
     # draw all ROIs except selected ROI
     dict_roi_coords = data_manager.getDictROICoords(app_key)
     for roiId, dict_roi_coords_single in dict_roi_coords.items():
-        if roi_display[roiId] and roiId != ROISelectedId:
+        # check the all values of dict_roi_display[roiId] are True
+        if all(dict_roi_display[roiId].values()) and roiId != ROISelectedId: 
             color = view_control.getROIColor(roiId)
             opacity = view_control.getROIOpacity()
             # draw contour of all ROIs except selected ROI
@@ -74,7 +75,7 @@ def updateLayerROI_Suite2pROITracking(
 
     painter = QPainter(pixmap)
     painter.setRenderHint(QPainter.Antialiasing)
-    roi_display = control_manager.getSharedAttr(app_key_pri, "roi_display")
+    dict_roi_display = control_manager.getSharedAttr(app_key_pri, "dict_roi_display")
     ROISelectedId = control_manager.getSharedAttr(app_key_pri, "roi_selected_id")
 
     if view_control.show_reg_im_roi:
@@ -83,7 +84,7 @@ def updateLayerROI_Suite2pROITracking(
         dict_roi_coords = data_manager.getDictROICoords(app_key_pri)
     
     for roiId, dict_roi_coords_single in dict_roi_coords.items():
-        if roi_display[roiId] and roiId != ROISelectedId:
+        if all(dict_roi_display[roiId].values()) and roiId != ROISelectedId:
             color = view_control.getROIColor(roiId)
             opacity = view_control.getROIOpacity()
             drawROI(painter, dict_roi_coords_single, color, opacity)
@@ -355,8 +356,8 @@ def drawROIPairsOnlyDisplay(
         app_key_sec: AppKeys
         ) -> None:
     if view_control.show_roi_pair and app_key_sec is not None:
-        roi_display_pri = control_manager.getSharedAttr(app_key_pri, "roi_display")
-        roi_display_sec = control_manager.getSharedAttr(app_key_sec, "roi_display")
+        dict_roi_display_pri = control_manager.getSharedAttr(app_key_pri, "dict_roi_display")
+        dict_roi_display_sec = control_manager.getSharedAttr(app_key_sec, "dict_roi_display")
         try:
             table_control_pri = control_manager.table_controls[app_key_pri]
             table_control_sec = control_manager.table_controls[app_key_sec]
@@ -369,7 +370,7 @@ def drawROIPairsOnlyDisplay(
                 else:
                     coords_sec = data_manager.getDictROICoords(app_key_sec)[roiId_sec]["med"]
                 # show only if both ROIs are displayed
-                if roi_display_pri[roiId_pri] and roi_display_sec[roiId_sec] and roiId_pri != ROISelectedId:
+                if all(dict_roi_display_pri[roiId_pri].values()) and all(dict_roi_display_sec[roiId_sec].values()) and roiId_pri != ROISelectedId:
                     drawROIPair(painter, coords_pri, coords_sec, view_control.getROIPairOpacity())
                 elif roiId_pri == ROISelectedId:
                     coords_pri_selected, coords_sec_selected = coords_pri, coords_sec

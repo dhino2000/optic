@@ -192,18 +192,31 @@ class Suite2pROICurationGUI(QMainWindow):
         layout = QHBoxLayout()
         layout.addWidget(makeLayoutWidgetDislplayCelltype(
             self.widget_manager, 
+            key_label=f'{self.app_key_pri}_display_celltype',
             key_checkbox=f'{self.app_key_pri}_display_celltype', 
             key_scrollarea=f'{self.app_key_pri}_display_celltype', 
+            table_columns=self.config_manager.table_columns[self.app_key_pri],
+            gui_defaults=self.config_manager.gui_defaults,
+        ))
+        layout.addWidget(makeLayoutWidgetDislplayCheckbox(
+            self.widget_manager, 
+            key_label=f'{self.app_key_pri}_display_checkbox',
+            key_checkbox=f'{self.app_key_pri}_display_checkbox', 
+            key_scrollarea=f'{self.app_key_pri}_display_checkbox', 
             table_columns=self.config_manager.table_columns[self.app_key_pri],
             gui_defaults=self.config_manager.gui_defaults,
         ))
         layout.addWidget(makeLayoutWidgetBGImageTypeDisplay(
             self, 
             self.widget_manager, 
-            key_buttongroup=f'{self.app_key_pri}_im_bg_type'
+            key_label=f'{self.app_key_pri}_im_bg_type',
+            key_buttongroup=f'{self.app_key_pri}_im_bg_type',
+            key_scrollarea=f'{self.app_key_pri}_im_bg_type',
+            gui_defaults=self.config_manager.gui_defaults,
         ))
         layout.addWidget(makeLayoutWidgetROIChooseSkip(
             self.widget_manager, 
+            key_label=f'{self.app_key_pri}_skip_celltype',
             key_checkbox=f'{self.app_key_pri}_skip_celltype', 
             key_scrollarea=f'{self.app_key_pri}_skip_celltype', 
             table_columns=self.config_manager.table_columns[self.app_key_pri],
@@ -386,17 +399,21 @@ class Suite2pROICurationGUI(QMainWindow):
             view_control=self.control_manager.view_controls[self.app_key_pri],
         )
         # Radiobutton ROIDisplayType checkboxChanged
-        dict_q_checkbox = {}
-        for celltype in self.config_manager.table_columns[self.app_key_pri]._celltype:
-            dict_q_checkbox[celltype] = [checkbox for key, checkbox in self.widget_manager.dict_checkbox.items() if (celltype in key) and ("celltype_roi_display" in key)][0]
         bindFuncCheckBoxDisplayCelltypeChanged(
-            dict_q_checkbox=dict_q_checkbox, 
+            dict_q_checkbox_celltype={key.split("celltype_roi_display_")[-1]: self.widget_manager.dict_checkbox[key] for key in self.widget_manager.dict_checkbox.keys() if ("celltype_roi_display_" in key) and (key.split("celltype_roi_display_")[-1] in set(self.config_manager.table_columns[gui.app_key_pri].getColumns().keys()))},
+            dict_q_checkbox_checkbox={key.split("checkbox_roi_display_")[-1]: self.widget_manager.dict_checkbox[key] for key in self.widget_manager.dict_checkbox.keys() if ("checkbox_roi_display_" in key) and (key.split("checkbox_roi_display_")[-1] in set(self.config_manager.table_columns[gui.app_key_pri].getColumns().keys()))},
+            view_control=self.control_manager.view_controls[self.app_key_pri],
+            table_control=self.control_manager.table_controls[self.app_key_pri],
+        )
+        bindFuncCheckBoxDisplayCheckBoxChanged(
+            dict_q_checkbox_celltype={key.split("celltype_roi_display_")[-1]: self.widget_manager.dict_checkbox[key] for key in self.widget_manager.dict_checkbox.keys() if ("celltype_roi_display_" in key) and (key.split("celltype_roi_display_")[-1] in set(self.config_manager.table_columns[gui.app_key_pri].getColumns().keys()))},
+            dict_q_checkbox_checkbox={key.split("checkbox_roi_display_")[-1]: self.widget_manager.dict_checkbox[key] for key in self.widget_manager.dict_checkbox.keys() if ("checkbox_roi_display_" in key) and (key.split("checkbox_roi_display_")[-1] in set(self.config_manager.table_columns[gui.app_key_pri].getColumns().keys()))},
             view_control=self.control_manager.view_controls[self.app_key_pri],
             table_control=self.control_manager.table_controls[self.app_key_pri],
         )
         # Checkbox ROISkip stateChanged
         bindFuncCheckBoxROIChooseSkip(
-            dict_q_checkbox=dict_q_checkbox,
+            dict_q_checkbox={key.split("celltype_skip_choose_")[-1]: self.widget_manager.dict_checkbox[key] for key in self.widget_manager.dict_checkbox.keys() if ("celltype_skip_choose_" in key) and (key.split("celltype_skip_choose_")[-1] in set(self.config_manager.table_columns[gui.app_key_pri].getColumns().keys()))},
             control_manager=self.control_manager,
             app_key=self.app_key_pri,
         )
@@ -416,6 +433,11 @@ class Suite2pROICurationGUI(QMainWindow):
         )
         # ROICheck Table TableColumn CellType Changed
         bindFuncRadiobuttonOfTableChanged(
+            table_control=self.control_manager.table_controls[self.app_key_pri],
+            view_control=self.control_manager.view_controls[self.app_key_pri],
+        )
+        # ROICheck Table TableColumn Checkbox Changed
+        bindFuncCheckboxOfTableChanged(
             table_control=self.control_manager.table_controls[self.app_key_pri],
             view_control=self.control_manager.view_controls[self.app_key_pri],
         )

@@ -887,13 +887,15 @@ def bindFuncButtonRunROIMatching(
             array_tgt = np.array([data_manager.getDictROICoords(app_key_sec)[idx]["med"] for idx in range(data_manager.getNROIs(app_key_sec))])
         
         if result == QMessageBox.Yes:
-            roi_display_pri = list(control_manager.getSharedAttr(app_key_pri, "roi_display").values())
-            roi_display_sec = list(control_manager.getSharedAttr(app_key_sec, "roi_display").values())
+            dict_roi_display_pri = control_manager.getSharedAttr(app_key_pri, "dict_roi_display")
+            dict_roi_display_sec = control_manager.getSharedAttr(app_key_sec, "dict_roi_display")
+            roi_display_pri = list(all(dict_roi_display_pri.values()))
+            roi_display_sec = list(all(dict_roi_display_sec.values()))
             array_src = array_src[roi_display_pri]
             array_tgt = array_tgt[roi_display_sec]
         elif result == QMessageBox.No: # all ROI
-            roi_display_pri = [True for roi_id in control_manager.getSharedAttr(app_key_pri, "roi_display").keys()]
-            roi_display_sec = [True for roi_id in control_manager.getSharedAttr(app_key_sec, "roi_display").keys()]
+            roi_display_pri = [True for roi_id in control_manager.getSharedAttr(app_key_pri, "dict_roi_display").keys()]
+            roi_display_sec = [True for roi_id in control_manager.getSharedAttr(app_key_sec, "dict_roi_display").keys()]
         elif result == QMessageBox.Cancel:
             return 
 
@@ -1449,6 +1451,23 @@ def bindFuncRadiobuttonOfTableChanged(
         handler = __onButtonClicked(row)
         button_group.buttonClicked.connect(handler)
 
+# -> table_layouts.makeLayoutTableROICountLabel
+def bindFuncCheckboxOfTableChanged(table_control, view_control):
+    def onItemChanged(item):
+        # check if the item is a checkbox
+        col = item.column()
+        is_checkbox = False
+        for col_name, col_info in table_control.table_columns.getColumns().items():
+            if col_info['type'] == 'checkbox' and col_info['order'] == col:
+                is_checkbox = True
+                break
+        if is_checkbox:
+            row = item.row()
+            table_control.changeCheckboxOfTable(row)
+            view_control.updateView()
+    
+    table_control.q_table.itemChanged.connect(onItemChanged)
+
 # -> table_layouts.makeLayoutROIFilterButton
 def bindFuncButtonFilterROI(
     q_button: 'QPushButton',
@@ -1519,16 +1538,35 @@ view_layouts
 """
 # -> view_layouts.makeLayoutWidgetDislplayCelltype, Neuron, Astrocyte, Not Cell, ...
 def bindFuncCheckBoxDisplayCelltypeChanged(
-    dict_q_checkbox: Dict[str, QCheckBox], 
+    dict_q_checkbox_celltype: Dict[str, QCheckBox], 
+    dict_q_checkbox_checkbox: Dict[str, QCheckBox],
     view_control: 'ViewControl', 
     table_control: 'TableControl'
 ) -> None:
     def updateDisplay() -> None:
-        dict_celltype_visibility = {celltype: q_checkbox.isChecked() for celltype, q_checkbox in dict_q_checkbox.items()}
+        dict_celltype_visibility = {celltype: q_checkbox.isChecked() for celltype, q_checkbox in dict_q_checkbox_celltype.items()}
+        dict_checkbox_visibility = {checkbox: q_checkbox.isChecked() for checkbox, q_checkbox in dict_q_checkbox_checkbox.items()}
         table_control.updateROIDisplayWithCelltype(dict_celltype_visibility)
+        table_control.updateROIDisplayWithCheckbox(dict_checkbox_visibility)
         view_control.updateView()
     
-    for q_checkbox in dict_q_checkbox.values():
+    for q_checkbox in dict_q_checkbox_celltype.values():
+        q_checkbox.stateChanged.connect(updateDisplay)
+# -> view_layouts.makeLayoutWidgetDislplayCheckbox, Check, Tracking, ...
+def bindFuncCheckBoxDisplayCheckBoxChanged(
+    dict_q_checkbox_celltype: Dict[str, QCheckBox], 
+    dict_q_checkbox_checkbox: Dict[str, QCheckBox],
+    view_control: 'ViewControl', 
+    table_control: 'TableControl'
+) -> None:
+    def updateDisplay() -> None:
+        dict_celltype_visibility = {celltype: q_checkbox.isChecked() for celltype, q_checkbox in dict_q_checkbox_celltype.items()}
+        dict_checkbox_visibility = {checkbox: q_checkbox.isChecked() for checkbox, q_checkbox in dict_q_checkbox_checkbox.items()}
+        table_control.updateROIDisplayWithCelltype(dict_celltype_visibility)
+        table_control.updateROIDisplayWithCheckbox(dict_checkbox_visibility)
+        view_control.updateView()
+    
+    for q_checkbox in dict_q_checkbox_checkbox.values():
         q_checkbox.stateChanged.connect(updateDisplay)
 
 # -> view_layouts.makeLayoutWidgetBGImageTypeDisplay, meanImg, meanImgE, ... 
@@ -1554,7 +1592,7 @@ def bindFuncCheckBoxROIChooseSkip(
         is_checked = (state == Qt.Checked)
         control_manager.setSharedAttrDictValue(app_key, "skip_roi_types", celltype, is_checked)
     for celltype, q_checkbox in dict_q_checkbox.items():
-        q_checkbox.stateChanged.connect(lambda state: _onCheckBoxChanged(state, celltype))
+        q_checkbox.stateChanged.connect(lambda state, celltype=celltype: _onCheckBoxChanged(state, celltype))
 
 # -> view_layouts.makeLayoutDisplayROIContours
 def bindFuncCheckBoxDisplayROIContours(

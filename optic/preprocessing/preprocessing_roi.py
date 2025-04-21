@@ -75,11 +75,11 @@ def updateROIImage(
         reg: bool=False
         ) -> Dict[str, np.ndarray]:
     dict_im_roi, dict_im_roi_reg = {}, {}
-    roi_display = control_manager.getSharedAttr(app_key, "roi_display")
+    dict_roi_display = control_manager.getSharedAttr(app_key, "dict_roi_display")
 
     roi_img = np.zeros(data_manager.getImageSize(app_key), dtype=dtype)
     for roiId, coords in data_manager.getDictROICoords(app_key).items():
-        if roi_display[roiId]:
+        if all(dict_roi_display[roiId].values()):
             xpix, ypix = coords["xpix"], coords["ypix"]
             roi_img[ypix, xpix] = value # XY reversed
     dict_im_roi["all"] = roi_img
@@ -87,7 +87,7 @@ def updateROIImage(
     if reg:
         roi_img = np.zeros(data_manager.getImageSize(app_key), dtype=dtype)
         for roiId, coords in data_manager.getDictROICoordsRegistered(app_key).items():
-            if roi_display[roiId]:
+            if all(dict_roi_display[roiId].values()):
                 xpix, ypix = coords["xpix"], coords["ypix"]
                 roi_img[ypix, xpix] = value # XY reversed
         dict_im_roi_reg["all"] = roi_img

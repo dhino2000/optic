@@ -68,9 +68,10 @@ def makeLayoutROIThresholds(
                                                 
     return layout
 
-# Select ROI display type of the buttongroup
+# Select ROI display type of the celltype buttongroup
 def makeLayoutWidgetDislplayCelltype(
         widget_manager: WidgetManager, 
+        key_label: str,
         key_checkbox: str, 
         key_scrollarea: str,
         table_columns: TableColumns,
@@ -79,6 +80,7 @@ def makeLayoutWidgetDislplayCelltype(
     # change ROI display celltypes
     widget = QWidget()
     layout = QVBoxLayout()
+    layout.addWidget(widget_manager.makeWidgetLabel(key=key_label, label="ROI Display Celltypes", bold=True, use_global_style=False, font_size=8))
     list_celltype = [key for key, value in table_columns.getColumns().items() if value['type'] == 'celltype']
     for celltype in list_celltype:
         key_checkbox_item = f"roi_display_{celltype}"
@@ -89,32 +91,67 @@ def makeLayoutWidgetDislplayCelltype(
     scrollarea.setWidget(widget)
     return scrollarea
 
+# Select ROI display type of the checkboxes
+def makeLayoutWidgetDislplayCheckbox(
+        widget_manager: WidgetManager, 
+        key_label: str,
+        key_checkbox: str, 
+        key_scrollarea: str,
+        table_columns: TableColumns,
+        gui_defaults: GuiDefaults,
+        ) -> QScrollArea:
+    # change ROI display celltypes
+    widget = QWidget()
+    layout = QVBoxLayout()
+    layout.addWidget(widget_manager.makeWidgetLabel(key=key_label, label="ROI Display Checkboxes", bold=True, use_global_style=False, font_size=8))
+    list_celltype = [key for key, value in table_columns.getColumns().items() if value['type'] == 'checkbox']
+    for celltype in list_celltype:
+        key_checkbox_item = f"roi_display_{celltype}"
+        label_checkbox_item = f"{celltype}"
+        layout.addWidget(widget_manager.makeWidgetCheckBox(key=f"{key_checkbox}_{key_checkbox_item}", label=label_checkbox_item, checked=False))
+    widget.setLayout(layout)
+    scrollarea = widget_manager.makeWidgetScrollArea(key=key_scrollarea, height_max=gui_defaults["SCROOLAREA_SETTINGS"]["MAX_HEIGHT"])
+    scrollarea.setWidget(widget)
+    return scrollarea
+
 # Select background image display type of the buttongroup
 def makeLayoutWidgetBGImageTypeDisplay(
         q_widget: QWidget, 
         widget_manager: WidgetManager, 
+        key_label: str,
         key_buttongroup: str,
-        ) -> QWidget:
+        key_scrollarea: str,
+        gui_defaults: GuiDefaults,
+        ) -> QScrollArea:
     # meanImg, meanImgE, max_proj, Vcorr
     bg_types = BGImageTypeList.FALL
-    widget = makeLayoutButtonGroup(q_widget, 
+    widget = QWidget()
+    layout = QVBoxLayout()
+    layout.addWidget(widget_manager.makeWidgetLabel(key=key_label, label="Background Image Type", bold=True, use_global_style=False, font_size=8))
+    buttongroup = makeLayoutButtonGroup(q_widget, 
                                    widget_manager, 
                                    key_buttongroup=key_buttongroup, 
                                    list_label_buttongroup=bg_types, 
                                    axis="vertical",
                                    is_scroll=True)
-    return widget
+    layout.addWidget(buttongroup)
+    widget.setLayout(layout)
+    scrollarea = widget_manager.makeWidgetScrollArea(key=key_scrollarea, height_max=gui_defaults["SCROOLAREA_SETTINGS"]["MAX_HEIGHT"])
+    scrollarea.setWidget(widget)
+    return scrollarea
 
 # Skip ROI choose
 def makeLayoutWidgetROIChooseSkip(
         widget_manager: WidgetManager, 
+        key_label: str,
         key_checkbox: str, 
         key_scrollarea: str,
         table_columns: TableColumns,
         gui_defaults: GuiDefaults,
-        ) -> QWidget:
+        ) -> QScrollArea:
     widget = QWidget()
     layout = QVBoxLayout()
+    layout.addWidget(widget_manager.makeWidgetLabel(key=key_label, label="Skip ROI type", bold=True, use_global_style=False, font_size=8))
     skip_items = [key for key, value in table_columns.getColumns().items() if value['type'] in ['celltype', 'checkbox']]
     for item in skip_items:
         key_checkbox_item = f"skip_choose_{item}"
