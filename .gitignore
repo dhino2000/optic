@@ -166,3 +166,4 @@ old/
 *.tif
 *.mat
 notebook/tmp/
+notebook/analysis/result
