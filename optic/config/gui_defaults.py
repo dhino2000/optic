@@ -5,6 +5,9 @@ from .constants import FileFilters, ProcessingDefaults, PlotColors, AppKeys, Cha
 
 # GUIに関する定数
 class GuiDefaults:
+    """
+    Suite2pROICurationGUI
+    """
     SUITE2P_ROI_CURATION = {
         "MIN_PLOT_RANGE": 30,
         "WINDOW_SETTINGS": {
@@ -121,6 +124,9 @@ class GuiDefaults:
         },
     }
 
+    """
+    Suite2pROITrackingGUI
+    """
     SUITE2P_ROI_TRACKING = {
         "MIN_PLOT_RANGE": 30,
         "WINDOW_SETTINGS": {
@@ -289,6 +295,9 @@ class GuiDefaults:
         },
     }
 
+    """
+    MicrogliaTrackingGUI
+    """
     MICROGLIA_TRACKING = {
         "MIN_PLOT_RANGE": 30,
         "WINDOW_SETTINGS": {
@@ -356,6 +365,9 @@ class GuiDefaults:
         },
     }
 
+    """
+    TIFStackExplorerGUI
+    """
     TIFSTACK_EXPLORER = {
         "WINDOW_SETTINGS": {
             "INIT_POSITION_X": 100, 
@@ -416,6 +428,51 @@ class GuiDefaults:
         },
         "TITLE": "Suite2pAutoRunGUI",
         "APP_KEYS": [AppKeys.PRI],
+    }
+
+    """
+    CASCADE GUI
+    """
+    CASCADE = {
+        "MIN_PLOT_RANGE": 30,
+        "WINDOW_SETTINGS": {
+            "INIT_POSITION_X": 100, 
+            "INIT_POSITION_Y": 100,
+            "WIDTH": 1200,
+            "HEIGHT": 200,
+        },
+        "WINDOW_SETTINGS_DIALOG": {
+            "INIT_POSITION_X": 100, 
+            "INIT_POSITION_Y": 100,
+            "WIDTH": 300,
+            "HEIGHT": 200,
+        },
+        "SCROOLAREA_SETTINGS": {
+            "MAX_HEIGHT": 200,
+        },
+        "TITLE": "CascadeGUI",
+        "APP_KEYS": [AppKeys.PRI],
+        "CANVAS_SETTINGS": {
+            "LIGHT_MODE_DOWNSAMPLE": 250,
+            "MIN_PLOT_WIDTH_SEC": 30,
+            "YLIM": (-0.1, 1.1),
+            "YLIM_RECTANGLE": (-0.05, 1.05),
+            "PLOT_POINTS": 10,
+        },
+        "TABLE_COLUMNS": {
+            AppKeys.PRI: {
+                "Cell_ID"   : {"order": 0, "type": "id",       "width": 80,  "removable": False, "name_fixed": True, "editable": False},
+                "Memo"      : {"order": 1, "type": "string",   "width": 200, "removable": True, }
+            },
+        },
+        "KEY_FUNCTION_MAP": {
+            AppKeys.PRI: {
+                Qt.Key_Up: ('move', 'up', 1),
+                Qt.Key_Down: ('move', 'down', 1),
+                Qt.Key_Left: ('move', 'left', 1),
+                Qt.Key_Right: ('move', 'right', 1),
+            },
+        },
     }
     
     @classmethod

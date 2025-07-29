@@ -100,6 +100,18 @@ class DataManager:
         except Exception as e:
             return False
         
+    # load calcium trace npy data
+    def loadNpyCalciumTrace(self, app_key: AppKeys, path_npy: str) -> bool:
+        try:
+            # apply to Fall data structure
+            arr_trace = np.load(path_npy, allow_pickle=True).item()
+            self.dict_Fall[app_key] = {
+                "F": arr_trace
+            }
+            return True
+        except Exception as e:
+            return False
+
     """
     get Functions
     """
