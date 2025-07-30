@@ -126,7 +126,8 @@ class CanvasControl:
     """
     def initializePlot(self):
         self.prepareTraceData()
-        self.plotTracesMean()
+        if self.ax_layout == 'triple':
+            self.plotTracesMean()
         self.figure.tight_layout()
         self.canvas.draw_idle()
 

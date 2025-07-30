@@ -57,7 +57,7 @@ class DataManager:
     IO Functions
     """
     # load Fall.mat data
-    def loadFallMat(self, app_key: AppKeys, path_fall: str, preprocessing: bool=True, config_manager: ConfigManager=None) -> bool:
+    def loadFallMat(self, app_key: AppKeys, path_fall: str, preprocessing: bool=True, config_manager: ConfigManager=None) -> Tuple[bool, Optional[Exception]]:
         try:
             dict_Fall = loadFallMat(path_fall)
             self.dict_Fall[app_key] = dict_Fall
@@ -75,42 +75,41 @@ class DataManager:
                     self.dict_im_roi_reg[app_key] = getROIImageFromFall(self, app_key)
                     if self.getNChannels(app_key) == 2:
                         self.dict_im_bg_chan2_reg[app_key] = getBGImageChannel2FromFall(self, app_key)
-            return True
+            return True, None
         except Exception as e:
-            raise e
-            return False
+            return False, e
         
     # load tiff image data (for optional)
-    def loadTifImage(self, app_key: AppKeys, path_image: str) -> bool:
+    def loadTifImage(self, app_key: AppKeys, path_image: str) -> Tuple[bool, Optional[Exception]]:
         try:
             self.dict_im_bg_optional[app_key] = loadTifImage(path_image)
-            return True
+            return True, None
         except Exception as e:
-            return False
+            return False, e
         
     # load tiff stack data
-    def loadTiffStack(self, app_key: AppKeys, path_tiff: str) -> bool:
+    def loadTiffStack(self, app_key: AppKeys, path_tiff: str) -> Tuple[bool, Optional[Exception]]:
         try:
             tiff, metadata = loadTiffStack(path_tiff)
             self.dict_data_dtype[app_key] = Extension.TIFF
             self.dict_tiff[app_key] = tiff
             self.dict_tiff_metadata[app_key] = metadata
             self.dict_tiff_reg[app_key] = tiff
-            return True
+            return True, None
         except Exception as e:
-            return False
+            return False, e
         
     # load calcium trace npy data
-    def loadNpyCalciumTrace(self, app_key: AppKeys, path_npy: str) -> bool:
+    def loadNpyCalciumTrace(self, app_key: AppKeys, path_npy: str) -> Tuple[bool, Optional[Exception]]:
         try:
             # apply to Fall data structure
-            arr_trace = np.load(path_npy, allow_pickle=True).item()
+            arr_trace = np.load(path_npy, allow_pickle=True)
             self.dict_Fall[app_key] = {
                 "F": arr_trace
             }
-            return True
+            return True, None
         except Exception as e:
-            return False
+            return False, e
 
     """
     get Functions
@@ -154,6 +153,9 @@ class DataManager:
     # get nROIs
     def getNROIs(self, app_key: AppKeys) -> int:
         return len(self.dict_Fall[app_key]["stat"])
+    # get nROIs with F 
+    def getNROIswithF(self, app_key: AppKeys) -> int:
+        return len(self.dict_Fall[app_key]["F"])
     # get nchannels
     def getNChannels(self, app_key: AppKeys) -> int:
         return self.dict_Fall[app_key]["ops"]["nchannels"]

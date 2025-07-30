@@ -1,8 +1,9 @@
 from __future__ import annotations
 from ..type_definitions import *
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
+from PyQt5.QtWidgets import QWidget, QLabel, QCheckBox, QLineEdit, QSlider, QSpinBox, QPushButton, QTableWidget, QListWidget, QComboBox, QGraphicsScene, QGraphicsView, QScrollArea, QAbstractItemView, QButtonGroup, QSizePolicy, QAbstractScrollArea
+from PyQt5.QtGui import QFont, QPainter
+from PyQt5.QtCore import Qt
+
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.axes import Axes

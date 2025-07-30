@@ -441,6 +441,12 @@ class GuiDefaults:
             "WIDTH": 1200,
             "HEIGHT": 200,
         },
+        "WINDOW_SETTINGS_DIALOG_DATA_LOAD": {
+            "INIT_POSITION_X": 100, 
+            "INIT_POSITION_Y": 100,
+            "WIDTH": 1000,
+            "HEIGHT": 200,
+        },
         "WINDOW_SETTINGS_DIALOG": {
             "INIT_POSITION_X": 100, 
             "INIT_POSITION_Y": 100,
