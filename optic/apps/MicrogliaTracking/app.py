@@ -1,12 +1,35 @@
-from PyQt5.QtWidgets import QMainWindow, QWidget, QGridLayout, QVBoxLayout, QHBoxLayout, QApplication
+from PyQt5.QtWidgets import QMainWindow, QWidget, QGridLayout, QVBoxLayout, QHBoxLayout, QMessageBox, QDialog
 from itertools import combinations
-from optic.config import *
-from optic.controls import *
-from optic.dialog import *
-from optic.gui import *
-from optic.io import *
-from optic.manager import *
-from optic.gui.bind_func import *
+from optic.config import AccessURL, Extension
+from optic.controls.view_control import ViewControl
+from optic.controls.table_control import TableControl
+from optic.dialog.elastix_params_config import ElastixParamsConfigDialog
+from optic.gui.app_setup import setupMainWindow
+from optic.gui.app_style import applyAppStyle
+from optic.gui.slider_layouts import makeLayoutContrastSlider, makeLayoutOpacitySlider
+from optic.gui.io_layouts import makeLayoutLoadFileWidget, makeLayoutLoadFileExitHelp, makeLayoutROITrackingIO
+from optic.gui.processing_image_layouts import makeLayoutMicrogliaXYCTStackRegistration
+from optic.gui.processing_roi_layouts import (
+    makeLayoutROIMatching, makeLayoutROIMatchingTest, makeLayoutROIManagerForTable, makeLayoutROIEditConfig,
+    makeLayoutCellpose, makeLayoutROIManager
+)
+from optic.gui.view_layouts import (
+    makeLayoutViewWithZTSlider
+)
+from optic.manager import WidgetManager, ConfigManager, DataManager, ControlManager, LayoutManager, initManagers
+from optic.gui.bind_func import (
+    bindFuncExit, bindFuncButtonsROIManagerForTable, bindFuncButtonRunElastixForMicrogliaXYCTStackRegistration,
+    bindFuncLoadFileWidget, bindFuncSliderSpinBoxROIEditConfig, bindFuncPlaneTSliderWithXYCTTracking,
+    bindFuncTableSelectionChangedWithTracking, bindFuncTableCellChangedWithMicrogliaTracking,
+    bindFuncOpacitySlider, bindFuncROIMaskNpyIO, bindFuncROIManagerZipIO,
+    bindFuncHighlightOpacitySlider, bindFuncBackgroundContrastSlider, bindFuncBackgroundVisibilityCheckbox, 
+    bindFuncViewEvents, bindFuncHelp, bindFuncCheckboxShowMatchedROI,
+    bindFuncCheckboxShowROIPair, bindFuncROIPairOpacitySlider, bindFuncButtonSaveRegisterdImage,
+    bindFuncButtonRunROIMatchingForXYCT, bindFuncButtonClearROIMatching,
+    bindFuncButtonRunCellposeForXYCT, bindFuncMicrogliaTrackingIO,
+    bindFuncCheckboxShowRegisteredROIImage, bindFuncCheckboxShowRegisteredStack
+)
+from optic.utils.layout_utils import clearLayout
 
 class MicrogliaTrackingGUI(QMainWindow):
     def __init__(self):

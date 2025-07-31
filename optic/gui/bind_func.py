@@ -1,11 +1,5 @@
 from __future__ import annotations
 from ..type_definitions import *
-from ..io.file_dialog import openFileDialogAndSetLineEdit, saveFileDialog
-from ..io.data_io import saveROICheck, loadROICheck, loadEventFilesNPY, generateSavePath, saveTiffStack, saveROITracking, loadROITracking, loadCellposeMaskNPY, saveROIManagerZip, loadROIManagerZip, saveRegisteredROICoordsAndBGImage, loadRegisteredROICoordsAndBGImage, saveMicrogliaTracking, loadMicrogliaTracking
-from ..visualization.info_visual import updateROICountDisplay
-from ..processing import *
-from ..preprocessing import *
-from ..utils import *
 from PyQt5.QtCore import Qt, QUrl
 from PyQt5.QtGui import QDesktopServices
 from matplotlib.figure import Figure
@@ -14,7 +8,6 @@ from matplotlib.backend_bases import Event
 from PyQt5.QtWidgets import QPushButton, QWidget, QLineEdit, QTableWidget, QButtonGroup, QCheckBox, QGraphicsView, QSlider, QMessageBox, QComboBox, QTableWidgetItem
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from copy import deepcopy
-from itk.elxParameterObjectPython import elastixParameterObject
 import numpy as np
 import os
 import shutil
@@ -46,6 +39,7 @@ def bindFuncExit(
     q_button: 'QPushButton', 
     q_window: 'QWidget'
 ) -> None:
+    from ..utils.app_utils import exitApp
     q_button.clicked.connect(lambda: exitApp(q_window))
 
 # -> widget_manager.dict_button["help"]
@@ -113,6 +107,8 @@ def bindFuncButtonEventfileIO(
     canvas_control: 'CanvasControl', 
     app_key: str
 ) -> None:
+    from ..io.data_io import loadEventFilesNPY
+
     def _loadEventFilesNPY() -> None:
         success = loadEventFilesNPY(q_window, data_manager, app_key)
         # update combobox
@@ -156,6 +152,8 @@ def bindFuncButtonExportFigure(
     path_dst: str,
     dpi: int = 300
 ) -> None:
+    from ..io.file_dialog import saveFileDialog
+    from ..utils.canvas_utils import exportFigure
     def onButtonClicked(q_window, figure, path_dst, dpi) -> None:
         path_dst, is_overwrite = saveFileDialog(q_window, file_type=".png_pdf", initial_dir=path_dst)
         if path_dst:
@@ -172,6 +170,7 @@ def bindFuncLoadFileWidget(
     q_lineedit: 'QLineEdit', 
     filetype: str = None
 ) -> None:
+    from ..io.file_dialog import openFileDialogAndSetLineEdit
     q_button.clicked.connect(lambda: openFileDialogAndSetLineEdit(q_widget, filetype, q_lineedit))
 
 # -> io_layouts.makeLayoutROICheckIO
@@ -187,6 +186,9 @@ def bindFuncROICheckIO(
     app_key: str,
     local_var: bool = True
 ) -> None:
+    from ..io.data_io import saveROICheck, loadROICheck
+    from ..visualization.info_visual import updateROICountDisplay
+
     gui_defaults = config_manager.gui_defaults
     table_columns = config_manager.table_columns[app_key]
     json_config = config_manager.json_config
@@ -213,6 +215,9 @@ def bindFuncROITrackingIO(
     app_key_sec: str,
     local_var: bool = False
 ) -> None:
+    from ..io.data_io import saveROITracking, loadROITracking
+    from ..visualization.info_visual import updateROICountDisplay
+
     gui_defaults = config_manager.gui_defaults
     json_config = config_manager.json_config
     def _loadROITracking() -> None:
@@ -251,6 +256,8 @@ def bindFuncRegisteredROIAndBGImageIO(
     data_manager: 'DataManager',
     app_key: AppKeys,
 ):
+    from ..io.data_io import saveRegisteredROICoordsAndBGImage, loadRegisteredROICoordsAndBGImage
+
     def _saveRegisteredROIAndBGImage():
         saveRegisteredROICoordsAndBGImage(q_window, data_manager, q_lineedit, app_key)
     def _loadRegisteredROIAndBGImage():
@@ -268,6 +275,9 @@ def bindFuncMicrogliaTrackingIO(
     data_manager: 'DataManager',
     control_manager: 'ControlManager',
 ) -> None:
+    from ..io.data_io import saveMicrogliaTracking, loadMicrogliaTracking
+    from ..utils.view_utils import generateRandomColor
+
     gui_defaults = config_manager.gui_defaults
     json_config = config_manager.json_config
     def _saveMicrogliaTracking():
@@ -327,6 +337,11 @@ def bindFuncROIMaskNpyIO(
     control_manager: 'ControlManager',
     app_key: str
 ) -> None:
+    from ..io.data_io import loadCellposeMaskNPY
+    from ..preprocessing.preprocessing_cellpose import convertCellposeMaskToDictROICoordsXYCT, convertCellposeMasksToDictROIMatching
+    from ..preprocessing.preprocessing_image import getDictROIImageXYCTFromDictROICoords
+    from ..utils.view_utils import generateRandomColor
+
     def _loadMaskNpy() -> None:
         is_load = loadCellposeMaskNPY(
             q_window, 
@@ -368,6 +383,10 @@ def bindFuncROIManagerZipIO(
     data_manager: 'DataManager',
     control_manager: 'ControlManager',
 ) -> None:
+    from ..io.data_io import saveROIManagerZip, loadROIManagerZip
+    from ..preprocessing.preprocessing_imagej import convertDictROIMatchingAndDictROICoordsToImagejRoi, convertImagejRoiToDictROIMatchingAndDictROICoords
+    from ..utils.view_utils import generateRandomColor
+
     def _saveROIManagerZip(is_roi_reg: bool) -> None:
         dict_roi_matching = data_manager.dict_roi_matching
         if is_roi_reg: # registered ROIs
@@ -462,6 +481,8 @@ def bindFuncButtonManageRectangleRangeForListWidget(
     q_lineedit: 'QLineEdit',
     view_control: 'ViewControl'
 ) -> None:
+    from ..utils.listwidget_utils import clearListWidget, removeSelectedItemsFromListWidget, addItemToListWidgetFromLineEdit
+
     def _addItemToListWidgetFromLineEdit(q_listwidget, q_lineedit) -> None:
         try:
             q_lineedit.setText(q_lineedit.text().replace(" ", ""))
@@ -501,6 +522,10 @@ def bindFuncButtonRunImageNormalization(
     tiff_stack: np.ndarray[Tuple[int, int, int, int, int]],
     metadata: Dict[str, Any],
 ):
+    from ..processing.normalization import normalizeImageStackWithReferenceAreas
+    from ..io.data_io import generateSavePath, saveTiffStack
+    from ..utils.dialog_utils import showProgressDialog
+
     def _bindFuncButtonRunImageNormalization():
         try:
             list_reference_areas = [tuple(int(x.strip()) for x in q_listwidget.item(i).text().split(",")) for i in range(q_listwidget.count())]
@@ -593,6 +618,9 @@ def bindFuncButtonLoadCellposeMask(
     data_manager: 'DataManager',
     app_key: AppKeys,
 ) -> None:
+    from ..io.data_io import loadCellposeMaskNPY
+    from ..preprocessing.preprocessing_cellpose import convertCellposeMaskToDictROICoords
+
     def _loadMaskNpy() -> None:
         loadCellposeMaskNPY(
             q_window, 
@@ -611,6 +639,8 @@ def bindFuncButtonExportFallLike(
     q_lineedit: 'QLineEdit',
     data_manager: 'DataManager',
 ) -> None:
+    from ..io.file_dialog import saveFileDialog
+
     def _exportFallLike() -> None:
         from ..preprocessing.preprocessing_fall import makeFallLikeFromBgImageAndDictROICoords
         from scipy.io import savemat
@@ -637,6 +667,11 @@ def bindFuncButtonRunElastixForFall(
         path_points_txt: str="points_tmp.txt",
         output_directory: str="./elastix"
 ) -> None:
+    from ..processing.elastix import (
+        convertDictToElastixFormat, makeElastixParameterObject, calculateSingleTransform, applySingleTransform,
+        applyDictROICoordsTransform
+    )
+
     def _runElastix():
         os.makedirs(output_directory, exist_ok=True)
 
@@ -703,6 +738,10 @@ def bindFuncButtonRunElastixForSingleStack(
         axis: Literal["t", "z"],
         output_directory: str="./elastix"
 ) -> None:
+    from ..processing.elastix import (
+        convertDictToElastixFormat, makeElastixParameterObject, runStackRegistration
+    )
+
     def _runElastix():
         os.makedirs(output_directory, exist_ok=True)
 
@@ -736,6 +775,8 @@ def bindFuncButtonSaveRegisterdImage(
     app_key: str,
     path_tif_src: str
 ) -> None:
+    from ..io.data_io import generateSavePath, saveTiffStack
+
     def _saveRegisteredImage():
         path_tif_dst = generateSavePath(path_tif_src, suffix="_reg", new_extension=".tif")
         metadata = data_manager.getTiffMetadata(app_key)
@@ -751,6 +792,8 @@ def bindFuncButtonSaveElastixTransform(
     app_key: AppKeys,
     gui_defaults: GuiDefaults,
 ) -> None:
+    from ..processing.elastix import saveElastixTransformParameters
+
     def _saveElastixTransformParameters():
         transform_parameters = data_manager.dict_transform_parameters.get(app_key)
         if not transform_parameters:
@@ -769,6 +812,8 @@ def bindFuncButtonApplyElastixTransform_XYCTtoXYCZT(
     app_key: AppKeys,
     output_directory: str="./elastix"
 ) -> None:
+    from ..processing.elastix import loadElastixTransformParameters, duplicateTransformParameters, applyStackTransform
+    
     def _applyElastixTransform_XYCTtoXYCZT():
         os.makedirs(output_directory, exist_ok=True)
 
@@ -797,6 +842,8 @@ def bindFuncButtonRunElastixForMicrogliaXYCTStackRegistration(
         path_points_txt: str="./elastix/points_tmp.txt",
         output_directory: str="./elastix"
 ) -> None:
+    from ..processing.elastix import convertDictToElastixFormat, makeElastixParameterObject, runStackRegistration, applyDictROICoordsTransform
+
     def _runElastix():
         axis = "t"
         app_key_pri = app_keys[0]
@@ -868,6 +915,9 @@ def bindFuncButtonRunROIMatching(
     app_key_pri: str,
     app_key_sec: str,
 ):
+    from ..processing.optimal_transport import calculateROIMatching
+    from ..utils.dialog_utils import showConfirmationDialog
+
     def _runROIMatching():
         view_control_pri = control_manager.view_controls[app_key_pri]
         roi_vis_type_pri = [celltype for celltype, vis in control_manager.getSharedAttr("pri", "celltype_visibility").items() if vis]
@@ -940,6 +990,9 @@ def bindFuncButtonRunROIMatchingForXYCT(
     app_key_pri: str,
     app_key_sec: str,
 ):
+    from ..processing.optimal_transport import calculateROIMatching
+    from ..utils.dialog_utils import showConfirmationDialog
+
     def _ROIMatching(widget_manager: WidgetManager, data_manager: DataManager, view_control_pri: ViewControl, t_plane_pri: int, t_plane_sec: int):
         # use registered coordinates if show_reg_im_roi is True
         if view_control_pri.show_reg_im_roi:
@@ -1181,6 +1234,10 @@ def bindFuncButtonRunCellposeForXYCT(
     q_combobox_restore: 'QComboBox',
     q_spinbox_diameter: 'QSpinBox',
 ) -> None:
+    from ..processing.cellpose import runCellposeDenoiseForMonoImage
+    from ..preprocessing.preprocessing_cellpose import convertCellposeMaskToDictROICoords, convertSingleCellposeMaskToDictROIMatching
+    from ..utils.view_utils import generateRandomColor
+    
     def runCellpose():
         t_plane = int(q_combobox_t_plane.currentText())
         channel = int(q_combobox_channel.currentText())
@@ -1390,6 +1447,7 @@ def bindFuncButtonClearColumnCells(
     q_table: 'QTableWidget', 
     idx_col: int
 ) -> None:
+    from ..utils.table_utils import clearColumnCells
     q_button.clicked.connect(lambda: clearColumnCells(q_table, idx_col))
 
 # -> table_layouts.makeLayoutTableROICountLabel
@@ -1397,12 +1455,13 @@ def bindFuncTableSelectionChanged(
     q_table: 'QTableWidget', 
     table_control: 'TableControl', 
     view_control: 'ViewControl', 
-    canvas_control: 'CanvasControl'
+    canvas_control: 'CanvasControl',
 ) -> None:
     def _onSelectionChanged(selected, deselected) -> None:
         if selected.indexes():
             table_control.onSelectionChanged(selected, deselected)
-            view_control.updateView()
+            if view_control:
+                view_control.updateView()
             if canvas_control: # for canvas_control
                 canvas_control.updatePlotWithROISelect()
     q_table.selectionModel().selectionChanged.connect(_onSelectionChanged)
@@ -1475,6 +1534,7 @@ def bindFuncButtonFilterROI(
     table_control: 'TableControl', 
     view_control: 'ViewControl',
 ) -> None:
+    from ..utils.info_utils import getThresholdsOfROIFilter
     q_button.clicked.connect(
         lambda: table_control.filterROI(getThresholdsOfROIFilter(dict_q_lineedit))
     )

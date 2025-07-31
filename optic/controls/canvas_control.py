@@ -1,6 +1,6 @@
 from __future__ import annotations
 from ..type_definitions import *
-from ..config.constants import AxisKeys, PlotColors, PlotLabels
+from ..config.constants import AxisKeys, PlotColors, PlotLabels, Extension
 from ..utils.data_utils import downSampleTrace, extractEventOnsetIndices, extractEventAlignedData
 from ..visualization.canvas_visual import plotTraces, zoomXAxis, moveXAxis, moveToPlotCenter, plotEventAlignedTrace
 from matplotlib.figure import Figure
@@ -79,13 +79,17 @@ class CanvasControl:
         roi_selected_id = self.control_manager.getSharedAttr(self.app_key, 'roi_selected_id')
         self.full_traces = self.data_manager.getTracesOfSelectedROI(self.app_key, roi_selected_id, n_channels=self.data_manager.getNChannels(self.app_key))
         
-        if self.data_manager.getNChannels(self.app_key) == 1:
-            self.colors = {key: getattr(PlotColors, key.upper()) for key in ["F", "Fneu", "spks"]}
-            self.labels = {key: getattr(PlotLabels, key.upper()) for key in ["F", "Fneu", "spks"]}
-        elif self.data_manager.getNChannels(self.app_key) == 2:
-            self.colors = {key: getattr(PlotColors, key.upper()) for key in ["F", "Fneu", "spks", "F_chan2", "Fneu_chan2"]}
-            self.labels = {key: getattr(PlotLabels, key.upper()) for key in ["F", "Fneu", "spks", "F_chan2", "Fneu_chan2"]}
-        
+        if self.data_manager.getDataType(self.app_key) == Extension.MAT:
+            if self.data_manager.getNChannels(self.app_key) == 1:
+                self.colors = {key: getattr(PlotColors, key.upper()) for key in ["F", "Fneu", "spks"]}
+                self.labels = {key: getattr(PlotLabels, key.upper()) for key in ["F", "Fneu", "spks"]}
+            elif self.data_manager.getNChannels(self.app_key) == 2:
+                self.colors = {key: getattr(PlotColors, key.upper()) for key in ["F", "Fneu", "spks", "F_chan2", "Fneu_chan2"]}
+                self.labels = {key: getattr(PlotLabels, key.upper()) for key in ["F", "Fneu", "spks", "F_chan2", "Fneu_chan2"]}
+        elif self.data_manager.getDataType(self.app_key) == Extension.NPY:
+            self.colors = {key: getattr(PlotColors, key.upper()) for key in ["F"]}
+            self.labels = {key: getattr(PlotLabels, key.upper()) for key in ["F"]}
+
         self.y_max = max(np.max(trace) for trace in self.full_traces.values())
         ylim_config = self.config_manager.gui_defaults['CANVAS_SETTINGS']['YLIM']
         self.ylim = (self.y_max * ylim_config[0], self.y_max * ylim_config[1])
@@ -102,6 +106,21 @@ class CanvasControl:
             self.full_traces = self.preprocessTraceData(self.full_traces)
             self.colors['event'] = PlotColors.EVENT
             self.labels['event'] = PlotLabels.EVENT
+
+        # get and preprocess cascade spike_prob and spike
+        try:
+            self.cascade_spike_prob = self.data_manager.getCascadeSpikeProbability(self.app_key)
+            self.cascade_spike = self.data_manager.getCascadeSpike(self.app_key)
+        except AttributeError:
+            self.cascade_spike_prob = None
+            self.cascade_spike = None
+        if self.cascade_spike_prob is not None and self.cascade_spike is not None:
+            self.full_traces['cascade_spike_prob'] = self.cascade_spike_prob
+            self.full_traces['cascade_spike'] = self.cascade_spike
+            self.colors['cascade_spike_prob'] = PlotColors.SPIKE_PROB_CASCADE
+            self.colors['cascade_spike'] = PlotColors.SPIKE_CASCADE
+            self.labels['cascade_spike_prob'] = PlotLabels.SPIKE_PROB_CASCADE
+            self.labels['cascade_spike'] = PlotLabels.SPIKE_CASCADE
 
     def prepareEventAlignedData(self):
         if self.eventfile is None:
@@ -134,16 +153,18 @@ class CanvasControl:
     def updatePlotWithROISelect(self):
         self.prepareTraceData()
         self.plotTracesZoomed()
-        self.plotTracesOverall()
-        if self.widget_manager.dict_checkbox[f"{self.app_key}_plot_eventfile"].isChecked():
-            self.plotEventAlignedTrace()
+        if self.ax_layout == 'triple':
+            self.plotTracesOverall()
+            if self.widget_manager.dict_checkbox[f"{self.app_key}_plot_eventfile"].isChecked():
+                self.plotEventAlignedTrace()
         self.figure.tight_layout()
         self.canvas.draw_idle()
 
     def updatePlotWithMouseEvent(self):
         self.prepareTraceData()
         self.plotTracesZoomed()
-        self.plotTracesOverall()
+        if self.ax_layout == 'triple':
+            self.plotTracesOverall()
         self.figure.tight_layout()
         self.canvas.draw_idle()
 

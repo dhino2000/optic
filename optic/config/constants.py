@@ -54,6 +54,9 @@ class PlotColors:
     FNEU_CHAN2 = 'darkorange'
     EVENT = 'green'
     RECTANGLE = "purple"
+    # cascade colors
+    SPIKE_PROB_CASCADE = "orange"
+    SPIKE_CASCADE = "green"
 
 # canvas plot labels
 class PlotLabels:
@@ -63,6 +66,9 @@ class PlotLabels:
     F_CHAN2 = "F_chan2"
     FNEU_CHAN2 = "Fneu_chan2"
     EVENT = "event"
+    # cascade label
+    SPIKE_PROB_CASCADE = "spike prob"
+    SPIKE_CASCADE = "spike"
 
 # widget管理の総合key
 class AppKeys:
@@ -141,3 +147,10 @@ class AccessURL:
         "TIFSTACK_EXPLORER": "https://github.com/dhino2000/optic/blob/main/docs/TIFStackExplorer/tutorial.md",
     }
     
+# import package config
+class ImportPackage:
+    SUITE2P = "suite2p"
+    CELLPOSE = "cellpose"
+    OT = "ot"
+    ELASTIX = "itk"
+    ROIFILE = "roifile"

@@ -102,10 +102,14 @@ class DataManager:
     # load calcium trace npy data
     def loadNpyCalciumTrace(self, app_key: AppKeys, path_npy: str) -> Tuple[bool, Optional[Exception]]:
         try:
+            self.dict_data_dtype[app_key] = Extension.NPY
             # apply to Fall data structure
             arr_trace = np.load(path_npy, allow_pickle=True)
             self.dict_Fall[app_key] = {
-                "F": arr_trace
+                "F": arr_trace,
+                "ops": {
+                    "nchannels": 1,  # default to 1 channel
+                }
             }
             return True, None
         except Exception as e:
@@ -120,24 +124,34 @@ class DataManager:
     
     # get F, Fneu, spks
     def getTraces(self, app_key: AppKeys, n_channels: int=1) -> Dict[str, np.ndarray[np.float32]]: # 2d array
-        dict_traces = {
-            "F": self.dict_Fall[app_key]["F"],
-            "Fneu": self.dict_Fall[app_key]["Fneu"],
-            "spks": self.dict_Fall[app_key]["spks"],
-        }
-        if n_channels == 2:
-            dict_traces["F_chan2"] = self.dict_Fall[app_key]["F_chan2"]
-            dict_traces["Fneu_chan2"] = self.dict_Fall[app_key]["Fneu_chan2"]
+        if self.dict_data_dtype[app_key] == Extension.MAT: # Fall.mat data
+            dict_traces = {
+                "F": self.dict_Fall[app_key]["F"],
+                "Fneu": self.dict_Fall[app_key]["Fneu"],
+                "spks": self.dict_Fall[app_key]["spks"],
+            }
+            if n_channels == 2:
+                dict_traces["F_chan2"] = self.dict_Fall[app_key]["F_chan2"]
+                dict_traces["Fneu_chan2"] = self.dict_Fall[app_key]["Fneu_chan2"]
+        elif self.dict_data_dtype[app_key] == Extension.NPY: # calcium trace npy data
+            dict_traces = {
+                "F": self.dict_Fall[app_key]["F"],
+            }
         return dict_traces
     def getTracesOfSelectedROI(self, app_key: AppKeys, roi_id: int, n_channels: int=1) -> Dict[str, np.ndarray[np.float32]]: # 1d array
-        dict_traces = {
-            "F": self.dict_Fall[app_key]["F"][roi_id],
-            "Fneu": self.dict_Fall[app_key]["Fneu"][roi_id],
-            "spks": self.dict_Fall[app_key]["spks"][roi_id]
-        }
-        if n_channels == 2:
-            dict_traces["F_chan2"] = self.dict_Fall[app_key]["F_chan2"][roi_id]
-            dict_traces["Fneu_chan2"] = self.dict_Fall[app_key]["Fneu_chan2"][roi_id]
+        if self.dict_data_dtype[app_key] == Extension.MAT: # Fall.mat data
+            dict_traces = {
+                "F": self.dict_Fall[app_key]["F"][roi_id],
+                "Fneu": self.dict_Fall[app_key]["Fneu"][roi_id],
+                "spks": self.dict_Fall[app_key]["spks"][roi_id]
+            }
+            if n_channels == 2:
+                dict_traces["F_chan2"] = self.dict_Fall[app_key]["F_chan2"][roi_id]
+                dict_traces["Fneu_chan2"] = self.dict_Fall[app_key]["Fneu_chan2"][roi_id]
+        elif self.dict_data_dtype[app_key] == Extension.NPY: # calcium trace npy data
+            dict_traces = {
+                "F": self.dict_Fall[app_key]["F"][roi_id],
+            }
         return dict_traces
     
     # get stat
@@ -150,6 +164,8 @@ class DataManager:
     def getLengthOfData(self, app_key: AppKeys) -> int:
         if self.dict_data_dtype[app_key] == Extension.MAT:
             return len(self.dict_Fall[app_key]["ops"]["xoff1"])
+        elif self.dict_data_dtype[app_key] == Extension.NPY:
+            return self.dict_Fall[app_key]["F"].shape[1]
     # get nROIs
     def getNROIs(self, app_key: AppKeys) -> int:
         return len(self.dict_Fall[app_key]["stat"])

@@ -1,11 +1,34 @@
-from PyQt5.QtWidgets import QMainWindow, QWidget, QGridLayout, QVBoxLayout, QHBoxLayout, QApplication
-from optic.config import *
-from optic.controls import *
-from optic.dialog import *
-from optic.gui import *
-from optic.io import *
-from optic.manager import *
-from optic.gui.bind_func import *
+from PyQt5.QtWidgets import QMainWindow, QWidget, QGridLayout, QVBoxLayout, QHBoxLayout, QMessageBox
+from optic.config import Extension, AxisKeys, AccessURL
+from optic.controls.view_control import ViewControl
+from optic.controls.table_control import TableControl
+from optic.controls.canvas_control import CanvasControl
+from optic.dialog.table_columns_config import TableColumnConfigDialog
+from optic.dialog.roi_celltype_set import ROICellTypeSetDialog
+from optic.gui.app_setup import setupMainWindow
+from optic.gui.app_style import applyAppStyle
+from optic.gui.canvas_layouts import (
+    makeLayoutCanvasTracePlot, makeLayoutLightPlotMode, makeLayoutMinimumPlotRange, makeLayoutEventFilePlotProperty
+)
+from optic.gui.slider_layouts import makeLayoutContrastSlider, makeLayoutOpacitySlider
+from optic.gui.io_layouts import makeLayoutLoadFileWidget, makeLayoutLoadFileExitHelp, makeLayoutROICheckIO
+from optic.gui.info_layouts import makeLayoutROIProperty
+from optic.gui.table_layouts import makeLayoutTableROICountLabel, makeLayoutROIFilterThreshold, makeLayoutROIFilterButton
+from optic.gui.view_layouts import (
+    makeLayoutViewWithZTSlider, makeLayoutWidgetDislplayCelltype, makeLayoutWidgetDislplayCheckbox, 
+    makeLayoutWidgetBGImageTypeDisplay, makeLayoutWidgetROIChooseSkip, makeLayoutDisplayROIContours
+)
+from optic.manager import WidgetManager, ConfigManager, DataManager, ControlManager, LayoutManager, initManagers
+from optic.gui.bind_func import (
+    bindFuncExit, bindFuncTableSelectionChanged, bindFuncCanvasMouseEvent, bindFuncButtonExportFigure, 
+    bindFuncLoadFileWidget, bindFuncRadiobuttonBGImageTypeChanged, bindFuncCheckBoxDisplayCelltypeChanged, 
+    bindFuncCheckBoxDisplayCheckBoxChanged, bindFuncCheckBoxROIChooseSkip, bindFuncButtonFilterROI, 
+    bindFuncRadiobuttonOfTableChanged, bindFuncCheckboxOfTableChanged, bindFuncOpacitySlider, 
+    bindFuncHighlightOpacitySlider, bindFuncBackgroundContrastSlider, bindFuncBackgroundVisibilityCheckbox, 
+    bindFuncCheckBoxDisplayROIContours, bindFuncViewEvents, bindFuncCanvasMouseEvent, bindFuncButtonEventfileIO, 
+    bindFuncCheckboxEventfilePlotProperty, bindFuncHelp, bindFuncROICheckIO
+)
+from optic.utils.layout_utils import clearLayout
 
 class Suite2pROICurationGUI(QMainWindow):
     def __init__(self):
