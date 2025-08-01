@@ -1,13 +1,16 @@
 from __future__ import annotations
 from ..type_definitions import *
+from typing import TYPE_CHECKING
 import os
 from PyQt5.QtWidgets import QMessageBox, QDialog
 from scipy.io import loadmat, savemat
-from roifile import roiread, roiwrite, ImagejRoi
 import tifffile
 import datetime
 import numpy as np
 from .file_dialog import openFileDialog, saveFileDialog
+
+if TYPE_CHECKING:
+    from roifile import ImagejRoi
 
 # load Fall.mat data
 def loadFallMat(
@@ -142,6 +145,8 @@ def saveROIManagerZip(
         list_roi        : List[ImagejRoi],
         is_save_reg     : bool=False,
         ) -> None:
+    from roifile import roiwrite
+
     path_src = q_lineedit.text()
     if is_save_reg:
         path_dst = generateSavePath(path_src, prefix="RoiSet_", new_extension="_reg.zip")
@@ -161,6 +166,7 @@ def loadROIManagerZip(
         q_window        : QMainWindow, 
         data_manager    : DataManager, 
         ) -> None | List[ImagejRoi]:
+    from roifile import roiread
     path_roi_zip = openFileDialog(q_widget=q_window, file_type=".zip", title="Open ImageJ ROI Manager zip file").replace("\\", "/")
     
     if path_roi_zip:

@@ -1,7 +1,6 @@
 # アプリごとに変わるconfig
-from typing import Dict, Any, Tuple
 from PyQt5.QtCore import Qt
-from .constants import FileFilters, ProcessingDefaults, PlotColors, AppKeys, ChannelKeys, AxisKeys
+from .constants import AppKeys, ChannelKeys, ImportPackages
 
 # GUIに関する定数
 class GuiDefaults:
@@ -122,6 +121,7 @@ class GuiDefaults:
                 Qt.Key_K: ('move', 'skip_roi', 1),
             },
         },
+        "IMPORT_PACKAGES": [ImportPackages.SUITE2P],
     }
 
     """
@@ -293,6 +293,11 @@ class GuiDefaults:
                 Qt.Key_S: ('roi_match', 'set', 1),
             },
         },
+        "IMPORT_PACKAGES": [
+            ImportPackages.SUITE2P,
+            ImportPackages.OT,
+            ImportPackages.ELASTIX
+        ],
     }
 
     """
@@ -363,6 +368,13 @@ class GuiDefaults:
                 Qt.Key_S: ('roi_match', 'set', 1),
             },
         },
+        "IMPORT_PACKAGES": [
+            ImportPackages.SUITE2P,
+            ImportPackages.OT,
+            ImportPackages.ELASTIX,
+            ImportPackages.ROIFILE,
+            ImportPackages.CELLPOSE
+        ],
     }
 
     """
@@ -439,7 +451,7 @@ class GuiDefaults:
             "INIT_POSITION_X": 100, 
             "INIT_POSITION_Y": 100,
             "WIDTH": 1200,
-            "HEIGHT": 200,
+            "HEIGHT": 800,
         },
         "WINDOW_SETTINGS_DIALOG_DATA_LOAD": {
             "INIT_POSITION_X": 100, 
@@ -479,6 +491,9 @@ class GuiDefaults:
                 Qt.Key_Right: ('move', 'right', 1),
             },
         },
+        "IMPORT_PACKAGES": [
+            ImportPackages.CASCADE,
+        ],
     }
     
     @classmethod

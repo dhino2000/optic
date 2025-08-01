@@ -55,8 +55,8 @@ class PlotColors:
     EVENT = 'green'
     RECTANGLE = "purple"
     # cascade colors
-    SPIKE_PROB_CASCADE = "orange"
-    SPIKE_CASCADE = "green"
+    CASCADE_SPIKE_PROB = "orange"
+    CASCADE_SPIKE_EVENTS = "green"
 
 # canvas plot labels
 class PlotLabels:
@@ -67,8 +67,8 @@ class PlotLabels:
     FNEU_CHAN2 = "Fneu_chan2"
     EVENT = "event"
     # cascade label
-    SPIKE_PROB_CASCADE = "spike prob"
-    SPIKE_CASCADE = "spike"
+    CASCADE_SPIKE_PROB = "spike prob"
+    CASCADE_SPIKE_EVENTS = "spike events"
 
 # widget管理の総合key
 class AppKeys:
@@ -148,9 +148,10 @@ class AccessURL:
     }
     
 # import package config
-class ImportPackage:
+class ImportPackages:
     SUITE2P = "suite2p"
     CELLPOSE = "cellpose"
     OT = "ot"
     ELASTIX = "itk"
     ROIFILE = "roifile"
+    CASCADE = "cascade"

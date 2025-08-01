@@ -2,8 +2,6 @@ from __future__ import annotations
 from ..type_definitions import *
 import cv2
 import numpy as np
-import rasterio.features
-from shapely.geometry import Polygon
 
 # get ROI contour from the ROI's xpix array and ypix array
 # method = "dilate" : for displaying on view
@@ -56,6 +54,9 @@ def convertROIContourToFilledForRECT(
         width: int, 
         height: int
         ) -> np.ndarray[int, int]:
+    import rasterio.features
+    from shapely.geometry import Polygon
+
     polygon = Polygon(roi_contour)
     mask = rasterio.features.rasterize(
         [(polygon, 1)],

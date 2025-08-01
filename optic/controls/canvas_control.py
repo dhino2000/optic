@@ -109,18 +109,18 @@ class CanvasControl:
 
         # get and preprocess cascade spike_prob and spike
         try:
-            self.cascade_spike_prob = self.data_manager.getCascadeSpikeProbability(self.app_key)
-            self.cascade_spike = self.data_manager.getCascadeSpike(self.app_key)
-        except AttributeError:
+            self.cascade_spike_prob = self.data_manager.getCascadeSpikeProbability(self.app_key)[roi_selected_id]
+            self.cascade_spike_events = self.data_manager.getCascadeSpikeEvents(self.app_key)[roi_selected_id]
+        except (AttributeError, TypeError):
             self.cascade_spike_prob = None
-            self.cascade_spike = None
-        if self.cascade_spike_prob is not None and self.cascade_spike is not None:
+            self.cascade_spike_events = None
+        if self.cascade_spike_prob is not None and self.cascade_spike_events is not None:
             self.full_traces['cascade_spike_prob'] = self.cascade_spike_prob
-            self.full_traces['cascade_spike'] = self.cascade_spike
-            self.colors['cascade_spike_prob'] = PlotColors.SPIKE_PROB_CASCADE
-            self.colors['cascade_spike'] = PlotColors.SPIKE_CASCADE
-            self.labels['cascade_spike_prob'] = PlotLabels.SPIKE_PROB_CASCADE
-            self.labels['cascade_spike'] = PlotLabels.SPIKE_CASCADE
+            self.full_traces['cascade_spike_events'] = self.cascade_spike_events
+            self.colors['cascade_spike_prob'] = PlotColors.CASCADE_SPIKE_PROB
+            self.colors['cascade_spike_events'] = PlotColors.CASCADE_SPIKE_EVENTS
+            self.labels['cascade_spike_prob'] = PlotLabels.CASCADE_SPIKE_PROB
+            self.labels['cascade_spike_events'] = PlotLabels.CASCADE_SPIKE_EVENTS
 
     def prepareEventAlignedData(self):
         if self.eventfile is None:

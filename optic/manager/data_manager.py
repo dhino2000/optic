@@ -2,13 +2,16 @@ from __future__ import annotations
 from ..type_definitions import *
 from collections import defaultdict
 import numpy as np
-from itk.elxParameterObjectPython import elastixParameterObject, mapstringvectorstring
-from roifile import ImagejRoi
 from ..preprocessing.preprocessing_image import getBGImageFromFall, getBGImageChannel2FromFall, getROIImageFromFall
 from ..preprocessing.preprocessing_fall import getROICoordsFromDictFall
-from ..config.constants import Extension
+from ..config.constants import Extension, ImportPackages
 from ..io.data_io import loadFallMat, loadTiffStack, loadTifImage
 from ..utils.custom_dict import CustomDict
+
+from typing import TYPE_CHECKING
+if TYPE_CHECKING: # for type checking
+    from itk.elxParameterObjectPython import elastixParameterObject, mapstringvectorstring
+    from roifile import ImagejRoi
 
 class DataManager:
     def __init__(self):
@@ -30,15 +33,15 @@ class DataManager:
         # for ROI tracking
         self.dict_im_bg_reg:            Dict[AppKeys, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
         self.dict_im_bg_chan2_reg:      Dict[AppKeys, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
-        # Elastix
-        self.dict_parameter_map:        Dict[AppKeys, mapstringvectorstring] = {}
-        self.dict_transform_parameters: Dict[AppKeys, elastixParameterObject] = {}
         # ROI image
         self.dict_im_roi:               Dict[AppKeys, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
         self.dict_im_roi_reg:           Dict[AppKeys, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
         # ROI mask, coordinates
         self.dict_roi_mask:             Dict[AppKeys, np.ndarray[np.uint16, Tuple[int, int, int]]] = {}
         self.dict_roi_mask_reg:         Dict[AppKeys, np.ndarray[np.uint16, Tuple[int, int, int]]] = {}
+        # Elastix
+        self.dict_parameter_map:        Dict[AppKeys, mapstringvectorstring] = {}
+        self.dict_transform_parameters: Dict[AppKeys, elastixParameterObject] = {}
         # for ImageJ ROI Manager
         self.list_roi_imagej:           List[ImagejRoi] = []
         self.list_roi_imagej_reg:       List[ImagejRoi] = []
@@ -49,6 +52,8 @@ class DataManager:
         self.dict_roi_coords_xyct_reg:  Dict[int, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]] = CustomDict()
         self.dict_im_roi_xyct:          Dict[int, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
         self.dict_im_roi_reg_xyct:      Dict[int, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
+        # Cascade
+        self.dict_cascade:              Dict[AppKeys, Dict[str, np.ndarray[Tuple[int]]]] = defaultdict(dict)
 
         self.dict_eventfile:            Dict[AppKeys, Dict[str, np.ndarray[Tuple[int]]]] = defaultdict(dict)
         self.dict_roicheck:             Dict[AppKeys, Any] = {}
@@ -67,7 +72,7 @@ class DataManager:
             self.dict_im_roi[app_key] = getROIImageFromFall(self, app_key)
             if self.getNChannels(app_key) == 2:
                 self.dict_im_bg_chan2[app_key] = getBGImageChannel2FromFall(self, app_key)
-            # Suite2pROITracking
+            # Suite2pROITracking add registered data dict
             if config_manager:
                 if config_manager.current_app == "SUITE2P_ROI_TRACKING":
                     self.dict_im_bg_reg[app_key] = getBGImageFromFall(self, app_key)
@@ -77,6 +82,7 @@ class DataManager:
                         self.dict_im_bg_chan2_reg[app_key] = getBGImageChannel2FromFall(self, app_key)
             return True, None
         except Exception as e:
+            # raise e
             return False, e
         
     # load tiff image data (for optional)
@@ -289,4 +295,10 @@ class DataManager:
                 del self.dict_eventfile[app_key][eventfile_name]
             else:
                 del self.dict_eventfile[app_key]
+
+    # Cascade
+    def getCascadeSpikeProbability(self, app_key: AppKeys) -> np.ndarray[Tuple[int]]:
+        return self.dict_cascade.get(app_key, {}).get("cascade_spike_prob", None)
+    def getCascadeSpikeEvents(self, app_key: AppKeys) -> np.ndarray[Tuple[int]]:
+        return self.dict_cascade.get(app_key, {}).get("cascade_spike_events", None)
     

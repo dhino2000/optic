@@ -1668,5 +1668,3 @@ def bindFuncCheckBoxDisplayROIContours(
     q_checkbox_contour_all.stateChanged.connect(lambda state: _onCheckBoxChanged(state, "contour_all"))
     q_checkbox_contour_selected.stateChanged.connect(lambda state: _onCheckBoxChanged(state, "contour_selected"))
     q_checkbox_contour_next.stateChanged.connect(lambda state: _onCheckBoxChanged(state, "contour_next"))
-
-

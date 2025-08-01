@@ -1,5 +1,5 @@
 # initialize Managers
-from typing import Union, Tuple, List
+from typing import Union, Tuple
 from .data_manager import DataManager
 from .control_manager import ControlManager
 from .widget_manager import WidgetManager
