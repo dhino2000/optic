@@ -27,6 +27,7 @@ def convertImagejRoiToDictROIMatchingAndDictROICoords(
         img_height: int
     ) -> Tuple[Dict[str, Dict[int, List[int] | Dict[int, Dict[int, Optional[int]]]]], 
                Dict[int, Dict[int, Dict[Literal["x", "y", "med"], np.ndarray]]]]:
+    from skimage.draw import ellipse
     """
     TEMPORARY WARNING !!!
     """
@@ -53,33 +54,41 @@ def convertImagejRoiToDictROIMatchingAndDictROICoords(
         roi_name = roi_name.upper() # mXXX_sXX -> MXXX_SXX
         roi_name = roi_name.replace("-", "_") # MXXX-SXX -> MXXX_SXX
 
-        # only RECT, TRACED, FREEHAND !!!
-        if roi.roitype == 1 or roi.roitype == 7 or roi.roitype == 8:
+        # only RECT, TRACED, FREEHAND, OVAL !!!
+        if roi.roitype in [1, 2, 7, 8]:
             try:
                 # RECT
                 if roi.roitype == 1: 
-                    roi_xy_coords = roi.multi_coordinates
-                    list_roi_coords_segment = []
+                    # simple rectangle ROI
+                    if not roi.multi_coordinates:
+                        xpix_contour = np.array([roi.left, roi.right, roi.right, roi.left])
+                        ypix_contour = np.array([roi.top, roi.top, roi.bottom, roi.bottom])
+                        xpix_ypix_contour = np.column_stack((xpix_contour, ypix_contour))
+                        xpix_ypix = convertROIContourToFilled(xpix_ypix_contour, img_width, img_height)
+                    # complicated rectangle ROI
+                    if roi.multi_coordinates:
+                        roi_xy_coords = roi.multi_coordinates
+                        list_roi_coords_segment = []
 
-                    seg_start = 0
-                    seg_end = len(roi_xy_coords)
-                    for i in range(len(roi_xy_coords)):
-                        try:
-                            # pick up 2 elements
-                            pri, sec = roi_xy_coords[i], roi_xy_coords[i+1]
-                            if pri == 4 and sec == 0: # border of segments (4, 0)
+                        seg_start = 0
+                        seg_end = len(roi_xy_coords)
+                        for i in range(len(roi_xy_coords)):
+                            try:
+                                # pick up 2 elements
+                                pri, sec = roi_xy_coords[i], roi_xy_coords[i+1]
+                                if pri == 4 and sec == 0: # border of segments (4, 0)
+                                    seg_end = i
+                                    list_roi_coords_segment.append(roi_xy_coords[seg_start:seg_end+1])
+                                    seg_start = i+1
+                            except IndexError: # end of list
                                 seg_end = i
                                 list_roi_coords_segment.append(roi_xy_coords[seg_start:seg_end+1])
-                                seg_start = i+1
-                        except IndexError: # end of list
-                            seg_end = i
-                            list_roi_coords_segment.append(roi_xy_coords[seg_start:seg_end+1])
-                    xpix_contour = np.concatenate([roi_coords_segment[1::3] for roi_coords_segment in list_roi_coords_segment])
-                    ypix_contour = np.concatenate([roi_coords_segment[2::3] for roi_coords_segment in list_roi_coords_segment])
-                    xpix_ypix_contour = np.column_stack((xpix_contour, ypix_contour))
-                    # RECT ROI contour is so complicated !!!
-                    # use specialzed function for RECT
-                    xpix_ypix = convertROIContourToFilledForRECT(xpix_ypix_contour, img_width, img_height)
+                        xpix_contour = np.concatenate([roi_coords_segment[1::3] for roi_coords_segment in list_roi_coords_segment])
+                        ypix_contour = np.concatenate([roi_coords_segment[2::3] for roi_coords_segment in list_roi_coords_segment])
+                        xpix_ypix_contour = np.column_stack((xpix_contour, ypix_contour))
+                        # RECT ROI contour is so complicated !!!
+                        # use specialzed function for RECT
+                        xpix_ypix = convertROIContourToFilledForRECT(xpix_ypix_contour, img_width, img_height)
                 # TRACED, FREEHAND
                 elif roi.roitype == 7 or roi.roitype == 8: 
                     roi_x_start = roi.left
@@ -91,7 +100,30 @@ def convertImagejRoiToDictROIMatchingAndDictROICoords(
                     xpix_ypix_contour = np.column_stack((xpix_contour, ypix_contour))
                     # convert contour to filled roi
                     xpix_ypix = convertROIContourToFilled(xpix_ypix_contour, img_width, img_height)
+                # OVAL
+                elif roi.roitype == 2:
+                    center_x, center_y = (roi.left + roi.right) / 2, (roi.top + roi.bottom) / 2
+                    width, height = roi.right - roi.left, roi.bottom - roi.top
+                    r_radius, c_radius = height / 2, width / 2
+                    img_height, img_width = int(height + 10), int(width + 10)
 
+                    # Adjust center coordinates for skimage.draw.ellipse
+                    offset_x = int(-roi.left + 5)
+                    offset_y = int(-roi.top + 5)
+                    sk_center_y = img_height - (center_y + offset_y) 
+                    sk_center_x = center_x + offset_x
+
+                    # skimage.draw.ellipse
+                    rr, cc = ellipse(sk_center_y, sk_center_x, r_radius, c_radius, 
+                                        shape=(img_height, img_width))
+
+                    # Convert to coordinates for plotting
+                    xpix_ypix = []
+                    for i in range(len(rr)):
+                        x = cc[i] - offset_x
+                        y = (img_height - rr[i]) - offset_y 
+                        xpix_ypix.append((x, y))
+                    xpix_ypix = np.array(xpix_ypix)
                 xpix, ypix = xpix_ypix[:, 0], xpix_ypix[:, 1]
                 med = np.array([np.median(xpix).astype("uint16"), np.median(ypix).astype("uint16")])
 
@@ -138,7 +170,8 @@ def convertImagejRoiToDictROIMatchingAndDictROICoords(
                 if name not in dict_roi_matching_anchor:
                     dict_roi_matching_anchor[name] = {}
                 dict_roi_matching_anchor[name][roi_t_plane] = roi_id
-            except IndexError:
+            except IndexError as e:
+                raise e
                 print("ROI load error: ", roi.name)
                 print("INDEX ERROR")
                 dict_error[roi.name] = "INDEX ERROR"
