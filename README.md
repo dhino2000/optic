@@ -96,7 +96,7 @@ T: time points
 (ex) `python C:/Users/dhino2000/optic/scripts/suite2p_roi_curation.py`
 
 3. Sort and Check ROIs!
-([Suite2pROICuration Tutorial](https://github.com/dhino2000/optic/blob/main/docs/Suite2pROICuration/tutorial.md))
+([Suite2pROICuration Tutorial](https://optic-doc.readthedocs.io/en/latest/Suite2pROICuration.html))
 
 ### Suite2pROITracking
 1. Open the Anaconda Prompt and switch to the desired environment.  
@@ -107,7 +107,7 @@ T: time points
 (ex) `python C:/Users/dhino2000/optic/scripts/suite2p_roi_tracking.py`
 
 3. Track ROIs!
-([Suite2pROITracking Tutorial](https://github.com/dhino2000/optic/blob/main/docs/Suite2pROITracking/tutorial.md))
+([Suite2pROITracking Tutorial](https://optic-doc.readthedocs.io/en/latest/Suite2pROITracking.html))
 
 ### MicrogliaTracking
 1. Open the Anaconda Prompt and switch to the desired environment.  
@@ -118,7 +118,7 @@ T: time points
 (ex) `python C:/Users/dhino2000/optic/scripts/microglia_tracking.py`
 
 3. Track ROIs!
-([MicrogliaTracking Tutorial](https://github.com/dhino2000/optic/blob/main/docs/MicrogliaTracking/tutorial.md))
+([MicrogliaTracking Tutorial](https://optic-doc.readthedocs.io/en/latest/MicrogliaTracking.html))
 
 ### TIFStackExplorer
 1. Open the Anaconda Prompt and switch to the desired environment.  
