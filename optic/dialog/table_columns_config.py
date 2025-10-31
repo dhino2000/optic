@@ -3,8 +3,6 @@ from ..type_definitions import *
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QTableWidget, QTableWidgetItem, QComboBox, QLineEdit
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QMainWindow, QMessageBox
-from ..manager.widget_manager import WidgetManager
-from ..manager.init_managers import initManagers
 from ..config.constants import TableColumnConfigDialog_Config
 from ..utils.table_utils import deleteSelectedRows, addRow
 import copy
@@ -18,6 +16,9 @@ class TableColumnConfigDialog(QDialog):
             gui_defaults: GuiDefaults,
             ):
         super().__init__(parent)
+
+        from ..manager.widget_manager import WidgetManager
+        from ..manager.init_managers import initManagers
         self.widget_manager = initManagers(WidgetManager())
         self.table_columns_tmp = copy.copy(table_columns) # copy to prevent changing original table_columns
         self.table_columns = table_columns

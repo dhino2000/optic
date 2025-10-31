@@ -493,6 +493,19 @@ class GuiDefaults:
             ImportPackages.CASCADE,
         ],
     }
+    """
+    BehaviorCamera
+    """
+    BEHAVIOR_CAMERA = {
+        "WINDOW_SETTINGS": {
+            "INIT_POSITION_X": 100, 
+            "INIT_POSITION_Y": 100,
+            "WIDTH": 1800,
+            "HEIGHT": 900,
+        },
+        "TITLE": "BehaviorCameraGUI",
+        "APP_KEYS": [AppKeys.PRI],
+    }
     
     @classmethod
     def getROIDisplayOptions(cls, app_name, table_columns):
