@@ -1,5 +1,5 @@
 # behavior_camera/camera/device.py
-# カメラデバイスの検出と初期化を管理するモジュール
+# Module for camera device detection and initialization management
 
 import cv2
 import numpy as np
@@ -15,7 +15,7 @@ except ImportError:
 
 
 class CameraType(Enum):
-    """カメラタイプの列挙"""
+    """Camera type enumeration"""
     BASLER = "Basler"
     USB = "USB"
     NONE = "None"
@@ -23,27 +23,27 @@ class CameraType(Enum):
 
 class CameraDevice:
     """
-    カメラデバイスの検出、初期化、制御を管理するクラス
-    BaslerカメラとUSBカメラの両方に対応
+    Class for managing camera device detection, initialization, and control
+    Supports both Basler and USB cameras
     """
     
     def __init__(self):
         self.camera_type = CameraType.NONE
         self.camera = None
-        self.converter = None  # Basler用
-        self.is_configured = False  # カメラ設定が適用済みか
+        self.converter = None  # For Basler
+        self.is_configured = False  # Flag for camera configuration applied
         
     def detectCameras(self) -> Tuple[List[str], List[str]]:
         """
-        接続されているカメラを検出
+        Detect connected cameras
         
         Returns:
-            Tuple[List[str], List[str]]: (Baslerカメラリスト, USBカメラリスト)
+            Tuple[List[str], List[str]]: (Basler camera list, USB camera list)
         """
         basler_cameras = []
         usb_cameras = []
         
-        # Baslerカメラを検出
+        # Detect Basler cameras
         if PYPYLON_AVAILABLE:
             try:
                 tl_factory = pylon.TlFactory.GetInstance()
@@ -52,7 +52,7 @@ class CameraDevice:
             except Exception as e:
                 print(f"Error detecting Basler cameras: {e}")
         
-        # USBカメラを検出（最大10個まで）
+        # Detect USB cameras (up to 10)
         for i in range(10):
             cap = cv2.VideoCapture(i)
             if cap.isOpened():
@@ -65,20 +65,20 @@ class CameraDevice:
     
     def initializeCamera(self) -> Tuple[bool, str]:
         """
-        カメラを自動検出して初期化
+        Auto-detect and initialize camera
         
         Returns:
-            Tuple[bool, str]: (成功フラグ, メッセージ)
+            Tuple[bool, str]: (success flag, message)
         """
         basler_cameras, usb_cameras = self.detectCameras()
         
         total_cameras = len(basler_cameras) + len(usb_cameras)
         
-        # カメラが見つからない場合
+        # No camera found
         if total_cameras == 0:
             return False, "No camera detected."
         
-        # 複数カメラが見つかった場合
+        # Multiple cameras found
         if total_cameras > 1:
             camera_list = basler_cameras + usb_cameras
             error_msg = f"Multiple cameras detected ({total_cameras}):\n"
@@ -86,7 +86,7 @@ class CameraDevice:
             error_msg += "\n\nPlease connect only one camera."
             return False, error_msg
         
-        # Baslerカメラを初期化
+        # Initialize Basler camera
         if len(basler_cameras) == 1:
             try:
                 self._initializeBaslerCamera()
@@ -94,7 +94,7 @@ class CameraDevice:
             except Exception as e:
                 return False, f"Failed to initialize Basler camera: {e}"
         
-        # USBカメラを初期化
+        # Initialize USB camera
         if len(usb_cameras) == 1:
             try:
                 self._initializeUSBCamera(0)
@@ -105,7 +105,7 @@ class CameraDevice:
         return False, "Unknown error during camera initialization."
     
     def _initializeBaslerCamera(self):
-        """Baslerカメラを初期化"""
+        """Initialize Basler camera"""
         if not PYPYLON_AVAILABLE:
             raise RuntimeError("pypylon is not available")
         
@@ -118,7 +118,7 @@ class CameraDevice:
         self.camera_type = CameraType.BASLER
     
     def _initializeUSBCamera(self, index: int):
-        """USBカメラを初期化"""
+        """Initialize USB camera"""
         self.camera = cv2.VideoCapture(index, cv2.CAP_DSHOW) # cv2.CAP_MSMF does not work well on some systems
         if not self.camera.isOpened():
             raise RuntimeError(f"Failed to open USB camera {index}")
@@ -128,28 +128,28 @@ class CameraDevice:
                        offsetx: int, offsety: int, gain: float, 
                        exposure_time: float):
         """
-        カメラ設定を適用
+        Apply camera configuration
         
         Args:
-            fps: フレームレート
-            width: 画像幅
-            height: 画像高さ
-            offsetx: X方向オフセット
-            offsety: Y方向オフセット
-            gain: ゲイン
-            exposure_time: 露光時間
+            fps: Frame rate
+            width: Image width
+            height: Image height
+            offsetx: X offset
+            offsety: Y offset
+            gain: Gain
+            exposure_time: Exposure time
         """
         if self.camera_type == CameraType.BASLER:
             self._setBaslerConfig(fps, width, height, offsetx, offsety, gain, exposure_time)
         elif self.camera_type == CameraType.USB:
             self._setUSBConfig(fps, width, height)
         
-        self.is_configured = True  # 設定適用済みフラグ
+        self.is_configured = True
     
     def _setBaslerConfig(self, fps: float, width: int, height: int,
                         offsetx: int, offsety: int, gain: float,
                         exposure_time: float):
-        """Baslerカメラの設定"""
+        """Configure Basler camera"""
         self.camera.Open()
         self.camera.AcquisitionFrameRateEnable.SetValue(True)
         self.camera.AcquisitionFrameRate.SetValue(fps)
@@ -161,7 +161,7 @@ class CameraDevice:
         self.camera.ExposureTime.SetValue(exposure_time)
     
     def _setUSBConfig(self, fps: float, width: int, height: int):
-        """USBカメラの設定"""
+        """Configure USB camera"""
         self.camera.set(cv2.CAP_PROP_FPS, fps)
         self.camera.set(cv2.CAP_PROP_FRAME_WIDTH, width)
         self.camera.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
@@ -169,12 +169,33 @@ class CameraDevice:
         print(f"USB Camera set Height: {self.camera.get(cv2.CAP_PROP_FRAME_HEIGHT)}")
         print(f"USB Camera set FPS: {self.camera.get(cv2.CAP_PROP_FPS)}")
     
-    def captureFrame(self) -> Optional[np.ndarray]:
+    def getResolution(self) -> Tuple[Optional[int], Optional[int]]:
         """
-        1フレームをキャプチャ
+        Get camera resolution (width, height)
         
         Returns:
-            Optional[np.ndarray]: キャプチャした画像、失敗時はNone
+            Tuple[Optional[int], Optional[int]]: (width, height), None if failed
+        """
+        if self.camera_type == CameraType.BASLER:
+            try:
+                width = self.camera.Width.GetValue()
+                height = self.camera.Height.GetValue()
+                return width, height
+            except Exception as e:
+                print(f"Error getting Basler resolution: {e}")
+                return None, None
+        elif self.camera_type == CameraType.USB:
+            width = int(self.camera.get(cv2.CAP_PROP_FRAME_WIDTH))
+            height = int(self.camera.get(cv2.CAP_PROP_FRAME_HEIGHT))
+            return width, height
+        return None, None
+    
+    def captureFrame(self) -> Optional[np.ndarray]:
+        """
+        Capture one frame
+        
+        Returns:
+            Optional[np.ndarray]: Captured image, None if failed
         """
         if self.camera_type == CameraType.BASLER:
             return self._captureBaslerFrame()
@@ -183,7 +204,7 @@ class CameraDevice:
         return None
     
     def _captureBaslerFrame(self) -> Optional[np.ndarray]:
-        """Baslerカメラから1フレームキャプチャ"""
+        """Capture one frame from Basler camera"""
         try:
             if not self.camera.IsGrabbing():
                 self.camera.StartGrabbing(pylon.GrabStrategy_OneByOne)
@@ -205,29 +226,29 @@ class CameraDevice:
             return None
     
     def _captureUSBFrame(self) -> Optional[np.ndarray]:
-        """USBカメラから1フレームキャプチャ"""
+        """Capture one frame from USB camera"""
         ret, frame = self.camera.read()
         if ret:
-            # グレースケール変換
+            # Convert to grayscale
             if len(frame.shape) == 3:
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             return frame
         return None
     
     def startGrabbing(self):
-        """連続撮影を開始"""
+        """Start continuous capture"""
         if self.camera_type == CameraType.BASLER:
             if not self.camera.IsGrabbing():
                 self.camera.StartGrabbing(pylon.GrabStrategy_LatestImageOnly)
     
     def stopGrabbing(self):
-        """連続撮影を停止"""
+        """Stop continuous capture"""
         if self.camera_type == CameraType.BASLER:
             if self.camera.IsGrabbing():
                 self.camera.StopGrabbing()
     
     def close(self):
-        """カメラを閉じる"""
+        """Close camera"""
         if self.camera_type == CameraType.BASLER:
             if self.camera.IsOpen():
                 self.camera.Close()
@@ -239,9 +260,9 @@ class CameraDevice:
         self.camera_type = CameraType.NONE
     
     def getCameraType(self) -> CameraType:
-        """カメラタイプを取得"""
+        """Get camera type"""
         return self.camera_type
     
     def isInitialized(self) -> bool:
-        """カメラが初期化されているか確認"""
+        """Check if camera is initialized"""
         return self.camera_type != CameraType.NONE
