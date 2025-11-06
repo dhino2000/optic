@@ -4,9 +4,24 @@ from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout
 from .base_layouts import makeLayoutLineEditLabel
 
 # 読み込むファイルを選択するためのウィジェット
-def makeLayoutLoadFileWidget(widget_manager: WidgetManager, label: str="", key_label: str="", key_lineedit: str="", key_button: str="") -> QHBoxLayout:
+def makeLayoutLoadFileWidget(
+        widget_manager: WidgetManager, 
+        label: str="", 
+        key_label: str="", 
+        key_lineedit: str="", 
+        key_button: str="",
+        text_set: str="",
+        axis: str="vertical"
+        ) -> QHBoxLayout:
     layout = QHBoxLayout() # entry
-    layout.addLayout(makeLayoutLineEditLabel(widget_manager, key_label=key_label, key_lineedit=key_lineedit, label=label))
+    layout.addLayout(makeLayoutLineEditLabel(
+        widget_manager, 
+        key_label=key_label, 
+        key_lineedit=key_lineedit, 
+        label=label,
+        axis=axis,
+        text_set=text_set
+        ))
     layout.addWidget(widget_manager.makeWidgetButton(key=key_button, label="Browse"))
     return layout
 

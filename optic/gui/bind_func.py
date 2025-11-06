@@ -168,10 +168,11 @@ def bindFuncLoadFileWidget(
     q_button: 'QPushButton', 
     q_widget: 'QWidget', 
     q_lineedit: 'QLineEdit', 
-    filetype: str = None
+    filetype: str = None,
+    select_dir: bool = False
 ) -> None:
     from ..io.file_dialog import openFileDialogAndSetLineEdit
-    q_button.clicked.connect(lambda: openFileDialogAndSetLineEdit(q_widget, filetype, q_lineedit))
+    q_button.clicked.connect(lambda: openFileDialogAndSetLineEdit(q_widget, filetype, q_lineedit, select_dir=select_dir))
 
 # -> io_layouts.makeLayoutROICheckIO
 def bindFuncROICheckIO(

@@ -64,11 +64,17 @@ def openFileDialogAndSetLineEdit(
         file_type           : str, 
         line_edit           : QLineEdit, 
         title               : str="Open File", 
-        initial_dir         : str=""
+        initial_dir         : str="",
+        select_dir          : bool=False
         ) -> None:
     if not isinstance(line_edit, QLineEdit):
         raise TypeError("line_edit must be an instance of QLineEdit")
 
-    file_path = openFileDialog(q_widget, file_type, title, initial_dir)
-    if file_path:
-        line_edit.setText(file_path)
+    if select_dir:
+        folder_path = openFolderDialog(q_widget, title, initial_dir)
+        if folder_path:
+            line_edit.setText(folder_path)
+    else:
+        file_path = openFileDialog(q_widget, file_type, title, initial_dir)
+        if file_path:
+            line_edit.setText(file_path)
