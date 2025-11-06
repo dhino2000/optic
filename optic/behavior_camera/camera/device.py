@@ -3,7 +3,7 @@
 
 import cv2
 import numpy as np
-from typing import Optional, Tuple, List
+from typing import Optional, Tuple, List, Dict, Any
 from enum import Enum
 
 try:
@@ -119,52 +119,70 @@ class CameraDevice:
     
     def _initializeUSBCamera(self, index: int):
         """Initialize USB camera"""
-        self.camera = cv2.VideoCapture(index, cv2.CAP_DSHOW) # cv2.CAP_MSMF does not work well on some systems
+        self.camera = cv2.VideoCapture(index, cv2.CAP_DSHOW)
         if not self.camera.isOpened():
             raise RuntimeError(f"Failed to open USB camera {index}")
         self.camera_type = CameraType.USB
     
-    def setCameraConfig(self, fps: float, width: int, height: int, 
-                       offsetx: int, offsety: int, gain: float, 
-                       exposure_time: float):
+    def setCameraConfig(self, config: Dict[str, Any]):
         """
-        Apply camera configuration
+        Apply camera configuration from config dictionary
+        Opens camera, applies config, then closes it (for single capture use)
+        For continuous capture, camera will be opened during startGrabbing
         
         Args:
-            fps: Frame rate
-            width: Image width
-            height: Image height
-            offsetx: X offset
-            offsety: Y offset
-            gain: Gain
-            exposure_time: Exposure time
+            config: Dictionary containing camera parameters
+                    Required keys: fps, width, height, offsetx, offsety, gain, exposure_time
         """
         if self.camera_type == CameraType.BASLER:
-            self._setBaslerConfig(fps, width, height, offsetx, offsety, gain, exposure_time)
+            # Ensure camera is in clean state
+            if self.camera.IsGrabbing():
+                self.camera.StopGrabbing()
+            
+            # Open, configure, then close
+            self._setBaslerConfig(config)
+            
+            # Close after configuration (will be reopened when needed)
+            if self.camera.IsOpen():
+                self.camera.Close()
+                
         elif self.camera_type == CameraType.USB:
-            self._setUSBConfig(fps, width, height)
+            self._setUSBConfig(config)
         
         self.is_configured = True
     
-    def _setBaslerConfig(self, fps: float, width: int, height: int,
-                        offsetx: int, offsety: int, gain: float,
-                        exposure_time: float):
-        """Configure Basler camera"""
-        self.camera.Open()
+    def _setBaslerConfig(self, config: Dict[str, Any]):
+        """
+        Configure Basler camera
+        CRITICAL ORDER: Must set Offset BEFORE Width/Height
+        """
+        # Open camera if not already open
+        if not self.camera.IsOpen():
+            self.camera.Open()
+        
+        # CRITICAL: Set frame rate first
         self.camera.AcquisitionFrameRateEnable.SetValue(True)
-        self.camera.AcquisitionFrameRate.SetValue(fps)
-        self.camera.OffsetX = offsetx
-        self.camera.OffsetY = offsety
-        self.camera.Width = width
-        self.camera.Height = height
-        self.camera.Gain = gain
-        self.camera.ExposureTime.SetValue(exposure_time)
+        self.camera.AcquisitionFrameRate.SetValue(config['fps'])
+        
+        # CRITICAL: Set offsets BEFORE width/height
+        self.camera.OffsetX = config['offsetx']
+        self.camera.OffsetY = config['offsety']
+        
+        # Set width and height
+        self.camera.Width = config['width']
+        self.camera.Height = config['height']
+        
+        # Set gain and exposure
+        self.camera.Gain = config['gain']
+        self.camera.ExposureTime.SetValue(config['exposure_time'])
+        
+        print(f"Basler config applied: {config['width']}x{config['height']}, FPS: {config['fps']}, Gain: {config['gain']}, Exposure: {config['exposure_time']}")
     
-    def _setUSBConfig(self, fps: float, width: int, height: int):
+    def _setUSBConfig(self, config: Dict[str, Any]):
         """Configure USB camera"""
-        self.camera.set(cv2.CAP_PROP_FPS, fps)
-        self.camera.set(cv2.CAP_PROP_FRAME_WIDTH, width)
-        self.camera.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+        self.camera.set(cv2.CAP_PROP_FPS, config['fps'])
+        self.camera.set(cv2.CAP_PROP_FRAME_WIDTH, config['width'])
+        self.camera.set(cv2.CAP_PROP_FRAME_HEIGHT, config['height'])
         print(f"USB Camera set Width: {self.camera.get(cv2.CAP_PROP_FRAME_WIDTH)}")
         print(f"USB Camera set Height: {self.camera.get(cv2.CAP_PROP_FRAME_HEIGHT)}")
         print(f"USB Camera set FPS: {self.camera.get(cv2.CAP_PROP_FPS)}")
@@ -178,8 +196,17 @@ class CameraDevice:
         """
         if self.camera_type == CameraType.BASLER:
             try:
+                # Need to open camera temporarily to read parameters
+                was_open = self.camera.IsOpen()
+                if not was_open:
+                    self.camera.Open()
+                
                 width = self.camera.Width.GetValue()
                 height = self.camera.Height.GetValue()
+                
+                if not was_open:
+                    self.camera.Close()
+                
                 return width, height
             except Exception as e:
                 print(f"Error getting Basler resolution: {e}")
@@ -193,6 +220,7 @@ class CameraDevice:
     def captureFrame(self) -> Optional[np.ndarray]:
         """
         Capture one frame
+        Handles camera open/close cycle for single capture
         
         Returns:
             Optional[np.ndarray]: Captured image, None if failed
@@ -204,25 +232,51 @@ class CameraDevice:
         return None
     
     def _captureBaslerFrame(self) -> Optional[np.ndarray]:
-        """Capture one frame from Basler camera"""
+        """
+        Capture one frame from Basler camera
+        Properly manages open/grab/close cycle
+        """
         try:
-            if not self.camera.IsGrabbing():
+            # Open camera if not open
+            was_open = self.camera.IsOpen()
+            if not was_open:
+                self.camera.Open()
+            
+            # Start grabbing for single frame
+            was_grabbing = self.camera.IsGrabbing()
+            if not was_grabbing:
                 self.camera.StartGrabbing(pylon.GrabStrategy_OneByOne)
             
+            # Retrieve frame
             grab_result = self.camera.RetrieveResult(
                 5000, pylon.TimeoutHandling_ThrowException
             )
             
+            img = None
             if grab_result.GrabSucceeded():
                 image = self.converter.Convert(grab_result)
                 img = image.GetArray()
-                grab_result.Release()
-                return img
-            else:
-                grab_result.Release()
-                return None
+            
+            grab_result.Release()
+            
+            # Clean up: stop grabbing and close if we opened it
+            if not was_grabbing:
+                self.camera.StopGrabbing()
+            if not was_open:
+                self.camera.Close()
+            
+            return img
+            
         except Exception as e:
             print(f"Error capturing Basler frame: {e}")
+            # Try to clean up on error
+            try:
+                if self.camera.IsGrabbing():
+                    self.camera.StopGrabbing()
+                if self.camera.IsOpen():
+                    self.camera.Close()
+            except:
+                pass
             return None
     
     def _captureUSBFrame(self) -> Optional[np.ndarray]:
@@ -236,22 +290,50 @@ class CameraDevice:
         return None
     
     def startGrabbing(self):
-        """Start continuous capture"""
+        """
+        Start continuous capture
+        Opens camera if needed
+        """
         if self.camera_type == CameraType.BASLER:
+            # Open camera if not open
+            if not self.camera.IsOpen():
+                self.camera.Open()
+            
+            # Start grabbing if not already grabbing
             if not self.camera.IsGrabbing():
                 self.camera.StartGrabbing(pylon.GrabStrategy_LatestImageOnly)
     
     def stopGrabbing(self):
-        """Stop continuous capture"""
+        """
+        Stop continuous capture
+        Closes camera after stopping
+        """
         if self.camera_type == CameraType.BASLER:
             if self.camera.IsGrabbing():
                 self.camera.StopGrabbing()
-    
-    def close(self):
-        """Close camera"""
-        if self.camera_type == CameraType.BASLER:
+            
+            # Close camera after stopping grabbing
             if self.camera.IsOpen():
                 self.camera.Close()
+    
+    def close(self):
+        """
+        Close camera and release resources
+        Safe to call multiple times
+        """
+        if self.camera_type == CameraType.BASLER:
+            try:
+                if self.camera.IsGrabbing():
+                    self.camera.StopGrabbing()
+            except:
+                pass
+            
+            try:
+                if self.camera.IsOpen():
+                    self.camera.Close()
+            except:
+                pass
+                
         elif self.camera_type == CameraType.USB:
             if self.camera is not None:
                 self.camera.release()
