@@ -3,7 +3,7 @@ from ..type_definitions import *
 import numpy as np
 from typing import Dict
 
-# 画像をint型に変換 型は指定可能
+# convert image dtype to uint8 or uint16
 def convertImageDtypeToINT(
         img: np.ndarray, 
         dtype: str="uint8"
@@ -15,22 +15,22 @@ def convertImageDtypeToINT(
     img = img.astype(dtype)
     return img
 
-# 大きさが異なる画像をそろえる, max_proj, Vcorr用
+# resize image shape to target shape by centering
 def resizeImageShape(
         img: np.ndarray, 
         shape_tgt: Tuple[int, int]
         ) -> np.ndarray:
     if img.shape == shape_tgt:
         return img
-    # 新しい黒い画像を作成
     new_img = np.zeros(shape_tgt, dtype=img.dtype)
-    # 中央に配置するための開始位置を計算
     start_y = (shape_tgt[0] - img.shape[0]) // 2
     start_x = (shape_tgt[1] - img.shape[1]) // 2
-    # 小さい画像を中央に配置
     new_img[start_y:start_y+img.shape[0], start_x:start_x+img.shape[1]] = img
     return new_img
 
+"""
+preprocessing for Suite2p Fall.mat
+"""
 # get Background Images from Fall.mat
 def getBGImageFromFall(
         data_manager: DataManager, 
@@ -101,3 +101,22 @@ def getDictROIImageXYCTFromDictROICoords(
     for plane_t, dict_roi_coords in dict_roi_coords_xyct.items():
         dict_im_roi_xyct[plane_t] = getROIImageFromDictROICoords(dict_roi_coords, shape, dtype=dtype, value=value)
     return dict_im_roi_xyct
+
+"""
+preprocessing for Caiman HDF5
+"""
+# get Background Images from Caiman HDF5
+def getBGImageFromCaimanHDF5(
+        data_manager: DataManager, 
+        app_key: AppKeys, 
+        dtype: str="uint8"
+        ) -> Dict[str, np.ndarray]:
+    # get image shape from meanImg
+    from ..config.constants import BGImageTypeList
+    dict_im_bg = {}
+    base_shape = data_manager.dict_Fall[app_key]["ops"]["meanImg"].shape
+    for key_im in BGImageTypeList.CAIMAN:
+        img = convertImageDtypeToINT(data_manager.dict_Fall[app_key]["ops"][key_im], dtype=dtype)
+        img = resizeImageShape(img, base_shape)
+        dict_im_bg[key_im] = img
+    return dict_im_bg

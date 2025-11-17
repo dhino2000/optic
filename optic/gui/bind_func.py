@@ -155,7 +155,7 @@ def bindFuncButtonExportFigure(
     from ..io.file_dialog import saveFileDialog
     from ..utils.canvas_utils import exportFigure
     def onButtonClicked(q_window, figure, path_dst, dpi) -> None:
-        path_dst, is_overwrite = saveFileDialog(q_window, file_type=".png_pdf", initial_dir=path_dst)
+        path_dst, is_overwrite = saveFileDialog(q_window, file_type=[".png", ".pdf"], initial_dir=path_dst)
         if path_dst:
             exportFigure(figure, path_dst, dpi)
     q_button.clicked.connect(lambda: onButtonClicked(q_window, figure, path_dst, dpi))
@@ -168,7 +168,7 @@ def bindFuncLoadFileWidget(
     q_button: 'QPushButton', 
     q_widget: 'QWidget', 
     q_lineedit: 'QLineEdit', 
-    filetype: str = None
+    filetype: Union[str, List[str]] = None
 ) -> None:
     from ..io.file_dialog import openFileDialogAndSetLineEdit
     q_button.clicked.connect(lambda: openFileDialogAndSetLineEdit(q_widget, filetype, q_lineedit))

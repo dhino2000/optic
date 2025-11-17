@@ -1,6 +1,7 @@
 from __future__ import annotations
 from ..type_definitions import *
-from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget
+from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget, QScrollArea
+from typing import List, Dict
 from .base_layouts import makeLayoutButtonGroup
 from ..config.constants import BGImageTypeList
 from ..gui.table_layouts import makeLayoutROIFilterThreshold
@@ -122,9 +123,9 @@ def makeLayoutWidgetBGImageTypeDisplay(
         key_buttongroup: str,
         key_scrollarea: str,
         gui_defaults: GuiDefaults,
+        bg_types: List[str]=BGImageTypeList.FALL,
         ) -> QScrollArea:
     # meanImg, meanImgE, max_proj, Vcorr
-    bg_types = BGImageTypeList.FALL
     widget = QWidget()
     layout = QVBoxLayout()
     layout.addWidget(widget_manager.makeWidgetLabel(key=key_label, label="Background Image Type", bold=True, use_global_style=False, font_size=8))

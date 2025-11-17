@@ -7,28 +7,22 @@ class Extension:
     MAT = ".mat"
     TIFF = ".tif"
     NPY = ".npy"
-    HDF5 = ".h5"
+    H5 = ".h5"
+    HDF5 = ".hdf5"
     PNG = ".png"
     PDF = ".pdf"
     JSON = ".json"
-    MAT_NPY = ".mat_npy"
 
-# ファイル選択時の拡張子
-class FileFilters:
-    MAT = "mat Files (*.mat);;All Files (*)"
-    TIFF = "tiff Files (*.tif *.tiff);;All Files (*)"
-    NPY = "npy Files (*.npy);;All Files (*)"
-    HDF5 = "h5 Files (*.h5);;All Files (*)"
-    PNG_PDF = "Image Files (*.png *.pdf);;PNG Files (*.png);;PDF Files (*.pdf);;All Files (*)"
-    MAT_NPY = "mat and npy Files (*.mat *.npy);;All Files (*)"
-
+# File filters for QFileDialog
 FILE_FILTERS = {
-    ".mat": "mat Files (*.mat);;All Files (*)",
-    ".tif": "tiff Files (*.tif *.tiff);;All Files (*)",
-    ".npy": "npy Files (*.npy);;All Files (*)",
-    ".h5": "h5 Files (*.h5);;All Files (*)",
-    ".png_pdf": "Image Files (*.png *.pdf);;PNG Files (*.png);;PDF Files (*.pdf);;All Files (*)",
-    ".mat_npy": "mat and npy Files (*.mat *.npy);;All Files (*)"
+    ".mat": "mat Files (*.mat)",
+    ".tif": "tiff Files (*.tif *.tiff)",
+    ".npy": "npy Files (*.npy)",
+    ".h5": "h5 Files (*.h5)",
+    ".hdf5": "hdf5 Files (*.hdf5)",
+    ".png": "PNG Files (*.png)",
+    ".pdf": "PDF Files (*.pdf)",
+    ".json": "JSON Files (*.json)",
 }
 
 # BackGroungImage Type
@@ -38,9 +32,10 @@ class BGImageType:
     MAX_PROJ = "max_proj"
     VCORR = "Vcorr"
 
-# FALL: Suite2p
+# FALL: Suite2p, "CAIMAN": Caiman HDF5
 class BGImageTypeList:
     FALL = [BGImageType.MEAN_IMG, BGImageType.MEAN_IMG_E, BGImageType.MAX_PROJ, BGImageType.VCORR]
+    CAIMAN = [BGImageType.MEAN_IMG]
 
 class ProcessingDefaults:
     RESPONSE_THRESHOLD = 30

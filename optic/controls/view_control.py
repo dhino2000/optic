@@ -90,7 +90,7 @@ class ViewControl:
         self.setDataType()
         self.setImageSize()
         self.initializeImageLayers()
-        if self.data_dtype == Extension.MAT:
+        if self.data_dtype == Extension.MAT or self.data_dtype == Extension.HDF5: # Suite2p Fall.mat or Caiman HDF5
             self.initializeROIColors()
             self.setSharedAttr_ROISelected(roi_id=0)
         elif self.data_dtype == Extension.TIFF:

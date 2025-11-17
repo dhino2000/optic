@@ -12,7 +12,7 @@ from .file_dialog import openFileDialog, saveFileDialog
 if TYPE_CHECKING:
     from roifile import ImagejRoi
 
-# load Fall.mat data
+# load Suite2p Fall.mat data
 def loadFallMat(
         path_fall       : str, 
         preprocessing   : bool=True
@@ -23,6 +23,25 @@ def loadFallMat(
         dict_Fall = convertMatToDictFall(Fall)
     else:
         dict_Fall = Fall
+    return dict_Fall
+
+# load CaImAn HDF5 data
+def loadCaimanHDF5(path_caiman: str) -> Dict[str, Any]:
+    """
+    Load CaImAn analysis results from HDF5 file and convert to dict_Fall format.
+    
+    Args:
+        path_caiman (str): Path to CaImAn HDF5 result file
+        
+    Returns:
+        Dict[str, Any]: dict_Fall format dictionary containing:
+    """
+    from caiman.source_extraction.cnmf import cnmf
+    from ..preprocessing.preprocessing_caiman import convertCaimanHDF5ToDictFall
+    
+    cnmf_result = cnmf.load_CNMF(path_caiman)
+    dict_Fall = convertCaimanHDF5ToDictFall(cnmf_result)
+    
     return dict_Fall
 
 def saveTifImage(

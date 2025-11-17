@@ -1,24 +1,41 @@
 from __future__ import annotations
 from ..type_definitions import *
 import os
-from PyQt5.QtWidgets import QLineEdit, QFileDialog, QMessageBox
+from PyQt5.QtWidgets import QWidget, QLineEdit, QFileDialog, QMessageBox
 
-# 開くファイルのファイルパスを返す
 def openFileDialog(
         q_widget    : QWidget, 
-        file_type   : str, 
+        file_type   : Union[str, List[str]], 
         title       : str="Open File", 
         initial_dir : str="", 
         multiple    : bool=False
-        ) -> Union[str, List[str]]: 
+        ) -> Union[str, List[str]]:
     """
-    :file_type: ".mat", ".tif", ".npy", ".h5"
+    Open file dialog and return selected file path(s).
+    
+    Args:
+        q_widget (QWidget): Parent widget
+        file_type (Union[str, List[str]]): File extension(s) - e.g., ".mat", ".tif", ".npy", ".h5" 
+                                           or list of extensions [".mat", ".h5"]
+        title (str): Dialog window title
+        initial_dir (str): Initial directory path
+        multiple (bool): If True, allows multiple file selection
+        
+    Returns:
+        Union[str, List[str]]: Selected file path(s)
     """
     from ..config.constants import FILE_FILTERS
     options = QFileDialog.Options()
-    file_filter = FILE_FILTERS.get(file_type, "All Files (*)")
-
-    # 複数ファイルを選択するか
+    
+    # Handle single or multiple file types
+    if isinstance(file_type, list):
+        # Combine multiple file filters
+        filter_list = [FILE_FILTERS.get(ft, f"*{ft}") for ft in file_type]
+        file_filter = ";;".join(filter_list) + ";;All Files (*)"
+    else:
+        file_filter = FILE_FILTERS.get(file_type, "All Files (*)")
+    
+    # Select single or multiple files
     if multiple:
         files, _ = QFileDialog.getOpenFileNames(q_widget, title, initial_dir, file_filter, options=options)
         return files
@@ -61,7 +78,7 @@ def openFolderDialog(
 # 選択したファイルのパスをQLineEditに表示
 def openFileDialogAndSetLineEdit(
         q_widget            : QWidget, 
-        file_type           : str, 
+        file_type           : Union[str, List[str]], 
         line_edit           : QLineEdit, 
         title               : str="Open File", 
         initial_dir         : str=""
