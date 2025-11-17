@@ -92,8 +92,14 @@ class DataManager:
             self.dict_Fall[app_key] = dict_Fall
             self.dict_data_dtype[app_key] = Extension.HDF5
             self.dict_im_bg[app_key] = getBGImageFromCaimanHDF5(self, app_key)
-            self.dict_roi_coords[app_key] = getROICoordsFromDictFall(dict_Fall)
+            self.dict_roi_coords[app_key] = getROICoordsFromDictFall(dict_Fall) # use same function as Fall.mat
             self.dict_im_roi[app_key] = getROIImageFromFall(self, app_key) # use same function as Fall.mat
+            # Suite2pROITracking add registered data dict
+            if config_manager:
+                if config_manager.current_app == "SUITE2P_ROI_TRACKING":
+                    self.dict_im_bg_reg[app_key] = getBGImageFromCaimanHDF5(self, app_key)
+                    self.dict_roi_coords_reg[app_key] = getROICoordsFromDictFall(dict_Fall) # use same function as Fall.mat
+                    self.dict_im_roi_reg[app_key] = getROIImageFromFall(self, app_key) # use same function as Fall.mat
             return True, None
         except Exception as e:
             raise e
