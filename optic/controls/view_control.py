@@ -41,6 +41,7 @@ class ViewControl:
         self.im_dtype:              np.dtype                    = np.uint8
         self.image_sizes:           Tuple[int, int]             = ()
         self.bg_image_type:         str                         = BGImageTypeList.FALL[0]
+        self.bg_image_idx_channel:  int                         = 0 # for Suite2pROITracking
         self.bg_contrast:           Dict[str, Dict[str, int]]   = {}
         self.bg_visibility:         Dict[str, bool]             = {} # show or hide background image
         self.roi_display_prop:      Dict[str, bool]             = {} # ROI display property, contour, next ROI, etc.
@@ -249,6 +250,9 @@ class ViewControl:
 
     def setBackgroundImageType(self, bg_type: str) -> None:
         self.bg_image_type = bg_type
+
+    def setBackgroundImageChannel(self, idx_channel: int) -> None:
+        self.bg_image_idx_channel = idx_channel
 
     def setBackgroundContrastValue(self, channel: str, min_or_max: Literal['min', 'max'], value: int) -> None:
         if channel in self.bg_contrast and min_or_max in ['min', 'max']:

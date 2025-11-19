@@ -81,35 +81,40 @@ def updateView_Suite2pROITracking(
     bg_image_chan2 = None
     bg_image_chan3 = None # optional
 
-    # chan 1
+    # chan 1 (Green)
+    idx_channel = view_control.bg_image_idx_channel
     if view_control.getBackgroundVisibility(ChannelKeys.CHAN1):
         image_type = view_control.getBackgroundImageType()
-        if view_control.getShowRegImBG():
-            image = data_manager.getDictBackgroundImageRegistered(app_key).get(image_type) 
-        else:
-            image = data_manager.getDictBackgroundImage(app_key).get(image_type)
+        if idx_channel == 0:
+            if view_control.getShowRegImBG():
+                image = data_manager.getDictBackgroundImageRegistered(app_key).get(image_type) 
+            else:
+                image = data_manager.getDictBackgroundImage(app_key).get(image_type)
+        # chan 2 with dual channel imaging
+        elif idx_channel == 1:
+            if view_control.getShowRegImBG():
+                image = data_manager.getDictBackgroundImageChannel2Registered(app_key).get("meanImg") # image_type is fixed to "meanImg"
+            else:
+                image = data_manager.getDictBackgroundImageChannel2(app_key).get("meanImg")
         bg_image_chan1 = adjustChannelContrast(
             image=image,
             min_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN1, 'min'),
             max_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN1, 'max'),
             )
-    # chan 2
-    # if view_control.getBackgroundVisibility(ChannelKeys.CHAN2) and data_manager.getNChannels(app_key) == 2:
-    #     if view_control.getShowRegImBG():
-    #         image = data_manager.getDictBackgroundImageChannel2Registered(app_key).get("meanImg")
-    #     else:
-    #         image = data_manager.getDictBackgroundImageChannel2(app_key).get("meanImg")
-    #     bg_image_chan2 = adjustChannelContrast(
-    #         image=image,
-    #         min_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN2, 'min'),
-    #         max_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN2, 'max'),
-    #         )
+    # chan 2 (Red), "sec" image, only for "pri" view
     if view_control.getBackgroundVisibility(ChannelKeys.CHAN2) and app_key == "pri":
+        idx_channel_sec = control_manager.view_controls.get(app_key_sec).bg_image_idx_channel
         image_type = control_manager.view_controls[app_key_sec].getBackgroundImageType()
-        if view_control.getShowRegImBG():
-            image = data_manager.getDictBackgroundImageRegistered(app_key_sec).get(image_type)
-        else:
-            image = data_manager.getDictBackgroundImage(app_key_sec).get(image_type)
+        if idx_channel_sec == 0:
+            if view_control.getShowRegImBG():
+                image = data_manager.getDictBackgroundImageRegistered(app_key_sec).get(image_type)
+            else:
+                image = data_manager.getDictBackgroundImage(app_key_sec).get(image_type)
+        elif idx_channel_sec == 1:
+            if view_control.getShowRegImBG():
+                image = data_manager.getDictBackgroundImageChannel2Registered(app_key_sec).get("meanImg") # image_type is fixed to "meanImg"
+            else:
+                image = data_manager.getDictBackgroundImageChannel2(app_key_sec).get("meanImg")
         bg_image_chan2 = adjustChannelContrast(
             image=image,
             min_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN2, 'min'),

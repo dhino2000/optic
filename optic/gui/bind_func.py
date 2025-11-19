@@ -1642,6 +1642,18 @@ def bindFuncRadiobuttonBGImageTypeChanged(
     checked_button = q_buttongroup.checkedButton()
     _onBGImageTypeChanged(q_buttongroup.id(checked_button))
 
+# -> view_layouts.makeLayoutWidgetBGImageTypeDisplay, Suite2pROITracking, with loading dual-channel imaging data
+def bindFuncComboboxBGImageChannelChanged(
+    q_combobox: 'QComboBox',
+    view_control: 'ViewControl'
+) -> None:
+    def _onChannelChanged(idx: int) -> None:
+        idx_channel = int(q_combobox.itemText(idx))
+        view_control.setBackgroundImageChannel(idx_channel)
+        view_control.updateView()
+    q_combobox.currentIndexChanged.connect(_onChannelChanged)
+    _onChannelChanged(q_combobox.currentIndex())
+
 # -> view_layouts.makeLayoutWidgetROIChooseSkip, Neuron, Not Cell, Check, ...
 def bindFuncCheckBoxROIChooseSkip(
     dict_q_checkbox: Dict[str, QCheckBox], 
