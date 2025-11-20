@@ -429,6 +429,10 @@ class GuiDefaults:
         "REGISTRATION_METHOD": ["None", "affine", "bspline"],
     }
 
+    """
+    Suite2p Auto Run GUI
+    """
+
     SUITE2P_AUTO_RUN = {
         "WINDOW_SETTINGS": {
             "INIT_POSITION_X": 100, 
@@ -493,7 +497,27 @@ class GuiDefaults:
             ImportPackages.CASCADE,
         ],
     }
-    
+
+    """
+    CheckMultiSessionROICoordinatesGUI
+    """
+    CHECK_MULTI_SESSION_ROI_COORDINATES = {
+        "WINDOW_SETTINGS": {
+            "INIT_POSITION_X": 100,
+            "INIT_POSITION_Y": 100,
+            "WIDTH": 1600,
+            "HEIGHT": 1000,
+        },
+        "WINDOW_SETTINGS_DIALOG": {
+            "INIT_POSITION_X": 100,
+            "INIT_POSITION_Y": 100,
+            "WIDTH": 600,
+            "HEIGHT": 200,
+        },
+        "TITLE": "CheckMultiSessionROICoordinatesGUI",
+        "APP_KEYS": [AppKeys.PRI],
+    }
+
     @classmethod
     def getROIDisplayOptions(cls, app_name, table_columns):
         if not hasattr(cls, app_name):

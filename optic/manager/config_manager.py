@@ -26,10 +26,12 @@ class ConfigManager:
         self.initializeConfigs()
 
     def initializeConfigs(self) -> None:
-        for app_key, table_columns in self.gui_defaults["TABLE_COLUMNS"].items():
-            self.table_columns[app_key] = TableColumns(table_columns)
-        for app_key, key_map in self.gui_defaults["KEY_FUNCTION_MAP"].items():
-            self.key_function_maps[app_key] = KeyFunctionMap(key_map)
+        if self.gui_defaults.get("TABLE_COLUMNS"):
+            for app_key, table_columns in self.gui_defaults["TABLE_COLUMNS"].items():
+                self.table_columns[app_key] = TableColumns(table_columns)
+        if self.gui_defaults.get("KEY_FUNCTION_MAP"):
+            for app_key, key_map in self.gui_defaults["KEY_FUNCTION_MAP"].items():
+                self.key_function_maps[app_key] = KeyFunctionMap(key_map)
 
     def getTableColumns(self, app_key: AppKeys) -> TableColumns:
         return self.table_columns[app_key]
