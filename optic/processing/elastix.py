@@ -270,18 +270,91 @@ def applyPointTransform(
     return points_reg
 
 # apply transform parameters to dict_roi_coords
+# legacy version, may cause crash when number of ROIs is large
+# def applyDictROICoordsTransform(
+#     img_fix: np.ndarray[np.uint8, Tuple[int, int]],
+#     img_mov: np.ndarray[np.uint8, Tuple[int, int]], 
+#     dict_roi_coords: Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32], Tuple[int]]],
+#     parameter_map: mapstringvectorstring,
+#     path_transform_parameters_file: str,
+#     path_points_txt: str,
+#     output_directory: str,
+#     xy_reverse: bool=False
+# ) -> Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32], Tuple[int]]]:
+#     dict_roi_coords_reg = {}
+#     x_max, x_min, y_max, y_min = img_mov.shape[0]-1, 0, img_mov.shape[1]-1, 0
+#     parameter_object_inverse = makeElastixParameterObjectInversed(parameter_map)
+#     transform_parameters_inverse = calculateSingleTransformInverse(
+#         img_fix, img_mov, 
+#         parameter_object_inverse, 
+#         path_transform_parameters_file, 
+#         output_directory
+#     )
+
+#     i = 0
+#     for roi_id, dict_coords in dict_roi_coords.items():
+#         if i % 100 == 0:
+#             print(f"processing {i}/{len(dict_roi_coords)}")
+#         i += 1
+
+#         """
+#         WARNING !!!
+#         XY coordination relationships of Suite2pTracking and MicrogliaTracking are different
+#         To modify this, set xy_reverse to True with MicrogliaTracking
+#         """
+#         # XY reverse
+#         if xy_reverse:
+#             med = np.array([dict_coords["med"]])[:, [1, 0]]
+#             xpix_ypix = np.array([dict_coords["ypix"], dict_coords["xpix"]]).T
+#         else:
+#             med = np.array([dict_coords["med"]])
+#             xpix_ypix = np.array([dict_coords["xpix"], dict_coords["ypix"]]).T
+
+#         generateTmpTextforRegistration(xpix_ypix, path_points_txt)
+#         xpix_ypix_reg = applyPointTransform(
+#             img_fix, img_mov, 
+#             transform_parameters_inverse,
+#             path_points_txt, 
+#             output_directory
+#             )
+
+#         generateTmpTextforRegistration(med, path_points_txt)
+#         med_reg = applyPointTransform(
+#             img_fix, img_mov, 
+#             transform_parameters_inverse,
+#             path_points_txt, 
+#             output_directory
+#             )
+
+#         # clip the coords
+#         med_reg = np.clip(med_reg, 0, [x_max, y_max])
+#         xpix_ypix_reg = np.clip(xpix_ypix_reg, [x_min, y_min], [x_max, y_max])
+
+#         # if npix is 1, convert to 2d array
+#         if xpix_ypix_reg.ndim == 1:
+#             xpix_ypix_reg = np.array([xpix_ypix_reg])
+
+#         if xy_reverse:
+#             med_reg = med_reg[::-1]
+#             xpix_ypix_reg = xpix_ypix_reg[:, [1, 0]]
+
+#         dict_roi_coords_reg[roi_id] = {"xpix": xpix_ypix_reg[:, 0], "ypix": xpix_ypix_reg[:, 1], "med": med_reg}
+#     return dict_roi_coords_reg
+
+# Revised version, make batch processing to avoid crash
 def applyDictROICoordsTransform(
-    img_fix: np.ndarray[np.uint8, Tuple[int, int]],
-    img_mov: np.ndarray[np.uint8, Tuple[int, int]], 
-    dict_roi_coords: Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32], Tuple[int]]],
-    parameter_map: mapstringvectorstring,
+    img_fix: np.ndarray,
+    img_mov: np.ndarray, 
+    dict_roi_coords: dict,
+    parameter_map,
     path_transform_parameters_file: str,
     path_points_txt: str,
     output_directory: str,
-    xy_reverse: bool=False
-) -> Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32], Tuple[int]]]:
+    xy_reverse: bool = False
+) -> dict:
     dict_roi_coords_reg = {}
-    x_max, x_min, y_max, y_min = img_mov.shape[0]-1, 0, img_mov.shape[1]-1, 0
+    x_max, y_max = img_mov.shape[0] - 1, img_mov.shape[1] - 1
+    
     parameter_object_inverse = makeElastixParameterObjectInversed(parameter_map)
     transform_parameters_inverse = calculateSingleTransformInverse(
         img_fix, img_mov, 
@@ -290,54 +363,76 @@ def applyDictROICoordsTransform(
         output_directory
     )
 
-    i = 0
+    # Collect all points from all ROIs
+    all_xpix_ypix = []
+    all_med = []
+    roi_indices = []
+    roi_npix = []  # Number of pixels per ROI
+    
     for roi_id, dict_coords in dict_roi_coords.items():
-        if i % 100 == 0:
-            print(f"processing {i}/{len(dict_roi_coords)}")
-        i += 1
-
-        """
-        WARNING !!!
-        XY coordination relationships of Suite2pTracking and MicrogliaTracking are different
-        To modify this, set xy_reverse to True with MicrogliaTracking
-        """
-        # XY reverse
         if xy_reverse:
             med = np.array([dict_coords["med"]])[:, [1, 0]]
             xpix_ypix = np.array([dict_coords["ypix"], dict_coords["xpix"]]).T
         else:
             med = np.array([dict_coords["med"]])
             xpix_ypix = np.array([dict_coords["xpix"], dict_coords["ypix"]]).T
-
-        generateTmpTextforRegistration(xpix_ypix, path_points_txt)
-        xpix_ypix_reg = applyPointTransform(
-            img_fix, img_mov, 
-            transform_parameters_inverse,
-            path_points_txt, 
-            output_directory
-            )
-
-        generateTmpTextforRegistration(med, path_points_txt)
-        med_reg = applyPointTransform(
-            img_fix, img_mov, 
-            transform_parameters_inverse,
-            path_points_txt, 
-            output_directory
-            )
-
-        # clip the coords
+        
+        all_xpix_ypix.append(xpix_ypix)
+        all_med.append(med)
+        roi_indices.append(roi_id)
+        roi_npix.append(len(xpix_ypix))
+    
+    # Concatenate all points
+    all_xpix_ypix_concat = np.vstack(all_xpix_ypix)
+    all_med_concat = np.vstack(all_med)
+    
+    # Transform all xpix_ypix at once
+    print(f"Transforming {len(all_xpix_ypix_concat)} pixel coordinates...")
+    generateTmpTextforRegistration(all_xpix_ypix_concat, path_points_txt)
+    all_xpix_ypix_reg = applyPointTransform(
+        img_fix, img_mov, 
+        transform_parameters_inverse,
+        path_points_txt, 
+        output_directory
+    )
+    
+    # Transform all med at once
+    print(f"Transforming {len(all_med_concat)} med coordinates...")
+    generateTmpTextforRegistration(all_med_concat, path_points_txt)
+    all_med_reg = applyPointTransform(
+        img_fix, img_mov, 
+        transform_parameters_inverse,
+        path_points_txt, 
+        output_directory
+    )
+    
+    # Split results back to individual ROIs
+    idx_start = 0
+    for i, roi_id in enumerate(roi_indices):
+        npix = roi_npix[i]
+        xpix_ypix_reg = all_xpix_ypix_reg[idx_start:idx_start + npix]
+        med_reg = all_med_reg[i]
+        
+        # Clip the coords
         med_reg = np.clip(med_reg, 0, [x_max, y_max])
-        xpix_ypix_reg = np.clip(xpix_ypix_reg, [x_min, y_min], [x_max, y_max])
-
-        # if npix is 1, convert to 2d array
+        xpix_ypix_reg = np.clip(xpix_ypix_reg, [0, 0], [x_max, y_max])
+        
+        # If npix is 1, convert to 2d array
         if xpix_ypix_reg.ndim == 1:
             xpix_ypix_reg = np.array([xpix_ypix_reg])
-
+        
         if xy_reverse:
             med_reg = med_reg[::-1]
             xpix_ypix_reg = xpix_ypix_reg[:, [1, 0]]
-
-        dict_roi_coords_reg[roi_id] = {"xpix": xpix_ypix_reg[:, 0], "ypix": xpix_ypix_reg[:, 1], "med": med_reg}
+        
+        dict_roi_coords_reg[roi_id] = {
+            "xpix": xpix_ypix_reg[:, 0], 
+            "ypix": xpix_ypix_reg[:, 1], 
+            "med": med_reg
+        }
+        
+        idx_start += npix
+    
     return dict_roi_coords_reg
 
 """
