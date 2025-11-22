@@ -1,5 +1,5 @@
-from PyQt5.QtWidgets import QMainWindow, QWidget, QGridLayout, QVBoxLayout, QHBoxLayout, QMessageBox
-from optic.config import Extension, AxisKeys, AccessURL
+from PyQt5.QtWidgets import QMainWindow, QWidget, QGridLayout, QVBoxLayout, QHBoxLayout, QApplication, QMessageBox
+from optic.config.constants import Extension, AxisKeys, AccessURL
 from optic.controls.view_control import ViewControl
 from optic.controls.table_control import TableControl
 from optic.controls.canvas_control import CanvasControl
@@ -75,12 +75,12 @@ class Suite2pROICurationGUI(QMainWindow):
 
     def loadFilePathsandInitialize(self):
         self.control_manager, self.data_manager = initManagers(self.control_manager, self.data_manager)
-        success = self.loadData()
+        success, e = self.loadData()
         if success:
             QMessageBox.information(self, "File load", "File loaded successfully!")
             self.setupMainUI()
         else:
-            QMessageBox.warning(self, "File Load Error", "Failed to load the file.")
+            QMessageBox.warning(self, "File Load Error", f"Failed to load the file. \n {e}")
             return
 
     def setupMainUI(self):
@@ -96,16 +96,24 @@ class Suite2pROICurationGUI(QMainWindow):
         self.setupUI_done = True
 
     def loadData(self):
-        success = self.data_manager.loadFallMat(
-            app_key=self.app_key_pri, 
-            path_fall=self.widget_manager.dict_lineedit[f"path_fall_{self.app_key_pri}"].text()
-        )
-        if self.widget_manager.dict_lineedit[f"path_reftif_{self.app_key_pri}"].text() != "":
-            success = self.data_manager.loadTifImage(
+        # check whether the input file is Suite2p Fall.mat file or Caiman HDF5 file
+        if self.widget_manager.dict_lineedit[f"path_fall_{self.app_key_pri}"].text().endswith(Extension.HDF5):
+            success, e = self.data_manager.loadCaimanHDF5(
+                app_key=self.app_key_pri, 
+                path_hdf5=self.widget_manager.dict_lineedit[f"path_fall_{self.app_key_pri}"].text()
+            )
+        elif self.widget_manager.dict_lineedit[f"path_fall_{self.app_key_pri}"].text().endswith(Extension.MAT):
+            success, e = self.data_manager.loadFallMat(
+                app_key=self.app_key_pri, 
+                path_fall=self.widget_manager.dict_lineedit[f"path_fall_{self.app_key_pri}"].text()
+            )
+        # Load reference Tiff image if provided
+        if self.widget_manager.dict_lineedit[f"path_reftif_{self.app_key_pri}"].text() != "" and self.widget_manager.dict_lineedit[f"path_reftif_{self.app_key_pri}"].text() != "":
+            success, e = self.data_manager.loadTifImage(
                 app_key=self.app_key_pri,
                 path_image=self.widget_manager.dict_lineedit[f"path_reftif_{self.app_key_pri}"].text(), 
             )
-        return success
+        return success, e
 
     def setupMainUILayouts(self):
         self.layout_main_ui.addLayout(self.makeLayoutSectionLeftUpper(), 0, 0)
@@ -229,6 +237,7 @@ class Suite2pROICurationGUI(QMainWindow):
             table_columns=self.config_manager.table_columns[self.app_key_pri],
             gui_defaults=self.config_manager.gui_defaults,
         ))
+        from optic.config.constants import BGImageTypeList
         layout.addWidget(makeLayoutWidgetBGImageTypeDisplay(
             self, 
             self.widget_manager, 
@@ -236,6 +245,7 @@ class Suite2pROICurationGUI(QMainWindow):
             key_buttongroup=f'{self.app_key_pri}_im_bg_type',
             key_scrollarea=f'{self.app_key_pri}_im_bg_type',
             gui_defaults=self.config_manager.gui_defaults,
+            bg_types=BGImageTypeList.FALL if self.data_manager.dict_data_dtype[self.app_key_pri]==Extension.MAT else BGImageTypeList.CAIMAN
         ))
         layout.addWidget(makeLayoutWidgetROIChooseSkip(
             self.widget_manager, 
@@ -381,7 +391,7 @@ class Suite2pROICurationGUI(QMainWindow):
     """
     def bindFuncFileLoadUI(self):        
         list_key = [f"path_fall_{self.app_key_pri}", f"path_reftif_{self.app_key_pri}"]
-        list_filetype = [Extension.MAT, Extension.TIFF]
+        list_filetype = [[Extension.MAT, Extension.HDF5], [Extension.TIFF]]
         for key, filetype in zip(list_key, list_filetype):
             bindFuncLoadFileWidget(
                 q_widget=self, 
@@ -428,6 +438,7 @@ class Suite2pROICurationGUI(QMainWindow):
             view_control=self.control_manager.view_controls[self.app_key_pri],
             table_control=self.control_manager.table_controls[self.app_key_pri],
         )
+        # Checkbox ROIDisplayType checkboxChanged
         bindFuncCheckBoxDisplayCheckBoxChanged(
             dict_q_checkbox_celltype={key.split("celltype_roi_display_")[-1]: self.widget_manager.dict_checkbox[key] for key in self.widget_manager.dict_checkbox.keys() if ("celltype_roi_display_" in key) and (key.split("celltype_roi_display_")[-1] in set(self.config_manager.table_columns[self.app_key_pri].getColumns().keys()))},
             dict_q_checkbox_checkbox={key.split("checkbox_roi_display_")[-1]: self.widget_manager.dict_checkbox[key] for key in self.widget_manager.dict_checkbox.keys() if ("checkbox_roi_display_" in key) and (key.split("checkbox_roi_display_")[-1] in set(self.config_manager.table_columns[self.app_key_pri].getColumns().keys()))},

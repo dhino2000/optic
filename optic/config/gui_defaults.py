@@ -514,8 +514,25 @@ class GuiDefaults:
             "WIDTH": 600,
             "HEIGHT": 200,
         },
+        "WINDOW_SETTINGS_ELASTIX_CONFIG": {
+            "INIT_POSITION_X": 100, 
+            "INIT_POSITION_Y": 100,
+            "WIDTH": 1600,
+            "HEIGHT": 900,
+        },
         "TITLE": "CheckMultiSessionROICoordinatesGUI",
         "APP_KEYS": [AppKeys.PRI],
+        "CHANNELS": [ChannelKeys.CHAN1],
+        "VIEW_SETTINGS": {
+            "DEFAULT_CONTRAST_MIN": 0,
+            "DEFAULT_CONTRAST_MAX": 255,
+        },
+        "ROI_VISUAL_SETTINGS": {
+            "COLOR_MIN": 100,
+            "COLOR_MAX": 255,
+            "DEFAULT_ROI_OPACITY": 128,
+            "DEFAULT_HIGHLIGHT_OPACITY": 255,
+        },
     }
 
     @classmethod

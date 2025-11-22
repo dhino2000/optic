@@ -74,7 +74,7 @@ class DataManager:
                 self.dict_im_bg_chan2[app_key] = getBGImageChannel2FromFall(self, app_key)
             # Suite2pROITracking add registered data dict
             if config_manager:
-                if config_manager.current_app == "SUITE2P_ROI_TRACKING":
+                if config_manager.current_app == "SUITE2P_ROI_TRACKING" or config_manager.current_app == "CHECK_MULTI_SESSION_ROI_COORDINATES":
                     self.dict_im_bg_reg[app_key] = getBGImageFromFall(self, app_key)
                     self.dict_roi_coords_reg[app_key] = getROICoordsFromDictFall(dict_Fall)
                     self.dict_im_roi_reg[app_key] = getROIImageFromFall(self, app_key)
@@ -259,7 +259,7 @@ class DataManager:
 
     # get image size, change return with dtype
     def getImageSize(self, app_key: AppKeys) -> Tuple[int, int]:
-        # Suite2o Fall.mat or Caiman HDF5
+        # Suite2p Fall.mat or Caiman HDF5
         if self.dict_data_dtype[app_key] == Extension.MAT or self.dict_data_dtype[app_key] == Extension.HDF5:
             return (self.dict_Fall[app_key]["ops"]["Lx"], self.dict_Fall[app_key]["ops"]["Ly"])
         elif self.dict_data_dtype[app_key] == Extension.TIFF:

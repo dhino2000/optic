@@ -306,6 +306,7 @@ def updateView_TIFStackExplorer(
     updateLayerROI_TIFStackExplorer(view_control, data_manager, control_manager, app_key)
 
 
+
 """
 Sub functions for updateView
 """
