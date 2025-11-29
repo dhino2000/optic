@@ -1,3 +1,12 @@
+import sys
+import os
+
+dir_notebook = os.path.dirname(os.path.abspath("__file__"))
+# 親ディレクトリのパスを取得
+dir_parent = os.path.dirname(dir_notebook)
+if not dir_parent in sys.path:
+    sys.path.append(dir_parent)
+
 from PyQt5.QtWidgets import QMainWindow, QWidget, QGridLayout, QVBoxLayout, QHBoxLayout, QApplication, QMessageBox
 from optic.config.constants import Extension, AxisKeys, AccessURL
 from optic.controls.view_control import ViewControl

@@ -1,11 +1,22 @@
-from PyQt5.QtWidgets import QMainWindow, QWidget, QGridLayout, QVBoxLayout, QHBoxLayout, QMessageBox, QDialog
-from optic.config import AccessURL
+import os
+import sys
+from functools import partial
+
+dir_notebook = os.path.dirname(os.path.abspath("__file__"))
+# 親ディレクトリのパスを取得
+dir_parent = os.path.dirname(dir_notebook)
+if not dir_parent in sys.path:
+    sys.path.append(dir_parent)
+
+from PyQt5.QtWidgets import QMainWindow, QWidget, QGridLayout, QVBoxLayout, QHBoxLayout, QApplication, QMessageBox, QDialog
+from optic.config.constants import BGImageTypeList, Extension, AccessURL
 from optic.controls.view_control import ViewControl
 from optic.controls.table_control import TableControl
 from optic.dialog.table_columns_config import TableColumnConfigDialog
 from optic.dialog.elastix_params_config import ElastixParamsConfigDialog
 from optic.dialog.roi_matching_test import ROIMatchingTestDialog
 from optic.gui.app_setup import setupMainWindow
+from optic.gui.app_style import applyAppStyle
 from optic.gui.slider_layouts import makeLayoutContrastSlider, makeLayoutOpacitySlider
 from optic.gui.io_layouts import makeLayoutLoadFileWidget, makeLayoutLoadFileExitHelp, makeLayoutROICheckIO, makeLayoutROITrackingIO
 from optic.gui.info_layouts import makeLayoutROIProperty
@@ -16,10 +27,10 @@ from optic.gui.view_layouts import (
     makeLayoutViewWithZTSlider, makeLayoutWidgetDislplayCelltype, makeLayoutWidgetDislplayCheckbox, 
     makeLayoutWidgetBGImageTypeDisplay, makeLayoutWidgetROIChooseSkip
 )
-from optic.manager import WidgetManager, ConfigManager, DataManager, ControlManager, initManagers
+from optic.manager import WidgetManager, ConfigManager, DataManager, ControlManager, LayoutManager, initManagers
 from optic.gui.bind_func import (
     bindFuncExit, bindFuncRegisteredROIAndBGImageIO, bindFuncROITrackingIO, 
-    bindFuncLoadFileWidget, bindFuncRadiobuttonBGImageTypeChanged, bindFuncCheckBoxDisplayCelltypeChanged, 
+    bindFuncLoadFileWidget, bindFuncRadiobuttonBGImageTypeChanged, bindFuncComboboxBGImageChannelChanged, bindFuncCheckBoxDisplayCelltypeChanged, 
     bindFuncCheckBoxDisplayCheckBoxChanged, bindFuncCheckBoxROIChooseSkip, bindFuncTableSelectionChangedWithTracking,
     bindFuncRadiobuttonOfTableChanged, bindFuncCheckboxOfTableChanged, bindFuncOpacitySlider, 
     bindFuncHighlightOpacitySlider, bindFuncBackgroundContrastSlider, bindFuncBackgroundVisibilityCheckbox, 
@@ -34,7 +45,9 @@ class Suite2pROITrackingGUI(QMainWindow):
     def __init__(self):
         APP_NAME = "SUITE2P_ROI_TRACKING"
         QMainWindow.__init__(self)
-        self.widget_manager, self.config_manager, self.data_manager, self.control_manager = initManagers(WidgetManager(), ConfigManager(), DataManager(), ControlManager())
+        self.widget_manager, self.config_manager, self.data_manager, self.control_manager = initManagers(
+            WidgetManager(), ConfigManager(), DataManager(), ControlManager()
+            )
         self.config_manager.setCurrentApp(APP_NAME)
         self.app_keys = self.config_manager.gui_defaults["APP_KEYS"]
 
@@ -75,12 +88,12 @@ class Suite2pROITrackingGUI(QMainWindow):
 
     def loadFilePathsandInitialize(self):
         self.control_manager, self.data_manager = initManagers(self.control_manager, self.data_manager)
-        success = self.loadData()
+        success, e = self.loadData()
         if success:
             QMessageBox.information(self, "File load", "File loaded successfully!")
             self.setupMainUI()
         else:
-            QMessageBox.warning(self, "File Load Error", "Failed to load the file.")
+            QMessageBox.warning(self, "File Load Error", f"Failed to load the file. \n {e}")
             return
 
     def setupMainUI(self):
@@ -97,13 +110,22 @@ class Suite2pROITrackingGUI(QMainWindow):
         self.setupUI_done = True
 
     def loadData(self):
+        from optic.config.constants import Extension
         for app_key in self.app_keys:
-            success = self.data_manager.loadFallMat(
-                app_key=app_key, 
-                path_fall=self.widget_manager.dict_lineedit[f"path_fall_{app_key}"].text(),
-                config_manager=self.config_manager
-            )
-        return success
+            # check whether the input file is Suite2p Fall.mat file or Caiman HDF5 file
+            if self.widget_manager.dict_lineedit[f"path_fall_{app_key}"].text().endswith(Extension.HDF5):
+                success, e = self.data_manager.loadCaimanHDF5(
+                    app_key=app_key, 
+                    path_hdf5=self.widget_manager.dict_lineedit[f"path_fall_{app_key}"].text(),
+                    config_manager=self.config_manager
+                )
+            elif self.widget_manager.dict_lineedit[f"path_fall_{app_key}"].text().endswith(Extension.MAT):
+                success, e = self.data_manager.loadFallMat(
+                    app_key=app_key, 
+                    path_fall=self.widget_manager.dict_lineedit[f"path_fall_{app_key}"].text(),
+                    config_manager=self.config_manager
+                )
+        return success, e
 
     def setupMainUILayouts(self):
         self.layout_main_ui.addLayout(self.makeLayoutSectionLeftUpper(), 0, 0, 1, 1)
@@ -179,6 +201,10 @@ class Suite2pROITrackingGUI(QMainWindow):
             key_buttongroup=f'{app_key}_im_bg_type',
             key_scrollarea=f'{app_key}_im_bg_type',
             gui_defaults=self.config_manager.gui_defaults,
+            bg_types=BGImageTypeList.FALL if self.data_manager.dict_data_dtype[app_key]==Extension.MAT else BGImageTypeList.CAIMAN,
+            key_combobox=f'{app_key}_im_bg_type_channel',
+            key_combobox_label=f'{app_key}_im_bg_type_channel',
+            list_combobox_channel=[str(i) for i in range(self.data_manager.getNChannels(app_key))]
         ))
         layout.addWidget(makeLayoutWidgetROIChooseSkip(
             self.widget_manager, 
@@ -393,10 +419,14 @@ class Suite2pROITrackingGUI(QMainWindow):
     """
     def bindFuncFileLoadUI(self):
         for app_key in self.app_keys:
-            list_key = [f"path_fall_{app_key}"]
-            list_filetype = ["mat"]
-            for key, filetype in zip(list_key, list_filetype):
-                bindFuncLoadFileWidget(q_widget=self, q_button=self.widget_manager.dict_button[key], q_lineedit=self.widget_manager.dict_lineedit[key], filetype=filetype)
+            key = f"path_fall_{app_key}"
+            filetype = [".mat", ".hdf5"]
+            bindFuncLoadFileWidget(
+                q_widget=self, 
+                q_button=self.widget_manager.dict_button[key], 
+                q_lineedit=self.widget_manager.dict_lineedit[key], 
+                filetype=filetype
+                )
 
         self.widget_manager.dict_button["load_file"].clicked.connect(lambda: self.loadFilePathsandInitialize())
         bindFuncExit(q_window=self, q_button=self.widget_manager.dict_button["exit"])
@@ -424,6 +454,11 @@ class Suite2pROITrackingGUI(QMainWindow):
             # Radiobutton BGImageType buttonChanged
             bindFuncRadiobuttonBGImageTypeChanged(
                 q_buttongroup=self.widget_manager.dict_buttongroup[f"{app_key}_im_bg_type"], 
+                view_control=self.control_manager.view_controls[app_key],
+            )
+            # Combobox BGImageType channel changed
+            bindFuncComboboxBGImageChannelChanged(
+                q_combobox=self.widget_manager.dict_combobox[f"{app_key}_im_bg_type_channel"],
                 view_control=self.control_manager.view_controls[app_key],
             )
             # Radiobutton ROIDisplayType checkboxChanged
@@ -524,16 +559,16 @@ class Suite2pROITrackingGUI(QMainWindow):
 
         # Elastix Run
         bindFuncButtonRunElastixForFall(
-                self,
-                q_button=self.widget_manager.dict_button['elastix_run'],
-                data_manager=self.data_manager,
-                config_manager=self.config_manager,
-                control_manager=self.control_manager,
-                app_key=self.app_keys[0],
-                app_key_sec=self.app_keys[1],
-                combobox_elastix_method=self.widget_manager.dict_combobox['elastix_method'],
-                path_points_txt="points_tmp.txt",
-                output_directory="./elastix"
+            self,
+            q_button=self.widget_manager.dict_button['elastix_run'],
+            data_manager=self.data_manager,
+            config_manager=self.config_manager,
+            control_manager=self.control_manager,
+            app_key=self.app_keys[0],
+            app_key_sec=self.app_keys[1],
+            combobox_elastix_method=self.widget_manager.dict_combobox['elastix_method'],
+            path_points_txt="points_tmp.txt",
+            output_directory="./elastix"
         ) 
         # Elastix config
         self.widget_manager.dict_button[f"elastix_config"].clicked.connect(
