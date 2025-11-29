@@ -86,6 +86,9 @@ class CanvasControl:
             elif self.data_manager.getNChannels(self.app_key) == 2:
                 self.colors = {key: getattr(PlotColors, key.upper()) for key in ["F", "Fneu", "spks", "F_chan2", "Fneu_chan2"]}
                 self.labels = {key: getattr(PlotLabels, key.upper()) for key in ["F", "Fneu", "spks", "F_chan2", "Fneu_chan2"]}
+        elif self.data_manager.getDataType(self.app_key) == Extension.HDF5:
+            self.colors = {key: getattr(PlotColors, key.upper()) for key in ["F", "spks"]}
+            self.labels = {key: getattr(PlotLabels, key.upper()) for key in ["F", "spks"]}
         elif self.data_manager.getDataType(self.app_key) == Extension.NPY:
             self.colors = {key: getattr(PlotColors, key.upper()) for key in ["F"]}
             self.labels = {key: getattr(PlotLabels, key.upper()) for key in ["F"]}

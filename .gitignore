@@ -168,3 +168,4 @@ old/
 notebook/tmp/
 notebook/analysis/result
 external/cascade/Pretrained_models
+external/CaImAn

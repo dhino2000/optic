@@ -8,11 +8,12 @@ import tifffile
 import datetime
 import numpy as np
 from .file_dialog import openFileDialog, saveFileDialog
+from ..config.constants import Extension
 
 if TYPE_CHECKING:
     from roifile import ImagejRoi
 
-# load Fall.mat data
+# load Suite2p Fall.mat data
 def loadFallMat(
         path_fall       : str, 
         preprocessing   : bool=True
@@ -23,6 +24,25 @@ def loadFallMat(
         dict_Fall = convertMatToDictFall(Fall)
     else:
         dict_Fall = Fall
+    return dict_Fall
+
+# load CaImAn HDF5 data
+def loadCaimanHDF5(path_caiman: str) -> Dict[str, Any]:
+    """
+    Load CaImAn analysis results from HDF5 file and convert to dict_Fall format.
+    
+    Args:
+        path_caiman (str): Path to CaImAn HDF5 result file
+        
+    Returns:
+        Dict[str, Any]: dict_Fall format dictionary containing:
+    """
+    from caiman.source_extraction.cnmf import cnmf
+    from ..preprocessing.preprocessing_caiman import convertCaimanHDF5ToDictFall
+    
+    cnmf_result = cnmf.load_CNMF(path_caiman)
+    dict_Fall = convertCaimanHDF5ToDictFall(cnmf_result)
+    
     return dict_Fall
 
 def saveTifImage(
@@ -186,20 +206,21 @@ def generateSavePath(
         remove_strings  : str=None
         ) -> str:
     """
-    元のファイルパスを基に、新しい保存パスを生成する。
-
-    :param path_src: 元のファイルパス
-    :param prefix: 新しいファイル名の接頭辞
-    :param suffix: 新しいファイル名の接尾辞
-    :param new_extension: 新しい拡張子（指定しない場合は元の拡張子を使用）
-    :param remove_strings: 元のファイル名から除去する文字列または文字列のリスト
-    :return: 生成された保存パス
+    Generate a new file path for saving by adding prefix/suffix, changing extension, and removing specified strings.
+    Args:
+        path_src (str): Original file path.
+        prefix (str): Prefix to add to the file name.
+        suffix (str): Suffix to add to the file name.
+        new_extension (str): New file extension (including dot), if changing.
+        remove_strings (str or List[str]): String(s) to remove from the file name.
+    Returns:
+        str: New file path for saving.
     """
     dir_src = os.path.dirname(path_src)
     name_ext_src =  os.path.basename(path_src)
     name_src, ext_src = os.path.splitext(name_ext_src)
 
-    # 指定された文字列を除去
+    # remove specified strings from the file name
     if remove_strings:
         if isinstance(remove_strings, str):
             remove_strings = [remove_strings]
@@ -208,7 +229,7 @@ def generateSavePath(
 
     name_dst = f"{prefix}{name_src}{suffix}"
 
-    # 新しい拡張子が指定されている場合は使用、そうでなければ元の拡張子を使用
+    # Use the new extension if specified, otherwise use the original extension
     ext_dst = new_extension if new_extension else ext_src
 
     name_ext_dst = f"{name_dst}{ext_dst}"
@@ -226,7 +247,7 @@ def saveROICheck(
         local_var       : bool=True
         ) -> None:
     path_src = q_lineedit.text()
-    path_dst = generateSavePath(path_src, prefix="ROIcuration_", remove_strings="Fall_")
+    path_dst = generateSavePath(path_src, prefix="ROIcuration_", remove_strings="Fall_", new_extension=Extension.MAT) # .tif -> ROIcheck_.mat
     path_dst, is_overwrite = saveFileDialog(q_widget=q_window, file_type=".mat", title="Save ROIcheck mat File", initial_dir=path_dst)
     
     if path_dst:
@@ -338,7 +359,7 @@ def saveROITracking(
         ) -> None:
     path_src_pri = q_lineedit_pri.text()
     path_src_sec = q_lineedit_sec.text()
-    path_dst = generateSavePath(path_src_pri, prefix="ROItracking_", remove_strings="Fall_")
+    path_dst = generateSavePath(path_src_pri, prefix="ROItracking_", remove_strings="Fall_", new_extension=Extension.MAT)
     path_dst, is_overwrite = saveFileDialog(q_widget=q_window, file_type=".mat", title="Save ROItracking mat File", initial_dir=path_dst)
     
     if path_dst:

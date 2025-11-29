@@ -2,10 +2,10 @@ from __future__ import annotations
 from ..type_definitions import *
 from collections import defaultdict
 import numpy as np
-from ..preprocessing.preprocessing_image import getBGImageFromFall, getBGImageChannel2FromFall, getROIImageFromFall
+from ..preprocessing.preprocessing_image import getBGImageFromFall, getBGImageChannel2FromFall, getROIImageFromFall, getBGImageFromCaimanHDF5
 from ..preprocessing.preprocessing_fall import getROICoordsFromDictFall
 from ..config.constants import Extension, ImportPackages
-from ..io.data_io import loadFallMat, loadTiffStack, loadTifImage
+from ..io.data_io import loadFallMat, loadCaimanHDF5, loadTiffStack, loadTifImage
 from ..utils.custom_dict import CustomDict
 
 from typing import TYPE_CHECKING
@@ -74,7 +74,7 @@ class DataManager:
                 self.dict_im_bg_chan2[app_key] = getBGImageChannel2FromFall(self, app_key)
             # Suite2pROITracking add registered data dict
             if config_manager:
-                if config_manager.current_app == "SUITE2P_ROI_TRACKING":
+                if config_manager.current_app == "SUITE2P_ROI_TRACKING" or config_manager.current_app == "CHECK_MULTI_SESSION_ROI_COORDINATES":
                     self.dict_im_bg_reg[app_key] = getBGImageFromFall(self, app_key)
                     self.dict_roi_coords_reg[app_key] = getROICoordsFromDictFall(dict_Fall)
                     self.dict_im_roi_reg[app_key] = getROIImageFromFall(self, app_key)
@@ -84,6 +84,26 @@ class DataManager:
         except Exception as e:
             # raise e
             return False, e
+        
+    # load Caiman HDF5 data
+    def loadCaimanHDF5(self, app_key: AppKeys, path_hdf5: str, config_manager: ConfigManager=None, threshold_ratio: float=0.2) -> Tuple[bool, Optional[Exception]]:
+        try:
+            dict_Fall = loadCaimanHDF5(path_hdf5)
+            self.dict_Fall[app_key] = dict_Fall
+            self.dict_data_dtype[app_key] = Extension.HDF5
+            self.dict_im_bg[app_key] = getBGImageFromCaimanHDF5(self, app_key)
+            self.dict_roi_coords[app_key] = getROICoordsFromDictFall(dict_Fall) # use same function as Fall.mat
+            self.dict_im_roi[app_key] = getROIImageFromFall(self, app_key) # use same function as Fall.mat
+            # Suite2pROITracking add registered data dict
+            if config_manager:
+                if config_manager.current_app == "SUITE2P_ROI_TRACKING":
+                    self.dict_im_bg_reg[app_key] = getBGImageFromCaimanHDF5(self, app_key)
+                    self.dict_roi_coords_reg[app_key] = getROICoordsFromDictFall(dict_Fall) # use same function as Fall.mat
+                    self.dict_im_roi_reg[app_key] = getROIImageFromFall(self, app_key) # use same function as Fall.mat
+            return True, None
+        except Exception as e:
+            raise e
+            # return False, e
         
     # load tiff image data (for optional)
     def loadTifImage(self, app_key: AppKeys, path_image: str) -> Tuple[bool, Optional[Exception]]:
@@ -130,7 +150,8 @@ class DataManager:
     
     # get F, Fneu, spks
     def getTraces(self, app_key: AppKeys, n_channels: int=1) -> Dict[str, np.ndarray[np.float32]]: # 2d array
-        if self.dict_data_dtype[app_key] == Extension.MAT: # Fall.mat data
+        # Fall.mat data
+        if self.dict_data_dtype[app_key] == Extension.MAT: 
             dict_traces = {
                 "F": self.dict_Fall[app_key]["F"],
                 "Fneu": self.dict_Fall[app_key]["Fneu"],
@@ -139,13 +160,21 @@ class DataManager:
             if n_channels == 2:
                 dict_traces["F_chan2"] = self.dict_Fall[app_key]["F_chan2"]
                 dict_traces["Fneu_chan2"] = self.dict_Fall[app_key]["Fneu_chan2"]
-        elif self.dict_data_dtype[app_key] == Extension.NPY: # calcium trace npy data
+        # Caiman HDF5 data
+        elif self.dict_data_dtype[app_key] == Extension.HDF5:
+            dict_traces = {
+                "F": self.dict_Fall[app_key]["F"],
+                "spks": self.dict_Fall[app_key]["spks"],
+            }
+        # calcium trace npy data
+        elif self.dict_data_dtype[app_key] == Extension.NPY: 
             dict_traces = {
                 "F": self.dict_Fall[app_key]["F"],
             }
         return dict_traces
     def getTracesOfSelectedROI(self, app_key: AppKeys, roi_id: int, n_channels: int=1) -> Dict[str, np.ndarray[np.float32]]: # 1d array
-        if self.dict_data_dtype[app_key] == Extension.MAT: # Fall.mat data
+        # Suite2p Fall.mat data
+        if self.dict_data_dtype[app_key] == Extension.MAT:
             dict_traces = {
                 "F": self.dict_Fall[app_key]["F"][roi_id],
                 "Fneu": self.dict_Fall[app_key]["Fneu"][roi_id],
@@ -154,7 +183,14 @@ class DataManager:
             if n_channels == 2:
                 dict_traces["F_chan2"] = self.dict_Fall[app_key]["F_chan2"][roi_id]
                 dict_traces["Fneu_chan2"] = self.dict_Fall[app_key]["Fneu_chan2"][roi_id]
-        elif self.dict_data_dtype[app_key] == Extension.NPY: # calcium trace npy data
+        # Caiman HDF5 data
+        elif self.dict_data_dtype[app_key] == Extension.HDF5:
+            dict_traces = {
+                "F": self.dict_Fall[app_key]["F"][roi_id],
+                "spks": self.dict_Fall[app_key]["spks"][roi_id]
+            }        
+        # calcium trace npy data
+        elif self.dict_data_dtype[app_key] == Extension.NPY: 
             dict_traces = {
                 "F": self.dict_Fall[app_key]["F"][roi_id],
             }
@@ -170,6 +206,8 @@ class DataManager:
     def getLengthOfData(self, app_key: AppKeys) -> int:
         if self.dict_data_dtype[app_key] == Extension.MAT:
             return len(self.dict_Fall[app_key]["ops"]["xoff1"])
+        elif self.dict_data_dtype[app_key] == Extension.HDF5:
+            return self.dict_Fall[app_key]["F"].shape[1]
         elif self.dict_data_dtype[app_key] == Extension.NPY:
             return self.dict_Fall[app_key]["F"].shape[1]
     # get nROIs
@@ -221,7 +259,8 @@ class DataManager:
 
     # get image size, change return with dtype
     def getImageSize(self, app_key: AppKeys) -> Tuple[int, int]:
-        if self.dict_data_dtype[app_key] == Extension.MAT:
+        # Suite2p Fall.mat or Caiman HDF5
+        if self.dict_data_dtype[app_key] == Extension.MAT or self.dict_data_dtype[app_key] == Extension.HDF5:
             return (self.dict_Fall[app_key]["ops"]["Lx"], self.dict_Fall[app_key]["ops"]["Ly"])
         elif self.dict_data_dtype[app_key] == Extension.TIFF:
             return (self.dict_tiff[app_key].shape[0], self.dict_tiff[app_key].shape[1])

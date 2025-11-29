@@ -58,8 +58,8 @@ def makeLayoutFallRegistration(
 # Microglia XYCT Stack Image Registration config
 def makeLayoutMicrogliaXYCTStackRegistration(
         widget_manager              : WidgetManager, 
-        data_manager                : DataManager,
-        app_key                     : str,
+        n_channels                  : int,
+        t_planes                    : int,
         key_label_elastix_method    : str, 
         key_label_ref_c             : str,
         key_label_ref_t             : str,
@@ -95,7 +95,7 @@ def makeLayoutMicrogliaXYCTStackRegistration(
         key_combobox_ref_c, 
         "Reference channel:", 
         axis="horizontal",
-        items=[str(i) for i in range(data_manager.getSizeOfC(app_key))]
+        items=[str(i) for i in range(n_channels)]
         ))
     layout_ref_plane.addLayout(makeLayoutComboBoxLabel(
         widget_manager, 
@@ -103,7 +103,7 @@ def makeLayoutMicrogliaXYCTStackRegistration(
         key_combobox_ref_t, 
         "Reference T plane:", 
         axis="horizontal",
-        items=[str(i) for i in range(data_manager.getSizeOfT(app_key))]
+        items=[str(i) for i in range(t_planes)]
         ))
     
     layout_run = QHBoxLayout()

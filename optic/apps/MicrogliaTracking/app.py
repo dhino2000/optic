@@ -1,6 +1,14 @@
-from PyQt5.QtWidgets import QMainWindow, QWidget, QGridLayout, QVBoxLayout, QHBoxLayout, QMessageBox, QDialog
+import sys
+import os
 from itertools import combinations
-from optic.config import AccessURL, Extension
+
+dir_notebook = os.path.dirname(os.path.abspath("__file__"))
+dir_parent = os.path.dirname(dir_notebook)
+if not dir_parent in sys.path:
+    sys.path.append(dir_parent)
+
+from PyQt5.QtWidgets import QMainWindow, QWidget, QGridLayout, QVBoxLayout, QHBoxLayout, QApplication, QMessageBox, QDialog
+from optic.config.constants import AccessURL, Extension
 from optic.controls.view_control import ViewControl
 from optic.controls.table_control import TableControl
 from optic.dialog.elastix_params_config import ElastixParamsConfigDialog
@@ -78,12 +86,12 @@ class MicrogliaTrackingGUI(QMainWindow):
 
     def loadFilePathsandInitialize(self):
         self.control_manager, self.data_manager = initManagers(self.control_manager, self.data_manager)
-        success = self.loadData()
+        success, e = self.loadData()
         if success:
             QMessageBox.information(self, "File load", "File loaded successfully!")
             self.setupMainUI()
         else:
-            QMessageBox.warning(self, "File Load Error", "Failed to load the file.")
+            QMessageBox.warning(self, "File Load Error", f"Failed to load the file. \n {e}")
             return
 
     def setupMainUI(self):
@@ -102,11 +110,11 @@ class MicrogliaTrackingGUI(QMainWindow):
 
     def loadData(self):
         for app_key in self.app_keys:
-            success = self.data_manager.loadTiffStack(
+            success, e = self.data_manager.loadTiffStack(
                 app_key=app_key, 
                 path_tiff=self.widget_manager.dict_lineedit[f"path_tiff"].text()
             )
-        return success
+        return success, e
 
     def setupMainUILayouts(self):
         self.layout_main_ui.addLayout(self.makeLayoutSectionLeftUpper(), 0, 0, 1, 1)
@@ -250,8 +258,8 @@ class MicrogliaTrackingGUI(QMainWindow):
     def makeLayoutComponenImageRegistration(self):
         layout = makeLayoutMicrogliaXYCTStackRegistration(
             self.widget_manager,
-            self.data_manager,
-            self.app_keys[0],                 
+            self.data_manager.getSizeOfC(self.app_keys[0]),
+            self.data_manager.getSizeOfT(self.app_keys[0]),               
             f"elastix_registration",
             f"elastix_ref_c",
             f"elastix_ref_plane_t",
