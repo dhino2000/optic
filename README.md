@@ -43,22 +43,6 @@ T: time points for time-lapse imaging
 - Migration distance calculation
 - Path trajectory analysis
 
-### 4. TIFStackExplorer
-<img src="docs/TIFStackExplorer/images/tif_stack_explorer.png">
-
-#### Input Format
-- TIFF stack (dimensions: XYCZT)  
-X, Y: spatial dimensions  
-C: channels (1-3)  
-Z: z-planes  
-T: time points
-#### Features
-- Multi-channel visualization
-- Z-stack navigation
-- Time series playback
-- ROI-based analysis
-- Image registration across time points or z-planes
-
 ## Installation
 
 ### Requirements
@@ -119,17 +103,6 @@ T: time points
 
 3. Track ROIs!
 ([MicrogliaTracking Tutorial](https://optic-doc.readthedocs.io/en/latest/MicrogliaTracking.html))
-
-### TIFStackExplorer
-1. Open the Anaconda Prompt and switch to the desired environment.  
-`activate optic`
-  
-2. Execute the "tif_stack_explorer.py" script  
-
-(ex) `python C:/Users/dhino2000/optic/scripts/tif_stack_explorer.py`
-
-3. 
-([TIFStackExplorer Tutorial](https://github.com/dhino2000/optic/blob/main/docs/TIFStackExplorer/tutorial.md))
 
 ## Downstream Analysis  
 After analyzing with these applications, some downstream analyses may be required. For guidance on these analyses, please refer to the Jupyter notebooks beginning with **"Chapter"** in the [notebook folder](https://github.com/dhino2000/optic/tree/main/notebook). These notebooks provide step-by-step examples and instructions for some downstream analysis workflows.
@@ -238,7 +211,7 @@ This project includes the following external libraries:
 
 [9] Rémi Flamary, Nicolas Courty, Alexandre Gramfort, Mokhtar Z. Alaya, Aurélie Boisbunon, Stanislas Chambon, Laetitia Chapel, Adrien Corenflos, Kilian Fatras, Nemo Fournier, Léo Gautheron, Nathalie T.H. Gayraud, Hicham Janati, Alain Rakotomamonjy, Ievgen Redko, Antoine Rolet, Antony Schutz, Vivien Seguy, Danica J. Sutherland, Romain Tavenard, Alexander Tong, Titouan Vayer, POT Python Optimal Transport library, Journal of Machine Learning Research, 22(78):1−8, 2021.
 
-[9] Titouan Vayer, Laetitia Chapel, Rémi Flamary, Romain Tavenard, Nicolas Courty, Optimal Transport for structured data with application on graphs, Proceedings of the 36th International Conference on Machine Learning, pp.6275-6284, PMLR 97, 2019.
+[10] Titouan Vayer, Laetitia Chapel, Rémi Flamary, Romain Tavenard, Nicolas Courty, Optimal Transport for structured data with application on graphs, Proceedings of the 36th International Conference on Machine Learning, pp.6275-6284, PMLR 97, 2019.
 
 
 
