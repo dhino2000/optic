@@ -926,7 +926,8 @@ def bindFuncButtonRunROIMatching(
         result = showConfirmationDialog(
             q_widget,
             'Confirmation',
-            f"Match only displayed ROIs? \nNo: Match all ROIs \nCancel: Cancel"
+            f"Match only displayed ROIs? \nNo: Match all ROIs \nCancel: Cancel",
+            QMessageBox.Yes
         )
         # use registered coordinates if show_reg_im_roi is True
         if view_control_pri.show_reg_im_roi:

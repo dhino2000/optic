@@ -61,7 +61,7 @@ def saveFileDialog(
         if os.path.exists(file_path):
             reply = QMessageBox.question(q_widget, 'File overwrite',
                                          "The file already exists. Do you want to overwrite it?",
-                                         QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+                                         QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
             if reply == QMessageBox.Yes:
                 return file_path, True  
         else:

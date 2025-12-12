@@ -1,0 +1,7 @@
+name: optic_310
+channels:
+  - defaults
+dependencies:
+  - python=3.10
+  - caiman
+prefix: C:\Users\HyperPC_Smee\anaconda3\envs\optic_310

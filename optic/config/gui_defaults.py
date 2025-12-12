@@ -53,6 +53,12 @@ class GuiDefaults:
             "skew": "(1, 100)",
             "std": "(0, 100)",
         },
+        "ROI_THRESHOLDS_CAIMAN": {
+            "npix": "(50, 200)",
+            "rval": "(0.8, 1)",
+            "SNR": "(2, 100)",
+            "cnn": "(0.9, 1)",
+        },
         "VIEW_SETTINGS": {
             "DEFAULT_CONTRAST_MIN": 0,
             "DEFAULT_CONTRAST_MAX": 255,

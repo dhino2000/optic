@@ -54,32 +54,37 @@ def convertCaimanHDF5ToDictFall(
 
     """
     Fall; stat
+    CaImAn uses three parameters for disinguishing ROIs: 
+    - rval : Spatial footprint consistency
+    - SNR  : Trace signal-noise-ratio
+    - cnn  : CNN-based classifier
     """    
     stat = {}
-    
+    rval = estimates.r_values
+    snr = estimates.SNR_comp
+    cnn = estimates.cnn_preds
     # Process each ROI
-
     for idx in np.arange(A.shape[1]):
         # Get spatial component for specific ROI
         roi_spatial = A[:, idx].toarray().flatten()
-        
         # Reshape to 2D image
         roi_2d = roi_spatial.reshape(dims)
-        
         # Apply threshold (CaImAn default: 20% of maximum value)
         threshold = roi_2d.max() * threshold_ratio
-        
         # Get coordinates of pixels above threshold
         xpix, ypix = np.where(roi_2d > threshold)
 
         med = (np.median(xpix), np.median(ypix))
-        
+
         # Create Suite2p format dictionary
         roi_dict = {
             'ypix': ypix,
             'xpix': xpix,
             'med': med,
-            "npix": len(ypix),
+            'npix': len(ypix),
+            'rval': rval[idx],
+            'SNR': snr[idx],
+            'cnn': cnn[idx],
         }
         
         stat[idx] = roi_dict

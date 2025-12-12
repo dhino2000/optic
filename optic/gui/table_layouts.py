@@ -49,8 +49,8 @@ def makeLayoutROIFilterThreshold(
         ) -> QGridLayout:
     layout = QGridLayout()
 
-    # 配置する要素数がグリッド数を超えていないか
-    if num_row * num_col > len(dict_roi_threshold):
+    # check grid size
+    if num_row * num_col < len(dict_roi_threshold):
         raise ValueError(f"Grid size ({num_row}x{num_col}={num_row*num_col}) is smaller than the number of dict_roi_threshold items ({len(dict_roi_threshold)}).")
 
     for i, (key_threshold, value_threshold) in enumerate(dict_roi_threshold.items()):

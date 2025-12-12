@@ -2,19 +2,37 @@ from __future__ import annotations
 from ..type_definitions import *
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout
 
-# 選択した細胞のプロパティを表示
-def makeLayoutROIProperty(widget_manager: WidgetManager, key_label: str) -> QVBoxLayout:
+# display ROI properties: med, npix, npix_soma, radius, aspect_ratio, compact, footprint, solidity, skew, std
+def makeLayoutROIProperty(
+        widget_manager: WidgetManager, 
+        key_label: str,
+        load_caiman: bool = False
+        ) -> QVBoxLayout:
     layout = QVBoxLayout()
-    # ROIの中心座標, size, radius, aspect_ratio, compact, footprint, solidity, skew(歪度), std
-    for list_roi_prop in (["med", "npix", "npix_soma", "radius", "aspect_ratio"], ["compact", "solidity", "footprint", "skew", "std"]):
+    if load_caiman:
+        # CaImAn ROI properties
+        list_list_roi_prop = [
+            ["med", "npix", "rval", "SNR", "cnn"],
+        ]
+    else:
+        # Suite2p ROI properties
+        list_list_roi_prop = [
+            ["med", "npix", "npix_soma", "radius", "aspect_ratio"],
+            ["compact", "solidity", "footprint", "skew", "std"]
+        ]
+    for list_roi_prop in list_list_roi_prop:
         layout_hbox = QHBoxLayout()
         for roi_prop in list_roi_prop:
             layout_hbox.addWidget(widget_manager.makeWidgetLabel(key=f"{key_label}_{roi_prop}", label=f"{roi_prop}: "))
         layout.addLayout(layout_hbox)
     return layout
 
-# Cell ROI, Not Cell ROI, All ROIの数を表示するlabel用Layout
-def makeLayoutROICount(widget_manager: WidgetManager, key_label: str, table_columns: TableColumns) -> QHBoxLayout:
+# display ROI count labels
+def makeLayoutROICount(
+        widget_manager: WidgetManager, 
+        key_label: str, 
+        table_columns: TableColumns
+        ) -> QHBoxLayout:
     layout = QHBoxLayout()
     # ROI number label
     list_celltype = ["All"]

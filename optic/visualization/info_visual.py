@@ -13,18 +13,32 @@ def updateTPlaneDisplay(widget_manager: WidgetManager, app_key: str, t: int) -> 
         widget_manager.dict_label[label_key].setText(f"T: {t}")
 
 # Display Selected ROI Property
-def updateROIPropertyDisplay(control_manager: ControlManager, data_manager: DataManager, widget_manager: WidgetManager, app_key: str) -> None:
+def updateROIPropertyDisplay(
+        control_manager: ControlManager, 
+        data_manager: DataManager, 
+        widget_manager: WidgetManager, 
+        app_key: str,
+        load_caiman: bool = False
+        ) -> None:
     roi_selected_id = control_manager.getSharedAttr(app_key, 'roi_selected_id')
     if roi_selected_id is None:
         return
 
-    roi_properties = getRoiProperties(data_manager, app_key, roi_selected_id)
+    roi_properties = getRoiProperties(data_manager, app_key, roi_selected_id, load_caiman)
     displayRoiProperties(widget_manager, app_key, roi_properties)
 
-def getRoiProperties(data_manager: DataManager, app_key: str, roi_id: int) -> Dict[str, Any]:
+def getRoiProperties(
+        data_manager: DataManager, 
+        app_key: str, 
+        roi_id: int, 
+        load_caiman: bool = False
+        ) -> Dict[str, Any]:
     roi_stat = data_manager.getStat(app_key)[roi_id]
-    properties = ["med", "npix", "npix_soma", "radius", "aspect_ratio", 
-                  "compact", "solidity", "footprint", "skew", "std"]
+    if load_caiman:
+        properties = ["med", "npix", "rval", "SNR", "cnn"]
+    else:
+        properties = ["med", "npix", "npix_soma", "radius", "aspect_ratio", 
+                      "compact", "solidity", "footprint", "skew", "std"]
     
     return {prop: roi_stat.get(prop, "N/A") for prop in properties}
 
