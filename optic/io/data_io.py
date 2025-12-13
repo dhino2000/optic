@@ -2,7 +2,7 @@ from __future__ import annotations
 from ..type_definitions import *
 from typing import TYPE_CHECKING
 import os
-from PyQt5.QtWidgets import QMessageBox, QDialog, QMainWindow, QLineEdit, QTableWidget
+from PyQt5.QtWidgets import QWidget, QMessageBox, QDialog, QMainWindow, QLineEdit, QTableWidget
 from scipy.io import loadmat, savemat
 import tifffile
 import datetime
