@@ -12,16 +12,16 @@ from .base_model import BaseClassifier
 
 class CnnClassifier(BaseClassifier):
     """
-    1D CNN classifier with Global Average Pooling.
+    1D CNN classifier with Multi-Statistics Pooling.
     
     Architecture:
         Input (batch, channels, seq_len)
         → [Conv1d → BatchNorm → ReLU → MaxPool] × N layers
-        → Global Average Pooling
+        → Multi-Statistics Pooling (mean, max, std, min)
         → Dropout → Linear → Output (batch, n_classes)
     
-    Global Average Pooling allows handling variable-length sequences
-    without padding or truncation affecting the output.
+    Multi-Statistics Pooling extracts multiple statistics from variable-length
+    sequences, preserving spike information better than simple GAP.
     """
     
     def __init__(
@@ -31,6 +31,7 @@ class CnnClassifier(BaseClassifier):
             cnn_channels: List[int] = None,
             kernel_size: int = 7,
             dropout: float = 0.3,
+            pool_stats: List[str] = None,
         ):
         """
         Initialize the CNN classifier.
@@ -41,25 +42,29 @@ class CnnClassifier(BaseClassifier):
             cnn_channels: List of channel sizes for each conv layer (default: [32, 64, 128])
             kernel_size: Kernel size for conv layers
             dropout: Dropout rate before final linear layer
+            pool_stats: List of pooling statistics to use (default: ["mean", "max", "std", "min"])
         """
         super().__init__(input_channels, n_classes)
         
         if cnn_channels is None:
             cnn_channels = [32, 64, 128]
         
+        if pool_stats is None:
+            pool_stats = ["mean", "max", "std"]  # min excluded (affected by zero padding)
+        
         self.cnn_channels = cnn_channels
         self.kernel_size = kernel_size
         self.dropout_rate = dropout
+        self.pool_stats = pool_stats
         
         # Build convolutional layers
         self.conv_layers = self._buildConvLayers()
         
-        # Global Average Pooling
-        self.global_avg_pool = nn.AdaptiveAvgPool1d(1)
-        
         # Classifier head
+        # Each stat produces cnn_channels[-1] features
+        classifier_input_size = cnn_channels[-1] * len(pool_stats)
         self.dropout = nn.Dropout(dropout)
-        self.fc = nn.Linear(cnn_channels[-1], n_classes)
+        self.fc = nn.Linear(classifier_input_size, n_classes)
     
     def _buildConvLayers(self) -> nn.Sequential:
         """
@@ -87,6 +92,35 @@ class CnnClassifier(BaseClassifier):
         
         return nn.Sequential(*layers)
     
+    def _multiStatsPool(
+            self, 
+            x: torch.Tensor, 
+            lengths: Optional[torch.Tensor] = None
+        ) -> torch.Tensor:
+        """
+        Apply multi-statistics pooling.
+        
+        Args:
+            x: Input tensor of shape (batch, channels, seq_len)
+            lengths: Original sequence lengths (not used currently)
+        
+        Returns:
+            Pooled tensor of shape (batch, channels * n_stats)
+        """
+        stats = []
+        
+        for stat in self.pool_stats:
+            if stat == "mean":
+                stats.append(x.mean(dim=2))
+            elif stat == "max":
+                stats.append(x.max(dim=2)[0])
+            elif stat == "min":
+                stats.append(x.min(dim=2)[0])
+            elif stat == "std":
+                stats.append(x.std(dim=2))
+        
+        return torch.cat(stats, dim=1)
+    
     def forward(
             self, 
             x: torch.Tensor, 
@@ -97,7 +131,7 @@ class CnnClassifier(BaseClassifier):
         
         Args:
             x: Input tensor of shape (batch_size, channels, seq_length)
-            lengths: Optional tensor of original sequence lengths (not used in CNN)
+            lengths: Optional tensor of original sequence lengths for masking
         
         Returns:
             Output tensor of shape (batch_size, n_classes)
@@ -105,9 +139,8 @@ class CnnClassifier(BaseClassifier):
         # Convolutional layers
         x = self.conv_layers(x)  # (batch, cnn_channels[-1], reduced_seq_len)
         
-        # Global Average Pooling
-        x = self.global_avg_pool(x)  # (batch, cnn_channels[-1], 1)
-        x = x.squeeze(-1)  # (batch, cnn_channels[-1])
+        # Multi-Statistics Pooling (with masking if lengths provided)
+        x = self._multiStatsPool(x, lengths)  # (batch, cnn_channels[-1] * n_stats)
         
         # Classifier
         x = self.dropout(x)
@@ -127,6 +160,7 @@ class CnnClassifier(BaseClassifier):
             "cnn_channels": self.cnn_channels,
             "kernel_size": self.kernel_size,
             "dropout": self.dropout_rate,
+            "pool_stats": self.pool_stats,
         })
         return config
 

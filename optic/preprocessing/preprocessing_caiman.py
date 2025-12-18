@@ -74,7 +74,7 @@ def convertCaimanHDF5ToDictFall(
         # Get coordinates of pixels above threshold
         xpix, ypix = np.where(roi_2d > threshold)
 
-        med = (np.median(xpix), np.median(ypix))
+        med = (int(np.median(xpix)), int(np.median(ypix)))
 
         # Create Suite2p format dictionary
         roi_dict = {

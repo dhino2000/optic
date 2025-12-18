@@ -192,6 +192,7 @@ def createModelFromConfig(model_config: Dict[str, Any]) -> torch.nn.Module:
             cnn_channels=model_config.get("cnn_channels"),
             kernel_size=model_config.get("kernel_size", 7),
             dropout=model_config.get("dropout", 0.3),
+            pool_stats=model_config.get("pool_stats"),
         )
     elif model_type == "CnnClassifierWithAttention":
         model = model_class(

@@ -274,8 +274,7 @@ class Trainer:
 
 
 def trainKFold(
-        model_class: type,
-        model_kwargs: Dict[str, Any],
+        model: nn.Module,
         kfold_generator,
         n_epochs: int,
         device: torch.device,
@@ -284,6 +283,7 @@ def trainKFold(
         class_weights: Optional[torch.Tensor] = None,
         checkpoint_dir: Optional[str] = None,
         checkpoint_interval: int = 10,
+        print_interval: int = 10,
         on_fold_start: Optional[Callable[[int], None]] = None,
         on_fold_end: Optional[Callable[[int, float], None]] = None,
         on_epoch_end: Optional[Callable[[int, EpochResult], None]] = None,
@@ -292,8 +292,7 @@ def trainKFold(
     Train model with k-fold cross validation.
     
     Args:
-        model_class: Model class to instantiate for each fold
-        model_kwargs: Keyword arguments for model constructor
+        model: Model instance (will be deep copied for each fold)
         kfold_generator: KFoldDataLoaderGenerator instance
         n_epochs: Number of epochs per fold
         device: Device to train on
@@ -302,6 +301,7 @@ def trainKFold(
         class_weights: Optional class weights
         checkpoint_dir: Directory for checkpoints
         checkpoint_interval: Checkpoint interval
+        print_interval: Print progress every N epochs (0 to disable)
         on_fold_start: Callback when fold starts
         on_fold_end: Callback when fold ends (fold_idx, val_accuracy)
         on_epoch_end: Callback when epoch ends (fold_idx, EpochResult)
@@ -309,6 +309,8 @@ def trainKFold(
     Returns:
         Tuple of (list of histories, list of validation accuracies)
     """
+    import copy
+    
     all_histories = []
     all_val_accuracies = []
     
@@ -316,13 +318,15 @@ def trainKFold(
         # Callback
         if on_fold_start is not None:
             on_fold_start(fold_idx)
+        elif print_interval > 0:
+            print(f"Fold {fold_idx} started")
         
-        # Create new model for this fold
-        model = model_class(**model_kwargs)
+        # Create new model for this fold (deep copy to reset weights)
+        fold_model = copy.deepcopy(model)
         
         # Create trainer
         trainer = Trainer(
-            model=model,
+            model=fold_model,
             device=device,
             learning_rate=learning_rate,
             weight_decay=weight_decay,
@@ -332,6 +336,15 @@ def trainKFold(
         # Set epoch callback
         if on_epoch_end is not None:
             trainer.on_epoch_end = lambda result, f=fold_idx: on_epoch_end(f, result)
+        elif print_interval > 0:
+            def make_print_callback(f):
+                def callback(result):
+                    if result.epoch % print_interval == 0 or result.epoch == n_epochs:
+                        print(f"  Fold {f}, Epoch {result.epoch}/{n_epochs}: "
+                              f"Train Loss={result.train_loss:.4f}, Val Loss={result.val_loss:.4f}, "
+                              f"Train Acc={result.train_accuracy:.4f}, Val Acc={result.val_accuracy:.4f}")
+                return callback
+            trainer.on_epoch_end = make_print_callback(fold_idx)
         
         # Determine checkpoint directory for this fold
         fold_checkpoint_dir = None

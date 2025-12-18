@@ -55,9 +55,9 @@ class GuiDefaults:
         },
         "ROI_THRESHOLDS_CAIMAN": {
             "npix": "(50, 200)",
-            "rval": "(0.8, 1)",
-            "SNR": "(2, 100)",
-            "cnn": "(0.9, 1)",
+            "rval": "(0.7, 1)",
+            "SNR": "(0.1, 100)",
+            "cnn": "(0.7, 1)",
         },
         "VIEW_SETTINGS": {
             "DEFAULT_CONTRAST_MIN": 0,
