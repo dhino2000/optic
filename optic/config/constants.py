@@ -35,7 +35,7 @@ class BGImageType:
 # FALL: Suite2p, "CAIMAN": Caiman HDF5
 class BGImageTypeList:
     FALL = [BGImageType.MEAN_IMG, BGImageType.MEAN_IMG_E, BGImageType.MAX_PROJ, BGImageType.VCORR]
-    CAIMAN = [BGImageType.MEAN_IMG]
+    CAIMAN = [BGImageType.MEAN_IMG, BGImageType.MEAN_IMG_E, BGImageType.MAX_PROJ, BGImageType.VCORR]
 
 class ProcessingDefaults:
     RESPONSE_THRESHOLD = 30
