@@ -44,6 +44,14 @@ class CanvasControl:
             self.plot_ffneu:                           bool = True
             self.plot_dff0:                            bool = True
             self.initializePlot()
+        # trace visibility
+        self.trace_visibility: Dict[str, bool] = {
+            "F": True,
+            "Fneu": True,
+            "spks": True,
+            "F_chan2": True,
+            "Fneu_chan2": True,
+        }
 
     def setupAxes(self):
         axes_config = {
@@ -172,6 +180,10 @@ class CanvasControl:
         self.canvas.draw_idle()
 
     def plotTraces(self, ax_key, traces, title_suffix, start, end, **kwargs):
+        # Skip plotting if no traces to display
+        if not traces:
+            self.axes[ax_key].clear()
+            return
         start_time = self.time_array[start]
         end_time = self.time_array[end - 1]
         num_ticks = self.config_manager.gui_defaults['CANVAS_SETTINGS']['PLOT_POINTS']
@@ -244,6 +256,13 @@ class CanvasControl:
             alpha=0.3,
             idx_zero=pre_frame,
         )
+
+    def setTraceVisibility(self, trace_key: str, is_visible: bool) -> None:
+        """
+        Set visibility for a specific trace.
+        """
+        if trace_key in self.trace_visibility:
+            self.trace_visibility[trace_key] = is_visible
     
     # top axis
     def plotTracesZoomed(self):
@@ -270,7 +289,11 @@ class CanvasControl:
         self.plotTraces(AxisKeys.BOT, mean_traces, "Average", 0, self.plot_data_points, ylim=None, title="Average Traces")
 
     def getDownsampledTraces(self, start, end):
-        traces = {key: trace[start:end] for key, trace in self.full_traces.items() if key != 'F_event'}
+        traces = {
+            key: trace[start:end] 
+            for key, trace in self.full_traces.items() 
+            if key != 'F_event' and self.trace_visibility.get(key, True)
+        }
         if self.widget_manager.dict_checkbox["light_plot_mode"].isChecked() and end - start > self.downsample_threshold:
             return {key: downSampleTrace(trace, self.downsample_threshold) for key, trace in traces.items()}
         return traces

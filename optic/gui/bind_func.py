@@ -160,6 +160,26 @@ def bindFuncButtonExportFigure(
             exportFigure(figure, path_dst, dpi)
     q_button.clicked.connect(lambda: onButtonClicked(q_window, figure, path_dst, dpi))
 
+# -> canvas_layouts.makeLayoutTraceDisplayCheckboxes
+def bindFuncTraceDisplayCheckbox(
+    dict_q_checkbox: Dict[str, QCheckBox],
+    canvas_control: CanvasControl,
+) -> None:
+    """
+    Bind trace display checkbox state changes to canvas control.
+    """
+    from PyQt5.QtCore import Qt
+    
+    def onCheckboxStateChanged(trace_key: str, state: int):
+        is_visible = (state == Qt.Checked)
+        canvas_control.setTraceVisibility(trace_key, is_visible)
+        canvas_control.updatePlotWithROISelect()
+    
+    for trace_key, checkbox in dict_q_checkbox.items():
+        checkbox.stateChanged.connect(
+            lambda state, key=trace_key: onCheckboxStateChanged(key, state)
+        )
+        
 """
 io_layouts
 """
