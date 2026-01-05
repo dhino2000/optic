@@ -8,10 +8,10 @@ from ..visualization.info_visual import updateZPlaneDisplay, updateTPlaneDisplay
 from ..preprocessing.preprocessing_roi import updateROIImage, updateROIImageForXYCT
 from ..gui.view_setup import setViewSize
 from ..config.constants import BGImageTypeList, Extension
-from ..utils.view_utils import generateRandomColor
 from collections import defaultdict
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QRectF
 from PyQt5.QtWidgets import QGraphicsView, QGraphicsScene, QGraphicsRectItem, QGraphicsPathItem, QGraphicsPixmapItem
+from PyQt5.QtGui import QKeyEvent, QMouseEvent, QWheelEvent
 import random
 import numpy as np
 
@@ -93,7 +93,7 @@ class ViewControl:
         self.initializeImageLayers()
         if self.data_dtype == Extension.MAT or self.data_dtype == Extension.HDF5: # Suite2p Fall.mat or Caiman HDF5
             self.initializeROIColors()
-            self.setSharedAttr_ROISelected(roi_id=0)
+            self.setSharedAttr_ROISelected(roi_id="0")
         elif self.data_dtype == Extension.TIFF:
             self.setImageDataType()
             self.setTIFFShape()
@@ -148,8 +148,19 @@ class ViewControl:
         # set scene to view
         self.q_view.setScene(self.q_scene)
 
-    def initializeROIColors(self):
-        for roi_id in self.data_manager.getStat(self.app_key).keys():
+    def initializeROIColors(self) -> None:
+        """
+        Initialize random colors for all ROIs with string keys.
+        """
+        from ..utils.view_utils import generateRandomColor
+        from ..utils.roi_id_utils import arrayIndexToRoiId
+        
+        n_rois_chan1 = self.data_manager.getNROIsChan1(self.app_key)
+        n_rois_total = self.data_manager.getNROIs(self.app_key)
+        
+        self.roi_colors = {}
+        for index in range(n_rois_total):
+            roi_id = arrayIndexToRoiId(index, n_rois_chan1)
             self.roi_colors[roi_id] = generateRandomColor()
     
     """
@@ -173,7 +184,7 @@ class ViewControl:
     def getRectHighlightRange(self) -> Optional[List[int, int, int, int, int, int, int, int]]:
         return self.rect_highlight_range
     
-    def getROIColor(self, roi_id: int) -> Tuple[int, int, int]:
+    def getROIColor(self, roi_id: str) -> Tuple[int, int, int]:
         return self.roi_colors[roi_id]
     
     def getROIColorXYCT(self, plane_t: int, roi_id: int) -> Dict[int, Tuple[int, int, int]]:
@@ -282,10 +293,10 @@ class ViewControl:
     """
     shared_attr Functions
     """
-    def setSharedAttr_ROISelected(self, roi_id: int) -> None:
+    def setSharedAttr_ROISelected(self, roi_id: str) -> None:
         self.control_manager.setSharedAttr(self.app_key, 'roi_selected_id', roi_id)
 
-    def getSharedAttr_ROISelected(self):
+    def getSharedAttr_ROISelected(self) -> str:
         return self.control_manager.getSharedAttr(self.app_key, 'roi_selected_id')
     
     """
@@ -310,31 +321,47 @@ class ViewControl:
         self.view_handler.handleWheelEvent(event)
 
     # With click, get the closest ROI id and update view
-    def getROIwithClick(self, x:int, y:int, reg:bool=False, xyct:bool=False, roi_skip:bool=True) -> None:
-        if xyct: # for Microglia Tracking XYCT
+    def getROIwithClick(self, x: int, y: int, reg: bool = False, xyct: bool = False, roi_skip: bool = True) -> None:
+        """
+        Get the closest ROI to click position and update selection.
+        
+        Args:
+            x: Click x coordinate
+            y: Click y coordinate
+            reg: Use registered coordinates
+            xyct: For Microglia Tracking XYCT mode
+            roi_skip: Skip ROIs based on celltype/checkbox settings
+        """
+        if xyct:  # for Microglia Tracking XYCT
             if reg:
                 dict_roi_coords = self.data_manager.getDictROICoordsXYCTRegistered()
             else:
                 dict_roi_coords = self.data_manager.getDictROICoordsXYCT()
             if dict_roi_coords is not None:
                 dict_roi_coords = dict_roi_coords.get(self.getPlaneT())
-        else: # for Suite2pROICuration, Suite2pROITracking
+        else:  # for Suite2pROICuration, Suite2pROITracking
             if reg:
                 dict_roi_coords = self.data_manager.getDictROICoordsRegistered(self.app_key)
             else:
                 dict_roi_coords = self.data_manager.getDictROICoords(self.app_key)
+        
         if dict_roi_coords is None:
-            return # No ROI data
+            return  # No ROI data
 
+        # dict_roi_coords keys are now strings
         dict_roi_med = {roi_id: dict_roi_coords[roi_id]["med"] for roi_id in dict_roi_coords.keys()}
         
-        if roi_skip: # skip celltype, checkbox
+        if roi_skip:  # skip celltype, checkbox
             skip_roi_types = self.control_manager.getSharedAttr(self.app_key, "skip_roi_types")
-            dict_roi_skip = {roi_id: shouldSkipROI(roi_id, 
-                                                self.config_manager.getTableColumns(self.app_key),
-                                                self.widget_manager.dict_table[self.app_key],
-                                                skip_roi_types) 
-                            for roi_id in dict_roi_med.keys()}
+            dict_roi_skip = {
+                roi_id: shouldSkipROI(
+                    roi_id, 
+                    self.config_manager.getTableColumns(self.app_key),
+                    self.widget_manager.dict_table[self.app_key],
+                    skip_roi_types
+                ) 
+                for roi_id in dict_roi_med.keys()
+            }
         else:
             dict_roi_skip = None
             

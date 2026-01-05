@@ -22,10 +22,10 @@ class DataManager:
         self.dict_tiff_reg:             Dict[AppKeys, np.ndarray[Tuple[int, int, int, int, int]]] = {}
 
         # ROI celltype
-        self.dict_roi_celltype:         Dict[AppKeys, Dict[int, str]] = {}
-        # ROI coordinates
-        self.dict_roi_coords:           Dict[AppKeys, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]] = {}
-        self.dict_roi_coords_reg:       Dict[AppKeys, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]] = {}
+        self.dict_roi_celltype:         Dict[AppKeys, Dict[str, str]] = {}
+        # ROI coordinates (key changed from int to str)
+        self.dict_roi_coords:           Dict[AppKeys, Dict[str, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]] = {}
+        self.dict_roi_coords_reg:       Dict[AppKeys, Dict[str, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]] = {}
         # background image
         self.dict_im_bg:                Dict[AppKeys, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
         self.dict_im_bg_chan2:          Dict[AppKeys, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
@@ -58,6 +58,10 @@ class DataManager:
         self.dict_eventfile:            Dict[AppKeys, Dict[str, np.ndarray[Tuple[int]]]] = defaultdict(dict)
         self.dict_roicheck:             Dict[AppKeys, Any] = {}
 
+        # For second Fall.mat support
+        self.dict_n_rois_chan1:         Dict[AppKeys, int] = {}
+        self.dict_has_second_fall:      Dict[AppKeys, bool] = {}
+
     """
     IO Functions
     """
@@ -68,21 +72,107 @@ class DataManager:
             self.dict_Fall[app_key] = dict_Fall
             self.dict_data_dtype[app_key] = Extension.MAT
             self.dict_im_bg[app_key] = getBGImageFromFall(self, app_key)
-            self.dict_roi_coords[app_key] = getROICoordsFromDictFall(dict_Fall)
+            self.dict_roi_coords[app_key] = self._convertRoiCoordsKeysToStr(getROICoordsFromDictFall(dict_Fall))
             self.dict_im_roi[app_key] = getROIImageFromFall(self, app_key)
+            
+            # Initialize second Fall.mat attributes
+            self.dict_n_rois_chan1[app_key] = len(dict_Fall["stat"])
+            self.dict_has_second_fall[app_key] = False
+            
             if self.getNChannels(app_key) == 2:
                 self.dict_im_bg_chan2[app_key] = getBGImageChannel2FromFall(self, app_key)
             # Suite2pROITracking add registered data dict
             if config_manager:
                 if config_manager.current_app == "SUITE2P_ROI_TRACKING" or config_manager.current_app == "CHECK_MULTI_SESSION_ROI_COORDINATES":
                     self.dict_im_bg_reg[app_key] = getBGImageFromFall(self, app_key)
-                    self.dict_roi_coords_reg[app_key] = getROICoordsFromDictFall(dict_Fall)
+                    self.dict_roi_coords_reg[app_key] = self._convertRoiCoordsKeysToStr(getROICoordsFromDictFall(dict_Fall))
                     self.dict_im_roi_reg[app_key] = getROIImageFromFall(self, app_key)
                     if self.getNChannels(app_key) == 2:
                         self.dict_im_bg_chan2_reg[app_key] = getBGImageChannel2FromFall(self, app_key)
             return True, None
         except Exception as e:
             # raise e
+            return False, e
+    
+    # load second Fall.mat data and merge with existing data
+    def loadFallMatChan2(self, app_key: AppKeys, path_fall_chan2: str, config_manager: ConfigManager=None) -> Tuple[bool, Optional[Exception]]:
+        """
+        Load second Fall.mat and merge with existing chan1 data.
+        Must be called after loadFallMat.
+        
+        Args:
+            app_key: Application key
+            path_fall_chan2: Path to second Fall.mat file
+            config_manager: Config manager (optional)
+        
+        Returns:
+            Tuple of (success, exception)
+        """
+        try:
+            dict_Fall_chan2 = loadFallMat(path_fall_chan2)
+            
+            # Get number of ROIs in first Fall.mat
+            n_rois_chan1 = self.dict_n_rois_chan1[app_key]
+            n_rois_chan2 = len(dict_Fall_chan2["stat"])
+            
+            # Merge trace data (F, Fneu, spks)
+            self.dict_Fall[app_key]["F"] = np.concatenate([
+                self.dict_Fall[app_key]["F"],
+                dict_Fall_chan2["F"]
+            ], axis=0)
+            self.dict_Fall[app_key]["Fneu"] = np.concatenate([
+                self.dict_Fall[app_key]["Fneu"],
+                dict_Fall_chan2["Fneu"]
+            ], axis=0)
+            self.dict_Fall[app_key]["spks"] = np.concatenate([
+                self.dict_Fall[app_key]["spks"],
+                dict_Fall_chan2["spks"]
+            ], axis=0)
+            
+            # Merge iscell
+            self.dict_Fall[app_key]["iscell"] = np.concatenate([
+                self.dict_Fall[app_key]["iscell"],
+                dict_Fall_chan2["iscell"]
+            ], axis=0)
+            
+            # Merge F_chan2, Fneu_chan2 if both have 2 channels
+            if self.getNChannels(app_key) == 2 and dict_Fall_chan2["ops"]["nchannels"] == 2:
+                self.dict_Fall[app_key]["F_chan2"] = np.concatenate([
+                    self.dict_Fall[app_key]["F_chan2"],
+                    dict_Fall_chan2["F_chan2"]
+                ], axis=0)
+                self.dict_Fall[app_key]["Fneu_chan2"] = np.concatenate([
+                    self.dict_Fall[app_key]["Fneu_chan2"],
+                    dict_Fall_chan2["Fneu_chan2"]
+                ], axis=0)
+            
+            # Merge stat with string keys
+            for i, stat_data in dict_Fall_chan2["stat"].items():
+                new_key = f"{i}_chan2"
+                self.dict_Fall[app_key]["stat"][new_key] = stat_data
+            
+            # Merge ROI coordinates with string keys
+            dict_roi_coords_chan2 = getROICoordsFromDictFall(dict_Fall_chan2)
+            for roi_id, coords in dict_roi_coords_chan2.items():
+                new_key = f"{roi_id}_chan2"
+                self.dict_roi_coords[app_key][new_key] = coords
+            
+            # Update ROI image
+            self.dict_im_roi[app_key] = getROIImageFromFall(self, app_key)
+            
+            # Mark that second Fall.mat exists
+            self.dict_has_second_fall[app_key] = True
+            
+            # Suite2pROITracking add registered data dict
+            if config_manager:
+                if config_manager.current_app == "SUITE2P_ROI_TRACKING" or config_manager.current_app == "CHECK_MULTI_SESSION_ROI_COORDINATES":
+                    for roi_id, coords in dict_roi_coords_chan2.items():
+                        new_key = f"{roi_id}_chan2"
+                        self.dict_roi_coords_reg[app_key][new_key] = coords
+                    self.dict_im_roi_reg[app_key] = getROIImageFromFall(self, app_key)
+            
+            return True, None
+        except Exception as e:
             return False, e
         
     # load Caiman HDF5 data
@@ -92,14 +182,19 @@ class DataManager:
             self.dict_Fall[app_key] = dict_Fall
             self.dict_data_dtype[app_key] = Extension.HDF5
             self.dict_im_bg[app_key] = getBGImageFromCaimanHDF5(self, app_key)
-            self.dict_roi_coords[app_key] = getROICoordsFromDictFall(dict_Fall) # use same function as Fall.mat
-            self.dict_im_roi[app_key] = getROIImageFromFall(self, app_key) # use same function as Fall.mat
+            self.dict_roi_coords[app_key] = self._convertRoiCoordsKeysToStr(getROICoordsFromDictFall(dict_Fall))
+            self.dict_im_roi[app_key] = getROIImageFromFall(self, app_key)
+            
+            # Initialize second Fall.mat attributes (no second file for HDF5)
+            self.dict_n_rois_chan1[app_key] = len(dict_Fall["stat"])
+            self.dict_has_second_fall[app_key] = False
+            
             # Suite2pROITracking add registered data dict
             if config_manager:
                 if config_manager.current_app == "SUITE2P_ROI_TRACKING":
                     self.dict_im_bg_reg[app_key] = getBGImageFromCaimanHDF5(self, app_key)
-                    self.dict_roi_coords_reg[app_key] = getROICoordsFromDictFall(dict_Fall) # use same function as Fall.mat
-                    self.dict_im_roi_reg[app_key] = getROIImageFromFall(self, app_key) # use same function as Fall.mat
+                    self.dict_roi_coords_reg[app_key] = self._convertRoiCoordsKeysToStr(getROICoordsFromDictFall(dict_Fall))
+                    self.dict_im_roi_reg[app_key] = getROIImageFromFall(self, app_key)
             return True, None
         except Exception as e:
             raise e
@@ -137,9 +232,21 @@ class DataManager:
                     "nchannels": 1,  # default to 1 channel
                 }
             }
+            # Initialize second Fall.mat attributes
+            self.dict_n_rois_chan1[app_key] = arr_trace.shape[0]
+            self.dict_has_second_fall[app_key] = False
             return True, None
         except Exception as e:
             return False, e
+
+    """
+    Helper Functions
+    """
+    def _convertRoiCoordsKeysToStr(self, dict_roi_coords: Dict[int, Any]) -> Dict[str, Any]:
+        """
+        Convert ROI coordinates dictionary keys from int to str.
+        """
+        return {str(k): v for k, v in dict_roi_coords.items()}
 
     """
     get Functions
@@ -172,32 +279,48 @@ class DataManager:
                 "F": self.dict_Fall[app_key]["F"],
             }
         return dict_traces
-    def getTracesOfSelectedROI(self, app_key: AppKeys, roi_id: int, n_channels: int=1) -> Dict[str, np.ndarray[np.float32]]: # 1d array
+    
+    def getTracesOfSelectedROI(self, app_key: AppKeys, roi_id: str, n_channels: int=1) -> Dict[str, np.ndarray[np.float32]]: # 1d array
+        """
+        Get traces for a selected ROI.
+        
+        Args:
+            app_key: Application key
+            roi_id: ROI ID as string (e.g., "0", "1", "0_chan2")
+            n_channels: Number of channels
+        
+        Returns:
+            Dictionary of trace arrays
+        """
+        from ..utils.roi_id_utils import roiIdToArrayIndex
+        
+        index = roiIdToArrayIndex(roi_id, self.getNROIsChan1(app_key))
+        
         # Suite2p Fall.mat data
         if self.dict_data_dtype[app_key] == Extension.MAT:
             dict_traces = {
-                "F": self.dict_Fall[app_key]["F"][roi_id],
-                "Fneu": self.dict_Fall[app_key]["Fneu"][roi_id],
-                "spks": self.dict_Fall[app_key]["spks"][roi_id]
+                "F": self.dict_Fall[app_key]["F"][index],
+                "Fneu": self.dict_Fall[app_key]["Fneu"][index],
+                "spks": self.dict_Fall[app_key]["spks"][index]
             }
             if n_channels == 2:
-                dict_traces["F_chan2"] = self.dict_Fall[app_key]["F_chan2"][roi_id]
-                dict_traces["Fneu_chan2"] = self.dict_Fall[app_key]["Fneu_chan2"][roi_id]
+                dict_traces["F_chan2"] = self.dict_Fall[app_key]["F_chan2"][index]
+                dict_traces["Fneu_chan2"] = self.dict_Fall[app_key]["Fneu_chan2"][index]
         # Caiman HDF5 data
         elif self.dict_data_dtype[app_key] == Extension.HDF5:
             dict_traces = {
-                "F": self.dict_Fall[app_key]["F"][roi_id],
-                "spks": self.dict_Fall[app_key]["spks"][roi_id]
+                "F": self.dict_Fall[app_key]["F"][index],
+                "spks": self.dict_Fall[app_key]["spks"][index]
             }        
         # calcium trace npy data
         elif self.dict_data_dtype[app_key] == Extension.NPY: 
             dict_traces = {
-                "F": self.dict_Fall[app_key]["F"][roi_id],
+                "F": self.dict_Fall[app_key]["F"][index],
             }
         return dict_traces
     
     # get stat
-    def getStat(self, app_key: AppKeys) -> Dict[int, Dict[str, Any]]:
+    def getStat(self, app_key: AppKeys) -> Dict[str, Dict[str, Any]]:
         return self.dict_Fall[app_key]["stat"]
     # get fs
     def getFs(self, app_key: AppKeys) -> float:
@@ -219,16 +342,22 @@ class DataManager:
     # get nchannels
     def getNChannels(self, app_key: AppKeys) -> int:
         return self.dict_Fall[app_key]["ops"]["nchannels"]
+    # get nROIs in first Fall.mat
+    def getNROIsChan1(self, app_key: AppKeys) -> int:
+        return self.dict_n_rois_chan1.get(app_key, self.getNROIs(app_key))
+    # get whether second Fall.mat exists
+    def getHasSecondFall(self, app_key: AppKeys) -> bool:
+        return self.dict_has_second_fall.get(app_key, False)
     
     # get ROI celltype
-    def getDictROICelltype(self, app_key: AppKeys, id_roi: int=None) -> Dict[int, str] | str:
+    def getDictROICelltype(self, app_key: AppKeys, id_roi: str=None) -> Dict[str, str] | str:
         if not id_roi == None:
             return self.dict_roi_celltype.get(app_key).get(id_roi)
         return self.dict_roi_celltype.get(app_key)
     # get ROI coordinates
-    def getDictROICoords(self, app_key: AppKeys) -> Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32], Tuple[int]]]:
+    def getDictROICoords(self, app_key: AppKeys) -> Dict[str, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32], Tuple[int]]]:
         return self.dict_roi_coords.get(app_key)
-    def getDictROICoordsRegistered(self, app_key: AppKeys) -> Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32], Tuple[int]]]:
+    def getDictROICoordsRegistered(self, app_key: AppKeys) -> Dict[str, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32], Tuple[int]]]:
         return self.dict_roi_coords_reg.get(app_key)
         
     "Tiff data"
@@ -257,44 +386,9 @@ class DataManager:
     def getDataTypeOfTiffStack(self, app_key: AppKeys) -> str:
         return self.dict_tiff[app_key].dtype
 
-    # get image size, change return with dtype
-    def getImageSize(self, app_key: AppKeys) -> Tuple[int, int]:
-        # Suite2p Fall.mat or Caiman HDF5
-        if self.dict_data_dtype[app_key] == Extension.MAT or self.dict_data_dtype[app_key] == Extension.HDF5:
-            return (self.dict_Fall[app_key]["ops"]["Lx"], self.dict_Fall[app_key]["ops"]["Ly"])
-        elif self.dict_data_dtype[app_key] == Extension.TIFF:
-            return (self.dict_tiff[app_key].shape[0], self.dict_tiff[app_key].shape[1])
-        
-    def getImageFromXYCZTTiffStack(self, app_key: AppKeys, plane_z: int, plane_t: int, channel: int, get_reg: bool = False) -> np.ndarray[np.uint8, Tuple[int, int]]:
-        # use registered image if get_reg is True
-        if get_reg:
-            img_stack = self.getTiffStackRegistered(app_key)
-        else:
-            img_stack = self.getTiffStack(app_key)
-        try:
-            return img_stack[:, :, channel, plane_z, plane_t]
-        except IndexError:
-            # out of index, return black image
-            return np.zeros(img_stack.shape[:2], dtype=np.uint8)
-    
-    def getDictBackgroundImage(self, app_key: AppKeys) -> Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]: # 2d array
-        return self.dict_im_bg.get(app_key)
-    
-    def getDictBackgroundImageChannel2(self, app_key: AppKeys) -> Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]:
-        return self.dict_im_bg_chan2.get(app_key)
-    
-    def getBackgroundImageOptional(self, app_key: AppKeys) -> np.ndarray[np.uint8, Tuple[int, int]]:
-        return self.dict_im_bg_optional.get(app_key)
-    
-    def getDictBackgroundImageRegistered(self, app_key: AppKeys) -> Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]: # 2d array
-        return self.dict_im_bg_reg.get(app_key)
-    
-    def getDictBackgroundImageChannel2Registered(self, app_key: AppKeys) -> Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]:
-        return self.dict_im_bg_chan2_reg.get(app_key)
-    
+    "ROI image"
     def getDictROIImage(self, app_key: AppKeys) -> Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]:
         return self.dict_im_roi.get(app_key)
-    
     def getDictROIImageRegistered(self, app_key: AppKeys) -> Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]:
         return self.dict_im_roi_reg.get(app_key)
     
@@ -341,3 +435,17 @@ class DataManager:
     def getCascadeSpikeEvents(self, app_key: AppKeys) -> np.ndarray[Tuple[int]]:
         return self.dict_cascade.get(app_key, {}).get("cascade_spike_events", None)
     
+    "Background image"
+    def getDictBGImage(self, app_key: AppKeys) -> Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]:
+        return self.dict_im_bg.get(app_key)
+    def getDictBGImageOptional(self, app_key: AppKeys) -> np.ndarray[np.uint8, Tuple[int, int]]:
+        return self.dict_im_bg_optional.get(app_key)
+    def getDictBGImageChan2(self, app_key: AppKeys) -> Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]:
+        return self.dict_im_bg_chan2.get(app_key)
+    def getDictBGImageRegistered(self, app_key: AppKeys) -> Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]:
+        return self.dict_im_bg_reg.get(app_key)
+    def getDictBGImageChan2Registered(self, app_key: AppKeys) -> Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]:
+        return self.dict_im_bg_chan2_reg.get(app_key)
+    
+    def getImageSize(self, app_key: AppKeys) -> Tuple[int, int]:
+        return self.dict_im_bg[app_key]["meanImg"].shape

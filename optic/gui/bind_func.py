@@ -160,6 +160,26 @@ def bindFuncButtonExportFigure(
             exportFigure(figure, path_dst, dpi)
     q_button.clicked.connect(lambda: onButtonClicked(q_window, figure, path_dst, dpi))
 
+# -> canvas_layouts.makeLayoutTraceDisplayCheckboxes
+def bindFuncTraceDisplayCheckbox(
+    dict_q_checkbox: Dict[str, QCheckBox],
+    canvas_control: CanvasControl,
+) -> None:
+    """
+    Bind trace display checkbox state changes to canvas control.
+    """
+    from PyQt5.QtCore import Qt
+    
+    def onCheckboxStateChanged(trace_key: str, state: int):
+        is_visible = (state == Qt.Checked)
+        canvas_control.setTraceVisibility(trace_key, is_visible)
+        canvas_control.updatePlotWithROISelect()
+    
+    for trace_key, checkbox in dict_q_checkbox.items():
+        checkbox.stateChanged.connect(
+            lambda state, key=trace_key: onCheckboxStateChanged(key, state)
+        )
+
 """
 io_layouts
 """
@@ -178,11 +198,13 @@ def bindFuncROICheckIO(
     q_button_save: 'QPushButton', 
     q_button_load: 'QPushButton', 
     q_window: 'QWidget', 
-    q_lineedit: 'QLineEdit', 
+    q_lineedit: 'QLineEdit',
+    q_lineedit_chan2: 'QLineEdit',
     q_table: 'QTableWidget', 
     widget_manager: 'WidgetManager',
     config_manager: 'ConfigManager',
     control_manager: 'ControlManager',
+    data_manager: 'DataManager',
     app_key: str,
     local_var: bool = True
 ) -> None:
@@ -193,11 +215,27 @@ def bindFuncROICheckIO(
     table_columns = config_manager.table_columns[app_key]
     json_config = config_manager.json_config
     table_control = control_manager.table_controls[app_key]
+    
+    def _saveROICheck() -> None:
+        saveROICheck(
+            q_window, 
+            q_lineedit, 
+            q_lineedit_chan2,
+            q_table, 
+            gui_defaults, 
+            table_columns, 
+            json_config,
+            data_manager,
+            app_key,
+            local_var
+        )
+    
     def _loadROICheck() -> None:
         loadROICheck(q_window, q_table, gui_defaults, table_columns, table_control)
         updateROICountDisplay(widget_manager, config_manager, app_key)
-    q_button_save.clicked.connect(lambda: saveROICheck(q_window, q_lineedit, q_table, gui_defaults, table_columns, json_config, local_var))
-    q_button_load.clicked.connect(lambda: _loadROICheck())
+    
+    q_button_save.clicked.connect(_saveROICheck)
+    q_button_load.clicked.connect(_loadROICheck)
 
 # -> io_layouts.makeLayoutROITrackingIO
 def bindFuncROITrackingIO(
