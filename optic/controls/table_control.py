@@ -10,7 +10,6 @@ from ..utils.info_utils import extractRangeValues
 from ..visualization.view_visual_roi import shouldSkipROI
 from ..config.constants import Extension
 
-
 class TableControl:
     def __init__(
             self, 
@@ -45,24 +44,19 @@ class TableControl:
 
     def setupWidgetROITable(self, app_key: str) -> None:
         from ..gui.table_setup import setupWidgetROITable
-        self.setLenRow(len(self.data_manager.getStat(self.app_key)))
-        self.q_table, self.groups_celltype = setupWidgetROITable(
-            self.q_table, 
-            self.len_row, 
-            self.table_columns,
-            data_manager=self.data_manager,
-            app_key=self.app_key,
-            key_event_ignore=True
-        )
+        self.setLenRow(len(self.data_manager.getStat(self.app_key))) # for Suite2p
+        self.q_table, self.groups_celltype = setupWidgetROITable(self.q_table, self.len_row, self.table_columns, key_event_ignore=True)
         self.setKeyPressEvent()
         self.initalizeSharedAttr_DictROIDisplay()
         self.initalizeSharedAttr_CelltypeVisibility()
         self.initalizeSharedAttr_CheckboxVisibility()
         # set celltype with TableColumns
-        celltype_pos = [col_name for col_name in self.table_columns.getColumns().keys() if self.table_columns.getColumns()[col_name]["type"] == "celltype"][0]
+        # if celltype columns are ["Neuron", "Astrocyte", "Not_Cell"], set "Neuron" or "Not_Cell" radiobutton
+        celltype_pos = [col_name for col_name in self.table_columns.getColumns().keys() if self.table_columns.getColumns()[col_name]["type"] == "celltype"][0] # first celltype except "Not_Cell"
         celltype_neg = [col_name for col_name in self.table_columns.getColumns().keys() if self.table_columns.getColumns()[col_name]["type"] == "celltype"][-1]
-        self.setROICellTypeFromArray(self.data_manager.getDictFall("pri")["iscell"][:,0], celltype_pos, celltype_neg, app_key)
+        self.setROICellTypeFromArray(self.data_manager.getDictFall("pri")["iscell"][:,0], celltype_pos, celltype_neg, app_key) # set celltype with "iscell" array
         updateROICountDisplay(self.widget_manager, self.config_manager, self.app_key)
+
 
     def setupWidgetDynamicTable(self, app_key: str) -> None:
         from ..gui.table_setup import setupWidgetDynamicTable
@@ -72,14 +66,7 @@ class TableControl:
     def updateWidgetROITable(self) -> None:
         from ..gui.table_setup import setupWidgetROITable
         self.q_table.clear()
-        self.q_table, groups_celltype = setupWidgetROITable(
-            self.q_table, 
-            self.len_row, 
-            self.table_columns,
-            data_manager=self.data_manager,
-            app_key=self.app_key,
-            key_event_ignore=True
-        )
+        self.q_table, groups_celltype = setupWidgetROITable(self.q_table, self.len_row, self.table_columns, key_event_ignore=True)
 
     def updateWidgetDynamicTableWithT(
         self, 
@@ -89,7 +76,7 @@ class TableControl:
         use_match: bool = True
     ) -> None:
         from ..gui.table_setup import applyDictROIMatchingToTable
-        self.q_table.setRowCount(0)
+        self.q_table.setRowCount(0)  # Initialize the table
         applyDictROIMatchingToTable(
             self.q_table,
             self.table_columns,
@@ -100,6 +87,7 @@ class TableControl:
         )
         self.setLenRow(self.q_table.rowCount())
 
+    # change table cell selection
     def onSelectionChanged(self, selected: QItemSelection, deselected: QItemSelection) -> None:
         if selected.indexes():
             row: int = self.q_table.currentRow()
@@ -110,9 +98,10 @@ class TableControl:
 
             cell_id = self.getCellIdFromRow(row)
             self.setSharedAttr_ROISelected(cell_id)
+            # update data_manager.dict_roi_celltype
             celltype = self.getCelltypeFromColumn(column)
-            if celltype is not None and cell_id is not None:
-                self.data_manager.dict_roi_celltype[self.app_key][cell_id] = celltype
+            if celltype is not None:
+                self.data_manager.dict_roi_celltype[self.app_key][row] = celltype
 
     def onSelectionChangedWithTracking(self, selected: QItemSelection, deselected: QItemSelection) -> None:
         if selected.indexes():
@@ -124,6 +113,7 @@ class TableControl:
             
             cell_id = self.getCellIdFromRow(row)
             self.setSharedAttr_ROISelected(cell_id)
+            # for ROI tracking
             id_roi_match = self.getCellIdMatchFromRow(row)
             self.setSharedAttr_ROIMatch(id_roi_match)
 
@@ -139,8 +129,10 @@ class TableControl:
     def getLenRow(self) -> int:
         return self.len_row
     
+    # if "Cell ID Match" column is empty, return None
     def getCellIdMatchFromRow(self, row: int) -> Optional[int]:
         try:
+            # Get first column with type 'id_match'
             id_match_columns = [(col_name, col_info) for col_name, col_info in self.table_columns.getColumns().items() 
                             if col_info['type'] == 'id_match']
             if not id_match_columns:
@@ -158,26 +150,27 @@ class TableControl:
     def getPlaneT(self) -> int:
         return self.plane_t
     
-    def getCellIdFromRow(self, row: int) -> Optional[str]:
+    # get "Cell ID" from table row
+    def getCellIdFromRow(self, row: int) -> Optional[int]:
         try:
+            # Get first column with type 'id'
             id_columns = [(col_name, col_info) for col_name, col_info in self.table_columns.getColumns().items() 
                         if col_info['type'] == 'id']
             if not id_columns:
                 return None
                 
             col_name, col_info = id_columns[0]
-            item = self.q_table.item(row, col_info['order'])
-            if item:
-                return item.text()
-            return None
+            return int(self.q_table.item(row, col_info['order']).text())
         except (ValueError, AttributeError):
             return None
         
+    # get Table Column name from table column
     def getTableColumnNameFromColumn(self, column: int) -> str:
         for col_name, col_info in self.table_columns.getColumns().items():
             if col_info["order"] == column:
                 return col_name
             
+    # get celltype name from table column
     def getCelltypeFromColumn(self, column: int) -> Optional[str]:
         for col_name, col_info in self.table_columns.getColumns().items():
             if col_info["order"] == column:
@@ -185,12 +178,10 @@ class TableControl:
                     return col_name 
                 else:
                     return None
-                
     """
     set Functions
     """
     def setTableSize(self, width_min: int=0, width_max: int=0, height_min: int=0, height_max: int=0) -> None:
-        from ..gui.table_setup import setTableSize
         setTableSize(self.q_table, width_min, width_max, height_min, height_max)
 
     def setSelectedRow(self, row: int) -> None:
@@ -213,13 +204,18 @@ class TableControl:
 
     def setPlaneT(self, plane_t: int) -> None:
         self.plane_t = plane_t
-
     """
     shared_attr Functions
+    roi_selected_id: Current selected ROI ID
+    roi_match_id: Current matched ROI ID
+    roi_display: Which ROIs should be displayed
+    display_celltype: Which celltype should be displayed
     """
-    def setSharedAttr_ROISelected(self, roi_id: Optional[str]) -> None:
-        if roi_id is None:
+    def setSharedAttr_ROISelected(self, roi_id: Optional[int]) -> None:
+        if roi_id == None: # clear selection
             self.control_manager.setSharedAttr(self.app_key, 'roi_selected_id', None)
+        elif roi_id < 0: # out of range
+            return
         else:
             self.control_manager.setSharedAttr(self.app_key, 'roi_selected_id', roi_id)
             if self.config_manager.current_app == "SUITE2P_ROI_CURATION" or self.config_manager.current_app == "SUITE2P_ROI_TRACKING":
@@ -231,7 +227,7 @@ class TableControl:
                     load_caiman=self.data_manager.dict_data_dtype[self.app_key]==Extension.HDF5
                 )
 
-    def getSharedAttr_ROISelected(self) -> Optional[str]:
+    def getSharedAttr_ROISelected(self) -> int:
         return self.control_manager.getSharedAttr(self.app_key, 'roi_selected_id')
     
     def setSharedAttr_ROIMatch(self, roi_id: int) -> None:
@@ -240,22 +236,19 @@ class TableControl:
     def getSharedAttr_ROIMatch(self) -> int:
         return self.control_manager.getSharedAttr(self.app_key, 'roi_match_id')
     
-    def setSharedAttr_DictROIDisplay(self, dict_roi_display: Dict[str, Dict[str, bool]]) -> None:
+    def setSharedAttr_DictROIDisplay(self, dict_roi_display: Dict[int, Dict[str, bool]]) -> None:
         self.control_manager.setSharedAttr(self.app_key, 'dict_roi_display', dict_roi_display)
 
-    def getSharedAttr_DictROIDisplay(self) -> Dict[str, Dict[str, bool]]:
+    def getSharedAttr_DictROIDisplay(self) -> Dict[int, Dict[str, bool]]:
         return self.control_manager.getSharedAttr(self.app_key, 'dict_roi_display')
 
     def initalizeSharedAttr_DictROIDisplay(self) -> None:
-        from ..utils.roi_id_utils import arrayIndexToRoiId
-        n_rois_chan1 = self.data_manager.getNROIsChan1(self.app_key)
-        dict_roi_display = {}
-        for index in range(self.len_row):
-            roi_id = arrayIndexToRoiId(index, n_rois_chan1)
-            dict_roi_display[roi_id] = {
+        dict_roi_display = {
+            roi_id: {
                 "celltype": True,
                 "checkbox": True,
-            }
+            } for roi_id in range(self.len_row)
+        }
         self.control_manager.setSharedAttr(self.app_key, 'dict_roi_display', dict_roi_display)
 
     def getSharedAttr_CelltypeVisibility(self) -> Dict[str, bool]:
@@ -280,79 +273,92 @@ class TableControl:
         checkbox_visibility = {checkbox: False for checkbox in list_checkbox}
         self.setSharedAttr_CheckboxVisibility(checkbox_visibility)
 
+    # with dict_checkbox["{app_key}_display_celltype"] change
     def updateROIDisplayWithCelltype(self, dict_celltype_visibility: Dict[str, bool]) -> None:
         dict_roi_display = self.getSharedAttr_DictROIDisplay()
+        # if all checkboxes of celltype are not checked
         if not any(dict_celltype_visibility.values()):
             for roi_id in dict_roi_display.keys():
                 dict_roi_display[roi_id]["celltype"] = False
         else:
+            # check each ROI celltype is in list_checked_celltype
             for roi_id in dict_roi_display.keys():
-                row = self.getRowFromCellId(roi_id)
-                if row is not None:
-                    current_celltype = self.getCurrentCellTypeOfRow(row)
-                    dict_roi_display[roi_id]["celltype"] = dict_celltype_visibility.get(current_celltype, False)
+                current_celltype = self.getCurrentCellTypeOfRow(roi_id)
+                dict_roi_display[roi_id]["celltype"] = dict_celltype_visibility.get(current_celltype, False)
         
         self.setSharedAttr_DictROIDisplay(dict_roi_display)
         self.setSharedAttr_CelltypeVisibility(dict_celltype_visibility)
 
+    # with dict_checkbox["{app_key}_display_checkbox"] change
     def updateROIDisplayWithCheckbox(self, dict_checkbox_visibility: Dict[str, bool]) -> None:
         dict_roi_display = self.getSharedAttr_DictROIDisplay()
+        # if all checkboxes of checkboxes are not checked
         if not any(dict_checkbox_visibility.values()):
             for roi_id in dict_roi_display.keys():
                 dict_roi_display[roi_id]["checkbox"] = True
         else:
+            # check each ROI's checkbox states
             for roi_id in dict_roi_display.keys():
                 row = self.getRowFromCellId(roi_id)
-                if row is not None:
-                    checkbox_states = self.getCheckboxStatesOfRow(row)
-                    is_visible = True
-                    for checkbox, is_visible_checkbox in dict_checkbox_visibility.items():
-                        if is_visible_checkbox and not checkbox_states.get(checkbox, False):
-                            is_visible = False
-                            break
-                    dict_roi_display[roi_id]["checkbox"] = is_visible
+                # get all checkbox states for this row
+                checkbox_states = self.getCheckboxStatesOfRow(row)
+                # check the ROI's checkbox states with dict_checkbox_visibility
+                is_visible = True
+                for checkbox, is_visible_checkbox in dict_checkbox_visibility.items():
+                    if is_visible_checkbox and not checkbox_states.get(checkbox, False):
+                        is_visible = False
+                        break
+                        
+                dict_roi_display[roi_id]["checkbox"] = is_visible
         
         self.setSharedAttr_DictROIDisplay(dict_roi_display)
         self.setSharedAttr_CheckboxVisibility(dict_checkbox_visibility)
 
+    # with table's "celltype" radiobutton change
     def changeRadiobuttonOfTable(self, row: int) -> None:
         dict_roi_display = self.getSharedAttr_DictROIDisplay()
-        roi_id = self.getCellIdFromRow(row)
-        if roi_id is not None and roi_id in dict_roi_display:
-            new_cell_type = self.getCurrentCellTypeOfRow(row)
-            dict_celltype_visibility = self.getSharedAttr_CelltypeVisibility()
-            dict_roi_display[roi_id]["celltype"] = dict_celltype_visibility.get(new_cell_type, False)
-            self.setSharedAttr_DictROIDisplay(dict_roi_display)
+        # check celltype of changed ROI
+        new_cell_type = self.getCurrentCellTypeOfRow(row)
+        dict_celltype_visibility = self.getSharedAttr_CelltypeVisibility()
+        dict_roi_display[row]["celltype"] = dict_celltype_visibility.get(new_cell_type, False)
+        self.setSharedAttr_DictROIDisplay(dict_roi_display)
 
+    # with table's "checkbox" checkbox change
     def changeCheckboxOfTable(self, row: int) -> None:
         dict_roi_display = self.getSharedAttr_DictROIDisplay()
-        roi_id = self.getCellIdFromRow(row)
-        if roi_id is None or roi_id not in dict_roi_display:
-            return
+        # check checkbox of changed ROI
         dict_checkbox_visibility: Dict[str, bool] = self.getSharedAttr_CheckboxVisibility()
+        # get all checkbox states for this row
         checkbox_states_row: Dict[str, bool] = self.getCheckboxStatesOfRow(row)
+        # check the ROI's checkbox states with dict_checkbox_visibility
         is_visible = True
         for checkbox_name, check_checkbox in dict_checkbox_visibility.items():
             if check_checkbox:
-                if not checkbox_states_row.get(checkbox_name, False):
+                if checkbox_states_row[checkbox_name]:
+                    pass
+                else:
                     is_visible = False
                     break
-        dict_roi_display[roi_id]["checkbox"] = is_visible
+        dict_roi_display[row]["checkbox"] = is_visible
         self.setSharedAttr_DictROIDisplay(dict_roi_display)
 
-    def updateSelectedROI(self, roi_id: str) -> None:
+    # with View mousePressEvent
+    def updateSelectedROI(self, roi_id: int) -> None:
+        # WARNING !!!
+        # roi_id and row are not always the same
         if roi_id is not None:
             row = self.getRowFromCellId(roi_id)
-            if row is not None:
-                self.q_table.selectRow(row)
-                self.setSelectedRow(row)
-                self.setSharedAttr_ROISelected(roi_id)
-                self.q_table.scrollToItem(self.q_table.item(row, 0), QAbstractItemView.PositionAtTop)
-                self.q_table.setCurrentCell(row, 0)
+            self.q_table.selectRow(row)
+            self.setSelectedRow(row)
+            self.setSharedAttr_ROISelected(roi_id)
+            self.q_table.scrollToItem(self.q_table.item(row, 0), QAbstractItemView.PositionAtTop)
+            self.q_table.setCurrentCell(row, 0)
             
     """
     Sub Function
     """
+            
+    # get celltype of radiobutton, Neruon/Astrocyte/...
     def getCurrentCellTypeOfRow(self, row: int) -> str:
         button_group = self.groups_celltype.get(row)
         if button_group:
@@ -363,6 +369,7 @@ class TableControl:
                         return col_name
         return None
     
+    # get checkbox state of the table, Check/Tracking/...
     def getCheckboxStatesOfRow(self, row: int) -> Dict[str, bool]:
         table_columns_ = self.table_columns.getColumns()
         dict_checkbox_state = {}
@@ -371,24 +378,18 @@ class TableControl:
                 dict_checkbox_state[column_name] = self.getCheckboxStatesOfColumn(column_name)[row]
         return dict_checkbox_state
 
+    # detect "Check" is checked or not
     def getRowChecked(self, row: int) -> bool:
         for col_name, col_info in self.table_columns.getColumns().items():
-            if col_info['type'] == 'checkbox' and col_name == 'Check':
+            if col_info['type'] == 'checkbox' and col_name == 'Check': # hardcoded !!!
                 check_box_item = self.q_table.item(row, col_info['order'])
                 return check_box_item.checkState() == Qt.Checked if check_box_item else False
         return False
     
-    def getRowFromCellId(self, cell_id: str) -> Optional[int]:
-        col_id = self.table_columns.getColumns()['Cell_ID']['order']
-        for row in range(self.len_row):
-            item = self.q_table.item(row, col_id)
-            if item and item.text() == cell_id:
-                return row
-        return None
-    
     """
     Button-binding Function
     """
+    # set Selected ROIs same celltype (Neuron, Not Cell, ...)
     def setSelectedROISameCelltype(
             self, 
             celltype: str,
@@ -398,6 +399,7 @@ class TableControl:
         checkbox_columns = self.getCheckboxColumns()
         skip_states = {}
         
+        # Check if user wants to skip checked ROIs for each checkbox column
         for column in checkbox_columns:
             result = showConfirmationDialog(
                 self.q_table,
@@ -407,8 +409,8 @@ class TableControl:
             if result == QMessageBox.Yes:
                 skip_states[column] = self.getCheckboxStatesOfColumn(column)
             elif result == QMessageBox.Cancel:
-                return
-            else:
+                return  # 処理を中断
+            else:  # No の場合
                 skip_states[column] = [False] * self.len_row
                 
         col_order: int = self.table_columns.getColumns()[celltype]["order"]
@@ -439,6 +441,7 @@ class TableControl:
                 states.append(False)
         return states
     
+    # toggle "Checkbox" of All ROIs
     def toggleSelectedROICheckbox(
             self, 
             checkbox: str, 
@@ -461,20 +464,20 @@ class TableControl:
                 if item:
                     item.setCheckState(check_state)
         
+    # Filter ROIs, set celltype radiobutton "Not Cell" (column with the highest order)
     def filterROI(self, thresholds: Dict[str, Tuple[float, float]]) -> None:
         result = showConfirmationDialog(
             self.q_table,
             'Confirmation',
-            f"Filter ROIs ?"
+            f"Filter ROIs ?",
         )
         if result == QMessageBox.Yes:
             celltype_columns = [col for col, info in self.table_columns.getColumns().items() if info['type'] == 'celltype']
-            target_celltype = max(celltype_columns, key=lambda col: self.table_columns.getColumns()[col]['order'])
+            target_celltype = max(celltype_columns, key=lambda col: self.table_columns.getColumns()[col]['order']) # Not_Cell column should be the last column of "celltype" columns
             target_column = self.table_columns.getColumns()[target_celltype]['order']
 
             for row in range(self.q_table.rowCount()):
-                roi_id = self.getCellIdFromRow(row)
-                roi_stat = self.data_manager.getStat(self.app_key)[roi_id]
+                roi_stat = self.data_manager.getStat(self.app_key)[row]
                 if not all(min_val <= roi_stat[param] <= max_val for param, (min_val, max_val) in thresholds.items()):
                     radio_button: QRadioButton = self.q_table.cellWidget(row, target_column)
                     if radio_button:
@@ -483,10 +486,22 @@ class TableControl:
             updateROICountDisplay(self.widget_manager, self.config_manager, self.app_key)
         else:
             return
-
     """
     Other Functions
     """
+    # get row from cell id
+    def getRowFromCellId(self, cell_id: int) -> Optional[int]:
+        col_id = self.table_columns.getColumns()['Cell_ID']['order'] # hardcoded !!!
+        dict_row_cellid = {row: int(self.q_table.item(row, col_id).text()) for row in range(self.len_row)}
+        dict_cellid_row = {v: k for k, v in dict_row_cellid.items()}
+        return dict_cellid_row.get(cell_id)
+    
+    # get cell id from row
+    def getCellIdFromRow(self, row: int) -> Optional[int]:
+        col_id = self.table_columns.getColumns()['Cell_ID']['order']
+        return int(self.q_table.item(row, col_id).text())
+    
+    # set ROI celltype with 0/1 array
     def setROICellTypeFromArray(
         self,
         array_bool: np.ndarray[bool],
@@ -494,56 +509,62 @@ class TableControl:
         celltype_neg: str = "Not_Cell",
         app_key: AppKeys = "pri"
     ) -> None:
-        from ..utils.roi_id_utils import arrayIndexToRoiId
-        
+        # Get column indices
         columns = self.table_columns.getColumns()
         pos_col_idx = columns.get(celltype_pos, {}).get('order')
         neg_col_idx = columns.get(celltype_neg, {}).get('order')
 
-        n_rois_chan1 = self.data_manager.getNROIsChan1(app_key)
-
+        # Update classifications and initialize ROI celltype
         self.data_manager.dict_roi_celltype[app_key] = {}
         for row, is_positive in enumerate(array_bool):
-            roi_id = arrayIndexToRoiId(row, n_rois_chan1)
-            self.data_manager.dict_roi_celltype[app_key][roi_id] = celltype_pos if is_positive else celltype_neg
+            self.data_manager.dict_roi_celltype[app_key][row] = celltype_pos if is_positive else celltype_neg
             target_col = pos_col_idx if is_positive else neg_col_idx
             radio_button = self.q_table.cellWidget(row, target_col)
             if radio_button:
                 radio_button.setChecked(True)
                 self.changeRadiobuttonOfTable(row)
                 
+        # Update display
         updateROICountDisplay(self.widget_manager, self.config_manager, self.app_key)
 
-    def updateMatchedROIPairs(self, matches: Dict[str, str]) -> None:
-        col_id = self.table_columns.getColumns()['Cell_ID']['order']
-        col_id_match = self.table_columns.getColumns()['Cell_ID_Match']['order']
+    # update Cell ID Match column values based on matching dictionary
+    def updateMatchedROIPairs(self, matches: Dict[int, int]) -> None:
+        col_id = self.table_columns.getColumns()['Cell_ID']['order'] # hardcoded !!!
+        col_id_match = self.table_columns.getColumns()['Cell_ID_Match']['order'] # hardcoded !!!
         
         for row in range(self.q_table.rowCount()):
             try:
-                cell_id = self.q_table.item(row, col_id).text()
+                cell_id = int(self.q_table.item(row, col_id).text())
                 if cell_id in matches:
+                    # Create new item with the matching ID
                     match_item = QTableWidgetItem(str(matches[cell_id]))
                     self.q_table.setItem(row, col_id_match, match_item)
                 else:
+                    # Clear the match if no matching exists
                     self.q_table.setItem(row, col_id_match, QTableWidgetItem(""))
             except (ValueError, AttributeError):
                 continue
 
-    def getMatchedROIPairs(self, table_control_sec: TableControl) -> List[Tuple[str, str]]:
+    # if "Match Cell ID" is filled, get ROI pair
+    def getMatchedROIPairs(self, table_control_sec: TableControl) -> List[Tuple[int, int]]:
         matched_pairs = []
 
-        col_id = self.table_columns.getColumns()['Cell_ID']['order']
-        col_id_match = self.table_columns.getColumns()['Cell_ID_Match']['order']
+        col_id = self.table_columns.getColumns()['Cell_ID']['order'] # hardcoded !!!
+        col_id_match = self.table_columns.getColumns()['Cell_ID_Match']['order'] # hardcoded !!!
         
         for row in range(self.len_row):
             try:
-                cell_id = self.q_table.item(row, col_id).text()
+                cell_id = int(self.q_table.item(row, col_id).text())
                 cell_id_match_item = self.q_table.item(row, col_id_match)
                 
                 if not cell_id_match_item or not cell_id_match_item.text().strip():
                     continue
                     
-                cell_id_match = cell_id_match_item.text()
+                cell_id_match = int(cell_id_match_item.text())
+                # Skip invalid values, below 0 or above the number of "sec" ROIs
+                if (cell_id_match < 0 or cell_id_match >= table_control_sec.len_row):
+                    continue
+                
                 matched_pairs.append((cell_id, cell_id_match))
             except (ValueError, AttributeError):
                 continue

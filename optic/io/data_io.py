@@ -239,26 +239,15 @@ def generateSavePath(
 # save table content as ROIcheck.mat
 def saveROICheck(
         q_window        : QMainWindow, 
-        q_lineedit      : QLineEdit,
-        q_lineedit_chan2: QLineEdit,
+        q_lineedit      : QLineEdit, 
         q_table         : QTableWidget, 
         gui_defaults    : GuiDefaults,
         table_columns   : TableColumns,
-        json_config     : JsonConfig,
-        data_manager    : DataManager,
-        app_key         : AppKeys,
+        json_config     : JsonConfig, 
         local_var       : bool=True
         ) -> None:
     path_src = q_lineedit.text()
-    path_src_chan2 = q_lineedit_chan2.text() if q_lineedit_chan2 else ""
-    has_chan2 = bool(path_src_chan2)
-    
-    # generate save path with dual Fall indication
-    if has_chan2:
-        path_dst = generateSavePath(path_src, prefix="ROIcuration_dualFall_", remove_strings="Fall_", new_extension=Extension.MAT)
-    else:
-        path_dst = generateSavePath(path_src, prefix="ROIcuration_", remove_strings="Fall_", new_extension=Extension.MAT)
-    
+    path_dst = generateSavePath(path_src, prefix="ROIcuration_", remove_strings="Fall_", new_extension=Extension.MAT) # .tif -> ROIcheck_.mat
     path_dst, is_overwrite = saveFileDialog(q_widget=q_window, file_type=".mat", title="Save ROIcheck mat File", initial_dir=path_dst)
     
     if path_dst:
@@ -270,9 +259,6 @@ def saveROICheck(
                 dialog.getUser()
                 user = dialog.user
             now = f"save_{datetime.datetime.now().strftime('%y%m%d_%H%M%S')}"
-            
-            n_roi_chan1 = data_manager.getNROIsChan1(app_key)
-            
             if is_overwrite:
                 mat_roicheck = loadmat(path_dst, simplify_cells=True)
                 dict_roicheck = convertTableDataToDictROICheck(q_table, table_columns, local_var)
@@ -282,8 +268,6 @@ def saveROICheck(
                     date=now,
                     user=user,
                     path_fall=path_src,
-                    path_fall_chan2=path_src_chan2,
-                    n_roi_chan1=n_roi_chan1,
                     )
             else:
                 dict_roicheck = convertTableDataToDictROICheck(q_table, table_columns, local_var)
@@ -292,9 +276,7 @@ def saveROICheck(
                     date=now,
                     user=user,
                     n_roi=q_table.rowCount(),
-                    n_roi_chan1=n_roi_chan1,
                     path_fall=path_src,
-                    path_fall_chan2=path_src_chan2,
                     )
                 
             # WARNING !!!
@@ -303,9 +285,6 @@ def saveROICheck(
             QMessageBox.information(q_window, "File save", f"ROICheck file saved!\nuser: {user}, date: {now}")
         except Exception as e:
             QMessageBox.warning(q_window, "File save failed", f"Error saving ROICheck file: {e}")
-
-
-
 
 # load ROIcheck.mat
 def loadROICheck(

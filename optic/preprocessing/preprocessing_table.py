@@ -53,35 +53,21 @@ def convertDictROICheckToMatROICheck(
         mat_roicheck    : Dict[str, Any]=None, 
         date            : str="",
         user            : str="",
-        n_roi           : int=0,
-        n_roi_chan1     : int=0,
-        path_fall       : str="",
-        path_fall_chan2 : str="",
+        n_roi           : int=0, 
+        path_fall       : str=""
         )-> Dict[str, Any]:
-
-    has_chan2 = bool(path_fall_chan2)
 
     if mat_roicheck is None:
         mat_roicheck = {
             "NumberOfROI": n_roi,
-            "NumberOfROI_chan1": n_roi_chan1 if has_chan2 else n_roi,
             "path_Fall": path_fall,
             "name_Fall": path_fall.split("/")[-1],
-            "path_Fall_chan2": path_fall_chan2 if has_chan2 else "",
-            "name_Fall_chan2": path_fall_chan2.split("/")[-1] if has_chan2 else "",
-            "has_chan2": has_chan2,
             "manualROIcheck": {},
         }
     else:
-        if path_fall:
+        if path_fall: # rewrite Fall.mat path
             mat_roicheck["path_Fall"] = path_fall
             mat_roicheck["name_Fall"] = path_fall.split("/")[-1]
-        if path_fall_chan2:
-            mat_roicheck["path_Fall_chan2"] = path_fall_chan2
-            mat_roicheck["name_Fall_chan2"] = path_fall_chan2.split("/")[-1]
-            mat_roicheck["has_chan2"] = True
-        if n_roi_chan1 > 0:
-            mat_roicheck["NumberOfROI_chan1"] = n_roi_chan1
 
     mat_roicheck["manualROIcheck"][date] = {
         "user": user,

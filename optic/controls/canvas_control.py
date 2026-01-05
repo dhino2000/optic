@@ -29,13 +29,6 @@ class CanvasControl:
         self.control_manager                            = control_manager
         self.ax_layout                                  = ax_layout
 
-        self.trace_visibility:          Dict[str, bool] = {
-            "F": True,
-            "Fneu": True,
-            "spks": True,
-            "F_chan2": True,
-            "Fneu_chan2": True,
-        }
         self.axes:                      Dict[str, Axes] = {}
         self.setupAxes()
         # F, Fneu, spks plotting
@@ -80,22 +73,11 @@ class CanvasControl:
         return full_traces
 
     def prepareTraceData(self):
-        """
-        Prepare trace data for plotting.
-        roi_selected_id is now a string.
-        """
         self.updatePlotWidth()
         self.updateDownsampleThreshold()
 
-        # roi_selected_id is now a string (e.g., "0", "1", "0_chan2")
         roi_selected_id = self.control_manager.getSharedAttr(self.app_key, 'roi_selected_id')
-        
-        # getTracesOfSelectedROI now accepts string roi_id
-        self.full_traces = self.data_manager.getTracesOfSelectedROI(
-            self.app_key, 
-            roi_selected_id, 
-            n_channels=self.data_manager.getNChannels(self.app_key)
-        )
+        self.full_traces = self.data_manager.getTracesOfSelectedROI(self.app_key, roi_selected_id, n_channels=self.data_manager.getNChannels(self.app_key))
         
         if self.data_manager.getDataType(self.app_key) == Extension.MAT:
             if self.data_manager.getNChannels(self.app_key) == 1:
@@ -108,19 +90,12 @@ class CanvasControl:
             self.colors = {key: getattr(PlotColors, key.upper()) for key in ["F", "spks"]}
             self.labels = {key: getattr(PlotLabels, key.upper()) for key in ["F", "spks"]}
         elif self.data_manager.getDataType(self.app_key) == Extension.NPY:
-            self.colors = {"F": PlotColors.F}
-            self.labels = {"F": PlotLabels.F}
+            self.colors = {key: getattr(PlotColors, key.upper()) for key in ["F"]}
+            self.labels = {key: getattr(PlotLabels, key.upper()) for key in ["F"]}
 
-        # Preprocess
-        if self.data_manager.getDataType(self.app_key) == Extension.MAT:
-            if "Fneu" in self.full_traces:
-                self.full_traces = self.preprocessTraceData(self.full_traces)
-        
-        # Calculate y limits
-        self.y_max = max([np.max(trace) for trace in self.full_traces.values()])
-        self.y_min = min([np.min(trace) for trace in self.full_traces.values()])
-        y_range = self.config_manager.gui_defaults["CANVAS_SETTINGS"]["YLIM"]
-        self.ylim = (self.y_min * y_range[0], self.y_max * y_range[1])
+        self.y_max = max(np.max(trace) for trace in self.full_traces.values())
+        ylim_config = self.config_manager.gui_defaults['CANVAS_SETTINGS']['YLIM']
+        self.ylim = (self.y_max * ylim_config[0], self.y_max * ylim_config[1])
 
         # get and preprocess eventfile
         eventfile_name = self.control_manager.getSharedAttr(self.app_key, 'eventfile_name')
@@ -197,11 +172,6 @@ class CanvasControl:
         self.canvas.draw_idle()
 
     def plotTraces(self, ax_key, traces, title_suffix, start, end, **kwargs):
-        # Skip plotting if no traces to display
-        if not traces:
-            self.axes[ax_key].clear()
-            return
-    
         start_time = self.time_array[start]
         end_time = self.time_array[end - 1]
         num_ticks = self.config_manager.gui_defaults['CANVAS_SETTINGS']['PLOT_POINTS']
@@ -223,25 +193,11 @@ class CanvasControl:
 
         default_kwargs.update(kwargs)
 
-        # Filter colors and labels based on visibility
-        filtered_colors = {
-            key: color
-            for key, color in self.colors.items()
-            if self.trace_visibility.get(key, True)
-        }
-        filtered_labels = {
-            key: label
-            for key, label in self.labels.items()
-            if self.trace_visibility.get(key, True)
-        }
-
-        plotTraces(
-            self.axes[ax_key], 
-            traces, 
-            filtered_colors, 
-            filtered_labels, 
-            **default_kwargs
-        )
+        plotTraces(self.axes[ax_key], 
+                traces, 
+                self.colors, 
+                self.labels, 
+                **default_kwargs)
         
     def plotEventAlignedTrace(self):
         event_segments, trace_segments = self.prepareEventAlignedData()
@@ -288,13 +244,6 @@ class CanvasControl:
             alpha=0.3,
             idx_zero=pre_frame,
         )
-
-    def setTraceVisibility(self, trace_key: str, is_visible: bool) -> None:
-        """
-        Set visibility for a specific trace.
-        """
-        if trace_key in self.trace_visibility:
-            self.trace_visibility[trace_key] = is_visible
     
     # top axis
     def plotTracesZoomed(self):
@@ -321,11 +270,7 @@ class CanvasControl:
         self.plotTraces(AxisKeys.BOT, mean_traces, "Average", 0, self.plot_data_points, ylim=None, title="Average Traces")
 
     def getDownsampledTraces(self, start, end):
-        traces = {
-            key: trace[start:end] 
-            for key, trace in self.full_traces.items() 
-            if key != 'F_event' and self.trace_visibility.get(key, True) # check visibility
-        }
+        traces = {key: trace[start:end] for key, trace in self.full_traces.items() if key != 'F_event'}
         if self.widget_manager.dict_checkbox["light_plot_mode"].isChecked() and end - start > self.downsample_threshold:
             return {key: downSampleTrace(trace, self.downsample_threshold) for key, trace in traces.items()}
         return traces

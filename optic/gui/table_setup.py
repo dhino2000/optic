@@ -26,13 +26,9 @@ def setTableSize(
 def setupWidgetROITable(
         q_table: QTableWidget, 
         len_row: int, 
-        table_columns: TableColumns,
-        data_manager: DataManager = None,
-        app_key: str = None,
+        table_columns: TableColumns, 
         key_event_ignore: bool=True
         ):
-    from ..utils.roi_id_utils import arrayIndexToRoiId
-    
     # initialize table
     q_table.clearSelection()
 
@@ -50,44 +46,35 @@ def setupWidgetROITable(
     for col_name, col_info in col_sorted:
         q_table.setColumnWidth(col_info['order'], col_info['width'])
 
-    # get n_rois_chan1 for ROI ID conversion
-    if data_manager is not None and app_key is not None:
-        n_rois_chan1 = data_manager.getNROIsChan1(app_key)
-    else:
-        n_rois_chan1 = len_row  # fallback: no second Fall.mat
-
     groups_celltype = {}
 
-    for row in range(len_row):
-        groups_celltype[row] = QButtonGroup(q_table)
-        # convert row index to string ROI ID
-        roi_id_str = arrayIndexToRoiId(row, n_rois_chan1)
-        
+    for cellid in range(len_row):
+        groups_celltype[cellid] = QButtonGroup(q_table)
         for col_name, col_info in col_sorted:
             cell_type = col_info["type"]
             
             if cell_type == "id":
-                cell = QTableWidgetItem(roi_id_str)
+                cell = QTableWidgetItem(str(cellid))
                 cell.setFlags(cell.flags() & ~Qt.ItemIsEditable) # make cell not editable
-                q_table.setItem(row, col_info['order'], cell)
+                q_table.setItem(cellid, col_info['order'], cell)
             elif cell_type == "id_match":
                 cell = QTableWidgetItem()
-                q_table.setItem(row, col_info['order'], cell)
+                q_table.setItem(cellid, col_info['order'], cell)
             elif cell_type == "celltype":
                 cell = QRadioButton()
                 if col_info.get("default", False):
                     cell.setChecked(True)
                 if key_event_ignore:
                     cell = applyKeyPressEventIgnore(cell)
-                groups_celltype[row].addButton(cell)
-                q_table.setCellWidget(row, col_info['order'], cell)
+                groups_celltype[cellid].addButton(cell)
+                q_table.setCellWidget(cellid, col_info['order'], cell)
             elif cell_type == "checkbox":
                 cell = QTableWidgetItem()
                 cell.setCheckState(Qt.Checked if col_info.get("default", False) else Qt.Unchecked)
-                q_table.setItem(row, col_info['order'], cell)
+                q_table.setItem(cellid, col_info['order'], cell)
             elif cell_type == "string":
                 cell = QTableWidgetItem()
-                q_table.setItem(row, col_info['order'], cell)
+                q_table.setItem(cellid, col_info['order'], cell)
 
     return q_table, groups_celltype
 

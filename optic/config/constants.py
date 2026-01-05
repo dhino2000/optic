@@ -1,6 +1,5 @@
 from PyQt5.QtCore import Qt
 from enum import Enum
-from typing import List
 import json
 from pathlib import Path
 
@@ -65,36 +64,6 @@ class PlotLabels:
     # cascade label
     CASCADE_SPIKE_PROB = "spike prob"
     CASCADE_SPIKE_EVENTS = "spike events"
-
-# Trace display keys for canvas plot visibility control
-class TraceDisplayKeys:
-    F = "F"
-    FNEU = "Fneu"
-    SPKS = "spks"
-    F_CHAN2 = "F_chan2"
-    FNEU_CHAN2 = "Fneu_chan2"
-    
-    # Trace keys by data type and channel count
-    @staticmethod
-    def getTraceKeys(data_type: str, n_channels: int = 1) -> List[str]:
-        """
-        Get list of trace keys based on data type and channel count.
-        
-        Args:
-            data_type: Extension type (Extension.MAT, Extension.HDF5)
-            n_channels: Number of channels (1 or 2)
-        
-        Returns:
-            List of trace keys to display
-        """
-        if data_type == Extension.MAT:
-            if n_channels == 2:
-                return [TraceDisplayKeys.F, TraceDisplayKeys.FNEU, TraceDisplayKeys.SPKS,
-                        TraceDisplayKeys.F_CHAN2, TraceDisplayKeys.FNEU_CHAN2]
-            else:
-                return [TraceDisplayKeys.F, TraceDisplayKeys.FNEU, TraceDisplayKeys.SPKS]
-        elif data_type == Extension.HDF5:
-            return [TraceDisplayKeys.F, TraceDisplayKeys.SPKS]
 
 # widget管理の総合key
 class AppKeys:
