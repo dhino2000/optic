@@ -964,27 +964,37 @@ def bindFuncButtonRunROIMatching(
         result = showConfirmationDialog(
             q_widget,
             'Confirmation',
-            f"Match only displayed ROIs? \nNo: Match all ROIs \nCancel: Cancel",
+            f"Match only displayed ROIs?\n\nYes: Match only displayed ROIs (celltypes: pri={roi_vis_type_pri}, sec={roi_vis_type_sec})\nNo: Match all ROIs \nCancel: Cancel",
             QMessageBox.Yes
         )
-        # use registered coordinates if show_reg_im_roi is True
+        
+        # get ROI coordinates with string keys
         if view_control_pri.show_reg_im_roi:
-            array_src = np.array([data_manager.getDictROICoordsRegistered(app_key_pri)[idx]["med"] for idx in range(data_manager.getNROIs(app_key_pri))])
-            array_tgt = np.array([data_manager.getDictROICoordsRegistered(app_key_sec)[idx]["med"] for idx in range(data_manager.getNROIs(app_key_sec))])
+            dict_coords_pri = data_manager.getDictROICoordsRegistered(app_key_pri)
+            dict_coords_sec = data_manager.getDictROICoordsRegistered(app_key_sec)
         else:
-            array_src = np.array([data_manager.getDictROICoords(app_key_pri)[idx]["med"] for idx in range(data_manager.getNROIs(app_key_pri))])
-            array_tgt = np.array([data_manager.getDictROICoords(app_key_sec)[idx]["med"] for idx in range(data_manager.getNROIs(app_key_sec))])
+            dict_coords_pri = data_manager.getDictROICoords(app_key_pri)
+            dict_coords_sec = data_manager.getDictROICoords(app_key_sec)
+        
+        # get sorted roi_id list (string keys)
+        roi_ids_pri = list(dict_coords_pri.keys())
+        roi_ids_sec = list(dict_coords_sec.keys())
+        
+        # build coordinate arrays using string keys
+        array_src = np.array([dict_coords_pri[roi_id]["med"] for roi_id in roi_ids_pri])
+        array_tgt = np.array([dict_coords_sec[roi_id]["med"] for roi_id in roi_ids_sec])
         
         if result == QMessageBox.Yes:
             dict_roi_display_pri = control_manager.getSharedAttr(app_key_pri, "dict_roi_display")
             dict_roi_display_sec = control_manager.getSharedAttr(app_key_sec, "dict_roi_display")
-            roi_display_pri = [all(dict_val.values()) for dict_val in dict_roi_display_pri.values()]
-            roi_display_sec = [all(dict_val.values()) for dict_val in dict_roi_display_sec.values()]
+            # roi_display uses string keys
+            roi_display_pri = [all(dict_roi_display_pri[roi_id].values()) for roi_id in roi_ids_pri]
+            roi_display_sec = [all(dict_roi_display_sec[roi_id].values()) for roi_id in roi_ids_sec]
             array_src = array_src[roi_display_pri]
             array_tgt = array_tgt[roi_display_sec]
-        elif result == QMessageBox.No: # all ROI
-            roi_display_pri = [True for roi_id in control_manager.getSharedAttr(app_key_pri, "dict_roi_display").keys()]
-            roi_display_sec = [True for roi_id in control_manager.getSharedAttr(app_key_sec, "dict_roi_display").keys()]
+        elif result == QMessageBox.No:
+            roi_display_pri = [True for _ in roi_ids_pri]
+            roi_display_sec = [True for _ in roi_ids_sec]
         elif result == QMessageBox.Cancel:
             return 
 
@@ -1008,12 +1018,18 @@ def bindFuncButtonRunROIMatching(
                     max_cost=max_cost,
                 )
 
-        # convert roi_matching id to original id
-        true_idxs_pri = np.nonzero(roi_display_pri)[0][list(roi_matching.keys())]
-        true_idxs_sec = np.nonzero(roi_display_sec)[0][list(roi_matching.values())]
-        roi_matching = dict(zip(true_idxs_pri, true_idxs_sec))
+        # convert roi_matching index to original string roi_id
+        # roi_matching keys/values are array indices within filtered arrays
+        filtered_roi_ids_pri = [roi_id for roi_id, displayed in zip(roi_ids_pri, roi_display_pri) if displayed]
+        filtered_roi_ids_sec = [roi_id for roi_id, displayed in zip(roi_ids_sec, roi_display_sec) if displayed]
+        
+        roi_matching_str = {}
+        for idx_pri, idx_sec in roi_matching.items():
+            roi_id_pri = filtered_roi_ids_pri[idx_pri]
+            roi_id_sec = filtered_roi_ids_sec[idx_sec]
+            roi_matching_str[roi_id_pri] = roi_id_sec
 
-        control_manager.table_controls[app_key_pri].updateMatchedROIPairs(roi_matching)
+        control_manager.table_controls[app_key_pri].updateMatchedROIPairs(roi_matching_str)
         control_manager.view_controls[app_key_pri].updateView()
         QMessageBox.information(q_widget, "ROI Matching Finish", "ROI Matching Finished!")
     q_button.clicked.connect(_runROIMatching)
