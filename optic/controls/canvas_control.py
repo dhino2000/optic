@@ -31,6 +31,14 @@ class CanvasControl:
 
         self.axes:                      Dict[str, Axes] = {}
         self.setupAxes()
+        # trace visibility
+        self.trace_visibility: Dict[str, bool] = {
+            "F": True,
+            "Fneu": True,
+            "spks": True,
+            "F_chan2": True,
+            "Fneu_chan2": True,
+        }
         # F, Fneu, spks plotting
         if plot_trace:
             self.fs:                                  float = self.data_manager.getFs(self.app_key)
@@ -44,14 +52,6 @@ class CanvasControl:
             self.plot_ffneu:                           bool = True
             self.plot_dff0:                            bool = True
             self.initializePlot()
-        # trace visibility
-        self.trace_visibility: Dict[str, bool] = {
-            "F": True,
-            "Fneu": True,
-            "spks": True,
-            "F_chan2": True,
-            "Fneu_chan2": True,
-        }
 
     def setupAxes(self):
         axes_config = {
@@ -100,10 +100,21 @@ class CanvasControl:
         elif self.data_manager.getDataType(self.app_key) == Extension.NPY:
             self.colors = {key: getattr(PlotColors, key.upper()) for key in ["F"]}
             self.labels = {key: getattr(PlotLabels, key.upper()) for key in ["F"]}
+        # get visible traces and set ylim
+        ylim_factor = self.config_manager.gui_defaults['CANVAS_SETTINGS']['YLIM']
+        visible_traces = [
+            trace for key, trace in self.full_traces.items() 
+            if self.trace_visibility.get(key, True)
+        ]
+        if visible_traces:
+            self.y_max = max(np.max(trace) for trace in visible_traces)
+            self.y_min = min(np.min(trace) for trace in visible_traces)
+        else:
+            self.y_max = 1.0
+            self.y_min = 0.0
 
-        self.y_max = max(np.max(trace) for trace in self.full_traces.values())
-        ylim_config = self.config_manager.gui_defaults['CANVAS_SETTINGS']['YLIM']
-        self.ylim = (self.y_max * ylim_config[0], self.y_max * ylim_config[1])
+        y_range = self.y_max - self.y_min
+        self.ylim = (self.y_max - y_range * ylim_factor, self.y_max * ylim_factor)
 
         # get and preprocess eventfile
         eventfile_name = self.control_manager.getSharedAttr(self.app_key, 'eventfile_name')

@@ -72,7 +72,7 @@ class GuiDefaults:
         "CANVAS_SETTINGS": {
             "LIGHT_MODE_DOWNSAMPLE": 250,
             "MIN_PLOT_WIDTH_SEC": 30,
-            "YLIM": (-0.1, 1.1),
+            "YLIM": 1.1,
             "YLIM_RECTANGLE": (-0.05, 1.05),
             "PLOT_POINTS": 10,
         },

@@ -18,7 +18,7 @@ def convertMatToDictFall(Fall: Dict[str, Any]) -> Dict[str, Any]:
     dict_Fall = {"stat": dict_Fall_stat, "F": Fall["F"], "Fneu": Fall["Fneu"], "spks": Fall["spks"], "ops": Fall["ops"], "iscell": Fall["iscell"]}
 
     # add chan2 data
-    if Fall["ops"]["nchannels"] == 2:
+    if Fall.get("F_chan2") is not None and Fall.get("Fneu_chan2") is not None:
         dict_Fall["F_chan2"] = Fall["F_chan2"]
         dict_Fall["Fneu_chan2"] = Fall["Fneu_chan2"]
         dict_Fall["redcell"] = Fall["redcell"]

@@ -82,8 +82,8 @@ class DataManager:
                         self.dict_im_bg_chan2_reg[app_key] = getBGImageChannel2FromFall(self, app_key)
             return True, None
         except Exception as e:
-            # raise e
-            return False, e
+            raise e
+            # return False, e
         
     # load Caiman HDF5 data
     def loadCaimanHDF5(self, app_key: AppKeys, path_hdf5: str, config_manager: ConfigManager=None, threshold_ratio: float=0.2) -> Tuple[bool, Optional[Exception]]:
@@ -218,7 +218,11 @@ class DataManager:
         return len(self.dict_Fall[app_key]["F"])
     # get nchannels
     def getNChannels(self, app_key: AppKeys) -> int:
-        return self.dict_Fall[app_key]["ops"]["nchannels"]
+        # temporary fix for dual channel imaging data which not contain F_chan2 in Fall.mat
+        if self.dict_Fall[app_key].get("F_chan2") is not None:
+            return 2
+        else:
+            return 1
     
     # get ROI celltype
     def getDictROICelltype(self, app_key: AppKeys, id_roi: int=None) -> Dict[int, str] | str:
