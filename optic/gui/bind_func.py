@@ -740,10 +740,101 @@ def bindFuncButtonRunElastixForFall(
         control_manager.view_controls[app_key].updateView()
         control_manager.view_controls[app_key_sec].updateView()
 
-        shutil.rmtree(output_directory)
-        os.remove(path_points_txt)
+        # shutil.rmtree(output_directory)
+        # os.remove(path_points_txt)
         QMessageBox.information(q_widget, "Image Registration Finish", "Image Registration Finished!")
     q_button.clicked.connect(lambda: _runElastix())
+
+# -> processing_image_layouts.makeLayoutManualRegistration
+def bindFuncButtonRunManualRegistration(
+    q_widget: 'QWidget',
+    q_button: 'QPushButton',
+    data_manager: 'DataManager',
+    config_manager: 'ConfigManager',
+    control_manager: 'ControlManager',
+    app_key: str,
+    app_key_sec: str,
+    q_lineedit_center: QLineEdit,
+    q_lineedit_shift_x: QLineEdit,
+    q_lineedit_shift_y: QLineEdit,
+    q_lineedit_radian: QLineEdit,
+    path_points_txt: str = "points_tmp.txt",
+    output_directory: str = "./elastix"
+) -> None:
+    from ..processing.elastix import (
+        convertDictToElastixFormat, createManualTransformParameters,
+        applySingleTransform, applyDictROICoordsTransform
+    )
+    from copy import deepcopy
+
+    def _runManualRegistration():
+        os.makedirs(output_directory, exist_ok=True)
+
+        # 1. Parse GUI values
+        center_text = q_lineedit_center.text()
+        center_x, center_y = map(float, center_text.split(","))
+        translation_x = float(q_lineedit_shift_x.text())
+        translation_y = float(q_lineedit_shift_y.text())
+        rotation_angle_rad = float(q_lineedit_radian.text())
+
+        # 2. Get images
+        img_type_pri = control_manager.view_controls[app_key].getBackgroundImageType()
+        img_fix = data_manager.getDictBackgroundImage(app_key).get(img_type_pri)
+        img_type_sec = control_manager.view_controls[app_key_sec].getBackgroundImageType()
+        img_mov = data_manager.getDictBackgroundImage(app_key_sec).get(img_type_sec)
+        image_size = (img_mov.shape[0], img_mov.shape[1])
+
+        # 3. Create transform parameters
+        transform_parameters = createManualTransformParameters(
+            center_x, center_y,
+            rotation_angle_rad,
+            translation_x, translation_y,
+            image_size,
+            output_directory
+        )
+
+        # 4. Store parameter_map for ROI coord transform (use rigid default)
+        dict_params = config_manager.json_config.get("elastix_params")["rigid"]
+        data_manager.dict_parameter_map[app_key] = convertDictToElastixFormat(dict_params)
+        data_manager.dict_transform_parameters[app_key] = transform_parameters
+
+        # 5. Apply transform to background images
+        dict_im_bg_reg_mov = {}
+        for key_im in data_manager.getDictBackgroundImage(app_key_sec).keys():
+            dict_im_bg_reg_mov[key_im] = applySingleTransform(
+                data_manager.getDictBackgroundImage(app_key_sec).get(key_im),
+                transform_parameters,
+                output_directory
+            )
+        data_manager.dict_im_bg_reg[app_key_sec] = dict_im_bg_reg_mov
+
+        # 6. Apply transform to ROI image
+        img_roi_mov = deepcopy(data_manager.getDictROIImage(app_key_sec).get("all"))
+        val_max = np.max(img_roi_mov)
+        img_roi_mov_reg = applySingleTransform(img_roi_mov, transform_parameters, output_directory)
+        img_roi_mov_reg_clipped = np.minimum(img_roi_mov_reg, val_max)
+        data_manager.dict_im_roi_reg[app_key_sec]["all"] = img_roi_mov_reg_clipped
+
+        # 7. Apply transform to ROI coordinates
+        path_transform_parameters_file = os.path.join(output_directory, "TransformParameters.0.txt")
+        dict_roi_coords = data_manager.getDictROICoords(app_key_sec)
+        dict_roi_coords_reg = applyDictROICoordsTransform(
+            img_fix, img_mov,
+            dict_roi_coords,
+            data_manager.getParameterMap(app_key),
+            path_transform_parameters_file,
+            path_points_txt,
+            output_directory
+        )
+        data_manager.dict_roi_coords_reg[app_key_sec] = dict_roi_coords_reg
+
+        # 8. Update views
+        control_manager.view_controls[app_key].updateView()
+        control_manager.view_controls[app_key_sec].updateView()
+
+        QMessageBox.information(q_widget, "Manual Registration Finish", "Manual Registration Finished!")
+
+    q_button.clicked.connect(lambda: _runManualRegistration())
 
 # -> processing_image_layouts.makeLayoutStackRegistration
 def bindFuncButtonRunElastixForSingleStack(

@@ -62,6 +62,56 @@ def makeElastixParameterObjectInversed(
 
     parameter_object_inverse.AddParameterMap(parameter_map_inverse)
     return parameter_object_inverse
+
+# create manual transform parameters
+def createManualTransformParameters(
+    center_x: float,
+    center_y: float,
+    rotation_angle_rad: float,
+    translation_x: float,
+    translation_y: float,
+    image_size: Tuple[int, int],
+    output_directory: str
+) -> elastixParameterObject:
+    param_object = elastixParameterObject()
+    
+    param_map = {
+        "Transform": ["EulerTransform"],
+        "NumberOfParameters": ["3"],
+        "TransformParameters": [
+            str(rotation_angle_rad),
+            str(translation_x),
+            str(translation_y)
+        ],
+        "InitialTransformParameterFileName": ["NoInitialTransform"],
+        "HowToCombineTransforms": ["Compose"],
+        "FixedImageDimension": ["2"],
+        "MovingImageDimension": ["2"],
+        "FixedInternalImagePixelType": ["float"],
+        "MovingInternalImagePixelType": ["float"],
+        "Size": [str(image_size[0]), str(image_size[1])],
+        "Index": ["0", "0"],
+        "Spacing": ["1", "1"],
+        "Origin": ["0", "0"],
+        "Direction": ["1", "0", "0", "1"],
+        "UseDirectionCosines": ["true"],
+        "CenterOfRotationPoint": [str(center_x), str(center_y)],
+        "ResampleInterpolator": ["FinalBSplineInterpolator"],
+        "FinalBSplineInterpolationOrder": ["3"],
+        "Resampler": ["DefaultResampler"],
+        "DefaultPixelValue": ["0"],
+        "ResultImageFormat": ["nii"],
+        "ResultImagePixelType": ["unsigned char"],
+        "CompressResultImage": ["false"],
+    }
+    
+    param_object.AddParameterMap(param_map)
+    
+    # Save TransformParameters.0.txt for ROI coordinate transform
+    path_transform_file = os.path.join(output_directory, "TransformParameters.0.txt")
+    param_object.WriteParameterFile(param_object.GetParameterMap(0), path_transform_file)
+    
+    return param_object
     
 """
 elastix registration
