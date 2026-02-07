@@ -14,14 +14,13 @@ from optic.controls.view_control import ViewControl
 from optic.controls.table_control import TableControl
 from optic.dialog.table_columns_config import TableColumnConfigDialog
 from optic.dialog.elastix_params_config import ElastixParamsConfigDialog
-from optic.dialog.roi_matching_test import ROIMatchingTestDialog
 from optic.gui.app_setup import setupMainWindow
 from optic.gui.app_style import applyAppStyle
 from optic.gui.slider_layouts import makeLayoutContrastSlider, makeLayoutOpacitySlider
 from optic.gui.io_layouts import makeLayoutLoadFileWidget, makeLayoutLoadFileExitHelp, makeLayoutROICheckIO, makeLayoutROITrackingIO
 from optic.gui.info_layouts import makeLayoutROIProperty
 from optic.gui.processing_image_layouts import makeLayoutFallRegistration, makeLayoutManualRegistration
-from optic.gui.processing_roi_layouts import makeLayoutROIMatching, makeLayoutROIMatchingTest
+from optic.gui.processing_roi_layouts import makeLayoutROIMatching
 from optic.gui.table_layouts import makeLayoutTableROICountLabel
 from optic.gui.view_layouts import (
     makeLayoutViewWithZTSlider, makeLayoutWidgetDislplayCelltype, makeLayoutWidgetDislplayCheckbox, 
@@ -328,10 +327,7 @@ class Suite2pROITrackingGUI(QMainWindow):
             "ot_run",
             "ot_clear",
         ))
-        layout.addLayout(makeLayoutROIMatchingTest(
-            self.widget_manager,
-            "roi_matching_test",
-        ))
+
         layout.addLayout(makeLayoutROITrackingIO(
             self.widget_manager,
             "roi_matching_save",
@@ -410,20 +406,6 @@ class Suite2pROITrackingGUI(QMainWindow):
         if config_window.exec_() == QDialog.Accepted:
             self.config_manager.json_config.set("elastix_params", config_window.elastix_params)
 
-    # ROI Matching Test Dialog
-    def showSubWindowROIMatchingTest(self):
-        config_window = ROIMatchingTestDialog(
-            self, 
-            self.config_manager.gui_defaults,
-            self.data_manager,
-            self.config_manager,
-            self.control_manager,
-            self.app_keys[0],
-            self.app_keys[1],
-            self.control_manager.view_controls[self.app_keys[0]].getShowRegImROI()
-        )
-        if config_window.exec_() == QDialog.Accepted:
-            pass
 
     """
     bindFunc Function
@@ -641,8 +623,4 @@ class Suite2pROITrackingGUI(QMainWindow):
             q_button=self.widget_manager.dict_button['ot_clear'],
             q_table=self.widget_manager.dict_table[self.app_keys[0]],
             idx_col=self.config_manager.table_columns[self.app_keys[0]].getColumns()["Cell_ID_Match"]["order"], # hardcoded !!!
-        )
-        # ROI Matching Test
-        self.widget_manager.dict_button[f"roi_matching_test"].clicked.connect(
-            lambda: self.showSubWindowROIMatchingTest()
         )

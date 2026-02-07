@@ -43,27 +43,11 @@ T: time points for time-lapse imaging
 - Migration distance calculation
 - Path trajectory analysis
 
-### 4. TIFStackExplorer
-<img src="docs/TIFStackExplorer/images/tif_stack_explorer.png">
-
-#### Input Format
-- TIFF stack (dimensions: XYCZT)  
-X, Y: spatial dimensions  
-C: channels (1-3)  
-Z: z-planes  
-T: time points
-#### Features
-- Multi-channel visualization
-- Z-stack navigation
-- Time series playback
-- ROI-based analysis
-- Image registration across time points or z-planes
-
 ## Installation
 
 ### Requirements
 - OS: Windows 11
-- Python: 3.8.19
+- Python: 3.10
 - CPU: > 24 cores
 - RAM: > 128 GB
 
@@ -83,8 +67,37 @@ T: time points
 
 3. Environment settings
 
-- open "Anaconda Prompt" and move to OPTIC directory
-- create OPTIC environment with `conda env create -f optic.yml`
+Choose one of the following methods (a or b) to set up the environment:
+
+#### a) Create with yaml file
+- Open "Anaconda Prompt" and move to OPTIC directory
+```bash
+cd {optic_directory}
+```
+- Create OPTIC environment with the following command:
+```bash
+conda env create -f optic.yml
+```
+
+#### b) Manual package installation
+- Open "Anaconda Prompt" and create a new environment:
+```bash
+conda create -n optic python=3.10
+activate optic
+```
+- Install the required packages:
+
+| Package | Version |
+|---|---|
+| PyQt5 | 5.15.11 |
+| numpy | 1.26.4 |
+| itk-elastix | 0.23.0 |
+| matplotlib | 3.10.8 |
+| pot | 0.9.6 |
+| scikit-image | 0.25.2 |
+| cellpose[gui] | 3.1.0 |
+
+> **Note**: If you want to use Cellpose with GPU acceleration, please set up a CUDA-compatible PyTorch environment according to the [PyTorch official documentation](https://pytorch.org/).
 
 ## How to use
 ### Suite2pROICuration
@@ -119,17 +132,6 @@ T: time points
 
 3. Track ROIs!
 ([MicrogliaTracking Tutorial](https://optic-doc.readthedocs.io/en/latest/MicrogliaTracking.html))
-
-### TIFStackExplorer
-1. Open the Anaconda Prompt and switch to the desired environment.  
-`activate optic`
-  
-2. Execute the "tif_stack_explorer.py" script  
-
-(ex) `python C:/Users/dhino2000/optic/scripts/tif_stack_explorer.py`
-
-3. 
-([TIFStackExplorer Tutorial](https://github.com/dhino2000/optic/blob/main/docs/TIFStackExplorer/tutorial.md))
 
 ## Downstream Analysis  
 After analyzing with these applications, some downstream analyses may be required. For guidance on these analyses, please refer to the Jupyter notebooks beginning with **"Chapter"** in the [notebook folder](https://github.com/dhino2000/optic/tree/main/notebook). These notebooks provide step-by-step examples and instructions for some downstream analysis workflows.
@@ -238,7 +240,7 @@ This project includes the following external libraries:
 
 [9] Rémi Flamary, Nicolas Courty, Alexandre Gramfort, Mokhtar Z. Alaya, Aurélie Boisbunon, Stanislas Chambon, Laetitia Chapel, Adrien Corenflos, Kilian Fatras, Nemo Fournier, Léo Gautheron, Nathalie T.H. Gayraud, Hicham Janati, Alain Rakotomamonjy, Ievgen Redko, Antoine Rolet, Antony Schutz, Vivien Seguy, Danica J. Sutherland, Romain Tavenard, Alexander Tong, Titouan Vayer, POT Python Optimal Transport library, Journal of Machine Learning Research, 22(78):1−8, 2021.
 
-[9] Titouan Vayer, Laetitia Chapel, Rémi Flamary, Romain Tavenard, Nicolas Courty, Optimal Transport for structured data with application on graphs, Proceedings of the 36th International Conference on Machine Learning, pp.6275-6284, PMLR 97, 2019.
+[10] Titouan Vayer, Laetitia Chapel, Rémi Flamary, Romain Tavenard, Nicolas Courty, Optimal Transport for structured data with application on graphs, Proceedings of the 36th International Conference on Machine Learning, pp.6275-6284, PMLR 97, 2019.
 
 
 

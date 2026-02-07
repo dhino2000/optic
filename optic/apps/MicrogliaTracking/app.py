@@ -18,7 +18,7 @@ from optic.gui.slider_layouts import makeLayoutContrastSlider, makeLayoutOpacity
 from optic.gui.io_layouts import makeLayoutLoadFileWidget, makeLayoutLoadFileExitHelp, makeLayoutROITrackingIO
 from optic.gui.processing_image_layouts import makeLayoutMicrogliaXYCTStackRegistration
 from optic.gui.processing_roi_layouts import (
-    makeLayoutROIMatching, makeLayoutROIMatchingTest, makeLayoutROIManagerForTable, makeLayoutROIEditConfig,
+    makeLayoutROIMatching, makeLayoutROIManagerForTable, makeLayoutROIEditConfig,
     makeLayoutCellpose, makeLayoutROIManager
 )
 from optic.gui.view_layouts import (
@@ -300,10 +300,6 @@ class MicrogliaTrackingGUI(QMainWindow):
             "ot_clear",
         ))
         layout.addWidget(self.widget_manager.makeWidgetButton("ot_run_all_tplanes", "Run Optimal Transport for all t-planes"))
-        layout.addLayout(makeLayoutROIMatchingTest(
-            self.widget_manager,
-            "roi_matching_test",
-        ))
         layout.addLayout(makeLayoutROITrackingIO(
             self.widget_manager,
             "roi_matching_save",
