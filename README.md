@@ -47,7 +47,7 @@ T: time points for time-lapse imaging
 
 ### Requirements
 - OS: Windows 11
-- Python: 3.8.19
+- Python: 3.10
 - CPU: > 24 cores
 - RAM: > 128 GB
 
@@ -67,8 +67,37 @@ T: time points for time-lapse imaging
 
 3. Environment settings
 
-- open "Anaconda Prompt" and move to OPTIC directory
-- create OPTIC environment with `conda env create -f optic.yml`
+Choose one of the following methods (a or b) to set up the environment:
+
+#### a) Create with yaml file
+- Open "Anaconda Prompt" and move to OPTIC directory
+```bash
+cd {optic_directory}
+```
+- Create OPTIC environment with the following command:
+```bash
+conda env create -f optic.yml
+```
+
+#### b) Manual package installation
+- Open "Anaconda Prompt" and create a new environment:
+```bash
+conda create -n optic python=3.10
+activate optic
+```
+- Install the required packages:
+
+| Package | Version |
+|---|---|
+| PyQt5 | 5.15.11 |
+| numpy | 1.26.4 |
+| itk-elastix | 0.23.0 |
+| matplotlib | 3.10.8 |
+| pot | 0.9.6 |
+| scikit-image | 0.25.2 |
+| cellpose[gui] | 3.1.0 |
+
+> **Note**: If you want to use Cellpose with GPU acceleration, please set up a CUDA-compatible PyTorch environment according to the [PyTorch official documentation](https://pytorch.org/).
 
 ## How to use
 ### Suite2pROICuration
