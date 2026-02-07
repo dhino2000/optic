@@ -2,7 +2,7 @@ from __future__ import annotations
 from ..type_definitions import *
 import numpy as np
 from typing import Dict, Tuple, Any
-
+from scipy.signal import medfilt2d
 
 def convertCaimanHDF5ToDictFall(
         cnmf_result: Any,
@@ -43,9 +43,29 @@ def convertCaimanHDF5ToDictFall(
     """
     Fall; ops
     """
+    # background image, meanImg, meanImgE, max_proj, Vcorr
     meanImg = np.reshape(estimates.b.dot(estimates.f.mean(1)), dims, order='F')
+    max_proj = np.reshape(estimates.b.dot(estimates.f.max(1)), dims, order='F')
+    Vcorr = estimates.Cn
+    # emulate Suite2p's meanImgE calculation
+    I = meanImg.copy()
+    diameter = params.init["gSig"]
+    diameter = 4 * np.ceil(diameter) + 1
+    Imed = medfilt2d(I, [int(diameter[0]), int(diameter[1])])
+    I = I - Imed
+    Idiv = medfilt2d(np.absolute(I), [int(diameter[0]), int(diameter[1])])
+    I = I / (1e-10 + Idiv)
+    mimg1 = -6
+    mimg99 = 6
+    mimg0 = I
+    mimg0 = (mimg0 - mimg1) / (mimg99 - mimg1)
+    meanImgE = np.maximum(0, np.minimum(1, mimg0))
+
     ops = {
         "meanImg": meanImg,
+        "meanImgE": meanImgE,
+        "max_proj": max_proj,
+        "Vcorr": Vcorr,
         "Lx": width,
         "Ly": height,
         "fs": params.data["fr"],
@@ -54,32 +74,37 @@ def convertCaimanHDF5ToDictFall(
 
     """
     Fall; stat
+    CaImAn uses three parameters for disinguishing ROIs: 
+    - rval : Spatial footprint consistency
+    - SNR  : Trace signal-noise-ratio
+    - cnn  : CNN-based classifier
     """    
     stat = {}
-    
+    rval = estimates.r_values
+    snr = estimates.SNR_comp
+    cnn = estimates.cnn_preds
     # Process each ROI
-
     for idx in np.arange(A.shape[1]):
         # Get spatial component for specific ROI
         roi_spatial = A[:, idx].toarray().flatten()
-        
         # Reshape to 2D image
         roi_2d = roi_spatial.reshape(dims)
-        
         # Apply threshold (CaImAn default: 20% of maximum value)
         threshold = roi_2d.max() * threshold_ratio
-        
         # Get coordinates of pixels above threshold
         xpix, ypix = np.where(roi_2d > threshold)
 
-        med = (np.median(xpix), np.median(ypix))
-        
+        med = (int(np.median(xpix)), int(np.median(ypix)))
+
         # Create Suite2p format dictionary
         roi_dict = {
             'ypix': ypix,
             'xpix': xpix,
             'med': med,
-            "npix": len(ypix),
+            'npix': len(ypix),
+            'rval': rval[idx],
+            'SNR': snr[idx],
+            'cnn': cnn[idx],
         }
         
         stat[idx] = roi_dict

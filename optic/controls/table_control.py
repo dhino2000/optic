@@ -8,6 +8,7 @@ from ..visualization.info_visual import updateROIPropertyDisplay, updateROICount
 from ..utils.dialog_utils import showConfirmationDialog
 from ..utils.info_utils import extractRangeValues
 from ..visualization.view_visual_roi import shouldSkipROI
+from ..config.constants import Extension
 
 class TableControl:
     def __init__(
@@ -218,7 +219,13 @@ class TableControl:
         else:
             self.control_manager.setSharedAttr(self.app_key, 'roi_selected_id', roi_id)
             if self.config_manager.current_app == "SUITE2P_ROI_CURATION" or self.config_manager.current_app == "SUITE2P_ROI_TRACKING":
-                updateROIPropertyDisplay(self.control_manager, self.data_manager, self.widget_manager, self.app_key)
+                updateROIPropertyDisplay(
+                    self.control_manager, 
+                    self.data_manager, 
+                    self.widget_manager, 
+                    self.app_key,
+                    load_caiman=self.data_manager.dict_data_dtype[self.app_key]==Extension.HDF5
+                )
 
     def getSharedAttr_ROISelected(self) -> int:
         return self.control_manager.getSharedAttr(self.app_key, 'roi_selected_id')

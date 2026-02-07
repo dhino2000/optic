@@ -1,7 +1,7 @@
 from __future__ import annotations
 from ..type_definitions import *
 from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout
-from ..gui.base_layouts import makeLayoutComboBoxLabel, makeLayoutSliderLabel
+from ..gui.base_layouts import makeLayoutComboBoxLabel, makeLayoutSliderLabel, makeLayoutLineEditLabel
 
 # Fall Image Registration config
 def makeLayoutFallRegistration(
@@ -53,6 +53,23 @@ def makeLayoutFallRegistration(
     layout.addLayout(layout_elastix)
     layout.addLayout(layout_checkbox)
     layout.addLayout(layout_slider)
+    return layout
+
+# Manual registration config
+def makeLayoutManualRegistration(
+        widget_manager       : WidgetManager,
+        key_lineedit_center  : str,
+        key_lineedit_shift_x : str,
+        key_lineedit_shift_y : str,
+        key_lineedit_radian  : str,
+        key_button_run       : str,
+        ) -> QHBoxLayout:
+    layout = QHBoxLayout()
+    layout.addLayout(makeLayoutLineEditLabel(widget_manager, "manual_registration_center", key_lineedit_center, "Center (x,y):", axis="horizontal", text_set="256,256"))
+    layout.addLayout(makeLayoutLineEditLabel(widget_manager, "manual_registration_shift_x", key_lineedit_shift_x, "Shift X:", axis="horizontal", text_set="0"))
+    layout.addLayout(makeLayoutLineEditLabel(widget_manager, "manual_registration_shift_y", key_lineedit_shift_y, "Shift Y:", axis="horizontal", text_set="0"))
+    layout.addLayout(makeLayoutLineEditLabel(widget_manager, "manual_registration_radian", key_lineedit_radian, "Radian:", axis="horizontal", text_set="0"))
+    layout.addWidget(widget_manager.makeWidgetButton(key=key_button_run, label="Run Manual Registration"))
     return layout
 
 # Microglia XYCT Stack Image Registration config

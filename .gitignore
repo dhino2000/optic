@@ -166,6 +166,8 @@ old/
 *.tif
 *.mat
 notebook/tmp/
+notebook/figures
+notebook/models
 notebook/analysis/result
 external/cascade/Pretrained_models
 external/CaImAn

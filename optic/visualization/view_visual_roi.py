@@ -182,7 +182,9 @@ def drawROI(
         opacity: int
         ) -> None:
     xpix, ypix = dict_roi_coords_single["xpix"], dict_roi_coords_single["ypix"]
-    
+    # if npix == 1, draw a single point
+    if type(xpix) == int and type(ypix) == int:
+        xpix, ypix = [xpix], [ypix]    
     pen = QPen(QColor(*color, opacity))
     painter.setPen(pen)
     
@@ -214,6 +216,7 @@ def drawROIPair(
 ) -> None:
     x_pri, y_pri = coords_pri
     x_sec, y_sec = coords_sec
+    x_pri, y_pri, x_sec, y_sec = int(x_pri), int(y_pri), int(x_sec), int(y_sec) # float -> int
     color = PenColors.ROI_PAIR
     width = PenWidth.ROI_PAIR
     

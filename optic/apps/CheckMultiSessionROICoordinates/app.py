@@ -23,6 +23,7 @@ from optic.controls.view_control import ViewControl
 from optic.manager import WidgetManager, ConfigManager, DataManager, ControlManager, LayoutManager, initManagers
 from optic.utils.view_utils import generateSessionColors
 from optic.gui.bind_func import bindFuncExit
+from optic.io.file_dialog import saveFileDialog
 
 class CheckMultiSessionROICoordinatesGUI(QMainWindow):
     def __init__(self):
@@ -197,7 +198,7 @@ class CheckMultiSessionROICoordinatesGUI(QMainWindow):
         # Background image type selector (use base_layout)
         layout.addWidget(self.widget_manager.makeWidgetLabel(
             key="registration_bg_label",
-            label="Background Image Type:"
+            label="Background Image Type:",
         ))
         
         bg_types = ["meanImg", "meanImgE", "max_proj", "Vcorr"]
@@ -212,6 +213,36 @@ class CheckMultiSessionROICoordinatesGUI(QMainWindow):
             is_scroll=False
         )
         layout.addLayout(widget_bg_type)
+
+        # Heatmap settings
+        layout.addWidget(self.widget_manager.makeWidgetLabel(
+            key="heatmap_settings_label",
+            label="Z-drift Heatmap",
+        ))
+        layout_heatmap = QHBoxLayout()
+
+        checkbox_heatmap = self.widget_manager.makeWidgetCheckBox(
+            key="heatmap_display",
+            label="Show Heatmap",
+            checked=False
+        )
+        layout_heatmap.addWidget(checkbox_heatmap)
+
+        layout_heatmap.addWidget(self.widget_manager.makeWidgetLabel(
+            key="heatmap_max_distance_label",
+            label="Max Distance (px):"
+        ))
+
+        spinbox_heatmap = self.widget_manager.makeWidgetSpinBox(
+            key="heatmap_max_distance",
+            value_min=5,
+            value_max=50,
+            value_set=10,
+            step=1
+        )
+        layout_heatmap.addWidget(spinbox_heatmap)
+
+        layout.addLayout(layout_heatmap)
         
         layout.addLayout(makeLayoutMicrogliaXYCTStackRegistration(
             self.widget_manager,
@@ -252,6 +283,8 @@ class CheckMultiSessionROICoordinatesGUI(QMainWindow):
         """
         layout = QVBoxLayout()
         layout.addLayout(self.makeLayoutComponentROIView())
+        layout.addWidget(self.widget_manager.makeWidgetButton("export_view_image", "Export View Image"))
+        layout.addWidget(self.widget_manager.makeWidgetButton("export_heatmap", "Export Heatmap"))
         return layout
     
     def makeLayoutSectionRightUpper(self):
@@ -400,6 +433,7 @@ class CheckMultiSessionROICoordinatesGUI(QMainWindow):
         result = np.zeros((height, width, 3), dtype=np.uint8)
         
         # Process each session
+        all_roi_mask = []
         for session_key, session_color in zip(self.data_manager.session_keys, self.data_manager.session_colors):
             # Check bg checkbox and draw background
             bg_checkbox_key = f"{session_key}_display_bg"
@@ -415,12 +449,37 @@ class CheckMultiSessionROICoordinatesGUI(QMainWindow):
                     result = alphaBlendImage(result, colored_bg, bg_mask, alpha=ALPHA_ROI)
             
             # Get ROI data
-            dict_roi = self.data_manager.getDictROICoords(session_key)
+            if view_control.show_reg_im_roi:
+                dict_roi = self.data_manager.getDictROICoordsRegistered(session_key)
+            else:
+                dict_roi = self.data_manager.getDictROICoords(session_key)
             dict_roi_visibility = self.data_manager.dict_roi_visibility.get(session_key)
             
             # Draw ROI mask
             roi_mask = getROIMask(dict_roi, dict_roi_visibility, (height, width))
+            all_roi_mask.append(roi_mask)
             result = alphaBlend(result, roi_mask, session_color, alpha=ALPHA_ROI)
+        # check overlapping ROIs from all sessions
+        all_roi_mask = np.array(all_roi_mask)
+        all_overlap_mask = np.sum(all_roi_mask, axis=0) == len(self.data_manager.session_keys)
+        # highlight overlapping ROIs in white
+        result = alphaBlendImage(result, np.full((height, width, 3), 255, dtype=np.uint8), all_overlap_mask.astype(np.uint8), alpha=255)
+
+        # Heatmap overlay
+        if self.widget_manager.dict_checkbox["heatmap_display"].isChecked():
+            max_distance = self.widget_manager.dict_spinbox["heatmap_max_distance"].value()
+            heatmap = self.calculateDistanceHeatmap(all_overlap_mask, max_distance)
+            heatmap_colored = self.applyColormap(heatmap, "viridis")
+            
+            # Apply heatmap only to ROI regions
+            ALPHA_HEATMAP = 128
+            result = (result.astype(np.float32) * (1 - ALPHA_HEATMAP/255) + heatmap_colored.astype(np.float32) * (ALPHA_HEATMAP/255)).astype(np.uint8)
+
+            self.heatmap = heatmap
+            self.heatmap_colored = heatmap_colored
+            self.result = result
+
+        self.roi_result = result
         
         # Update view
         qimage = QImage(result.data, width, height, width * 3, QImage.Format_RGB888)
@@ -435,6 +494,80 @@ class CheckMultiSessionROICoordinatesGUI(QMainWindow):
         
         # Fit scene to view
         view_control.q_scene.setSceneRect(QRectF(scaled_pixmap.rect()))
+
+    def exportViewImage(self, path_dst: str) -> None:
+        """
+        Export current view as image (original size, not scaled to GUI)
+        """
+        from PIL import Image
+        
+        # self.roi_result is already the contrast-adjusted, ROI-overlaid image
+        pil_image = Image.fromarray(self.roi_result)
+        pil_image.save(path_dst)
+
+    def exportHeatmapImage(self, path_dst: str) -> None:
+        """
+        Export heatmap image (original size).
+        """
+        from PIL import Image
+        
+        if not hasattr(self, 'heatmap_colored') or self.heatmap_colored is None:
+            QMessageBox.warning(self, "Export Error", "No heatmap available. Enable heatmap display first.")
+            return
+        
+        pil_image = Image.fromarray(self.heatmap_colored)
+        pil_image.save(path_dst)
+
+    def calculateDistanceHeatmap(self, overlap_mask: np.ndarray, max_distance: int = 10) -> np.ndarray:
+        """
+        Calculate distance heatmap from overlap pixels.
+        
+        Parameters
+        ----------
+        overlap_mask : np.ndarray
+            Boolean mask where True = all sessions overlap
+        max_distance : int
+            Distance at which value becomes 1.0
+        
+        Returns
+        -------
+        heatmap : np.ndarray
+            Float array with values 0.0 to 1.0
+        """
+        from scipy.ndimage import distance_transform_edt
+        
+        if not np.any(overlap_mask):
+            return np.ones(overlap_mask.shape, dtype=np.float32)
+        
+        distance_map = distance_transform_edt(~overlap_mask)
+        heatmap = np.clip(distance_map / max_distance, 0.0, 1.0)
+        
+        return heatmap.astype(np.float32)
+
+
+    def applyColormap(self, heatmap: np.ndarray, colormap_name: str = "viridis") -> np.ndarray:
+        """
+        Apply colormap to heatmap.
+        
+        Parameters
+        ----------
+        heatmap : np.ndarray
+            Float array with values 0.0 to 1.0
+        colormap_name : str
+            Matplotlib colormap name
+        
+        Returns
+        -------
+        colored : np.ndarray
+            RGB image (height, width, 3), dtype=uint8
+        """
+        import matplotlib.cm as cm
+        
+        cmap = cm.get_cmap(colormap_name)
+        colored = cmap(heatmap)[:, :, :3]
+        colored = (colored * 255).astype(np.uint8)
+        
+        return colored
 
     """
     bindFunc Functions
@@ -498,7 +631,7 @@ class CheckMultiSessionROICoordinatesGUI(QMainWindow):
             applySingleTransform, applyDictROICoordsTransform
         )
         def _runElastix():
-            path_points_txt: str="./elastix/points_tmp.txt"
+            path_points_txt: str="points_tmp.txt"
             output_directory: str="./elastix"
             os.makedirs(output_directory, exist_ok=True)
 
@@ -557,10 +690,41 @@ class CheckMultiSessionROICoordinatesGUI(QMainWindow):
 
                     self.updateView_CheckMultiSessionROICoordinates()
 
-                    shutil.rmtree(output_directory)
-                    os.remove(path_points_txt)
+                shutil.rmtree(output_directory)
+                os.remove(path_points_txt)
                 QMessageBox.information(self, "Image Registration Finish", "Image Registration Finished!")
         q_button.clicked.connect(lambda: _runElastix())
+
+    def bindFuncButtonExportViewImage(self, q_button: QPushButton) -> None:
+        def _exportViewImage():
+            path_dst, _ = saveFileDialog(self, file_type=[".png", ".tif"], initial_dir="view_export.png")
+            if path_dst:
+                self.exportViewImage(path_dst)
+                QMessageBox.information(self, "Export", "Image exported successfully!")
+        
+        q_button.clicked.connect(_exportViewImage)
+
+    def bindFuncButtonExportHeatmap(self, q_button: QPushButton) -> None:
+        def _exportHeatmap():
+            path_dst, _ = saveFileDialog(self, file_type=[".png", ".tiff"], initial_dir="heatmap_export.png")
+            if path_dst:
+                self.exportHeatmapImage(path_dst)
+                QMessageBox.information(self, "Export", "Heatmap exported successfully!")
+        
+        q_button.clicked.connect(_exportHeatmap)
+
+    def bindFuncCheckboxHeatmapDisplay(self, q_checkbox) -> None:
+        """Bind heatmap display checkbox."""
+        def _onChanged(state: int):
+            self.updateView_CheckMultiSessionROICoordinates()
+        q_checkbox.stateChanged.connect(_onChanged)
+
+    def bindFuncSpinboxHeatmapMaxDistance(self, q_spinbox) -> None:
+        """Bind heatmap max distance spinbox."""
+        def _onChanged(value: int):
+            if self.widget_manager.dict_checkbox["heatmap_display"].isChecked():
+                self.updateView_CheckMultiSessionROICoordinates()
+        q_spinbox.valueChanged.connect(_onChanged)
 
     """
     bindFunc All Widgets
@@ -597,10 +761,9 @@ class CheckMultiSessionROICoordinatesGUI(QMainWindow):
             q_button=self.widget_manager.dict_button["elastix_run_t"],
             combobox_elastix_method=self.widget_manager.dict_combobox["elastix_method"],
         )
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv) if QApplication.instance() is None else QApplication.instance()
-    applyAppStyle(app)
-    gui = CheckMultiSessionROICoordinatesGUI()
-    gui.show()
-    sys.exit(app.exec_())
+        # export view image button
+        self.bindFuncButtonExportViewImage(q_button=self.widget_manager.dict_button["export_view_image"])
+        self.bindFuncButtonExportHeatmap(q_button=self.widget_manager.dict_button["export_heatmap"])
+        # Heatmap
+        self.bindFuncCheckboxHeatmapDisplay(self.widget_manager.dict_checkbox["heatmap_display"])
+        self.bindFuncSpinboxHeatmapMaxDistance(self.widget_manager.dict_spinbox["heatmap_max_distance"])

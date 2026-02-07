@@ -8,7 +8,7 @@ if not dir_parent in sys.path:
     sys.path.append(dir_parent)
 
 from PyQt5.QtWidgets import QMainWindow, QWidget, QGridLayout, QVBoxLayout, QHBoxLayout, QApplication, QMessageBox
-from optic.config.constants import Extension, AxisKeys, AccessURL
+from optic.config.constants import Extension, AxisKeys, AccessURL, TraceDisplayKeys
 from optic.controls.view_control import ViewControl
 from optic.controls.table_control import TableControl
 from optic.controls.canvas_control import CanvasControl
@@ -35,7 +35,7 @@ from optic.gui.bind_func import (
     bindFuncRadiobuttonOfTableChanged, bindFuncCheckboxOfTableChanged, bindFuncOpacitySlider, 
     bindFuncHighlightOpacitySlider, bindFuncBackgroundContrastSlider, bindFuncBackgroundVisibilityCheckbox, 
     bindFuncCheckBoxDisplayROIContours, bindFuncViewEvents, bindFuncCanvasMouseEvent, bindFuncButtonEventfileIO, 
-    bindFuncCheckboxEventfilePlotProperty, bindFuncHelp, bindFuncROICheckIO
+    bindFuncCheckboxEventfilePlotProperty, bindFuncHelp, bindFuncROICheckIO, bindFuncTraceDisplayCheckbox
 )
 from optic.utils.layout_utils import clearLayout
 
@@ -224,7 +224,10 @@ class Suite2pROICurationGUI(QMainWindow):
     # ROI property label
     def makeLayoutComponentROIPropertyDisplay_Threshold(self):
         layout = QVBoxLayout()
-        layout.addLayout(makeLayoutROIProperty(self.widget_manager, key_label=f"{self.app_key_pri}_roi_prop"))
+        layout.addLayout(makeLayoutROIProperty(
+            self.widget_manager, 
+            key_label=f"{self.app_key_pri}_roi_prop", 
+            load_caiman=self.data_manager.dict_data_dtype[self.app_key_pri]==Extension.HDF5))
         return layout
 
     # ROI display, background image button group, checkbox
@@ -315,15 +318,40 @@ class Suite2pROICurationGUI(QMainWindow):
             key_button_load=f"roicuration_load_{self.app_key_pri}",
         ))
         return layout
+    
+    def makeLayoutTraceDisplayCheckboxes(self):
+        """
+        Create checkbox layout for trace display visibility control.
+        """
+        from optic.config.constants import TraceDisplayKeys
+        
+        layout = QHBoxLayout()
+        
+        data_type = self.data_manager.getDataType(self.app_key_pri)
+        n_channels = self.data_manager.getNChannels(self.app_key_pri)
+        list_trace_keys = TraceDisplayKeys.getTraceKeys(data_type, n_channels)
+        
+        for trace_key in list_trace_keys:
+            checkbox_key = f"{self.app_key_pri}_trace_display_{trace_key}"
+            checkbox = self.widget_manager.makeWidgetCheckBox(
+                key=checkbox_key,
+                label=trace_key,
+                checked=True
+            )
+            layout.addWidget(checkbox)
+        
+        return layout
 
     # ROI Filter, threshold
     def makeLayoutComponentROIFilter(self):
         layout = QHBoxLayout()
+        # Suite2p Fall.mat or CaImAn HDF5
+        dict_roi_threshold = self.config_manager.gui_defaults["ROI_THRESHOLDS_CAIMAN"] if self.data_manager.dict_data_dtype[self.app_key_pri]==Extension.HDF5 else self.config_manager.gui_defaults["ROI_THRESHOLDS"]
         layout.addLayout(makeLayoutROIFilterThreshold(
             self.widget_manager, 
             key_label=f"{self.app_key_pri}_roi_filter", 
             key_lineedit=f"{self.app_key_pri}_roi_filter",
-            dict_roi_threshold=self.config_manager.gui_defaults["ROI_THRESHOLDS"]
+            dict_roi_threshold=dict_roi_threshold
         ))
         layout.addLayout(makeLayoutROIFilterButton(
             self.widget_manager, 
@@ -347,6 +375,7 @@ class Suite2pROICurationGUI(QMainWindow):
             key_button=f"export_canvas_{self.app_key_pri}"
         ), stretch=1)
         layout.addLayout(self.makeLayoutComponentPlotProperty())
+        layout.addLayout(self.makeLayoutTraceDisplayCheckboxes())
         layout.addLayout(self.makeLayoutComponentEventFilePlotProperty())
         return layout
 
@@ -461,9 +490,10 @@ class Suite2pROICurationGUI(QMainWindow):
             app_key=self.app_key_pri,
         )
         # Filter ROIs
+        dict_roi_threshold = self.config_manager.gui_defaults["ROI_THRESHOLDS_CAIMAN"] if self.data_manager.dict_data_dtype[self.app_key_pri]==Extension.HDF5 else self.config_manager.gui_defaults["ROI_THRESHOLDS"]
         bindFuncButtonFilterROI(
             q_button=self.widget_manager.dict_button[f"{self.app_key_pri}_roi_filter"],
-            dict_q_lineedit={key: self.widget_manager.dict_lineedit[f"{self.app_key_pri}_roi_filter_{key}"] for key in self.config_manager.gui_defaults["ROI_THRESHOLDS"].keys()},
+            dict_q_lineedit={key: self.widget_manager.dict_lineedit[f"{self.app_key_pri}_roi_filter_{key}"] for key in dict_roi_threshold.keys()},
             table_control=self.control_manager.table_controls[self.app_key_pri],
             view_control=self.control_manager.view_controls[self.app_key_pri],
         )
@@ -553,6 +583,17 @@ class Suite2pROICurationGUI(QMainWindow):
             control_manager=self.control_manager,
             canvas_control=self.control_manager.canvas_controls[self.app_key_pri],
             app_key=self.app_key_pri,
+        )
+        # Trace Display Checkboxes
+        bindFuncTraceDisplayCheckbox(
+            dict_q_checkbox={
+                key: self.widget_manager.dict_checkbox[f"{self.app_key_pri}_trace_display_{key}"]
+                for key in TraceDisplayKeys.getTraceKeys(
+                    self.data_manager.getDataType(self.app_key_pri),
+                    self.data_manager.getNChannels(self.app_key_pri)
+                )
+            },
+            canvas_control=self.control_manager.canvas_controls[self.app_key_pri],
         )
         # Canvas plot EventFile property
         bindFuncCheckboxEventfilePlotProperty(

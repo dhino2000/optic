@@ -14,14 +14,13 @@ from optic.controls.view_control import ViewControl
 from optic.controls.table_control import TableControl
 from optic.dialog.table_columns_config import TableColumnConfigDialog
 from optic.dialog.elastix_params_config import ElastixParamsConfigDialog
-from optic.dialog.roi_matching_test import ROIMatchingTestDialog
 from optic.gui.app_setup import setupMainWindow
 from optic.gui.app_style import applyAppStyle
 from optic.gui.slider_layouts import makeLayoutContrastSlider, makeLayoutOpacitySlider
 from optic.gui.io_layouts import makeLayoutLoadFileWidget, makeLayoutLoadFileExitHelp, makeLayoutROICheckIO, makeLayoutROITrackingIO
 from optic.gui.info_layouts import makeLayoutROIProperty
-from optic.gui.processing_image_layouts import makeLayoutFallRegistration
-from optic.gui.processing_roi_layouts import makeLayoutROIMatching, makeLayoutROIMatchingTest
+from optic.gui.processing_image_layouts import makeLayoutFallRegistration, makeLayoutManualRegistration
+from optic.gui.processing_roi_layouts import makeLayoutROIMatching
 from optic.gui.table_layouts import makeLayoutTableROICountLabel
 from optic.gui.view_layouts import (
     makeLayoutViewWithZTSlider, makeLayoutWidgetDislplayCelltype, makeLayoutWidgetDislplayCheckbox, 
@@ -35,7 +34,7 @@ from optic.gui.bind_func import (
     bindFuncRadiobuttonOfTableChanged, bindFuncCheckboxOfTableChanged, bindFuncOpacitySlider, 
     bindFuncHighlightOpacitySlider, bindFuncBackgroundContrastSlider, bindFuncBackgroundVisibilityCheckbox, 
     bindFuncViewEvents, bindFuncHelp, bindFuncROICheckIO, bindFuncCheckboxShowMatchedROI,
-    bindFuncCheckboxShowROIPair, bindFuncROIPairOpacitySlider, bindFuncButtonRunElastixForFall,
+    bindFuncCheckboxShowROIPair, bindFuncROIPairOpacitySlider, bindFuncButtonRunElastixForFall, bindFuncButtonRunManualRegistration,
     bindFuncButtonRunROIMatching, bindFuncButtonClearColumnCells, bindFuncCheckboxShowRegisteredBGImage,
     bindFuncCheckboxShowRegisteredROIImage
 )
@@ -172,7 +171,11 @@ class Suite2pROITrackingGUI(QMainWindow):
     # ROI property label
     def makeLayoutComponentROIPropertyDisplay_Threshold(self, app_key):
         layout = QVBoxLayout()
-        layout.addLayout(makeLayoutROIProperty(self.widget_manager, key_label=f"{app_key}_roi_prop"))
+        layout.addLayout(makeLayoutROIProperty(
+            self.widget_manager, 
+            key_label=f"{app_key}_roi_prop",
+            load_caiman=self.data_manager.dict_data_dtype[app_key]==Extension.HDF5
+            ))
         return layout
     
     # ROI display, background image button group, checkbox
@@ -291,6 +294,14 @@ class Suite2pROITrackingGUI(QMainWindow):
             f"show_reg_im_roi",
             f"opacity_roi_pair",
         )
+        layout.addLayout(makeLayoutManualRegistration(
+            self.widget_manager,
+            "manual_registration_center",
+            "manual_registration_shift_x",
+            "manual_registration_shift_y",
+            "manual_registration_radian",
+            "manual_registration_run",
+        ))
         layout.addWidget(self.widget_manager.makeWidgetButton(key="save_reg_roi_bg", label="Save registered ROI and images"))
         layout.addWidget(self.widget_manager.makeWidgetButton(key="load_reg_roi_bg", label="Load registered ROI and images"))
         return layout
@@ -316,10 +327,7 @@ class Suite2pROITrackingGUI(QMainWindow):
             "ot_run",
             "ot_clear",
         ))
-        layout.addLayout(makeLayoutROIMatchingTest(
-            self.widget_manager,
-            "roi_matching_test",
-        ))
+
         layout.addLayout(makeLayoutROITrackingIO(
             self.widget_manager,
             "roi_matching_save",
@@ -398,20 +406,6 @@ class Suite2pROITrackingGUI(QMainWindow):
         if config_window.exec_() == QDialog.Accepted:
             self.config_manager.json_config.set("elastix_params", config_window.elastix_params)
 
-    # ROI Matching Test Dialog
-    def showSubWindowROIMatchingTest(self):
-        config_window = ROIMatchingTestDialog(
-            self, 
-            self.config_manager.gui_defaults,
-            self.data_manager,
-            self.config_manager,
-            self.control_manager,
-            self.app_keys[0],
-            self.app_keys[1],
-            self.control_manager.view_controls[self.app_keys[0]].getShowRegImROI()
-        )
-        if config_window.exec_() == QDialog.Accepted:
-            pass
 
     """
     bindFunc Function
@@ -570,6 +564,22 @@ class Suite2pROITrackingGUI(QMainWindow):
             path_points_txt="points_tmp.txt",
             output_directory="./elastix"
         ) 
+        # Manual Registration Run
+        bindFuncButtonRunManualRegistration(
+            self,
+            q_button=self.widget_manager.dict_button['manual_registration_run'],
+            data_manager=self.data_manager,
+            config_manager=self.config_manager,
+            control_manager=self.control_manager,
+            app_key=self.app_keys[0],
+            app_key_sec=self.app_keys[1],
+            q_lineedit_center=self.widget_manager.dict_lineedit["manual_registration_center"],
+            q_lineedit_shift_x=self.widget_manager.dict_lineedit["manual_registration_shift_x"],
+            q_lineedit_shift_y=self.widget_manager.dict_lineedit["manual_registration_shift_y"],
+            q_lineedit_radian=self.widget_manager.dict_lineedit["manual_registration_radian"],
+            path_points_txt="points_tmp.txt",
+            output_directory="./elastix"
+        )
         # Elastix config
         self.widget_manager.dict_button[f"elastix_config"].clicked.connect(
             lambda: self.showSubWindowElastixParamsConfig()
@@ -613,8 +623,4 @@ class Suite2pROITrackingGUI(QMainWindow):
             q_button=self.widget_manager.dict_button['ot_clear'],
             q_table=self.widget_manager.dict_table[self.app_keys[0]],
             idx_col=self.config_manager.table_columns[self.app_keys[0]].getColumns()["Cell_ID_Match"]["order"], # hardcoded !!!
-        )
-        # ROI Matching Test
-        self.widget_manager.dict_button[f"roi_matching_test"].clicked.connect(
-            lambda: self.showSubWindowROIMatchingTest()
         )

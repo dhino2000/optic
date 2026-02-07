@@ -53,6 +53,12 @@ class GuiDefaults:
             "skew": "(1, 100)",
             "std": "(0, 100)",
         },
+        "ROI_THRESHOLDS_CAIMAN": {
+            "npix": "(50, 200)",
+            "rval": "(0.7, 1)",
+            "SNR": "(0.1, 100)",
+            "cnn": "(0.7, 1)",
+        },
         "VIEW_SETTINGS": {
             "DEFAULT_CONTRAST_MIN": 0,
             "DEFAULT_CONTRAST_MAX": 255,
@@ -66,7 +72,7 @@ class GuiDefaults:
         "CANVAS_SETTINGS": {
             "LIGHT_MODE_DOWNSAMPLE": 250,
             "MIN_PLOT_WIDTH_SEC": 30,
-            "YLIM": (-0.1, 1.1),
+            "YLIM": 1.1,
             "YLIM_RECTANGLE": (-0.05, 1.05),
             "PLOT_POINTS": 10,
         },

@@ -31,6 +31,14 @@ class CanvasControl:
 
         self.axes:                      Dict[str, Axes] = {}
         self.setupAxes()
+        # trace visibility
+        self.trace_visibility: Dict[str, bool] = {
+            "F": True,
+            "Fneu": True,
+            "spks": True,
+            "F_chan2": True,
+            "Fneu_chan2": True,
+        }
         # F, Fneu, spks plotting
         if plot_trace:
             self.fs:                                  float = self.data_manager.getFs(self.app_key)
@@ -92,10 +100,21 @@ class CanvasControl:
         elif self.data_manager.getDataType(self.app_key) == Extension.NPY:
             self.colors = {key: getattr(PlotColors, key.upper()) for key in ["F"]}
             self.labels = {key: getattr(PlotLabels, key.upper()) for key in ["F"]}
+        # get visible traces and set ylim
+        ylim_factor = self.config_manager.gui_defaults['CANVAS_SETTINGS']['YLIM']
+        visible_traces = [
+            trace for key, trace in self.full_traces.items() 
+            if self.trace_visibility.get(key, True)
+        ]
+        if visible_traces:
+            self.y_max = max(np.max(trace) for trace in visible_traces)
+            self.y_min = min(np.min(trace) for trace in visible_traces)
+        else:
+            self.y_max = 1.0
+            self.y_min = 0.0
 
-        self.y_max = max(np.max(trace) for trace in self.full_traces.values())
-        ylim_config = self.config_manager.gui_defaults['CANVAS_SETTINGS']['YLIM']
-        self.ylim = (self.y_max * ylim_config[0], self.y_max * ylim_config[1])
+        y_range = self.y_max - self.y_min
+        self.ylim = (self.y_max - y_range * ylim_factor, self.y_max * ylim_factor)
 
         # get and preprocess eventfile
         eventfile_name = self.control_manager.getSharedAttr(self.app_key, 'eventfile_name')
@@ -172,6 +191,10 @@ class CanvasControl:
         self.canvas.draw_idle()
 
     def plotTraces(self, ax_key, traces, title_suffix, start, end, **kwargs):
+        # Skip plotting if no traces to display
+        if not traces:
+            self.axes[ax_key].clear()
+            return
         start_time = self.time_array[start]
         end_time = self.time_array[end - 1]
         num_ticks = self.config_manager.gui_defaults['CANVAS_SETTINGS']['PLOT_POINTS']
@@ -244,6 +267,13 @@ class CanvasControl:
             alpha=0.3,
             idx_zero=pre_frame,
         )
+
+    def setTraceVisibility(self, trace_key: str, is_visible: bool) -> None:
+        """
+        Set visibility for a specific trace.
+        """
+        if trace_key in self.trace_visibility:
+            self.trace_visibility[trace_key] = is_visible
     
     # top axis
     def plotTracesZoomed(self):
@@ -270,7 +300,11 @@ class CanvasControl:
         self.plotTraces(AxisKeys.BOT, mean_traces, "Average", 0, self.plot_data_points, ylim=None, title="Average Traces")
 
     def getDownsampledTraces(self, start, end):
-        traces = {key: trace[start:end] for key, trace in self.full_traces.items() if key != 'F_event'}
+        traces = {
+            key: trace[start:end] 
+            for key, trace in self.full_traces.items() 
+            if key != 'F_event' and self.trace_visibility.get(key, True)
+        }
         if self.widget_manager.dict_checkbox["light_plot_mode"].isChecked() and end - start > self.downsample_threshold:
             return {key: downSampleTrace(trace, self.downsample_threshold) for key, trace in traces.items()}
         return traces
