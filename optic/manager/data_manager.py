@@ -219,7 +219,7 @@ class DataManager:
     # get nchannels
     def getNChannels(self, app_key: AppKeys) -> int:
         # temporary fix for dual channel imaging data which not contain F_chan2 in Fall.mat
-        if self.dict_Fall[app_key].get("F_chan2") is not None:
+        if len(self.dict_Fall[app_key].get("F_chan2", [])) > 0:
             return 2
         else:
             return 1

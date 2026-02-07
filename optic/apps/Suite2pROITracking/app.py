@@ -20,7 +20,7 @@ from optic.gui.app_style import applyAppStyle
 from optic.gui.slider_layouts import makeLayoutContrastSlider, makeLayoutOpacitySlider
 from optic.gui.io_layouts import makeLayoutLoadFileWidget, makeLayoutLoadFileExitHelp, makeLayoutROICheckIO, makeLayoutROITrackingIO
 from optic.gui.info_layouts import makeLayoutROIProperty
-from optic.gui.processing_image_layouts import makeLayoutFallRegistration
+from optic.gui.processing_image_layouts import makeLayoutFallRegistration, makeLayoutManualRegistration
 from optic.gui.processing_roi_layouts import makeLayoutROIMatching, makeLayoutROIMatchingTest
 from optic.gui.table_layouts import makeLayoutTableROICountLabel
 from optic.gui.view_layouts import (
@@ -35,7 +35,7 @@ from optic.gui.bind_func import (
     bindFuncRadiobuttonOfTableChanged, bindFuncCheckboxOfTableChanged, bindFuncOpacitySlider, 
     bindFuncHighlightOpacitySlider, bindFuncBackgroundContrastSlider, bindFuncBackgroundVisibilityCheckbox, 
     bindFuncViewEvents, bindFuncHelp, bindFuncROICheckIO, bindFuncCheckboxShowMatchedROI,
-    bindFuncCheckboxShowROIPair, bindFuncROIPairOpacitySlider, bindFuncButtonRunElastixForFall,
+    bindFuncCheckboxShowROIPair, bindFuncROIPairOpacitySlider, bindFuncButtonRunElastixForFall, bindFuncButtonRunManualRegistration,
     bindFuncButtonRunROIMatching, bindFuncButtonClearColumnCells, bindFuncCheckboxShowRegisteredBGImage,
     bindFuncCheckboxShowRegisteredROIImage
 )
@@ -172,7 +172,11 @@ class Suite2pROITrackingGUI(QMainWindow):
     # ROI property label
     def makeLayoutComponentROIPropertyDisplay_Threshold(self, app_key):
         layout = QVBoxLayout()
-        layout.addLayout(makeLayoutROIProperty(self.widget_manager, key_label=f"{app_key}_roi_prop"))
+        layout.addLayout(makeLayoutROIProperty(
+            self.widget_manager, 
+            key_label=f"{app_key}_roi_prop",
+            load_caiman=self.data_manager.dict_data_dtype[app_key]==Extension.HDF5
+            ))
         return layout
     
     # ROI display, background image button group, checkbox
@@ -291,6 +295,14 @@ class Suite2pROITrackingGUI(QMainWindow):
             f"show_reg_im_roi",
             f"opacity_roi_pair",
         )
+        layout.addLayout(makeLayoutManualRegistration(
+            self.widget_manager,
+            "manual_registration_center",
+            "manual_registration_shift_x",
+            "manual_registration_shift_y",
+            "manual_registration_radian",
+            "manual_registration_run",
+        ))
         layout.addWidget(self.widget_manager.makeWidgetButton(key="save_reg_roi_bg", label="Save registered ROI and images"))
         layout.addWidget(self.widget_manager.makeWidgetButton(key="load_reg_roi_bg", label="Load registered ROI and images"))
         return layout
@@ -570,6 +582,22 @@ class Suite2pROITrackingGUI(QMainWindow):
             path_points_txt="points_tmp.txt",
             output_directory="./elastix"
         ) 
+        # Manual Registration Run
+        bindFuncButtonRunManualRegistration(
+            self,
+            q_button=self.widget_manager.dict_button['manual_registration_run'],
+            data_manager=self.data_manager,
+            config_manager=self.config_manager,
+            control_manager=self.control_manager,
+            app_key=self.app_keys[0],
+            app_key_sec=self.app_keys[1],
+            q_lineedit_center=self.widget_manager.dict_lineedit["manual_registration_center"],
+            q_lineedit_shift_x=self.widget_manager.dict_lineedit["manual_registration_shift_x"],
+            q_lineedit_shift_y=self.widget_manager.dict_lineedit["manual_registration_shift_y"],
+            q_lineedit_radian=self.widget_manager.dict_lineedit["manual_registration_radian"],
+            path_points_txt="points_tmp.txt",
+            output_directory="./elastix"
+        )
         # Elastix config
         self.widget_manager.dict_button[f"elastix_config"].clicked.connect(
             lambda: self.showSubWindowElastixParamsConfig()
