@@ -97,6 +97,7 @@ activate optic
 | scikit-image | 0.25.2 |
 | cellpose[gui] | 3.1.0 |
 
+> **Note**: If you want to use HDF5 files analyzed with CaImAn, please install CaImAn according to the [CaImAn official documentation](https://caiman.readthedocs.io/en/latest/Installation.html).  
 > **Note**: If you want to use Cellpose with GPU acceleration, please set up a CUDA-compatible PyTorch environment according to the [PyTorch official documentation](https://pytorch.org/).
 
 ## How to use
