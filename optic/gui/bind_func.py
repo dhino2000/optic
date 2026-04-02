@@ -11,6 +11,19 @@ from copy import deepcopy
 import numpy as np
 import os
 import shutil
+import time
+import csv
+import datetime
+
+def _save_timing_log(log_path: str, operation: str, elapsed_sec: float, info: str = "") -> None:
+    """Append a timing record to a CSV log file."""
+    file_exists = os.path.isfile(log_path)
+    with open(log_path, "a", newline="") as f:
+        writer = csv.writer(f)
+        if not file_exists:
+            writer.writerow(["datetime", "operation", "elapsed_sec", "info"])
+        writer.writerow([datetime.datetime.now().isoformat(), operation, f"{elapsed_sec:.3f}", info])
+
 
 """
 This module uses the following type annotations:
@@ -684,6 +697,7 @@ def bindFuncButtonRunElastixForFall(
         app_key: str,
         app_key_sec: str,
         combobox_elastix_method: QComboBox,
+        widget_manager: 'WidgetManager' = None,
         path_points_txt: str="points_tmp.txt",
         output_directory: str="./elastix"
 ) -> None:
@@ -709,7 +723,14 @@ def bindFuncButtonRunElastixForFall(
         img_type_sec = control_manager.view_controls[app_key_sec].getBackgroundImageType()
         img_mov = data_manager.getDictBackgroundImage(app_key_sec).get(img_type_sec)
         # run elastix
+        t0 = time.time()
         transform_parameters = calculateSingleTransform(img_fix, img_mov, parameter_object, output_directory)
+        elapsed_elastix = time.time() - t0
+        print(f"Elastix registration time: {elapsed_elastix:.3f} s")
+        path_pri = widget_manager.dict_lineedit[f"path_fall_{app_key}"].text() if widget_manager else ""
+        path_sec = widget_manager.dict_lineedit[f"path_fall_{app_key_sec}"].text() if widget_manager else ""
+        _save_timing_log("execution_time_log.csv", "elastix", elapsed_elastix,
+                         info=f"{elastix_method}, path_pri={path_pri}, path_sec={path_sec}")
         data_manager.dict_transform_parameters[app_key] = transform_parameters
         # apply transform parameters to image
         # background image
@@ -1069,6 +1090,7 @@ def bindFuncButtonRunROIMatching(
         threshold = float(widget_manager.dict_lineedit["ot_threshold_transport"].text())
         max_cost = float(widget_manager.dict_lineedit["ot_threshold_cost"].text())
 
+        t0 = time.time()
         roi_matching = calculateROIMatching(
                     array_src=array_src,
                     array_tgt=array_tgt,
@@ -1080,6 +1102,12 @@ def bindFuncButtonRunROIMatching(
                     threshold=threshold,
                     max_cost=max_cost,
                 )
+        elapsed_ot = time.time() - t0
+        print(f"Optimal transport matching time: {elapsed_ot:.3f} s")
+        path_pri = widget_manager.dict_lineedit[f"path_fall_{app_key_pri}"].text() if widget_manager else ""
+        path_sec = widget_manager.dict_lineedit[f"path_fall_{app_key_sec}"].text() if widget_manager else ""
+        _save_timing_log("execution_time_log.csv", "optimal_transport", elapsed_ot,
+                         info=f"method={method}, n_src={len(array_src)}, n_tgt={len(array_tgt)}, path_pri={path_pri}, path_sec={path_sec}")
 
         # convert roi_matching id to original id
         true_idxs_pri = np.nonzero(roi_display_pri)[0][list(roi_matching.keys())]

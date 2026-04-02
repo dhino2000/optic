@@ -561,6 +561,7 @@ class Suite2pROITrackingGUI(QMainWindow):
             app_key=self.app_keys[0],
             app_key_sec=self.app_keys[1],
             combobox_elastix_method=self.widget_manager.dict_combobox['elastix_method'],
+            widget_manager=self.widget_manager,
             path_points_txt="points_tmp.txt",
             output_directory="./elastix"
         ) 
