@@ -17,7 +17,7 @@ from optic.dialog.elastix_params_config import ElastixParamsConfigDialog
 from optic.gui.app_setup import setupMainWindow
 from optic.gui.app_style import applyAppStyle
 from optic.gui.slider_layouts import makeLayoutContrastSlider, makeLayoutOpacitySlider
-from optic.gui.io_layouts import makeLayoutLoadFileWidget, makeLayoutLoadFileExitHelp, makeLayoutROICheckIO, makeLayoutROITrackingIO
+from optic.gui.io_layouts import makeLayoutLoadFileWidget, makeLayoutLoadFileExitHelp, makeLayoutROICurationIO, makeLayoutROITrackingIO
 from optic.gui.info_layouts import makeLayoutROIProperty
 from optic.gui.processing_image_layouts import makeLayoutFallRegistration, makeLayoutManualRegistration
 from optic.gui.processing_roi_layouts import makeLayoutROIMatching
@@ -33,16 +33,16 @@ from optic.gui.bind_func import (
     bindFuncCheckBoxDisplayCheckBoxChanged, bindFuncCheckBoxROIChooseSkip, bindFuncTableSelectionChangedWithTracking,
     bindFuncRadiobuttonOfTableChanged, bindFuncCheckboxOfTableChanged, bindFuncOpacitySlider, 
     bindFuncHighlightOpacitySlider, bindFuncBackgroundContrastSlider, bindFuncBackgroundVisibilityCheckbox, 
-    bindFuncViewEvents, bindFuncHelp, bindFuncROICheckIO, bindFuncCheckboxShowMatchedROI,
+    bindFuncViewEvents, bindFuncHelp, bindFuncROICurationIO, bindFuncCheckboxShowMatchedROI,
     bindFuncCheckboxShowROIPair, bindFuncROIPairOpacitySlider, bindFuncButtonRunElastixForFall, bindFuncButtonRunManualRegistration,
     bindFuncButtonRunROIMatching, bindFuncButtonClearColumnCells, bindFuncCheckboxShowRegisteredBGImage,
     bindFuncCheckboxShowRegisteredROIImage
 )
 from optic.utils.layout_utils import clearLayout
 
-class Suite2pROITrackingGUI(QMainWindow):
+class OpticROITrackingGUI(QMainWindow):
     def __init__(self):
-        APP_NAME = "SUITE2P_ROI_TRACKING"
+        APP_NAME = "OPTIC_ROI_TRACKING"
         QMainWindow.__init__(self)
         self.widget_manager, self.config_manager, self.data_manager, self.control_manager = initManagers(
             WidgetManager(), ConfigManager(), DataManager(), ControlManager()
@@ -244,8 +244,8 @@ class Suite2pROITrackingGUI(QMainWindow):
         ))
         return layout
     
-    # Table, ROI count label, Table Columns Config, Set ROI Celltype, ROICheck IO
-    def makeLayoutComponentTable_ROICountLabel_ROISetSameCelltype_ROICheckIO(self, app_key):
+    # Table, ROI count label, Table Columns Config, Set ROI Celltype, ROICuration IO
+    def makeLayoutComponentTable_ROICountLabel_ROISetSameCelltype_ROICurationIO(self, app_key):
         layout = QVBoxLayout()
         layout.addLayout(makeLayoutTableROICountLabel(
             self.widget_manager, 
@@ -254,7 +254,7 @@ class Suite2pROITrackingGUI(QMainWindow):
             table_columns=self.config_manager.table_columns[app_key]
         ))
         layout.addWidget(self.widget_manager.makeWidgetButton(key=f"{app_key}_config_table", label="Table Columns Config"))
-        layout.addLayout(makeLayoutROICheckIO(
+        layout.addLayout(makeLayoutROICurationIO(
             self.widget_manager, 
             key_button_save=f"roicuration_save_{app_key}",
             key_button_load=f"roicuration_load_{app_key}",
@@ -271,7 +271,7 @@ class Suite2pROITrackingGUI(QMainWindow):
     
     def makeLayoutComponent_Table_Button(self, app_key):
         layout = QVBoxLayout()
-        layout.addLayout(self.makeLayoutComponentTable_ROICountLabel_ROISetSameCelltype_ROICheckIO(app_key))
+        layout.addLayout(self.makeLayoutComponentTable_ROICountLabel_ROISetSameCelltype_ROICurationIO(app_key))
         return layout
 
     "Bottom Extra"
@@ -389,12 +389,47 @@ class Suite2pROITrackingGUI(QMainWindow):
     # Table Column Config Dialog
     def showSubWindowTableColumnConfig(self, app_key):
         config_window = TableColumnConfigDialog(
-            self, 
-            self.control_manager.table_controls[app_key].table_columns, 
+            self,
+            self.control_manager.table_controls[app_key].table_columns,
             self.config_manager.gui_defaults
         )
-        if config_window.exec_():
-            self.loadFilePathsandInitialize()
+        if not config_window.exec_():
+            return
+        # Mirror columns onto the other panel (sec inherits everything except pri-only Cell_ID_Match).
+        self._syncTableColumnsAcrossSessions(source_app_key=app_key)
+        # Full UI rebuild — refreshes the table + side panels (ROI Display Celltypes / Skip / contrast).
+        # Preserves loaded data because data_manager is not re-created here.
+        self.setupMainUI()
+
+    def _syncTableColumnsAcrossSessions(self, source_app_key: str) -> None:
+        """Mirror the columns the user just edited onto the other panel. Pri keeps
+        Cell_ID_Match (id_match column); sec never has it. Everything else is shared."""
+        pri_key, sec_key = self.app_keys[0], self.app_keys[1]
+        target_app_key = sec_key if source_app_key == pri_key else pri_key
+        source_cols = self.control_manager.table_controls[source_app_key].table_columns.getColumns()
+        target_tc   = self.control_manager.table_controls[target_app_key].table_columns
+        target_cols_old = target_tc.getColumns()
+
+        if target_app_key == sec_key:
+            new_target = {n: dict(i) for n, i in source_cols.items() if i.get('type') != 'id_match'}
+        else:
+            existing_match = None
+            for n, i in target_cols_old.items():
+                if i.get('type') == 'id_match':
+                    existing_match = (n, dict(i))
+                    break
+            new_target = {}
+            inserted = False
+            for n, i in source_cols.items():
+                new_target[n] = dict(i)
+                if not inserted and i.get('type') == 'id' and existing_match is not None:
+                    cm_name, cm_info = existing_match
+                    new_target[cm_name] = cm_info
+                    inserted = True
+
+        for idx, name in enumerate(new_target):
+            new_target[name]['order'] = idx
+        target_tc.setColumns(new_target)
 
     # Elastix Params Config Dialog
     def showSubWindowElastixParamsConfig(self):
@@ -428,8 +463,8 @@ class Suite2pROITrackingGUI(QMainWindow):
 
     def bindFuncAllWidget(self):
         for app_key in self.app_keys:
-            # ROICheck save load
-            bindFuncROICheckIO(
+            # ROICuration save load
+            bindFuncROICurationIO(
                 q_window=self, 
                 q_lineedit=self.widget_manager.dict_lineedit[f"path_fall_{app_key}"], 
                 q_button_save=self.widget_manager.dict_button[f"roicuration_save_{app_key}"], 
@@ -475,12 +510,12 @@ class Suite2pROITrackingGUI(QMainWindow):
                 control_manager=self.control_manager,
                 app_key=app_key,
             )
-            # ROICheck Table TableColumn CellType Changed
+            # ROICuration Table TableColumn CellType Changed
             bindFuncRadiobuttonOfTableChanged(
                 table_control=self.control_manager.table_controls[app_key],
                 view_control=self.control_manager.view_controls[app_key],
             )
-            # ROICheck Table TableColumn Checkbox Changed
+            # ROICuration Table TableColumn Checkbox Changed
             bindFuncCheckboxOfTableChanged(
                 table_control=self.control_manager.table_controls[app_key],
                 view_control=self.control_manager.view_controls[app_key],
@@ -513,7 +548,7 @@ class Suite2pROITrackingGUI(QMainWindow):
                 view_control=self.control_manager.view_controls[app_key],
             )
 
-        # ROICheck Table onSelectionChanged
+        # ROICuration Table onSelectionChanged
         bindFuncTableSelectionChangedWithTracking(
             q_table_pri=self.widget_manager.dict_table[self.app_keys[0]],
             q_table_sec=self.widget_manager.dict_table[self.app_keys[1]],

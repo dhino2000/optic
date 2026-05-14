@@ -10,8 +10,8 @@ import numpy as np
 """
 update layer_roi
 """
-# update layer_roi for Suite2pROICuration
-def updateLayerROI_Suite2pROICuration(
+# update layer_roi for OpticROICuration
+def updateLayerROI_OpticROICuration(
         view_control: ViewControl, 
         data_manager: DataManager, 
         control_manager: ControlManager, 
@@ -60,8 +60,8 @@ def updateLayerROI_Suite2pROICuration(
     painter.end()
     view_control.layer_roi.setPixmap(pixmap)
 
-# update layer_roi for Suite2pROITracking
-def updateLayerROI_Suite2pROITracking(
+# update layer_roi for OpticROITracking
+def updateLayerROI_OpticROITracking(
         view_control: ViewControl, 
         data_manager: DataManager, 
         control_manager: ControlManager, 
@@ -100,8 +100,8 @@ def updateLayerROI_Suite2pROITracking(
     resetZoomView(view_control.q_view, view_control.q_scene.sceneRect())
     view_control.layer_roi.setPixmap(pixmap)
 
-# update layer_roi for MicrogliaTracking
-def updateLayerROI_MicrogliaTracking(
+# update layer_roi for OpticRawTracking
+def updateLayerROI_OpticRawTracking(
         view_control: ViewControl, 
         data_manager: DataManager, 
         control_manager: ControlManager, 

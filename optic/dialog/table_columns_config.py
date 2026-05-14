@@ -55,10 +55,15 @@ class TableColumnConfigDialog(QDialog):
 
         self.bindFuncAllWidget()
 
-    # get table_columns info from the selected row
+    # get table_columns info from the selected row.
+    # Looks up table_columns_tmp (reflects current UI state including newly added rows)
+    # and falls back to table_columns for safety. Returns {} if the column is not yet known
+    # (e.g. just added in the UI but never persisted).
     def getTableColumnsInfo(self, row: int) -> Tuple[str, Dict[str, Any]]:
         col_name = self.widget_manager.dict_table["table_columns"].cellWidget(row, 0).text()
-        col_info = self.table_columns.getColumns()[col_name]
+        col_info = self.table_columns_tmp.getColumns().get(col_name)
+        if col_info is None:
+            col_info = self.table_columns.getColumns().get(col_name, {})
         return col_name, col_info
 
     def setupConfigTable(self):
@@ -89,21 +94,42 @@ class TableColumnConfigDialog(QDialog):
             self.widget_manager.dict_table["table_columns"].setCellWidget(i, 2, self.widget_manager.dict_lineedit[f"width_{i}"])
 
     def deleteSelectedTableColumns(self):
-        selected_row = sorted(set(index.row() for index in self.widget_manager.dict_table["table_columns"].selectedIndexes()), reverse=True)[0]
+        selected_indexes = self.widget_manager.dict_table["table_columns"].selectedIndexes()
+        if not selected_indexes:
+            return
+        selected_row = sorted(set(index.row() for index in selected_indexes), reverse=True)[0]
         selected_col_name, selected_col_info = self.getTableColumnsInfo(selected_row)
-        if not selected_col_info.get("removable", False):
+        # name_fixed columns are the only ones we explicitly forbid removing. Newly added
+        # columns (no metadata yet) and existing columns flagged removable both fall through.
+        if selected_col_info.get("name_fixed", False) and not selected_col_info.get("removable", False):
             QMessageBox.warning(self, "Warning", f"{selected_col_name} is not removable !")
-        else:
-            deleteSelectedRows(self.widget_manager.dict_table["table_columns"])
-            self.updateTableColumnsTmp()
+            return
+        deleteSelectedRows(self.widget_manager.dict_table["table_columns"])
+        self.updateTableColumnsTmp()
+
+    # Generate the smallest "{base}_{n}" name (n=1,2,3,...) that does not collide with any
+    # column name already present in the dialog table.
+    def _generateUniqueColumnName(self) -> str:
+        base = TableColumnConfigDialog_Config.DEFAULT_PARAMS[0]
+        q_table = self.widget_manager.dict_table["table_columns"]
+        existing = set()
+        for r in range(q_table.rowCount()):
+            widget = q_table.cellWidget(r, 0)
+            if widget is not None:
+                existing.add(widget.text())
+        n = 1
+        while f"{base}_{n}" in existing:
+            n += 1
+        return f"{base}_{n}"
 
     def addNewTableColumn(self):
         row = addRow(self.widget_manager.dict_table["table_columns"])
-        
+
         # add new widgets
-        self.widget_manager.makeWidgetLineEdit(key=f"col_name_{row}", text_set=TableColumnConfigDialog_Config.DEFAULT_PARAMS[0])
+        unique_name = self._generateUniqueColumnName()
+        self.widget_manager.makeWidgetLineEdit(key=f"col_name_{row}", text_set=unique_name)
         self.widget_manager.dict_table["table_columns"].setCellWidget(row, 0, self.widget_manager.dict_lineedit[f"col_name_{row}"])
-        
+
         self.widget_manager.makeWidgetComboBox(key=f"type_{row}")
         self.widget_manager.dict_combobox[f"type_{row}"].addItems(TableColumnConfigDialog_Config.COMBO_ITEMS)
         self.widget_manager.dict_combobox[f"type_{row}"].setCurrentText(TableColumnConfigDialog_Config.DEFAULT_PARAMS[1])
@@ -111,6 +137,9 @@ class TableColumnConfigDialog(QDialog):
 
         self.widget_manager.makeWidgetLineEdit(key=f"width_{row}", text_set=TableColumnConfigDialog_Config.DEFAULT_PARAMS[2])
         self.widget_manager.dict_table["table_columns"].setCellWidget(row, 2, self.widget_manager.dict_lineedit[f"width_{row}"])
+
+        # Sync table_columns_tmp so the new column is removable / lookup-able before Update is pressed.
+        self.updateTableColumnsTmp()
 
     def convertTableToTableColumns(self):
         table_columns = {}
@@ -147,6 +176,10 @@ class TableColumnConfigDialog(QDialog):
                 col_info_tmp["name_fixed"] = col_info["name_fixed"]
             if col_info.get("removable", False):
                 col_info_tmp["removable"] = col_info["removable"]
+            elif not col_info:
+                # New columns added via the dialog are removable by default — otherwise
+                # the user would be unable to delete a column they just created.
+                col_info_tmp["removable"] = True
             if col_info.get("editable", False):
                 col_info_tmp["editable"] = col_info["editable"]
             if col_info.get("default", False):

@@ -20,7 +20,7 @@ from optic.gui.canvas_layouts import (
     makeLayoutCanvasTracePlot, makeLayoutLightPlotMode, makeLayoutMinimumPlotRange, makeLayoutEventFilePlotProperty
 )
 from optic.gui.slider_layouts import makeLayoutContrastSlider, makeLayoutOpacitySlider
-from optic.gui.io_layouts import makeLayoutLoadFileWidget, makeLayoutLoadFileExitHelp, makeLayoutROICheckIO
+from optic.gui.io_layouts import makeLayoutLoadFileWidget, makeLayoutLoadFileExitHelp, makeLayoutROICurationIO
 from optic.gui.info_layouts import makeLayoutROIProperty
 from optic.gui.table_layouts import makeLayoutTableROICountLabel, makeLayoutROIFilterThreshold, makeLayoutROIFilterButton
 from optic.gui.view_layouts import (
@@ -35,13 +35,13 @@ from optic.gui.bind_func import (
     bindFuncRadiobuttonOfTableChanged, bindFuncCheckboxOfTableChanged, bindFuncOpacitySlider, 
     bindFuncHighlightOpacitySlider, bindFuncBackgroundContrastSlider, bindFuncBackgroundVisibilityCheckbox, 
     bindFuncCheckBoxDisplayROIContours, bindFuncViewEvents, bindFuncCanvasMouseEvent, bindFuncButtonEventfileIO, 
-    bindFuncCheckboxEventfilePlotProperty, bindFuncHelp, bindFuncROICheckIO, bindFuncTraceDisplayCheckbox
+    bindFuncCheckboxEventfilePlotProperty, bindFuncHelp, bindFuncROICurationIO, bindFuncTraceDisplayCheckbox
 )
 from optic.utils.layout_utils import clearLayout
 
-class Suite2pROICurationGUI(QMainWindow):
+class OpticROICurationGUI(QMainWindow):
     def __init__(self):
-        APP_NAME = "SUITE2P_ROI_CURATION"
+        APP_NAME = "OPTIC_ROI_CURATION"
         QMainWindow.__init__(self)
         self.widget_manager, self.config_manager, self.data_manager, self.control_manager, self.layout_manager = initManagers(
             WidgetManager(), ConfigManager(), DataManager(), ControlManager(), LayoutManager()
@@ -71,6 +71,7 @@ class Suite2pROICurationGUI(QMainWindow):
         # メインUI用のレイアウト
         self.layout_main_ui = QGridLayout()
         self.layout_main.addLayout(self.layout_main_ui, 0, 0, 1, 1)
+        self.layout_main.setRowStretch(0, 1)
 
     def setupFileLoadUI(self):
         file_load_widget = QWidget()
@@ -128,6 +129,12 @@ class Suite2pROICurationGUI(QMainWindow):
         self.layout_main_ui.addLayout(self.makeLayoutSectionLeftUpper(), 0, 0)
         self.layout_main_ui.addLayout(self.makeLayoutSectionMiddleUpper(), 0, 1)
         self.layout_main_ui.addLayout(self.makeLayoutSectionRightUpper(), 0, 2)
+        # Equal 1:1:1 width distribution for Canvas / View / Table, plus row 0 takes all
+        # the vertical space so the View widget grows when the window is enlarged.
+        self.layout_main_ui.setColumnStretch(0, 1)
+        self.layout_main_ui.setColumnStretch(1, 1)
+        self.layout_main_ui.setColumnStretch(2, 1)
+        self.layout_main_ui.setRowStretch(0, 1)
 
     def setupControls(self):
         self.control_manager.table_controls[self.app_key_pri] = TableControl(
@@ -301,8 +308,8 @@ class Suite2pROICurationGUI(QMainWindow):
         return layout
 
     "Right Upper"
-    # Table, ROI count label, Table Columns Config, Set ROI Celltype, ROICheck IO
-    def makeLayoutComponentTable_ROICountLabel_ROISetSameCelltype_ROICheckIO(self):
+    # Table, ROI count label, Table Columns Config, Set ROI Celltype, ROICuration IO
+    def makeLayoutComponentTable_ROICountLabel_ROISetSameCelltype_ROICurationIO(self):
         layout = QVBoxLayout()
         layout.addLayout(makeLayoutTableROICountLabel(
             self.widget_manager, 
@@ -312,7 +319,7 @@ class Suite2pROICurationGUI(QMainWindow):
         ))
         layout.addWidget(self.widget_manager.makeWidgetButton(key=f"{self.app_key_pri}_config_table", label="Table Columns Config"))
         layout.addWidget(self.widget_manager.makeWidgetButton(key=f"{self.app_key_pri}_roi_celltype_set", label="Set ROI Celltype"))
-        layout.addLayout(makeLayoutROICheckIO(
+        layout.addLayout(makeLayoutROICurationIO(
             self.widget_manager, 
             key_button_save=f"roicuration_save_{self.app_key_pri}",
             key_button_load=f"roicuration_load_{self.app_key_pri}",
@@ -382,7 +389,7 @@ class Suite2pROICurationGUI(QMainWindow):
     # 中上
     def makeLayoutSectionMiddleUpper(self):
         layout = QVBoxLayout()
-        layout.addLayout(self.makeLayoutComponentROIView())
+        layout.addLayout(self.makeLayoutComponentROIView(), stretch=1)
         layout.addLayout(self.makeLayoutComponentROIPropertyDisplay_Threshold())
         layout.addLayout(self.makeLayoutComponentROIDisplay_BGImageDisplay_ROISkip())
         layout.addLayout(self.makeLayoutComponentContrastOpacitySlider())
@@ -391,7 +398,7 @@ class Suite2pROICurationGUI(QMainWindow):
     # 右上
     def makeLayoutSectionRightUpper(self):
         layout = QVBoxLayout()
-        layout.addLayout(self.makeLayoutComponentTable_ROICountLabel_ROISetSameCelltype_ROICheckIO())
+        layout.addLayout(self.makeLayoutComponentTable_ROICountLabel_ROISetSameCelltype_ROICurationIO())
         layout.addLayout(self.makeLayoutComponentROIFilter())
         return layout
 
@@ -443,8 +450,8 @@ class Suite2pROICurationGUI(QMainWindow):
         bindFuncHelp(q_button=self.widget_manager.dict_button["help"], url=AccessURL.HELP[self.config_manager.current_app])
 
     def bindFuncAllWidget(self):
-        # ROICheck save load
-        bindFuncROICheckIO(
+        # ROICuration save load
+        bindFuncROICurationIO(
             q_window=self, 
             q_lineedit=self.widget_manager.dict_lineedit[f"path_fall_{self.app_key_pri}"], 
             q_button_save=self.widget_manager.dict_button[f"roicuration_save_{self.app_key_pri}"], 
@@ -497,19 +504,19 @@ class Suite2pROICurationGUI(QMainWindow):
             table_control=self.control_manager.table_controls[self.app_key_pri],
             view_control=self.control_manager.view_controls[self.app_key_pri],
         )
-        # ROICheck Table onSelectionChanged
+        # ROICuration Table onSelectionChanged
         bindFuncTableSelectionChanged(
             q_table=self.widget_manager.dict_table[self.app_key_pri],
             table_control=self.control_manager.table_controls[self.app_key_pri],
             view_control=self.control_manager.view_controls[self.app_key_pri],
             canvas_control=self.control_manager.canvas_controls[self.app_key_pri],
         )
-        # ROICheck Table TableColumn CellType Changed
+        # ROICuration Table TableColumn CellType Changed
         bindFuncRadiobuttonOfTableChanged(
             table_control=self.control_manager.table_controls[self.app_key_pri],
             view_control=self.control_manager.view_controls[self.app_key_pri],
         )
-        # ROICheck Table TableColumn Checkbox Changed
+        # ROICuration Table TableColumn Checkbox Changed
         bindFuncCheckboxOfTableChanged(
             table_control=self.control_manager.table_controls[self.app_key_pri],
             view_control=self.control_manager.view_controls[self.app_key_pri],

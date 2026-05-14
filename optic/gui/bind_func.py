@@ -206,8 +206,8 @@ def bindFuncLoadFileWidget(
     from ..io.file_dialog import openFileDialogAndSetLineEdit
     q_button.clicked.connect(lambda: openFileDialogAndSetLineEdit(q_widget, filetype, q_lineedit))
 
-# -> io_layouts.makeLayoutROICheckIO
-def bindFuncROICheckIO(
+# -> io_layouts.makeLayoutROICurationIO
+def bindFuncROICurationIO(
     q_button_save: 'QPushButton', 
     q_button_load: 'QPushButton', 
     q_window: 'QWidget', 
@@ -219,18 +219,18 @@ def bindFuncROICheckIO(
     app_key: str,
     local_var: bool = True
 ) -> None:
-    from ..io.data_io import saveROICheck, loadROICheck
+    from ..io.data_io import saveROICuration, loadROICuration
     from ..visualization.info_visual import updateROICountDisplay
 
     gui_defaults = config_manager.gui_defaults
     table_columns = config_manager.table_columns[app_key]
     json_config = config_manager.json_config
     table_control = control_manager.table_controls[app_key]
-    def _loadROICheck() -> None:
-        loadROICheck(q_window, q_table, gui_defaults, table_columns, table_control)
+    def _loadROICuration() -> None:
+        loadROICuration(q_window, q_table, gui_defaults, table_columns, table_control)
         updateROICountDisplay(widget_manager, config_manager, app_key)
-    q_button_save.clicked.connect(lambda: saveROICheck(q_window, q_lineedit, q_table, gui_defaults, table_columns, json_config, local_var))
-    q_button_load.clicked.connect(lambda: _loadROICheck())
+    q_button_save.clicked.connect(lambda: saveROICuration(q_window, q_lineedit, q_table, gui_defaults, table_columns, json_config, local_var))
+    q_button_load.clicked.connect(lambda: _loadROICuration())
 
 # -> io_layouts.makeLayoutROITrackingIO
 def bindFuncROITrackingIO(
@@ -298,8 +298,8 @@ def bindFuncRegisteredROIAndBGImageIO(
     q_button_save.clicked.connect(lambda: _saveRegisteredROIAndBGImage())
     q_button_load.clicked.connect(lambda: _loadRegisteredROIAndBGImage())
 
-# -> io_layouts.makeLayoutROITrackingIO MicrogliaTracking
-def bindFuncMicrogliaTrackingIO(
+# -> io_layouts.makeLayoutROITrackingIO OpticRawTracking
+def bindFuncOpticRawTrackingIO(
     q_button_save: 'QPushButton', 
     q_button_load: 'QPushButton', 
     q_window: 'QWidget', 
@@ -308,17 +308,17 @@ def bindFuncMicrogliaTrackingIO(
     data_manager: 'DataManager',
     control_manager: 'ControlManager',
 ) -> None:
-    from ..io.data_io import saveMicrogliaTracking, loadMicrogliaTracking
+    from ..io.data_io import saveOpticRawTracking, loadOpticRawTracking
     from ..utils.view_utils import generateRandomColor
 
     gui_defaults = config_manager.gui_defaults
     json_config = config_manager.json_config
-    def _saveMicrogliaTracking():
+    def _saveOpticRawTracking():
         dict_roi_coords_xyct = data_manager.getDictROICoordsXYCT()
         dict_roi_coords_xyct_reg = data_manager.getDictROICoordsXYCTRegistered()
         dict_roi_matching = data_manager.getDictROIMatching()
         dict_tiff_reg = data_manager.dict_tiff_reg
-        saveMicrogliaTracking(
+        saveOpticRawTracking(
             q_window, 
             q_lineedit,
             gui_defaults, 
@@ -329,8 +329,8 @@ def bindFuncMicrogliaTrackingIO(
             dict_tiff_reg,
             )
 
-    def _loadMicrogliaTracking() -> None:
-        dict_roi_matching, dict_roi_coords_xyct, dict_roi_coords_xyct_reg, dict_tiff_reg = loadMicrogliaTracking(
+    def _loadOpticRawTracking() -> None:
+        dict_roi_matching, dict_roi_coords_xyct, dict_roi_coords_xyct_reg, dict_tiff_reg = loadOpticRawTracking(
             q_window, 
             gui_defaults, 
         )
@@ -358,8 +358,8 @@ def bindFuncMicrogliaTrackingIO(
         control_manager.table_controls["pri"].updateWidgetDynamicTableWithT(data_manager.dict_roi_matching, t_plane_pri, t_plane_sec, True)
         control_manager.table_controls["sec"].updateWidgetDynamicTableWithT(data_manager.dict_roi_matching, t_plane_pri, t_plane_sec, False)
 
-    q_button_save.clicked.connect(lambda: _saveMicrogliaTracking())
-    q_button_load.clicked.connect(lambda: _loadMicrogliaTracking())
+    q_button_save.clicked.connect(lambda: _saveOpticRawTracking())
+    q_button_load.clicked.connect(lambda: _loadOpticRawTracking())
 
 # -> io_layouts.makeLayoutMaskNpyIO
 def bindFuncROIMaskNpyIO(
@@ -1924,7 +1924,7 @@ def bindFuncButtonFilterROI(
     )
     view_control.updateView()
 
-# -> Suite2pROITrackingMulti, id_match column editing
+# -> OpticROITrackingMulti, id_match column editing
 def bindFuncIDMatchOfTableChanged(
     table_control: 'TableControl',
     view_control: 'ViewControl',
@@ -1959,8 +1959,8 @@ def bindFuncIDMatchOfTableChanged(
                 return
     table_control.q_table.itemChanged.connect(onItemChanged)
 
-# -> MicrogliaTracking, ROI Table
-def bindFuncTableCellChangedWithMicrogliaTracking(
+# -> OpticRawTracking, ROI Table
+def bindFuncTableCellChangedWithOpticRawTracking(
     q_table_pri: 'QTableWidget',
     control_manager: 'ControlManager',
     data_manager: 'DataManager',
@@ -2061,7 +2061,7 @@ def bindFuncRadiobuttonBGImageTypeChanged(
     checked_button = q_buttongroup.checkedButton()
     _onBGImageTypeChanged(q_buttongroup.id(checked_button))
 
-# -> view_layouts.makeLayoutWidgetBGImageTypeDisplay, Suite2pROITracking, with loading dual-channel imaging data
+# -> view_layouts.makeLayoutWidgetBGImageTypeDisplay, OpticROITracking, with loading dual-channel imaging data
 def bindFuncComboboxBGImageChannelChanged(
     q_combobox: 'QComboBox',
     view_control: 'ViewControl'
@@ -2099,3 +2099,65 @@ def bindFuncCheckBoxDisplayROIContours(
     q_checkbox_contour_all.stateChanged.connect(lambda state: _onCheckBoxChanged(state, "contour_all"))
     q_checkbox_contour_selected.stateChanged.connect(lambda state: _onCheckBoxChanged(state, "contour_selected"))
     q_checkbox_contour_next.stateChanged.connect(lambda state: _onCheckBoxChanged(state, "contour_next"))
+
+
+# Generate a master tracking table CSV from all pairwise ROI matches via graph-based alignment.
+# get_session_labels_callback() must return List[str] aligned with plane_t indices.
+# default_filename_callback() must return the default basename presented in the save dialog.
+def bindFuncButtonGenerateMasterTrackingTable(
+    q_button: 'QPushButton',
+    q_window: 'QWidget',
+    data_manager: 'DataManager',
+    get_session_labels_callback,
+    default_filename_callback,
+) -> None:
+    from PyQt5.QtWidgets import QFileDialog
+    from ..processing.graph_alignment import generateMasterTrackingTable
+
+    def _onClicked() -> None:
+        list_session_labels = list(get_session_labels_callback() or [])
+        if len(list_session_labels) < 2:
+            QMessageBox.warning(
+                q_window,
+                "Master Tracking Table",
+                "Need at least 2 sessions to generate master tracking table.",
+            )
+            return
+
+        df, list_clique, list_incomplete = generateMasterTrackingTable(
+            data_manager.dict_roi_matching, list_session_labels
+        )
+
+        n_complete = len(list_clique)
+        n_incomplete = len(list_incomplete)
+        total = n_complete + n_incomplete
+        ratio = (n_complete / total) if total > 0 else 0.0
+        print(f"[master_tracking_table] complete subgraphs: {n_complete}, "
+              f"incomplete subgraphs: {n_incomplete}, "
+              f"ratio_complete: {ratio:.4f}")
+        if list_incomplete:
+            print("[master_tracking_table] incomplete subgraphs (excluded from CSV):")
+            for sg in list_incomplete:
+                print(f"  {sg}")
+
+        default_name = default_filename_callback() or "master_tracking.csv"
+        path_dst, _ = QFileDialog.getSaveFileName(
+            q_window,
+            "Save Master Tracking Table",
+            default_name,
+            "CSV files (*.csv)",
+        )
+        if not path_dst:
+            return
+        try:
+            df.to_csv(path_dst, index=False)
+        except Exception as e:
+            QMessageBox.warning(q_window, "Master Tracking Table", f"Failed to save CSV:\n{e}")
+            return
+        QMessageBox.information(
+            q_window,
+            "Master Tracking Table",
+            f"Saved {len(df)} ROI identities to:\n{path_dst}",
+        )
+
+    q_button.clicked.connect(_onClicked)

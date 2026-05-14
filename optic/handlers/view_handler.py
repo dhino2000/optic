@@ -24,12 +24,12 @@ class ViewHandler:
         self.handler = self._initializeHandler(self.current_app)
 
     def _initializeHandler(self, current_app):
-        if current_app == "SUITE2P_ROI_CURATION":
-            return self.Suite2pROICurationHandler(self.view_control, self.view_control.control_manager.table_controls[self.app_key])
-        elif current_app in ("SUITE2P_ROI_TRACKING", "SUITE2P_ROI_TRACKING_MULTI"):
-            return self.Suite2pROITrackingHandler(self.view_control)
-        elif current_app == "MICROGLIA_TRACKING":
-            return self.MicrogliaTrackingHandler(self.view_control)
+        if current_app == "OPTIC_ROI_CURATION":
+            return self.OpticROICurationHandler(self.view_control, self.view_control.control_manager.table_controls[self.app_key])
+        elif current_app in ("OPTIC_ROI_TRACKING", "OPTIC_ROI_TRACKING_MULTI"):
+            return self.OpticROITrackingHandler(self.view_control)
+        elif current_app == "OPTIC_RAW_TRACKING":
+            return self.OpticRawTrackingHandler(self.view_control)
         elif current_app == "TIFSTACK_EXPLORER":
             return self.TifStackExplorerHandler(self.view_control)
         else:
@@ -54,13 +54,13 @@ class ViewHandler:
         self.handler.wheelEvent(event)
 
     """
-    Suite2pROICuration Handler
+    OpticROICuration Handler
     left click : select roi
     middle click + drag : pan
     ctrl + scroll : zoom in/out
     R : reset zoom
     """
-    class Suite2pROICurationHandler:
+    class OpticROICurationHandler:
         def __init__(self, view_control: ViewControl, table_control: TableControl):
             self.view_control = view_control
             self.table_control = table_control
@@ -93,6 +93,8 @@ class ViewHandler:
                 delta = current_pos - self.view_control.drag_start_pos
                 self.view_control.q_view.setTransformationAnchor(QGraphicsView.NoAnchor)
                 self.view_control.q_view.translate(delta.x(), delta.y())
+                if hasattr(self.view_control.q_view, "markUserAdjusted"):
+                    self.view_control.q_view.markUserAdjusted()
                 self.view_control.drag_start_pos = current_pos
 
         def mouseReleaseEvent(self, event: QMouseEvent):
@@ -101,12 +103,15 @@ class ViewHandler:
                 self.view_control.drag_start_pos = None
 
         def wheelEvent(self, event: QWheelEvent):
-            if self.view_control.dict_key_pushed[Qt.Key_Control]:
+            # Use event.modifiers() instead of dict_key_pushed: wheel events carry modifier
+            # state regardless of focus, while keyPressEvent only fires on the focused widget
+            # (QGraphicsView has no focus by default, so dict_key_pushed[Ctrl] often stays False).
+            if event.modifiers() & Qt.ControlModifier:
                 zoomView(self.view_control.q_view, event.angleDelta().y(), event.pos())
                 self.view_control.updateView()
 
     """
-    Suite2pROITracking Handler
+    OpticROITracking Handler
     --- pri view ---
     left click : select roi
     right click : select roi in sec view
@@ -119,7 +124,7 @@ class ViewHandler:
     ctrl + scroll : zoom in/out
     R : reset zoom
     """
-    class Suite2pROITrackingHandler:
+    class OpticROITrackingHandler:
         def __init__(self, view_control: ViewControl):
             self.view_control = view_control
             self.app_key = view_control.app_key
@@ -164,7 +169,7 @@ class ViewHandler:
             pass
 
     """
-    MicrogliaTracking Handler
+    OpticRawTracking Handler
     --- default mode ---
     click : select roi
     middle click + drag : pan
@@ -174,7 +179,7 @@ class ViewHandler:
     space : quit roi edit mode
 
     """
-    class MicrogliaTrackingHandler:
+    class OpticRawTrackingHandler:
         def __init__(self, view_control: ViewControl):
             self.view_control:               ViewControl = view_control
             self.table_control:             TableControl = view_control.control_manager.table_controls[view_control.app_key]
@@ -301,6 +306,8 @@ class ViewHandler:
                 delta = current_pos - self.drag_start_pos
                 self.view_control.q_view.setTransformationAnchor(QGraphicsView.NoAnchor)
                 self.view_control.q_view.translate(delta.x(), delta.y())
+                if hasattr(self.view_control.q_view, "markUserAdjusted"):
+                    self.view_control.q_view.markUserAdjusted()
                 self.drag_start_pos = current_pos
             # ROI Edit
             if self.view_control.roi_edit_mode and self.is_dragging_edit:
@@ -323,8 +330,8 @@ class ViewHandler:
                 self.is_dragging_edit = False
 
         def wheelEvent(self, event: QWheelEvent):
-            # Zoom
-            if self.view_control.dict_key_pushed[Qt.Key_Control]:
+            # Zoom — see OpticROICurationHandler.wheelEvent for why we use event.modifiers().
+            if event.modifiers() & Qt.ControlModifier:
                 zoomView(self.view_control.q_view, event.angleDelta().y(), event.pos())
                 self.view_control.updateView()
 
@@ -359,6 +366,8 @@ class ViewHandler:
                 delta = current_pos - self.drag_start_pos
                 self.view_control.q_view.setTransformationAnchor(QGraphicsView.NoAnchor)
                 self.view_control.q_view.translate(delta.x(), delta.y())
+                if hasattr(self.view_control.q_view, "markUserAdjusted"):
+                    self.view_control.q_view.markUserAdjusted()
                 self.drag_start_pos = current_pos
 
         def mouseReleaseEvent(self, event: QMouseEvent):
@@ -370,7 +379,10 @@ class ViewHandler:
                 self.view_control.drag_start_pos = None
 
         def wheelEvent(self, event: QWheelEvent):
-            if self.view_control.dict_key_pushed[Qt.Key_Control]:
+            # Use event.modifiers() instead of dict_key_pushed: wheel events carry modifier
+            # state regardless of focus, while keyPressEvent only fires on the focused widget
+            # (QGraphicsView has no focus by default, so dict_key_pushed[Ctrl] often stays False).
+            if event.modifiers() & Qt.ControlModifier:
                 zoomView(self.view_control.q_view, event.angleDelta().y(), event.pos())
                 self.view_control.updateView()
 

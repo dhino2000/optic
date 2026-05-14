@@ -5,8 +5,8 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QGraphicsScene, QGraphicsView
 import numpy as np
 from ..config.constants import ChannelKeys, PenColors, PenWidth
-from .view_visual_roi import updateLayerROI_Suite2pROICuration, updateLayerROI_Suite2pROITracking, updateLayerROI_MicrogliaTracking, updateLayerROI_TIFStackExplorer
-# (updateLayerROI_MicrogliaTracking は multi-session Suite2p でも流用)
+from .view_visual_roi import updateLayerROI_OpticROICuration, updateLayerROI_OpticROITracking, updateLayerROI_OpticRawTracking, updateLayerROI_TIFStackExplorer
+# (updateLayerROI_OpticRawTracking は multi-session Suite2p でも流用)
 from ..preprocessing.preprocessing_roi import updateROIImage
 
 """
@@ -14,7 +14,7 @@ update View
 """
 # q_view widget visualization
 # update view for Fall data
-def updateView_Suite2pROICuration(
+def updateView_OpticROICuration(
         q_scene: QGraphicsScene, 
         q_view: QGraphicsView, 
         view_control: ViewControl, 
@@ -66,10 +66,10 @@ def updateView_Suite2pROICuration(
     view_control.layer_bg.setPixmap(pixmap)
 
     # update ROI layer
-    updateLayerROI_Suite2pROICuration(view_control, data_manager, control_manager, app_key)
+    updateLayerROI_OpticROICuration(view_control, data_manager, control_manager, app_key)
 
 # update view for Fall data for ROI Tracking
-def updateView_Suite2pROITracking(
+def updateView_OpticROITracking(
         q_scene: QGraphicsScene, 
         q_view: QGraphicsView, 
         view_control: ViewControl, 
@@ -152,10 +152,10 @@ def updateView_Suite2pROITracking(
     view_control.layer_bg.setPixmap(pixmap)
 
     # update ROI layer
-    updateLayerROI_Suite2pROITracking(view_control, data_manager, control_manager, app_key, app_key_sec)
+    updateLayerROI_OpticROITracking(view_control, data_manager, control_manager, app_key, app_key_sec)
 
 # update view for Tiff data, microglia tracking
-def updateView_MicrogliaTracking(
+def updateView_OpticRawTracking(
         q_scene: QGraphicsScene, 
         q_view: QGraphicsView, 
         view_control: ViewControl, 
@@ -232,13 +232,13 @@ def updateView_MicrogliaTracking(
     view_control.layer_bg.setPixmap(pixmap)
 
     try:
-        updateLayerROI_MicrogliaTracking(view_control, data_manager, control_manager, app_key, app_key_sec)
+        updateLayerROI_OpticRawTracking(view_control, data_manager, control_manager, app_key, app_key_sec)
     except AttributeError:
         pass
 
 
 # update view for multi-session Suite2p Fall.mat tracking
-def updateView_Suite2pROITrackingMulti(
+def updateView_OpticROITrackingMulti(
         q_scene: QGraphicsScene,
         q_view: QGraphicsView,
         view_control: ViewControl,
@@ -320,7 +320,7 @@ def updateView_Suite2pROITrackingMulti(
     pixmap = QPixmap.fromImage(qimage)
     view_control.layer_bg.setPixmap(pixmap)
 
-    updateLayerROI_Suite2pROITracking(view_control, data_manager, control_manager, app_key, app_key_sec)
+    updateLayerROI_OpticROITracking(view_control, data_manager, control_manager, app_key, app_key_sec)
 
 
 # update view for Tiff data
@@ -518,6 +518,10 @@ def zoomView(
     q_view.horizontalScrollBar().setValue(q_view.horizontalScrollBar().value() - delta.x())
     q_view.verticalScrollBar().setValue(q_view.verticalScrollBar().value() - delta.y())
     q_view.viewport().update()
+    # Mark the view as user-adjusted so AutoFitGraphicsView's resizeEvent (triggered when
+    # scrollbars appear from zoom-in) does not fit-reset the new zoom.
+    if hasattr(q_view, "markUserAdjusted"):
+        q_view.markUserAdjusted()
 
 # reset zoom
 def resetZoomView(
@@ -526,3 +530,6 @@ def resetZoomView(
 ) -> None:
     view.setTransform(QTransform())
     view.fitInView(scene_rect, Qt.KeepAspectRatio)
+    # R-key reset re-enables automatic fit-on-resize.
+    if hasattr(view, "clearUserAdjusted"):
+        view.clearUserAdjusted()

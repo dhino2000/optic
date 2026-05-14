@@ -5,9 +5,9 @@ from .constants import AppKeys, ChannelKeys, ImportPackages
 # GUIに関する定数
 class GuiDefaults:
     """
-    Suite2pROICurationGUI
+    OpticROICurationGUI
     """
-    SUITE2P_ROI_CURATION = {
+    OPTIC_ROI_CURATION = {
         "MIN_PLOT_RANGE": 30,
         "WINDOW_SETTINGS": {
             "INIT_POSITION_X": 100, 
@@ -42,7 +42,7 @@ class GuiDefaults:
         "SCROOLAREA_SETTINGS": {
             "MAX_HEIGHT": 200,
         },
-        "TITLE": "Suite2pROICurationGUI",
+        "TITLE": "OpticROICurationGUI",
         "APP_KEYS": [AppKeys.PRI],
         "CHANNELS": [ChannelKeys.CHAN1, ChannelKeys.CHAN2, ChannelKeys.CHAN3],
         "ROI_THRESHOLDS": {
@@ -131,9 +131,9 @@ class GuiDefaults:
     }
 
     """
-    Suite2pROITrackingGUI
+    OpticROITrackingGUI
     """
-    SUITE2P_ROI_TRACKING = {
+    OPTIC_ROI_TRACKING = {
         "MIN_PLOT_RANGE": 30,
         "WINDOW_SETTINGS": {
             "INIT_POSITION_X": 100, 
@@ -174,7 +174,7 @@ class GuiDefaults:
         "SCROOLAREA_SETTINGS": {
             "MAX_HEIGHT": 200,
         },
-        "TITLE": "Suite2pROITrackingGUI",
+        "TITLE": "OpticROITrackingGUI",
         "APP_KEYS": [AppKeys.PRI, AppKeys.SEC],
         "CHANNELS": [ChannelKeys.CHAN1, ChannelKeys.CHAN2, ChannelKeys.CHAN3],
         "VIEW_SETTINGS": {
@@ -305,9 +305,9 @@ class GuiDefaults:
     }
 
     """
-    MicrogliaTrackingGUI
+    OpticRawTrackingGUI
     """
-    MICROGLIA_TRACKING = {
+    OPTIC_RAW_TRACKING = {
         "MIN_PLOT_RANGE": 30,
         "WINDOW_SETTINGS": {
             "INIT_POSITION_X": 100, 
@@ -331,7 +331,7 @@ class GuiDefaults:
             "WIDTH": 300,
             "HEIGHT": 200,
         },
-        "TITLE": "MicrogliaTrackingGUI",
+        "TITLE": "OpticRawTrackingGUI",
         "APP_KEYS": [AppKeys.PRI, AppKeys.SEC],
         "CHANNELS": [ChannelKeys.CHAN1, ChannelKeys.CHAN2, ChannelKeys.CHAN3],
         "VIEW_SETTINGS": {
@@ -382,9 +382,9 @@ class GuiDefaults:
     }
 
     """
-    Suite2pROITrackingMultiGUI  (multi-session, MicrogliaTracking 方式)
+    OpticROITrackingMultiGUI  (multi-session, OpticRawTracking 方式)
     """
-    SUITE2P_ROI_TRACKING_MULTI = {
+    OPTIC_ROI_TRACKING_MULTI = {
         "MIN_PLOT_RANGE": 30,
         "WINDOW_SETTINGS": {
             "INIT_POSITION_X": 100,
@@ -419,7 +419,7 @@ class GuiDefaults:
         "SCROOLAREA_SETTINGS": {
             "MAX_HEIGHT": 200,
         },
-        "TITLE": "Suite2pROITrackingMultiGUI",
+        "TITLE": "OpticROITrackingMultiGUI",
         "APP_KEYS": [AppKeys.PRI, AppKeys.SEC],
         "CHANNELS": [ChannelKeys.CHAN1, ChannelKeys.CHAN2, ChannelKeys.CHAN3],
         "VIEW_SETTINGS": {

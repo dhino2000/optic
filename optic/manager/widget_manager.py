@@ -198,25 +198,55 @@ def makeWidgetScene(
     widget = QGraphicsScene()
     return widget
 
+# QGraphicsView that re-fits its scene to the (shorter) viewport edge on every resize,
+# preserving aspect ratio — but only while the user has not manually altered the view
+# transform. Without this guard, zooming-in produces scrollbars whose appearance triggers
+# a resizeEvent that would immediately fit-reset the user's zoom.
+class AutoFitGraphicsView(QGraphicsView):
+    def __init__(self, scene):
+        super().__init__(scene)
+        # Becomes True once the user zooms / pans manually. Reset by resetZoomView (R key).
+        self._user_adjusted = False
+
+    def markUserAdjusted(self) -> None:
+        self._user_adjusted = True
+
+    def clearUserAdjusted(self) -> None:
+        self._user_adjusted = False
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        if self._user_adjusted:
+            return
+        scene = self.scene()
+        if scene is None:
+            return
+        rect = scene.sceneRect()
+        if rect.width() > 0 and rect.height() > 0:
+            self.fitInView(rect, Qt.KeepAspectRatio)
+
+
 # QGraphicsView Widget
 def makeWidgetView(
-    scene: QGraphicsScene, 
-    width_min: int, 
-    height_min: int, 
-    color: str, 
-    anti_aliasing: bool, 
+    scene: QGraphicsScene,
+    width_min: int,
+    height_min: int,
+    color: str,
+    anti_aliasing: bool,
     smooth_pixmap_transform: bool,
 ) -> QGraphicsView:
-    widget = QGraphicsView(scene)
+    widget = AutoFitGraphicsView(scene)
     if width_min:
         widget.setMinimumWidth(width_min)
     if height_min:
         widget.setMinimumHeight(height_min)
     widget.setStyleSheet(f"background-color: {color};")  # 背景色を黒に設定
     widget.setViewportUpdateMode(QGraphicsView.FullViewportUpdate)
-    widget.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
+    # NOTE: AdjustToContents would lock sizeHint to the current viewport size, blocking the
+    # widget from growing when the user enlarges the window. AdjustIgnored lets QSizePolicy
+    # alone drive growth/shrink, which is what AutoFitGraphicsView depends on.
+    widget.setSizeAdjustPolicy(QAbstractScrollArea.AdjustIgnored)
     widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-    # widget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
     widget.setAlignment(Qt.AlignCenter)
     if anti_aliasing:
         widget.setRenderHint(QPainter.Antialiasing)  # アンチエイリアシングを有効化

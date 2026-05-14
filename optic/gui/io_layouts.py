@@ -21,15 +21,15 @@ def makeLayoutLoadFileExitHelp(
         layout.addWidget(widget_manager.makeWidgetButton(key=key, label=label))
     return layout
 
-# Table, ROICheck IO
-def makeLayoutROICheckIO(
+# Table, ROICuration IO
+def makeLayoutROICurationIO(
         widget_manager: WidgetManager, 
         key_button_save: str,
         key_button_load: str,
         )-> QHBoxLayout:
     layout = QHBoxLayout()
     list_key = [key_button_save, key_button_load]
-    list_label = ["Save ROICheck", "Load ROICheck"]
+    list_label = ["Save ROICuration", "Load ROICuration"]
     for key, label in zip(list_key, list_label):
         layout.addWidget(widget_manager.makeWidgetButton(key=key, label=label))
     return layout

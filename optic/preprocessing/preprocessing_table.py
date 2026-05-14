@@ -4,17 +4,17 @@ import datetime
 import numpy as np
 from PyQt5.QtCore import Qt
 
-# convert contents of QTableWidget into dict_roicheck
-def convertTableDataToDictROICheck(
+# convert contents of QTableWidget into dict_roicuration
+def convertTableDataToDictROICuration(
         q_table: QTableWidget, 
         table_columns: TableColumns, 
         local_var: bool=False
         ) -> Dict[str, Any]:
     if local_var:
-        from ..config.constants_local import ROICheckMatKeysLocal
-        cell_type_keys = ROICheckMatKeysLocal.cell_type_keys # local variables
+        from ..config.constants_local import ROICurationMatKeysLocal
+        cell_type_keys = ROICurationMatKeysLocal.cell_type_keys # local variables
     
-    dict_roicheck = {}
+    dict_roicuration = {}
     row_count = q_table.rowCount()
     # process each column
     for col_name, col_info in table_columns.getColumns().items():
@@ -25,40 +25,40 @@ def convertTableDataToDictROICheck(
                 if radio_button and radio_button.isChecked():
                     selected_rows.append([row])
 
-            dict_roicheck[col_name] = np.array(selected_rows, dtype=np.int32)
+            dict_roicuration[col_name] = np.array(selected_rows, dtype=np.int32)
 
             if local_var:
                 if col_name in cell_type_keys:
-                    dict_roicheck[cell_type_keys[col_name]] = np.array(selected_rows, dtype=np.int32)
+                    dict_roicuration[cell_type_keys[col_name]] = np.array(selected_rows, dtype=np.int32)
         
         elif col_info['type'] == 'checkbox':
-            dict_roicheck[col_name] = np.zeros((row_count, 1), dtype=np.bool_)
+            dict_roicuration[col_name] = np.zeros((row_count, 1), dtype=np.bool_)
             for row in range(row_count):
                 item = q_table.item(row, col_info['order'])
-                dict_roicheck[col_name][row] = item.checkState() == Qt.Checked if item else False
+                dict_roicuration[col_name][row] = item.checkState() == Qt.Checked if item else False
         
         elif col_info['type'] == 'string':
-            dict_roicheck[col_name] = np.empty((row_count, 1), dtype=object)
+            dict_roicuration[col_name] = np.empty((row_count, 1), dtype=object)
             for row in range(row_count):
                 item = q_table.item(row, col_info['order'])
-                dict_roicheck[col_name][row] = item.text() if item else ''
+                dict_roicuration[col_name][row] = item.text() if item else ''
 
-    dict_roicheck["TableColumns"] = table_columns.getColumns()
+    dict_roicuration["TableColumns"] = table_columns.getColumns()
 
-    return dict_roicheck
+    return dict_roicuration
 
-# dict_roicheck -> mat_roicheck
-def convertDictROICheckToMatROICheck(
-        dict_roicheck   : Dict[str, Any], 
-        mat_roicheck    : Dict[str, Any]=None, 
+# dict_roicuration -> mat_roicuration
+def convertDictROICurationToMatROICuration(
+        dict_roicuration   : Dict[str, Any], 
+        mat_roicuration    : Dict[str, Any]=None, 
         date            : str="",
         user            : str="",
         n_roi           : int=0, 
         path_fall       : str=""
         )-> Dict[str, Any]:
 
-    if mat_roicheck is None:
-        mat_roicheck = {
+    if mat_roicuration is None:
+        mat_roicuration = {
             "NumberOfROI": n_roi,
             "path_Fall": path_fall,
             "name_Fall": path_fall.split("/")[-1],
@@ -66,26 +66,26 @@ def convertDictROICheckToMatROICheck(
         }
     else:
         if path_fall: # rewrite Fall.mat path
-            mat_roicheck["path_Fall"] = path_fall
-            mat_roicheck["name_Fall"] = path_fall.split("/")[-1]
+            mat_roicuration["path_Fall"] = path_fall
+            mat_roicuration["name_Fall"] = path_fall.split("/")[-1]
 
-    mat_roicheck["manualROIcheck"][date] = {
+    mat_roicuration["manualROIcheck"][date] = {
         "user": user,
-        **dict_roicheck,
+        **dict_roicuration,
     }
 
-    return mat_roicheck
+    return mat_roicuration
 
-# mat_roicheck -> dict_roicheck
-def convertMatROICheckToDictROICheck(mat_roicheck: Dict[str, Any]) -> Dict[str, Any]:
-    mat_roicheck = mat_roicheck["manualROIcheck"]
-    mat_dtype = list(mat_roicheck[0].dtype.fields)
-    dict_roicheck = {}
-    for key_, value_ in zip(mat_dtype, list(mat_roicheck[0][0])):
+# mat_roicuration -> dict_roicuration
+def convertMatROICurationToDictROICuration(mat_roicuration: Dict[str, Any]) -> Dict[str, Any]:
+    mat_roicuration = mat_roicuration["manualROIcheck"]
+    mat_dtype = list(mat_roicuration[0].dtype.fields)
+    dict_roicuration = {}
+    for key_, value_ in zip(mat_dtype, list(mat_roicuration[0][0])):
         if value_.dtype=="object":
             value_ = np.array([[x[0].item() if x[0].size > 0 else ""] for x in value_])
-        dict_roicheck[key_] = value_
-    return dict_roicheck
+        dict_roicuration[key_] = value_
+    return dict_roicuration
 
 # convert contents of QTableWidget into dict_roitracking
 def convertTableDataToDictROITracking(
@@ -95,7 +95,7 @@ def convertTableDataToDictROITracking(
         local_var: bool=False
         ) -> Dict[str, np.ndarray]:
     # celltype, checkbox, string
-    dict_roi_tracking = convertTableDataToDictROICheck(q_table_pri, table_columns, local_var)
+    dict_roi_tracking = convertTableDataToDictROICuration(q_table_pri, table_columns, local_var)
     row_count_pri = q_table_pri.rowCount()
     row_count_sec = q_table_sec.rowCount()
     for col_name, col_info in table_columns.getColumns().items():        
@@ -126,7 +126,7 @@ def convertTableDataToDictROITracking(
 # dict_roitracking -> mat_roitracking
 def convertDictROITrackingToMatROITracking(
         dict_roi_tracking_pri : Dict[str, Any], 
-        dict_roi_check_sec    : Dict[str, Any],
+        dict_roi_curation_sec    : Dict[str, Any],
         mat_roi_tracking      : Dict[str, Any]=None, 
         date                  : str="",
         user                  : str="",
@@ -157,7 +157,7 @@ def convertDictROITrackingToMatROITracking(
     mat_roi_tracking["ROITracking"][date] = {
         **{"user": user},
         **{"pri": dict_roi_tracking_pri},
-        **{"sec": dict_roi_check_sec}
+        **{"sec": dict_roi_curation_sec}
     }
 
     return mat_roi_tracking
@@ -248,34 +248,34 @@ def convertContentsOfDictROIMatchingAndDictROICoordsToArray(
     dict_roi_matching_converted = {"id": arr_roi_matching_id, "match": arr_roi_matching_match}
     return dict_roi_matching_converted, arr_roi_coords_xyct, arr_roi_coords_xyct_reg
 
-# convert dict_roi_matching and dict_roi_coords_xyct to mat_microglia_tracking 
-def convertDictROIMatchingAndDictROICoordsToMatMicrogliaTracking(
+# convert dict_roi_matching and dict_roi_coords_xyct to mat_optic_raw_tracking 
+def convertDictROIMatchingAndDictROICoordsToMatOpticRawTracking(
     dict_roi_matching       : Dict[str, Any], 
     dict_roi_coords_xyct    : Dict[str, Any], 
     dict_roi_coords_xyct_reg: Dict[str, Any],
     dict_tiff_reg           : Dict[str, Any],
-    mat_microglia_tracking  : Dict[str, Any]=None, 
+    mat_optic_raw_tracking  : Dict[str, Any]=None, 
     date                    : str="",
     user                    : str="",
     path_tif                : str=""
 )-> Dict[str, Any]:
 
-    if mat_microglia_tracking is None:
-        mat_microglia_tracking = {
+    if mat_optic_raw_tracking is None:
+        mat_optic_raw_tracking = {
             "path_tif": path_tif,
             "name_tif": path_tif.split("/")[-1],
             "ROI": {},
         }
     else:
         if path_tif: # rewrite tif file path
-            mat_microglia_tracking["path_tif"] = path_tif
-            mat_microglia_tracking["name_tif"] = path_tif.split("/")[-1]
+            mat_optic_raw_tracking["path_tif"] = path_tif
+            mat_optic_raw_tracking["name_tif"] = path_tif.split("/")[-1]
 
     # convert dict_roi_matching and dict_roi_coords_xyct to appropriate format
     dict_roi_matching_converted, arr_roi_coords_xyct, arr_roi_coords_xyct_reg = convertContentsOfDictROIMatchingAndDictROICoordsToArray(
         dict_roi_matching, dict_roi_coords_xyct, dict_roi_coords_xyct_reg
     )
-    mat_microglia_tracking["ROI"][date] = {
+    mat_optic_raw_tracking["ROI"][date] = {
         "user": user,
         "ROITracking": dict_roi_matching_converted,
         "ROICoords": arr_roi_coords_xyct,
@@ -283,18 +283,18 @@ def convertDictROIMatchingAndDictROICoordsToMatMicrogliaTracking(
         "BGImageRegistered": dict_tiff_reg,
     }
 
-    return mat_microglia_tracking
+    return mat_optic_raw_tracking
 
 """
 Load Microglia Tracking
 """
-# mat_microglia_tracking -> dict_roi_matching, dict_roi_coords_xyct
-def convertMatMicrogliaTrackingToDictROIMatchingAndDictROICoords(
-    mat_microglia_tracking: Dict[str, Any],
+# mat_optic_raw_tracking -> dict_roi_matching, dict_roi_coords_xyct
+def convertMatOpticRawTrackingToDictROIMatchingAndDictROICoords(
+    mat_optic_raw_tracking: Dict[str, Any],
 ) -> Tuple[Dict[Literal["id", "match"], Dict[int, List[int] | Dict[int, Dict[int, Optional[int]]]]], Dict[int, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]], Dict[int, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]]]:
-    mat_roi_matching = mat_microglia_tracking["ROITracking"]
-    mat_roi_coords = mat_microglia_tracking["ROICoords"]
-    mat_roi_coords_reg = mat_microglia_tracking["ROICoordsRegistered"]
+    mat_roi_matching = mat_optic_raw_tracking["ROITracking"]
+    mat_roi_coords = mat_optic_raw_tracking["ROICoords"]
+    mat_roi_coords_reg = mat_optic_raw_tracking["ROICoordsRegistered"]
 
     # convert dict_roi_matching for the GUI
     dict_roi_matching = convertMatROIMatchingToDictROIMatching(mat_roi_matching)

@@ -1,12 +1,12 @@
 from __future__ import annotations
 from ..type_definitions import *
 from ..handlers.view_handler import ViewHandler
-from ..visualization.view_visual import updateView_Suite2pROICuration, updateView_TIFStackExplorer, updateView_Suite2pROITracking, updateView_MicrogliaTracking, updateView_Suite2pROITrackingMulti, zoomView, resetZoomView
+from ..visualization.view_visual import updateView_OpticROICuration, updateView_TIFStackExplorer, updateView_OpticROITracking, updateView_OpticRawTracking, updateView_OpticROITrackingMulti, zoomView, resetZoomView
 from ..visualization.view_visual_roi import findClosestROI, shouldSkipROI
 from ..visualization.view_visual_rectangle import initializeDragRectangle, updateDragRectangle
 from ..visualization.info_visual import updateZPlaneDisplay, updateTPlaneDisplay
 from ..preprocessing.preprocessing_roi import updateROIImage, updateROIImageForXYCT
-from ..gui.view_setup import setViewSize
+from ..gui.view_setup import setViewSize, resolveViewMinSize
 from ..config.constants import BGImageTypeList, Extension
 from ..utils.view_utils import generateRandomColor
 from collections import defaultdict
@@ -41,7 +41,7 @@ class ViewControl:
         self.im_dtype:              np.dtype                    = np.uint8
         self.image_sizes:           Tuple[int, int]             = ()
         self.bg_image_type:         str                         = BGImageTypeList.FALL[0]
-        self.bg_image_idx_channel:  int                         = 0 # for Suite2pROITracking
+        self.bg_image_idx_channel:  int                         = 0 # for OpticROITracking
         self.bg_contrast:           Dict[str, Dict[str, int]]   = {}
         self.bg_visibility:         Dict[str, bool]             = {} # show or hide background image
         self.roi_display_prop:      Dict[str, bool]             = {} # ROI display property, contour, next ROI, etc.
@@ -88,6 +88,10 @@ class ViewControl:
         self.is_dragging:       bool                            = False
         self.drag_pos_start:    Tuple[int, int]                 = (0, 0)
 
+        # One-shot flag: fitInView once on first updateView so the image fits the (possibly
+        # screen-capped) view widget at startup. User-initiated zoom/pan after that is preserved.
+        self._initial_fit_done: bool                            = False
+
         self.setDataType()
         self.setImageSize()
         self.initializeImageLayers()
@@ -99,17 +103,28 @@ class ViewControl:
             self.setTIFFShape()
 
     def updateView(self) -> None:
-        if self.config_manager.current_app == "SUITE2P_ROI_CURATION":
-            updateView_Suite2pROICuration(self.q_scene, self.q_view, self, self.data_manager, self.control_manager, self.app_key)
-        elif self.config_manager.current_app == "SUITE2P_ROI_TRACKING":
-            updateView_Suite2pROITracking(self.q_scene, self.q_view, self, self.data_manager, self.control_manager, self.app_key, self.app_key_sec)
-        elif self.config_manager.current_app == "MICROGLIA_TRACKING":
-            updateView_MicrogliaTracking(self.q_scene, self.q_view, self, self.data_manager, self.control_manager, self.app_key, self.app_key_sec)
-        elif self.config_manager.current_app == "SUITE2P_ROI_TRACKING_MULTI":
-            updateView_Suite2pROITrackingMulti(self.q_scene, self.q_view, self, self.data_manager, self.control_manager, self.app_key, self.app_key_sec)
+        if self.config_manager.current_app == "OPTIC_ROI_CURATION":
+            updateView_OpticROICuration(self.q_scene, self.q_view, self, self.data_manager, self.control_manager, self.app_key)
+        elif self.config_manager.current_app == "OPTIC_ROI_TRACKING":
+            updateView_OpticROITracking(self.q_scene, self.q_view, self, self.data_manager, self.control_manager, self.app_key, self.app_key_sec)
+        elif self.config_manager.current_app == "OPTIC_RAW_TRACKING":
+            updateView_OpticRawTracking(self.q_scene, self.q_view, self, self.data_manager, self.control_manager, self.app_key, self.app_key_sec)
+        elif self.config_manager.current_app == "OPTIC_ROI_TRACKING_MULTI":
+            updateView_OpticROITrackingMulti(self.q_scene, self.q_view, self, self.data_manager, self.control_manager, self.app_key, self.app_key_sec)
         elif self.config_manager.current_app == "TIFSTACK_EXPLORER":
             updateView_TIFStackExplorer(self.q_scene, self.q_view, self, self.data_manager, self.control_manager, self.app_key)
-        
+
+        # First-time fit: scale the (possibly oversized) image to fit the view widget once.
+        # Deferred via QTimer so it runs after Qt has laid out the view at its final size,
+        # otherwise fitInView would use the pre-show widget size (often 0). Subsequent updates
+        # leave the user's zoom/pan state intact.
+        if not self._initial_fit_done:
+            scene_rect = self.q_scene.sceneRect()
+            if scene_rect.width() > 0 and scene_rect.height() > 0:
+                from PyQt5.QtCore import QTimer
+                self._initial_fit_done = True
+                QTimer.singleShot(0, lambda: resetZoomView(self.q_view, self.q_scene.sceneRect()))
+
 
     """
     initialize Functions
@@ -122,7 +137,12 @@ class ViewControl:
 
     def setViewSize(self, use_self_size: bool=True) -> None:
         if use_self_size:
-            width_min, height_min = self.getImageSize()
+            # Cap the View's minimum size by available screen area so layouts fit on 1920x1080+
+            # displays even when the underlying image is large (e.g. 1024x1024 microglia stacks).
+            # Scene coordinates are unaffected by widget size — QGraphicsView's mapToScene handles
+            # click / draw / drag at original image coords regardless of how the view is scaled.
+            n_panels = len(self.config_manager.gui_defaults.get("APP_KEYS", ["pri"]))
+            width_min, height_min = resolveViewMinSize(self.getImageSize(), n_panels=n_panels)
             setViewSize(self.q_view, width_min=width_min, height_min=height_min)
 
     def setTIFFShape(self) -> None:
@@ -331,7 +351,7 @@ class ViewControl:
                 dict_roi_coords = self.data_manager.getDictROICoordsXYCT()
             if dict_roi_coords is not None:
                 dict_roi_coords = dict_roi_coords.get(self.getPlaneT())
-        else: # for Suite2pROICuration, Suite2pROITracking
+        else: # for OpticROICuration, OpticROITracking
             if reg:
                 dict_roi_coords = self.data_manager.getDictROICoordsRegistered(self.app_key)
             else:

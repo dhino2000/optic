@@ -102,7 +102,7 @@ class CheckMultiSessionROICoordinatesGUI(QMainWindow):
     def makeLayoutComponentROIView(self):
         """
         ROI view component with QGraphicsView
-        Similar to Suite2pROICurationGUI's ROI view
+        Similar to OpticROICurationGUI's ROI view
         
         Returns:
         --------
@@ -359,20 +359,20 @@ class CheckMultiSessionROICoordinatesGUI(QMainWindow):
     def loadROICurationMat(self, app_key: str, path_roi_curation: str):
         from scipy.io import loadmat
         import numpy as np
-        mat_roicheck = loadmat(path_roi_curation, simplify_cells=True)
-        date = list(mat_roicheck["manualROIcheck"].keys())[-1] # get last date as default
+        mat_roicuration = loadmat(path_roi_curation, simplify_cells=True)
+        date = list(mat_roicuration["manualROIcheck"].keys())[-1] # get last date as default
         # select saved date
-        dict_roicheck = mat_roicheck["manualROIcheck"][date]
-        dict_roicheck = {k.replace(" ", "_"): v for k, v in dict_roicheck.items()} # this is temporary fix for old ROIcheck files !!!
+        dict_roicuration = mat_roicuration["manualROIcheck"][date]
+        dict_roicuration = {k.replace(" ", "_"): v for k, v in dict_roicuration.items()} # this is temporary fix for old ROIcuration files !!!
         # MATLAB convert [1] to 1
         # so, convert 1 to [1]
-        for key in dict_roicheck.keys():
-            if isinstance(dict_roicheck[key], int):
-                dict_roicheck[key] = [dict_roicheck[key]]
+        for key in dict_roicuration.keys():
+            if isinstance(dict_roicuration[key], int):
+                dict_roicuration[key] = [dict_roicuration[key]]
 
-        table_columns = dict_roicheck.get("TableColumns")
+        table_columns = dict_roicuration.get("TableColumns")
         list_celltype = [col_name for col_name, col_info in table_columns.items() if col_info["type"] == "celltype"]
-        dict_roi_celltype = {celltype: dict_roicheck[celltype] for celltype in list_celltype}
+        dict_roi_celltype = {celltype: dict_roicuration[celltype] for celltype in list_celltype}
         self.data_manager.dict_roi_celltype[app_key] = dict_roi_celltype
 
         index_to_label = {idx: i for i, celltype in enumerate(list_celltype) for idx in dict_roi_celltype[celltype]}

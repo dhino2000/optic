@@ -1,14 +1,14 @@
-# Suite2pROICuration Tutorial
-<img src="images/suite2p_roi_curation.png">
+# OpticROICuration Tutorial
+<img src="images/optic_roi_curation.png">
 
-**Suite2pROICuration** is a specialized tool for quickly and efficiently classifying ROIs extracted by Suite2p into neurons and noise cells. The interface is designed to be intuitive and visually clear. It can be customized to classify cells beyond neurons, allowing users to define their own cell types. By loading event files (.npy) from behavioral experiments simultaneously done with imaging, users can identify event-responsive cells.
+**OpticROICuration** is a specialized tool for quickly and efficiently classifying ROIs extracted by Suite2p into neurons and noise cells. The interface is designed to be intuitive and visually clear. It can be customized to classify cells beyond neurons, allowing users to define their own cell types. By loading event files (.npy) from behavioral experiments simultaneously done with imaging, users can identify event-responsive cells.
 
 ## Workflow
 
 1. **Load Fall.mat**
 2. [**Set celltypes with table column config**](#custom-table-columns-configuration)
 3. [**Check ROIs**](#check-rois)
-4. **Save ROICheck.mat file**
+4. **Save ROICuration.mat file**
 
 ## Input
 
@@ -18,18 +18,18 @@ Before using this application, please prepare **Fall.mat**, the result file of S
 
 ## Output
 
-The result of ROI checking is exported as **ROICheck~.mat**, containing the ROI celltype information and can store multiple results. About downstream analysis, please check the [notebook for analysis](https://github.com/dhino2000/optic/blob/main/notebook/Chapter1_ExtractTracesWithCheckedROIs.ipynb).  
-If you want to track ROIs between the different dates, please use [**Suite2pROITracking**](https://github.com/dhino2000/optic/blob/main/docs/Suite2pROITracking/tutorial.md).
-- **ROICheck_{name_of_the_Fall_file}.mat**
+The result of ROI curationing is exported as **ROICuration~.mat**, containing the ROI celltype information and can store multiple results. About downstream analysis, please check the [notebook for analysis](https://github.com/dhino2000/optic/blob/main/notebook/Chapter1_ExtractTracesWithCheckedROIs.ipynb).  
+If you want to track ROIs between the different dates, please use [**OpticROITracking**](https://github.com/dhino2000/optic/blob/main/docs/OpticROITracking/tutorial.md).
+- **ROICuration_{name_of_the_Fall_file}.mat**
 
 ## Load Fall.mat file
-<img src="images/suite2p_roi_curation_file_load.png">
+<img src="images/optic_roi_curation_file_load.png">
 
 
 **Fall mat file path (Required):**   
 
 push "browse" button and choose "Fall.mat" file.  
-Suite2pROICuration supports 2-channel imaging Fall.mat but not support multi-plane imaging data.  
+OpticROICuration supports 2-channel imaging Fall.mat but not support multi-plane imaging data.  
 
 **Reference tif image file path (Optional):**   
 
@@ -37,9 +37,9 @@ push "browse" button and choose single XY tif image file.
 If you capture reference image as tif file, you can use it with blue-channel image.
 
 ## Check ROIs
-<img src="images/suite2p_roi_curation_legend.png">
+<img src="images/optic_roi_curation_legend.png">
 
-Suite2pROICuration consists of 3 GUI sections, **Canvas**, **View**, and **Table**.
+OpticROICuration consists of 3 GUI sections, **Canvas**, **View**, and **Table**.
 
 ### Canvas Section
 <table>
@@ -75,12 +75,12 @@ Suite2pROICuration consists of 3 GUI sections, **Canvas**, **View**, and **Table
 </td>
 <td width="50%">
 
-<img src="images/suite2p_roi_curation_canvas.png">
+<img src="images/optic_roi_curation_canvas.png">
 
 - **With event file load**  
   1: Whisker stimulation ON, 0: Whisker simulation OFF
 
-<img src="images/suite2p_roi_curation_event_canvas.png">
+<img src="images/optic_roi_curation_event_canvas.png">
 
 </td>
 </tr>
@@ -135,7 +135,7 @@ Suite2pROICuration consists of 3 GUI sections, **Canvas**, **View**, and **Table
 </td>
 <td width="50%">
 
-<img src="images/suite2p_roi_curation_view.png">
+<img src="images/optic_roi_curation_view.png">
 
 </td>
 </tr>
@@ -165,22 +165,22 @@ ex):
   
   ROIs can be filtered based on six parameters: **npix**, **radius**, **aspect_ratio**, **compact**, **skew**, and **std**. If the all parameters of the ROI are not between the thresholds (min, max), the ROI's cell type will be switched to **Not_Cell**.
 
-- **Save/Load ROI Check result**
+- **Save/Load ROI Curation result**
 
-  The results are saved as **ROICheck.mat** files.
-  You can save your progress and resume ROI checking later by loading the file.
+  The results are saved as **ROICuration.mat** files.
+  You can save your progress and resume ROI curationing later by loading the file.
   When saving, you need to select a username, which can be edited in the **optic/config/json/user_settings.json**.  
-  The ROICheck.mat file contains all previous checking results, allowing you to select any save point when loading.
-  For downstream analysis using these ROICheck files, please refer to the provided [Jupyter notebooks](https://github.com/dhino2000/optic/blob/main/notebook/Chapter1_ExtractTracesWithCheckedROIs.ipynb).
+  The ROICuration.mat file contains all previous checking results, allowing you to select any save point when loading.
+  For downstream analysis using these ROICuration files, please refer to the provided [Jupyter notebooks](https://github.com/dhino2000/optic/blob/main/notebook/Chapter1_ExtractTracesWithCheckedROIs.ipynb).
 
 </td>
 <td width="50%">
 
-<img src="images/suite2p_roi_curation_table.png">
+<img src="images/optic_roi_curation_table.png">
 
 - **ROI celltype set**
 
-<img src="images/suite2p_roi_curation_roi_set.png">
+<img src="images/optic_roi_curation_roi_set.png">
 
 - **Save Dialog**
 
@@ -209,7 +209,7 @@ ex):
 
 ## Custom Table Columns Configuration
 
-The default columns configuration of Suite2pROICuration is ["Cell_ID", "Astrocyte", "Neuron", "Not_Cell", "Check", "Tracking", "Memo"], but you can custom them with **Table Columns Config** of Table section.
+The default columns configuration of OpticROICuration is ["Cell_ID", "Astrocyte", "Neuron", "Not_Cell", "Check", "Tracking", "Memo"], but you can custom them with **Table Columns Config** of Table section.
 
 ### Table Columns Config
 <table>
@@ -242,17 +242,17 @@ The Column width. it can be adjusted by dragging.
 <td width="50%">
 
 - **Default**  
-<img src="images/suite2p_roi_curation_table_config.png">
+<img src="images/optic_roi_curation_table_config.png">
 
 - **After Customization**  
-<img src="images/suite2p_roi_curation_table_config_custom.png">
+<img src="images/optic_roi_curation_table_config_custom.png">
 
 </td>
 </tr>
 </table>
 
 
-<img src="images/suite2p_roi_curation_custom.png">
+<img src="images/optic_roi_curation_custom.png">
 
 #### Key operation of table
 

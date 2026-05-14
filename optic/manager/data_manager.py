@@ -45,7 +45,7 @@ class DataManager:
         # for ImageJ ROI Manager
         self.list_roi_imagej:           List[ImagejRoi] = []
         self.list_roi_imagej_reg:       List[ImagejRoi] = []
-        # for MicrogliaTracking / multi-session Suite2p
+        # for OpticRawTracking / multi-session Suite2p
         # ROI matching, XYCT
         self.dict_roi_matching:         Dict[str, Dict[int, List[int] | Dict[int, Dict[int, Optional[int]]]]] = {"id": {}, "match": {}}
         self.dict_roi_coords_xyct:      Dict[int, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]] = CustomDict()
@@ -60,7 +60,7 @@ class DataManager:
         self.dict_cascade:              Dict[AppKeys, Dict[str, np.ndarray[Tuple[int]]]] = defaultdict(dict)
 
         self.dict_eventfile:            Dict[AppKeys, Dict[str, np.ndarray[Tuple[int]]]] = defaultdict(dict)
-        self.dict_roicheck:             Dict[AppKeys, Any] = {}
+        self.dict_roicuration:             Dict[AppKeys, Any] = {}
 
     """
     IO Functions
@@ -76,9 +76,9 @@ class DataManager:
             self.dict_im_roi[app_key] = getROIImageFromFall(self, app_key)
             if self.getNChannels(app_key) == 2:
                 self.dict_im_bg_chan2[app_key] = getBGImageChannel2FromFall(self, app_key)
-            # Suite2pROITracking add registered data dict
+            # OpticROITracking add registered data dict
             if config_manager:
-                if config_manager.current_app == "SUITE2P_ROI_TRACKING" or config_manager.current_app == "CHECK_MULTI_SESSION_ROI_COORDINATES":
+                if config_manager.current_app == "OPTIC_ROI_TRACKING" or config_manager.current_app == "CHECK_MULTI_SESSION_ROI_COORDINATES":
                     self.dict_im_bg_reg[app_key] = getBGImageFromFall(self, app_key)
                     self.dict_roi_coords_reg[app_key] = getROICoordsFromDictFall(dict_Fall)
                     self.dict_im_roi_reg[app_key] = getROIImageFromFall(self, app_key)
@@ -98,9 +98,9 @@ class DataManager:
             self.dict_im_bg[app_key] = getBGImageFromCaimanHDF5(self, app_key)
             self.dict_roi_coords[app_key] = getROICoordsFromDictFall(dict_Fall) # use same function as Fall.mat
             self.dict_im_roi[app_key] = getROIImageFromFall(self, app_key) # use same function as Fall.mat
-            # Suite2pROITracking add registered data dict
+            # OpticROITracking add registered data dict
             if config_manager:
-                if config_manager.current_app == "SUITE2P_ROI_TRACKING":
+                if config_manager.current_app == "OPTIC_ROI_TRACKING":
                     self.dict_im_bg_reg[app_key] = getBGImageFromCaimanHDF5(self, app_key)
                     self.dict_roi_coords_reg[app_key] = getROICoordsFromDictFall(dict_Fall) # use same function as Fall.mat
                     self.dict_im_roi_reg[app_key] = getROIImageFromFall(self, app_key) # use same function as Fall.mat
