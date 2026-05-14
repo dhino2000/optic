@@ -798,14 +798,17 @@ def bindFuncButtonRunManualRegistration(
         translation_y = float(q_lineedit_shift_y.text())
         rotation_angle_rad = float(q_lineedit_radian.text())
 
-        # 2. Get images
+        # 2. Get the sec session's plane_t for XYCT storage
+        t_plane_sec = control_manager.view_controls[app_key_sec].getPlaneT()
+
+        # 3. Get images
         img_type_pri = control_manager.view_controls[app_key].getBackgroundImageType()
         img_fix = data_manager.getDictBackgroundImage(app_key).get(img_type_pri)
         img_type_sec = control_manager.view_controls[app_key_sec].getBackgroundImageType()
         img_mov = data_manager.getDictBackgroundImage(app_key_sec).get(img_type_sec)
         image_size = (img_mov.shape[0], img_mov.shape[1])
 
-        # 3. Create transform parameters
+        # 4. Create transform parameters
         transform_parameters = createManualTransformParameters(
             center_x, center_y,
             rotation_angle_rad,
@@ -814,12 +817,12 @@ def bindFuncButtonRunManualRegistration(
             output_directory
         )
 
-        # 4. Store parameter_map for ROI coord transform (use rigid default)
+        # 5. Store parameter_map for ROI coord transform (use rigid default)
         dict_params = config_manager.json_config.get("elastix_params")["rigid"]
         data_manager.dict_parameter_map[app_key] = convertDictToElastixFormat(dict_params)
         data_manager.dict_transform_parameters[app_key] = transform_parameters
 
-        # 5. Apply transform to background images
+        # 6. Apply transform to background images
         dict_im_bg_reg_mov = {}
         for key_im in data_manager.getDictBackgroundImage(app_key_sec).keys():
             dict_im_bg_reg_mov[key_im] = applySingleTransform(
@@ -828,15 +831,19 @@ def bindFuncButtonRunManualRegistration(
                 output_directory
             )
         data_manager.dict_im_bg_reg[app_key_sec] = dict_im_bg_reg_mov
+        # Store in XYCT
+        data_manager.dict_im_bg_reg_xyct[t_plane_sec] = dict_im_bg_reg_mov
 
-        # 6. Apply transform to ROI image
+        # 7. Apply transform to ROI image
         img_roi_mov = deepcopy(data_manager.getDictROIImage(app_key_sec).get("all"))
         val_max = np.max(img_roi_mov)
         img_roi_mov_reg = applySingleTransform(img_roi_mov, transform_parameters, output_directory)
         img_roi_mov_reg_clipped = np.minimum(img_roi_mov_reg, val_max)
         data_manager.dict_im_roi_reg[app_key_sec]["all"] = img_roi_mov_reg_clipped
+        # Store in XYCT
+        data_manager.dict_im_roi_reg_xyct[t_plane_sec] = {"all": img_roi_mov_reg_clipped}
 
-        # 7. Apply transform to ROI coordinates
+        # 8. Apply transform to ROI coordinates
         path_transform_parameters_file = os.path.join(output_directory, "TransformParameters.0.txt")
         dict_roi_coords = data_manager.getDictROICoords(app_key_sec)
         dict_roi_coords_reg = applyDictROICoordsTransform(
@@ -848,8 +855,10 @@ def bindFuncButtonRunManualRegistration(
             output_directory
         )
         data_manager.dict_roi_coords_reg[app_key_sec] = dict_roi_coords_reg
+        # Store in XYCT
+        data_manager.dict_roi_coords_xyct_reg[t_plane_sec] = dict_roi_coords_reg
 
-        # 8. Update views
+        # 9. Update views
         control_manager.view_controls[app_key].updateView()
         control_manager.view_controls[app_key_sec].updateView()
 
@@ -1129,19 +1138,46 @@ def bindFuncButtonRunROIMatchingForXYCT(
     control_manager: 'ControlManager',
     app_key_pri: str,
     app_key_sec: str,
+    use_dynamic_table: bool = True,
 ):
     from ..processing.optimal_transport import calculateROIMatching
     from ..utils.dialog_utils import showConfirmationDialog
 
+    def _getDisplayedROIIds(app_key: str, t_plane: int) -> List[int]:
+        """Get ROI IDs that are currently displayed (pass dict_roi_display filter)."""
+        all_roi_ids = list(data_manager.dict_roi_coords_xyct.get(t_plane, {}).keys())
+        dict_roi_display = control_manager.getSharedAttr(app_key, 'dict_roi_display')
+        if dict_roi_display is None:
+            return all_roi_ids
+        return [roi_id for roi_id in all_roi_ids if roi_id in dict_roi_display and all(dict_roi_display[roi_id].values())]
+
     def _ROIMatching(widget_manager: WidgetManager, data_manager: DataManager, view_control_pri: ViewControl, t_plane_pri: int, t_plane_sec: int):
-        # use registered coordinates if show_reg_im_roi is True
+        # Filter to only displayed ROIs
+        displayed_ids_pri = _getDisplayedROIIds(app_key_pri, t_plane_pri)
+        displayed_ids_sec = _getDisplayedROIIds(app_key_sec, t_plane_sec)
+
+        if len(displayed_ids_pri) == 0 or len(displayed_ids_sec) == 0:
+            print(f"  session {t_plane_pri}-{t_plane_sec}: no displayed ROIs, skip")
+            return
+
+        # Re-initialize dict_roi_matching ID list and match dict for this pair
+        data_manager.dict_roi_matching["id"][t_plane_pri] = displayed_ids_pri
+        data_manager.dict_roi_matching["id"][t_plane_sec] = displayed_ids_sec
+        if t_plane_pri not in data_manager.dict_roi_matching["match"]:
+            data_manager.dict_roi_matching["match"][t_plane_pri] = {}
+        data_manager.dict_roi_matching["match"][t_plane_pri][t_plane_sec] = {roi_id: None for roi_id in displayed_ids_pri}
+
+        # Build coordinate arrays from displayed ROIs only
         if view_control_pri.show_reg_im_roi:
-            array_src = np.array([data_manager.getDictROICoordsXYCTRegistered()[t_plane_pri][roi_id]["med"] for roi_id in data_manager.getDictROICoordsXYCTRegistered()[t_plane_pri].keys()])
-            array_tgt = np.array([data_manager.getDictROICoordsXYCTRegistered()[t_plane_sec][roi_id]["med"] for roi_id in data_manager.getDictROICoordsXYCTRegistered()[t_plane_sec].keys()])
+            coords_pri = data_manager.getDictROICoordsXYCTRegistered()[t_plane_pri]
+            coords_sec = data_manager.getDictROICoordsXYCTRegistered()[t_plane_sec]
         else:
-            array_src = np.array([data_manager.getDictROICoordsXYCT()[t_plane_pri][roi_id]["med"] for roi_id in data_manager.getDictROICoordsXYCT()[t_plane_pri].keys()])
-            array_tgt = np.array([data_manager.getDictROICoordsXYCT()[t_plane_sec][roi_id]["med"] for roi_id in data_manager.getDictROICoordsXYCT()[t_plane_sec].keys()])
-        
+            coords_pri = data_manager.getDictROICoordsXYCT()[t_plane_pri]
+            coords_sec = data_manager.getDictROICoordsXYCT()[t_plane_sec]
+
+        array_src = np.array([coords_pri[roi_id]["med"] for roi_id in displayed_ids_pri])
+        array_tgt = np.array([coords_sec[roi_id]["med"] for roi_id in displayed_ids_sec])
+
         method = widget_manager.dict_combobox["ot_method"].currentText()
         metric = "minkowski"
         p = float(widget_manager.dict_lineedit["ot_dist_exp"].text())
@@ -1161,14 +1197,11 @@ def bindFuncButtonRunROIMatchingForXYCT(
                     threshold=threshold,
                     max_cost=max_cost,
                 )
-        
-        # clear ROI Matching
-        dict_roi_matching_ = data_manager.dict_roi_matching["match"][t_plane_pri][t_plane_sec]
-        data_manager.dict_roi_matching["match"][t_plane_pri][t_plane_sec] = {roi_id: None for roi_id in dict_roi_matching_.keys()}
-        # convert roi_matching id to original id
+
+        # Convert row indices back to original ROI IDs
         for row_pri, row_sec in roi_matching.items():
-            roi_id_pri = data_manager.dict_roi_matching["id"][t_plane_pri][row_pri]
-            roi_id_sec = data_manager.dict_roi_matching["id"][t_plane_sec][row_sec]
+            roi_id_pri = displayed_ids_pri[row_pri]
+            roi_id_sec = displayed_ids_sec[row_sec]
             data_manager.dict_roi_matching["match"][t_plane_pri][t_plane_sec][roi_id_pri] = roi_id_sec
 
     def _runROIMatchingAllTPlanes():
@@ -1192,8 +1225,12 @@ def bindFuncButtonRunROIMatchingForXYCT(
         # update Table, View
         t_plane_pri = view_control_pri.getPlaneT()
         t_plane_sec = view_control_sec.getPlaneT()
-        table_control_pri.updateWidgetDynamicTableWithT(data_manager.dict_roi_matching, t_plane_pri, t_plane_sec, True)
-        table_control_sec.updateWidgetDynamicTableWithT(data_manager.dict_roi_matching, t_plane_pri, t_plane_sec, False)
+        if use_dynamic_table:
+            table_control_pri.updateWidgetDynamicTableWithT(data_manager.dict_roi_matching, t_plane_pri, t_plane_sec, True)
+            table_control_sec.updateWidgetDynamicTableWithT(data_manager.dict_roi_matching, t_plane_pri, t_plane_sec, False)
+        else:
+            matches = {k: v for k, v in data_manager.dict_roi_matching["match"].get(t_plane_pri, {}).get(t_plane_sec, {}).items() if v is not None}
+            table_control_pri.updateMatchedROIPairs(matches)
         view_control_pri.updateView()
         QMessageBox.information(q_widget, "ROI Matching Finish", "ROI Matching Finished!")
 
@@ -1205,19 +1242,31 @@ def bindFuncButtonRunROIMatchingForXYCT(
         t_plane_pri = view_control_pri.getPlaneT()
         t_plane_sec = view_control_sec.getPlaneT()
 
-        result = showConfirmationDialog(
-            q_widget,
-            'Confirmation',
-            f"Match ROIs?"
-        )
-        if result != QMessageBox.Yes:
-            return 
-        
-        _ROIMatching(widget_manager, data_manager, view_control_pri, t_plane_pri, t_plane_sec)
+        msg = QMessageBox(q_widget)
+        msg.setWindowTitle("ROI Matching")
+        msg.setText("Run ROI Matching for which session pairs?")
+        btn_current = msg.addButton(f"Current pair (Session {t_plane_pri} - {t_plane_sec})", QMessageBox.AcceptRole)
+        btn_all = msg.addButton("All session pairs", QMessageBox.AcceptRole)
+        msg.addButton(QMessageBox.Cancel)
+        msg.exec_()
+
+        clicked = msg.clickedButton()
+        if clicked == btn_current:
+            _ROIMatching(widget_manager, data_manager, view_control_pri, t_plane_pri, t_plane_sec)
+        elif clicked == btn_all:
+            for tp_pri in data_manager.dict_roi_matching["match"].keys():
+                for tp_sec in data_manager.dict_roi_matching["match"][tp_pri].keys():
+                    _ROIMatching(widget_manager, data_manager, view_control_pri, tp_pri, tp_sec)
+        else:
+            return
 
         # update Table, View
-        table_control_pri.updateWidgetDynamicTableWithT(data_manager.dict_roi_matching, t_plane_pri, t_plane_sec, True)
-        table_control_sec.updateWidgetDynamicTableWithT(data_manager.dict_roi_matching, t_plane_pri, t_plane_sec, False)
+        if use_dynamic_table:
+            table_control_pri.updateWidgetDynamicTableWithT(data_manager.dict_roi_matching, t_plane_pri, t_plane_sec, True)
+            table_control_sec.updateWidgetDynamicTableWithT(data_manager.dict_roi_matching, t_plane_pri, t_plane_sec, False)
+        else:
+            matches = {k: v for k, v in data_manager.dict_roi_matching["match"].get(t_plane_pri, {}).get(t_plane_sec, {}).items() if v is not None}
+            table_control_pri.updateMatchedROIPairs(matches)
         view_control_pri.updateView()
         QMessageBox.information(q_widget, "ROI Matching Finish", "ROI Matching Finished!")
     q_button_run.clicked.connect(_runROIMatching)
@@ -1506,6 +1555,197 @@ def bindFuncPlaneTSlider(
         view_control.updateView()
     q_slider.valueChanged.connect(onTChanged)
 
+# T-slider for multi-session Suite2p tracking (両パネル独立, pri < sec 制約なし)
+def bindFuncPlaneTSliderMultiSession(
+    q_slider_pri: 'QSlider',
+    q_slider_sec: 'QSlider',
+    data_manager: 'DataManager',
+    control_manager: 'ControlManager',
+    table_control_pri: 'TableControl',
+    table_control_sec: 'TableControl',
+) -> None:
+    def onTChanged(value: int, app_key: str) -> None:
+        control_manager.view_controls[app_key].setPlaneT(value)
+        control_manager.table_controls[app_key].setPlaneT(value)
+
+        table_control_pri.setSharedAttr_ROISelected(None)
+        table_control_sec.setSharedAttr_ROISelected(None)
+
+        try:
+            t_plane_pri = control_manager.view_controls["pri"].getPlaneT()
+            t_plane_sec = control_manager.view_controls["sec"].getPlaneT()
+            control_manager.table_controls["pri"].updateWidgetDynamicTableWithT(data_manager.dict_roi_matching, t_plane_pri, t_plane_sec, True)
+            control_manager.table_controls["sec"].updateWidgetDynamicTableWithT(data_manager.dict_roi_matching, t_plane_pri, t_plane_sec, False)
+            control_manager.view_controls["pri"].updateView()
+            control_manager.view_controls["sec"].updateView()
+        except Exception:
+            pass
+
+    q_slider_pri.valueChanged.connect(lambda value: onTChanged(value, "pri"))
+    q_slider_sec.valueChanged.connect(lambda value: onTChanged(value, "sec"))
+
+
+# Elastix registration for multi-session Fall.mat (each session vs. reference session)
+def bindFuncButtonRunElastixForMultiSessionFall(
+    q_widget: 'QWidget',
+    q_button: 'QPushButton',
+    data_manager: 'DataManager',
+    config_manager: 'ConfigManager',
+    control_manager: 'ControlManager',
+    combobox_elastix_method: 'QComboBox',
+    combobox_idx_ref: 'QComboBox',
+    path_points_txt: str = "./elastix/points_tmp.txt",
+    output_directory: str = "./elastix",
+) -> None:
+    from ..processing.elastix import convertDictToElastixFormat, makeElastixParameterObject, calculateSingleTransform, applySingleTransform, applyDictROICoordsTransform
+    from copy import deepcopy
+
+    def _registerSession(t_plane, idx_ref, img_fix, dict_parameter_map, parameter_object):
+        """Register a single session to the reference."""
+        if t_plane == idx_ref:
+            data_manager.dict_im_bg_reg_xyct[t_plane] = deepcopy(data_manager.dict_im_bg_xyct[t_plane])
+            data_manager.dict_roi_coords_xyct_reg[t_plane] = deepcopy(data_manager.dict_roi_coords_xyct[t_plane])
+            data_manager.dict_im_roi_reg_xyct[t_plane] = deepcopy(data_manager.dict_im_roi_xyct.get(t_plane, {}))
+            print(f"  session {t_plane}: reference, skip")
+            return
+
+        print(f"  session {t_plane}: registering ...")
+        img_mov = data_manager.dict_im_bg_xyct[t_plane]["meanImg"]
+
+        transform_parameters = calculateSingleTransform(img_fix, img_mov, parameter_object, output_directory)
+
+        # Apply to all bg image types
+        reg_bg = {}
+        for img_type, img in data_manager.dict_im_bg_xyct[t_plane].items():
+            reg_bg[img_type] = applySingleTransform(img, transform_parameters, output_directory)
+        data_manager.dict_im_bg_reg_xyct[t_plane] = reg_bg
+
+        # Apply to ROI image
+        from ..preprocessing.preprocessing_image import getROIImageFromDictROICoords
+        if t_plane not in data_manager.dict_im_roi_xyct:
+            dict_Fall = data_manager.dict_Fall_xyct[t_plane]
+            shape = (dict_Fall["ops"]["Lx"], dict_Fall["ops"]["Ly"])
+            data_manager.dict_im_roi_xyct[t_plane] = getROIImageFromDictROICoords(
+                data_manager.dict_roi_coords_xyct[t_plane], shape
+            )
+        img_roi = data_manager.dict_im_roi_xyct[t_plane].get("all")
+        if img_roi is not None:
+            val_max = np.max(img_roi)
+            img_roi_reg = applySingleTransform(img_roi, transform_parameters, output_directory)
+            data_manager.dict_im_roi_reg_xyct[t_plane] = {"all": np.minimum(img_roi_reg, val_max)}
+
+        # Apply to ROI coordinates
+        path_params_txt = f"{output_directory}/TransformParameters_t{t_plane}.txt"
+        transform_parameters.WriteParameterFile(transform_parameters, path_params_txt)
+        dict_roi_coords_reg = applyDictROICoordsTransform(
+            img_fix, img_mov,
+            data_manager.dict_roi_coords_xyct[t_plane],
+            dict_parameter_map,
+            path_params_txt,
+            path_points_txt,
+            output_directory,
+            xy_reverse=False,
+        )
+        data_manager.dict_roi_coords_xyct_reg[t_plane] = dict_roi_coords_reg
+
+    def _runElastix():
+        elastix_method = combobox_elastix_method.currentText()
+        idx_ref = int(combobox_idx_ref.currentText())
+        os.makedirs(output_directory, exist_ok=True)
+
+        dict_params = config_manager.json_config.get("elastix_params")[elastix_method]
+        dict_parameter_map = convertDictToElastixFormat(dict_params)
+        parameter_object = makeElastixParameterObject(dict_parameter_map)
+        img_fix = data_manager.dict_im_bg_xyct[idx_ref]["meanImg"]
+
+        # Get current sec session
+        t_plane_sec = control_manager.view_controls["sec"].getPlaneT()
+
+        # Ask user: current session only or all sessions
+        msg = QMessageBox(q_widget)
+        msg.setWindowTitle("Registration")
+        msg.setText("Run registration for which sessions?")
+        btn_current = msg.addButton(f"Current session (Session {t_plane_sec})", QMessageBox.AcceptRole)
+        btn_all = msg.addButton("All sessions", QMessageBox.AcceptRole)
+        msg.addButton(QMessageBox.Cancel)
+        msg.exec_()
+
+        clicked = msg.clickedButton()
+        if clicked == btn_current:
+            n_sessions = len(data_manager.dict_im_bg_xyct)
+            print(f"Single-session registration: ref={idx_ref}, session={t_plane_sec}, method={elastix_method}")
+            _registerSession(t_plane_sec, idx_ref, img_fix, dict_parameter_map, parameter_object)
+        elif clicked == btn_all:
+            n_sessions = len(data_manager.dict_im_bg_xyct)
+            print(f"Multi-session registration: ref={idx_ref}, n_sessions={n_sessions}, method={elastix_method}")
+            for t_plane in range(n_sessions):
+                _registerSession(t_plane, idx_ref, img_fix, dict_parameter_map, parameter_object)
+        else:
+            return
+
+        # Refresh current per-app_key dicts from XYCT and update views
+        for app_key in ["pri", "sec"]:
+            if app_key in control_manager.view_controls:
+                t = control_manager.view_controls[app_key].getPlaneT()
+                data_manager.switchSessionForAppKey(app_key, t)
+                control_manager.view_controls[app_key].updateView()
+
+        QMessageBox.information(q_widget, "Registration Finish", "Registration finished!")
+
+    q_button.clicked.connect(lambda: _runElastix())
+
+
+# Save / Load for multi-session Suite2p tracking
+def bindFuncMultiSessionTrackingIO(
+    q_button_save: 'QPushButton',
+    q_button_load: 'QPushButton',
+    q_window: 'QWidget',
+    q_lineedit: 'QLineEdit',
+    config_manager: 'ConfigManager',
+    data_manager: 'DataManager',
+    control_manager: 'ControlManager',
+) -> None:
+    from ..io.data_io import saveMultiSessionTracking, loadMultiSessionTracking
+    from ..utils.view_utils import generateRandomColor
+
+    def _save():
+        saveMultiSessionTracking(
+            q_window,
+            q_lineedit,
+            config_manager.gui_defaults,
+            config_manager.json_config,
+            data_manager.dict_roi_matching,
+            data_manager.dict_roi_coords_xyct,
+            data_manager.dict_roi_coords_xyct_reg,
+        )
+
+    def _load():
+        result = loadMultiSessionTracking(q_window, config_manager.gui_defaults)
+        if result is None:
+            return
+        dict_roi_matching, dict_roi_coords_xyct, dict_roi_coords_xyct_reg = result
+        data_manager.dict_roi_matching = dict_roi_matching
+        data_manager.dict_roi_coords_xyct = dict_roi_coords_xyct
+        data_manager.dict_roi_coords_xyct_reg = dict_roi_coords_xyct_reg
+
+        # ROI color の再初期化
+        for plane_t in dict_roi_coords_xyct.keys():
+            for roi_id in dict_roi_coords_xyct[plane_t].keys():
+                color = generateRandomColor()
+                control_manager.view_controls["pri"].roi_colors_xyct[plane_t][roi_id] = color
+                control_manager.view_controls["sec"].roi_colors_xyct[plane_t][roi_id] = color
+
+        t_plane_pri = control_manager.view_controls["pri"].getPlaneT()
+        t_plane_sec = control_manager.view_controls["sec"].getPlaneT()
+        control_manager.table_controls["pri"].updateWidgetDynamicTableWithT(dict_roi_matching, t_plane_pri, t_plane_sec, True)
+        control_manager.table_controls["sec"].updateWidgetDynamicTableWithT(dict_roi_matching, t_plane_pri, t_plane_sec, False)
+        control_manager.view_controls["pri"].updateView()
+        control_manager.view_controls["sec"].updateView()
+
+    q_button_save.clicked.connect(lambda: _save())
+    q_button_load.clicked.connect(lambda: _load())
+
+
 # -> view_layouts.makeLayoutViewWithZTSlider for Microglia Tracking
 def bindFuncPlaneTSliderWithXYCTTracking(
     q_slider_pri: 'QSlider',
@@ -1664,7 +1904,11 @@ def bindFuncCheckboxOfTableChanged(table_control, view_control):
             row = item.row()
             table_control.changeCheckboxOfTable(row)
             view_control.updateView()
-    
+
+    try:
+        table_control.q_table.itemChanged.disconnect()
+    except (RuntimeError, TypeError):
+        pass
     table_control.q_table.itemChanged.connect(onItemChanged)
 
 # -> table_layouts.makeLayoutROIFilterButton
@@ -1679,6 +1923,41 @@ def bindFuncButtonFilterROI(
         lambda: table_control.filterROI(getThresholdsOfROIFilter(dict_q_lineedit))
     )
     view_control.updateView()
+
+# -> Suite2pROITrackingMulti, id_match column editing
+def bindFuncIDMatchOfTableChanged(
+    table_control: 'TableControl',
+    view_control: 'ViewControl',
+    control_manager: 'ControlManager',
+    data_manager: 'DataManager',
+) -> None:
+    def onItemChanged(item: 'QTableWidgetItem') -> None:
+        col = item.column()
+        for col_name, col_info in table_control.table_columns.getColumns().items():
+            if col_info['type'] == 'id_match' and col_info['order'] == col:
+                row = item.row()
+                item_id = table_control.q_table.item(row, 0)
+                if item_id is None:
+                    return
+                try:
+                    roi_id_pri = int(item_id.text())
+                    t_plane_pri = control_manager.view_controls["pri"].getPlaneT()
+                    t_plane_sec = control_manager.view_controls["sec"].getPlaneT()
+                    match_text = item.text().strip() if item else ""
+                    if match_text == "":
+                        data_manager.dict_roi_matching["match"][t_plane_pri][t_plane_sec][roi_id_pri] = None
+                    else:
+                        roi_id_sec = int(match_text)
+                        sec_ids = data_manager.dict_roi_matching["id"].get(t_plane_sec, [])
+                        if roi_id_sec in sec_ids:
+                            data_manager.dict_roi_matching["match"][t_plane_pri][t_plane_sec][roi_id_pri] = roi_id_sec
+                        else:
+                            data_manager.dict_roi_matching["match"][t_plane_pri][t_plane_sec][roi_id_pri] = None
+                except (ValueError, KeyError, AttributeError):
+                    pass
+                view_control.updateView()
+                return
+    table_control.q_table.itemChanged.connect(onItemChanged)
 
 # -> MicrogliaTracking, ROI Table
 def bindFuncTableCellChangedWithMicrogliaTracking(

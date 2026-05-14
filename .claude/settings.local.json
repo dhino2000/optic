@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c \"import json; nb=json.load\\(open\\('notebook/Suite2pROITrackingGUI_ver03.ipynb'\\)\\); [print\\(f'Cell {i}:', c['source'][:200] if c['source'] else '\\(empty\\)'\\) for i,c in enumerate\\(nb['cells']\\)]\")",
+      "Bash(python -c \"import json; nb=json.load\\(open\\('c:/Users/sofut/Machine_Learning/WakeLab/optic/notebook/Suite2pROITrackingGUI_ver03.ipynb', encoding='utf-8'\\)\\); [print\\(f'Cell {i}:', repr\\(c['source'][:300]\\)\\) for i,c in enumerate\\(nb['cells']\\)]\")",
+      "Bash(python -c ':*)",
+      "Bash(python write_nb_helper.py)",
+      "Bash(python3 -c ':*)",
+      "Bash(python -c \"import json; nb=json.load\\(open\\('notebook/Suite2pROITrackingGUI_ver03.ipynb'\\)\\); src=''.join\\(nb['cells'][0]['source']\\); print\\(src[src.find\\('_updateMatch'\\):src.find\\('_updateMatch'\\)+3000]\\)\")"
+    ]
+  }
+}

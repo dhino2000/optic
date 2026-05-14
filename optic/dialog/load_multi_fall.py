@@ -158,7 +158,8 @@ class LoadMultiFallDialog(QDialog):
     def bindFuncAllWidget(self):
         self.widget_manager.dict_button["add_lineedit"].clicked.connect(self.addSession)
         self.widget_manager.dict_button["remove_lineedit"].clicked.connect(self.removeSession)
+        self.widget_manager.dict_button["load_file"].clicked.connect(self.accept)
         bindFuncExit(
-            q_window=self, 
-            q_button=self.widget_manager.dict_button["exit"], 
+            q_window=self,
+            q_button=self.widget_manager.dict_button["exit"],
         )

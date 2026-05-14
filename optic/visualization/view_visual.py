@@ -6,6 +6,7 @@ from PyQt5.QtWidgets import QGraphicsScene, QGraphicsView
 import numpy as np
 from ..config.constants import ChannelKeys, PenColors, PenWidth
 from .view_visual_roi import updateLayerROI_Suite2pROICuration, updateLayerROI_Suite2pROITracking, updateLayerROI_MicrogliaTracking, updateLayerROI_TIFStackExplorer
+# (updateLayerROI_MicrogliaTracking は multi-session Suite2p でも流用)
 from ..preprocessing.preprocessing_roi import updateROIImage
 
 """
@@ -234,6 +235,92 @@ def updateView_MicrogliaTracking(
         updateLayerROI_MicrogliaTracking(view_control, data_manager, control_manager, app_key, app_key_sec)
     except AttributeError:
         pass
+
+
+# update view for multi-session Suite2p Fall.mat tracking
+def updateView_Suite2pROITrackingMulti(
+        q_scene: QGraphicsScene,
+        q_view: QGraphicsView,
+        view_control: ViewControl,
+        data_manager: DataManager,
+        control_manager: ControlManager,
+        app_key: AppKeys,
+        app_key_sec: AppKeys = None,
+        ) -> None:
+    bg_image_chan1 = None
+    bg_image_chan2 = None
+    bg_image_chan3 = None
+
+    # Chan1 (Green): current session background (redirected via switchSessionForAppKey)
+    idx_channel = view_control.bg_image_idx_channel
+    if view_control.getBackgroundVisibility(ChannelKeys.CHAN1):
+        image_type = view_control.getBackgroundImageType()
+        image = None
+        if idx_channel == 0:
+            d = (data_manager.getDictBackgroundImageRegistered(app_key) if view_control.getShowRegImBG()
+                 else data_manager.getDictBackgroundImage(app_key))
+            if d:
+                image = d.get(image_type)
+        else:
+            d = (data_manager.getDictBackgroundImageChannel2Registered(app_key) if view_control.getShowRegImBG()
+                 else data_manager.getDictBackgroundImageChannel2(app_key))
+            if d:
+                image = d.get("meanImg")
+        if image is not None:
+            bg_image_chan1 = adjustChannelContrast(
+                image=image,
+                min_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN1, 'min'),
+                max_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN1, 'max'),
+            )
+
+    # Chan2 (Red): sec session background, only for pri view
+    if view_control.getBackgroundVisibility(ChannelKeys.CHAN2) and app_key_sec is not None:
+        view_control_sec = control_manager.view_controls.get(app_key_sec)
+        if view_control_sec is not None:
+            image_type_sec = view_control_sec.getBackgroundImageType()
+            d_sec = (data_manager.getDictBackgroundImageRegistered(app_key_sec) if view_control.getShowRegImBG()
+                     else data_manager.getDictBackgroundImage(app_key_sec))
+            if d_sec:
+                image = d_sec.get(image_type_sec)
+                if image is not None:
+                    bg_image_chan2 = adjustChannelContrast(
+                        image=image,
+                        min_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN2, 'min'),
+                        max_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN2, 'max'),
+                    )
+
+    # Chan3 (Blue): sec ROI image overlay, only for pri view
+    if view_control.getBackgroundVisibility(ChannelKeys.CHAN3) and app_key_sec is not None:
+        view_control_sec = control_manager.view_controls.get(app_key_sec)
+        if view_control_sec is not None:
+            view_control_sec.updateROIImage()
+            d_roi = (data_manager.getDictROIImageRegistered(app_key_sec) if view_control.getShowRegImROI()
+                     else data_manager.getDictROIImage(app_key_sec))
+            if d_roi:
+                image = d_roi.get("all")
+                if image is not None:
+                    bg_image_chan3 = adjustChannelContrast(
+                        image=image,
+                        min_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN3, 'min'),
+                        max_val_slider=view_control.getBackgroundContrastValue(ChannelKeys.CHAN3, 'max'),
+                        scaling=False,
+                    )
+
+    (width, height) = view_control.getImageSize()
+    bg_image = convertMonoImageToRGBImage(
+        image_g=bg_image_chan1,
+        image_r=bg_image_chan2,
+        image_b=bg_image_chan3,
+        height=height,
+        width=width,
+        dtype=np.uint8,
+    )
+
+    qimage = QImage(bg_image.data, width, height, width * 3, QImage.Format_RGB888)
+    pixmap = QPixmap.fromImage(qimage)
+    view_control.layer_bg.setPixmap(pixmap)
+
+    updateLayerROI_Suite2pROITracking(view_control, data_manager, control_manager, app_key, app_key_sec)
 
 
 # update view for Tiff data

@@ -26,7 +26,7 @@ class ViewHandler:
     def _initializeHandler(self, current_app):
         if current_app == "SUITE2P_ROI_CURATION":
             return self.Suite2pROICurationHandler(self.view_control, self.view_control.control_manager.table_controls[self.app_key])
-        elif current_app == "SUITE2P_ROI_TRACKING":
+        elif current_app in ("SUITE2P_ROI_TRACKING", "SUITE2P_ROI_TRACKING_MULTI"):
             return self.Suite2pROITrackingHandler(self.view_control)
         elif current_app == "MICROGLIA_TRACKING":
             return self.MicrogliaTrackingHandler(self.view_control)

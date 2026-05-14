@@ -2,7 +2,7 @@ from __future__ import annotations
 from ..type_definitions import *
 from collections import defaultdict
 import numpy as np
-from ..preprocessing.preprocessing_image import getBGImageFromFall, getBGImageChannel2FromFall, getROIImageFromFall, getBGImageFromCaimanHDF5
+from ..preprocessing.preprocessing_image import getBGImageFromFall, getBGImageFromDictFall, getBGImageChannel2FromFall, getROIImageFromFall, getBGImageFromCaimanHDF5
 from ..preprocessing.preprocessing_fall import getROICoordsFromDictFall
 from ..config.constants import Extension, ImportPackages
 from ..io.data_io import loadFallMat, loadCaimanHDF5, loadTiffStack, loadTifImage
@@ -45,11 +45,15 @@ class DataManager:
         # for ImageJ ROI Manager
         self.list_roi_imagej:           List[ImagejRoi] = []
         self.list_roi_imagej_reg:       List[ImagejRoi] = []
-        # for MicrogliaTracking
+        # for MicrogliaTracking / multi-session Suite2p
         # ROI matching, XYCT
         self.dict_roi_matching:         Dict[str, Dict[int, List[int] | Dict[int, Dict[int, Optional[int]]]]] = {"id": {}, "match": {}}
         self.dict_roi_coords_xyct:      Dict[int, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]] = CustomDict()
         self.dict_roi_coords_xyct_reg:  Dict[int, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]] = CustomDict()
+        # for multi-session Suite2p: background images indexed by session (plane_t)
+        self.dict_Fall_xyct:            Dict[int, Dict[str, Any]] = {}
+        self.dict_im_bg_xyct:           Dict[int, Dict[str, np.ndarray]] = defaultdict(dict)
+        self.dict_im_bg_reg_xyct:       Dict[int, Dict[str, np.ndarray]] = defaultdict(dict)
         self.dict_im_roi_xyct:          Dict[int, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
         self.dict_im_roi_reg_xyct:      Dict[int, Dict[str, np.ndarray[np.uint8, Tuple[int, int]]]] = defaultdict(dict)
         # Cascade
@@ -105,6 +109,46 @@ class DataManager:
             raise e
             # return False, e
         
+    # redirect per-app_key data to a specific session (plane_t) from XYCT dicts
+    def switchSessionForAppKey(self, app_key: str, plane_t: int) -> None:
+        dict_Fall = self.dict_Fall_xyct.get(plane_t)
+        if dict_Fall is None:
+            return
+        self.dict_Fall[app_key] = dict_Fall
+        self.dict_data_dtype[app_key] = Extension.MAT
+        self.dict_im_bg[app_key] = self.dict_im_bg_xyct.get(plane_t, {})
+        self.dict_im_bg_reg[app_key] = self.dict_im_bg_reg_xyct.get(plane_t, {})
+        self.dict_roi_coords[app_key] = self.dict_roi_coords_xyct.get(plane_t, {})
+        self.dict_roi_coords_reg[app_key] = self.dict_roi_coords_xyct_reg.get(plane_t, {})
+        # Update ROI image from XYCT if available, otherwise regenerate and cache
+        from ..preprocessing.preprocessing_image import getROIImageFromFall
+        if plane_t not in self.dict_im_roi_xyct:
+            self.dict_im_roi_xyct[plane_t] = getROIImageFromFall(self, app_key)
+        self.dict_im_roi[app_key] = self.dict_im_roi_xyct[plane_t]
+        if plane_t not in self.dict_im_roi_reg_xyct:
+            self.dict_im_roi_reg_xyct[plane_t] = getROIImageFromFall(self, app_key)
+        self.dict_im_roi_reg[app_key] = self.dict_im_roi_reg_xyct[plane_t]
+
+    # load Fall.mat for multi-session tracking (data indexed by plane_t=session index)
+    def loadFallMatMultiSession(self, plane_t: int, path_fall: str) -> Tuple[bool, Optional[Exception]]:
+        try:
+            from copy import deepcopy
+            dict_Fall = loadFallMat(path_fall)
+            # Store XYCT data indexed by plane_t (session)
+            self.dict_Fall_xyct[plane_t] = dict_Fall
+            self.dict_im_bg_xyct[plane_t] = getBGImageFromDictFall(dict_Fall)
+            self.dict_im_bg_reg_xyct[plane_t] = deepcopy(self.dict_im_bg_xyct[plane_t])
+            self.dict_roi_coords_xyct[plane_t] = getROICoordsFromDictFall(dict_Fall)
+            self.dict_roi_coords_xyct_reg[plane_t] = deepcopy(self.dict_roi_coords_xyct[plane_t])
+            # Redirect all per-app_key dicts (including roi_coords_reg, im_roi) via switchSessionForAppKey
+            if plane_t == 0:
+                self.switchSessionForAppKey("pri", 0)
+            elif plane_t == 1:
+                self.switchSessionForAppKey("sec", 1)
+            return True, None
+        except Exception as e:
+            return False, e
+
     # load tiff image data (for optional)
     def loadTifImage(self, app_key: AppKeys, path_image: str) -> Tuple[bool, Optional[Exception]]:
         try:
@@ -313,6 +357,34 @@ class DataManager:
     
     def getDictROICoordsXYCTRegistered(self) -> Dict[int, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]]:
         return self.dict_roi_coords_xyct_reg
+
+    def getDictFallXYCT(self, plane_t: int) -> Dict[str, Any]:
+        return self.dict_Fall_xyct.get(plane_t, {})
+
+    def getStatXYCT(self, plane_t: int) -> Dict[int, Any]:
+        return self.dict_Fall_xyct.get(plane_t, {}).get("stat", {})
+
+    def getNROIsXYCT(self, plane_t: int) -> int:
+        return len(self.getStatXYCT(plane_t))
+
+    def getTracesXYCT(self, plane_t: int, roi_id: int = None) -> Dict[str, np.ndarray]:
+        dict_Fall = self.dict_Fall_xyct.get(plane_t, {})
+        if not dict_Fall:
+            return {}
+        traces = {
+            "F":    dict_Fall.get("F"),
+            "Fneu": dict_Fall.get("Fneu"),
+            "spks": dict_Fall.get("spks"),
+        }
+        if roi_id is not None:
+            return {k: v[roi_id] for k, v in traces.items() if v is not None}
+        return {k: v for k, v in traces.items() if v is not None}
+
+    def getDictBackgroundImageXYCT(self) -> Dict[int, Dict[str, np.ndarray]]:
+        return self.dict_im_bg_xyct
+
+    def getDictBackgroundImageRegisteredXYCT(self) -> Dict[int, Dict[str, np.ndarray]]:
+        return self.dict_im_bg_reg_xyct
     
     def getDictROIMatching(self) -> Dict[str, Dict[int, List[int] | Dict[int, Dict[int, Optional[int]]]]]:
         return self.dict_roi_matching

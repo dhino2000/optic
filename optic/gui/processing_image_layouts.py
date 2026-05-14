@@ -210,6 +210,57 @@ def makeLayoutStackRegistration(
     layout.addWidget(widget_manager.makeWidgetButton(key=key_button_export, label="Export Image"))
     return layout
 
+# Multi-session Fall.mat registration (N sessions vs. one reference session)
+def makeLayoutMultiSessionFallRegistration(
+        widget_manager               : WidgetManager,
+        n_sessions                   : int,
+        key_label_elastix_method     : str,
+        key_combobox_elastix_method  : str,
+        key_label_ref_s              : str,
+        key_combobox_ref_s           : str,
+        key_button_config            : str,
+        key_button_run               : str,
+        key_checkbox_show_roi_match  : str,
+        key_checkbox_show_roi_pair   : str,
+        key_checkbox_show_reg_im_bg  : str,
+        key_checkbox_show_reg_im_roi : str,
+        key_label_opacity_pair       : str,
+        key_slider_opacity_pair      : str,
+        ) -> QVBoxLayout:
+    layout = QVBoxLayout()
+    layout.addWidget(widget_manager.makeWidgetLabel(key=key_label_elastix_method, label="Image Registration (Multi-Session)", bold=True, italic=True, use_global_style=False))
+    layout_row = QHBoxLayout()
+    layout_row.addLayout(makeLayoutComboBoxLabel(
+        widget_manager,
+        key_label_elastix_method,
+        key_combobox_elastix_method,
+        "Elastix method:",
+        axis="horizontal",
+        items=["rigid", "affine", "bspline"]
+    ))
+    layout_row.addLayout(makeLayoutComboBoxLabel(
+        widget_manager,
+        key_label_ref_s,
+        key_combobox_ref_s,
+        "Reference session:",
+        axis="horizontal",
+        items=[str(i) for i in range(n_sessions)]
+    ))
+    layout_row.addLayout(makeLayoutElastixConfig(widget_manager, key_button_config))
+    layout_row.addWidget(widget_manager.makeWidgetButton(key=key_button_run, label="Run Registration"))
+    layout_checkbox = QHBoxLayout()
+    layout_checkbox.addWidget(widget_manager.makeWidgetCheckBox(key=key_checkbox_show_roi_match, label="Show Matched ROI", checked=True))
+    layout_checkbox.addWidget(widget_manager.makeWidgetCheckBox(key=key_checkbox_show_roi_pair, label="Show ROI pairs", checked=True))
+    layout_checkbox.addWidget(widget_manager.makeWidgetCheckBox(key=key_checkbox_show_reg_im_bg, label="Show Registered Image", checked=True))
+    layout_checkbox.addWidget(widget_manager.makeWidgetCheckBox(key=key_checkbox_show_reg_im_roi, label="Show Registered ROI", checked=True))
+    layout_slider = QHBoxLayout()
+    layout_slider.addLayout(makeLayoutSliderLabel(widget_manager, key_label_opacity_pair, key_slider_opacity_pair, "Opacity of ROI pair", value_set=255))
+    layout.addLayout(layout_row)
+    layout.addLayout(layout_checkbox)
+    layout.addLayout(layout_slider)
+    return layout
+
+
 # save elastix transform parameter
 def makeLayoutSaveElastixTransform(
         widget_manager: WidgetManager, 

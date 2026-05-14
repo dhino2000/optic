@@ -29,8 +29,13 @@ def setupWidgetROITable(
         table_columns: TableColumns, 
         key_event_ignore: bool=True
         ):
-    # initialize table
+    # initialize table: clear all existing items and cell widgets
     q_table.clearSelection()
+    for row in range(q_table.rowCount()):
+        for col in range(q_table.columnCount()):
+            q_table.removeCellWidget(row, col)
+    q_table.clearContents()
+    q_table.setRowCount(0)
 
     q_table.setRowCount(len_row)
     # sort columns by order

@@ -1,7 +1,7 @@
 from __future__ import annotations
 from ..type_definitions import *
 from ..handlers.view_handler import ViewHandler
-from ..visualization.view_visual import updateView_Suite2pROICuration, updateView_TIFStackExplorer, updateView_Suite2pROITracking, updateView_MicrogliaTracking, zoomView, resetZoomView
+from ..visualization.view_visual import updateView_Suite2pROICuration, updateView_TIFStackExplorer, updateView_Suite2pROITracking, updateView_MicrogliaTracking, updateView_Suite2pROITrackingMulti, zoomView, resetZoomView
 from ..visualization.view_visual_roi import findClosestROI, shouldSkipROI
 from ..visualization.view_visual_rectangle import initializeDragRectangle, updateDragRectangle
 from ..visualization.info_visual import updateZPlaneDisplay, updateTPlaneDisplay
@@ -104,7 +104,9 @@ class ViewControl:
         elif self.config_manager.current_app == "SUITE2P_ROI_TRACKING":
             updateView_Suite2pROITracking(self.q_scene, self.q_view, self, self.data_manager, self.control_manager, self.app_key, self.app_key_sec)
         elif self.config_manager.current_app == "MICROGLIA_TRACKING":
-            updateView_MicrogliaTracking(self.q_scene, self.q_view, self, self.data_manager, self.control_manager, self.app_key, self.app_key_sec)  
+            updateView_MicrogliaTracking(self.q_scene, self.q_view, self, self.data_manager, self.control_manager, self.app_key, self.app_key_sec)
+        elif self.config_manager.current_app == "SUITE2P_ROI_TRACKING_MULTI":
+            updateView_Suite2pROITrackingMulti(self.q_scene, self.q_view, self, self.data_manager, self.control_manager, self.app_key, self.app_key_sec)
         elif self.config_manager.current_app == "TIFSTACK_EXPLORER":
             updateView_TIFStackExplorer(self.q_scene, self.q_view, self, self.data_manager, self.control_manager, self.app_key)
         
@@ -151,6 +153,13 @@ class ViewControl:
     def initializeROIColors(self):
         for roi_id in self.data_manager.getStat(self.app_key).keys():
             self.roi_colors[roi_id] = generateRandomColor()
+
+    def initializeROIColorsXYCT(self, plane_t: int) -> None:
+        """Initialize roi_colors_xyct for a session (plane_t) from dict_roi_coords_xyct."""
+        dict_roi_coords = self.data_manager.getDictROICoordsXYCT().get(plane_t, {})
+        for roi_id in dict_roi_coords.keys():
+            if roi_id not in self.roi_colors_xyct[plane_t]:
+                self.roi_colors_xyct[plane_t][roi_id] = generateRandomColor()
     
     """
     get Functions
@@ -174,9 +183,13 @@ class ViewControl:
         return self.rect_highlight_range
     
     def getROIColor(self, roi_id: int) -> Tuple[int, int, int]:
+        if roi_id not in self.roi_colors:
+            self.roi_colors[roi_id] = generateRandomColor()
         return self.roi_colors[roi_id]
     
-    def getROIColorXYCT(self, plane_t: int, roi_id: int) -> Dict[int, Tuple[int, int, int]]:
+    def getROIColorXYCT(self, plane_t: int, roi_id: int) -> Tuple[int, int, int]:
+        if roi_id not in self.roi_colors_xyct[plane_t]:
+            self.roi_colors_xyct[plane_t][roi_id] = generateRandomColor()
         return self.roi_colors_xyct[plane_t][roi_id]
 
     def getROIOpacity(self) -> int:

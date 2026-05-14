@@ -605,3 +605,89 @@ def loadMicrogliaTracking(
             return dict_roi_matching, dict_roi_coords_xyct, dict_roi_coords_xyct_reg, dict_tiff_reg
         except Exception as e:
             QMessageBox.warning(q_window, "File load failed", f"Error loading Microglia Tracking file: {e}")
+
+
+# ===== Multi-session Suite2p ROI Tracking IO =====
+
+def saveMultiSessionTracking(
+        q_window                    : QMainWindow,
+        q_lineedit                  : QLineEdit,
+        gui_defaults                : GuiDefaults,
+        json_config                 : JsonConfig,
+        dict_roi_matching           : Dict[str, Any],
+        dict_roi_coords_xyct        : Dict[int, Any],
+        dict_roi_coords_xyct_reg    : Dict[int, Any],
+        ) -> None:
+    path_src = q_lineedit.text() if q_lineedit else ""
+    path_dst = generateSavePath(path_src, prefix="MultiSessionTracking_", remove_strings="Fall_", new_extension=".mat")
+    path_dst, is_overwrite = saveFileDialog(q_widget=q_window, file_type=".mat", title="Save Multi-session Tracking mat File", initial_dir=path_dst)
+    if path_dst:
+        try:
+            from ..dialog.user_select import UserSelectDialog
+            from ..preprocessing.preprocessing_table import (
+                convertDictROIMatchingAndDictROICoordsToMatMicrogliaTracking,
+                convertMatMicrogliaTrackingToDictROIMatchingAndDictROICoords,
+                convertContentsOfDictROIMatchingAndDictROICoordsToArray,
+            )
+            dialog = UserSelectDialog(parent=q_window, gui_defaults=gui_defaults, json_config=json_config)
+            user = ""
+            if dialog.exec_() == QDialog.Accepted:
+                dialog.getUser()
+                user = dialog.user
+            now = f"save_{datetime.datetime.now().strftime('%y%m%d_%H%M%S')}"
+
+            if is_overwrite:
+                mat_data = loadmat(path_dst, simplify_cells=True)
+                # 既存エントリを再変換して保持
+                for date_ in list(mat_data["ROI"].keys()):
+                    d_match, d_coords, d_coords_reg = convertMatMicrogliaTrackingToDictROIMatchingAndDictROICoords(mat_data["ROI"][date_])
+                    d_conv, arr_c, arr_cr = convertContentsOfDictROIMatchingAndDictROICoordsToArray(d_match, d_coords, d_coords_reg)
+                    mat_data["ROI"][date_] = {
+                        "ROITracking": d_conv,
+                        "ROICoords": arr_c,
+                        "ROICoordsRegistered": arr_cr,
+                        "user": mat_data["ROI"][date_].get("user", ""),
+                    }
+                mat_data = convertDictROIMatchingAndDictROICoordsToMatMicrogliaTracking(
+                    dict_roi_matching, dict_roi_coords_xyct, dict_roi_coords_xyct_reg,
+                    dict_tiff_reg={},   # 画像は保存しない
+                    mat_microglia_tracking=mat_data,
+                    date=now, user=user, path_tif=path_src,
+                )
+            else:
+                mat_data = convertDictROIMatchingAndDictROICoordsToMatMicrogliaTracking(
+                    dict_roi_matching, dict_roi_coords_xyct, dict_roi_coords_xyct_reg,
+                    dict_tiff_reg={},
+                    date=now, user=user, path_tif=path_src,
+                )
+            savemat(path_dst, mat_data)
+            QMessageBox.information(q_window, "File save", f"Multi-session tracking saved!\nuser: {user}, date: {now}")
+        except Exception as e:
+            QMessageBox.warning(q_window, "File save failed", f"Error: {e}")
+
+
+def loadMultiSessionTracking(
+        q_window     : QMainWindow,
+        gui_defaults : GuiDefaults,
+        ):
+    path_src = openFileDialog(q_widget=q_window, file_type=".mat", title="Open Multi-session Tracking mat File")
+    if not path_src:
+        return None
+    try:
+        from ..dialog.date_select import DateSelectDialog
+        from ..preprocessing.preprocessing_table import convertMatMicrogliaTrackingToDictROIMatchingAndDictROICoords
+        mat_data = loadmat(path_src, simplify_cells=True)
+        roi_data = mat_data["ROI"]
+        list_date = list(roi_data.keys())
+        dialog = DateSelectDialog(parent=q_window, gui_defaults=gui_defaults, list_date=list_date)
+        if dialog.exec_() == QDialog.Accepted:
+            date = dialog.date
+        else:
+            return None
+        dict_roi_matching, dict_roi_coords_xyct, dict_roi_coords_xyct_reg = \
+            convertMatMicrogliaTrackingToDictROIMatchingAndDictROICoords(roi_data[date])
+        QMessageBox.information(q_window, "File load", "Multi-session tracking file loaded!")
+        return dict_roi_matching, dict_roi_coords_xyct, dict_roi_coords_xyct_reg
+    except Exception as e:
+        QMessageBox.warning(q_window, "File load failed", f"Error: {e}")
+        return None
