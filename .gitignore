@@ -171,3 +171,5 @@ notebook/models
 notebook/analysis/result
 external/cascade/Pretrained_models
 external/CaImAn
+.claude/*
+.vscode/*

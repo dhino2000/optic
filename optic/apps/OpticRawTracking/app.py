@@ -28,20 +28,21 @@ from optic.manager import WidgetManager, ConfigManager, DataManager, ControlMana
 from optic.gui.bind_func import (
     bindFuncExit, bindFuncButtonsROIManagerForTable, bindFuncButtonRunElastixForMicrogliaXYCTStackRegistration,
     bindFuncLoadFileWidget, bindFuncSliderSpinBoxROIEditConfig, bindFuncPlaneTSliderWithXYCTTracking,
-    bindFuncTableSelectionChangedWithTracking, bindFuncTableCellChangedWithMicrogliaTracking,
+    bindFuncTableSelectionChangedWithTracking, bindFuncTableCellChangedWithOpticRawTracking,
     bindFuncOpacitySlider, bindFuncROIMaskNpyIO, bindFuncROIManagerZipIO,
     bindFuncHighlightOpacitySlider, bindFuncBackgroundContrastSlider, bindFuncBackgroundVisibilityCheckbox, 
     bindFuncViewEvents, bindFuncHelp, bindFuncCheckboxShowMatchedROI,
     bindFuncCheckboxShowROIPair, bindFuncROIPairOpacitySlider, bindFuncButtonSaveRegisterdImage,
     bindFuncButtonRunROIMatchingForXYCT, bindFuncButtonClearROIMatching,
-    bindFuncButtonRunCellposeForXYCT, bindFuncMicrogliaTrackingIO,
-    bindFuncCheckboxShowRegisteredROIImage, bindFuncCheckboxShowRegisteredStack
+    bindFuncButtonRunCellposeForXYCT, bindFuncOpticRawTrackingIO,
+    bindFuncCheckboxShowRegisteredROIImage, bindFuncCheckboxShowRegisteredStack,
+    bindFuncButtonGenerateMasterTrackingTable,
 )
 from optic.utils.layout_utils import clearLayout
 
-class MicrogliaTrackingGUI(QMainWindow):
+class OpticRawTrackingGUI(QMainWindow):
     def __init__(self):
-        APP_NAME = "MICROGLIA_TRACKING"
+        APP_NAME = "OPTIC_RAW_TRACKING"
         QMainWindow.__init__(self)
         self.widget_manager, self.config_manager, self.data_manager, self.control_manager, self.layout_manager = initManagers(
             WidgetManager(), ConfigManager(), DataManager(), ControlManager(), LayoutManager()
@@ -305,6 +306,9 @@ class MicrogliaTrackingGUI(QMainWindow):
             "roi_matching_save",
             "roi_matching_load",
         ))
+        layout.addWidget(self.widget_manager.makeWidgetButton(
+            "master_tracking_run", "Generate master tracking table"
+        ))
         return layout
     
     # ROI Manager
@@ -468,7 +472,7 @@ class MicrogliaTrackingGUI(QMainWindow):
             canvas_control_sec=None,
         )
         # ROI Table onCellChanged
-        bindFuncTableCellChangedWithMicrogliaTracking(
+        bindFuncTableCellChangedWithOpticRawTracking(
             q_table_pri=self.widget_manager.dict_table[self.app_keys[0]],
             control_manager=self.control_manager,
             data_manager=self.data_manager,
@@ -541,7 +545,7 @@ class MicrogliaTrackingGUI(QMainWindow):
             lambda: self.showSubWindowElastixParamsConfig()
         )
         # Microglia Tracking IO
-        bindFuncMicrogliaTrackingIO(
+        bindFuncOpticRawTrackingIO(
             self.widget_manager.dict_button["roi_matching_save"],
             self.widget_manager.dict_button["roi_matching_load"],
             self,
@@ -568,6 +572,23 @@ class MicrogliaTrackingGUI(QMainWindow):
             control_manager=self.control_manager,
             app_key_pri=self.app_keys[0],
             app_key_sec=self.app_keys[1],
+        )
+        # Generate master tracking table (graph-based multi-session alignment)
+        def _getRawTrackingSessionLabels():
+            path_tiff = self.widget_manager.dict_lineedit["path_tiff"].text()
+            n_t = self.data_manager.getSizeOfT(self.app_keys[0])
+            return [f"{path_tiff}:T{t}" for t in range(n_t)]
+        def _getRawTrackingDefaultFilename():
+            path_tiff = self.widget_manager.dict_lineedit["path_tiff"].text()
+            base = os.path.splitext(os.path.basename(path_tiff))[0] if path_tiff else "tracking"
+            dir_ = os.path.dirname(path_tiff) if path_tiff else ""
+            return os.path.join(dir_, f"master_tracking_{base}.csv")
+        bindFuncButtonGenerateMasterTrackingTable(
+            q_button=self.widget_manager.dict_button["master_tracking_run"],
+            q_window=self,
+            data_manager=self.data_manager,
+            get_session_labels_callback=_getRawTrackingSessionLabels,
+            default_filename_callback=_getRawTrackingDefaultFilename,
         )
         # run Cellpose
         bindFuncButtonRunCellposeForXYCT(

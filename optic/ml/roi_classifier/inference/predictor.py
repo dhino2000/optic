@@ -190,7 +190,7 @@ def predictAndUpdateDataManager(
     """
     Predict cell types and update DataManager.
     
-    This function is designed for integration with Suite2pROICurationGUI.
+    This function is designed for integration with OpticROICurationGUI.
     
     Args:
         predictor: RoiClassifierPredictor instance

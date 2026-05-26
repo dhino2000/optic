@@ -349,8 +349,8 @@ def applyPointTransform(
 
 #         """
 #         WARNING !!!
-#         XY coordination relationships of Suite2pTracking and MicrogliaTracking are different
-#         To modify this, set xy_reverse to True with MicrogliaTracking
+#         XY coordination relationships of Suite2pTracking and OpticRawTracking are different
+#         To modify this, set xy_reverse to True with OpticRawTracking
 #         """
 #         # XY reverse
 #         if xy_reverse:

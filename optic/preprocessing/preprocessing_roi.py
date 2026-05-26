@@ -96,7 +96,7 @@ def updateROIImage(
     else:
         return dict_im_roi
     
-# update ROI Image for MicrogliaTracking
+# update ROI Image for OpticRawTracking
 def updateROIImageForXYCT(
     data_manager: DataManager, 
     control_manager: ControlManager, 

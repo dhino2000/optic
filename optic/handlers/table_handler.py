@@ -206,7 +206,7 @@ class TableHandler:
     
     # def removeSelectedRow(self) -> None:
     #     """
-    #     Remove the selected row (used mainly in MICROGLIA_TRACKING)
+    #     Remove the selected row (used mainly in OPTIC_RAW_TRACKING)
     #     """
     #     table_control = self.table_control
     #     current_row = table_control.selected_row

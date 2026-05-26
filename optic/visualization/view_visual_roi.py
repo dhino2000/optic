@@ -10,8 +10,8 @@ import numpy as np
 """
 update layer_roi
 """
-# update layer_roi for Suite2pROICuration
-def updateLayerROI_Suite2pROICuration(
+# update layer_roi for OpticROICuration
+def updateLayerROI_OpticROICuration(
         view_control: ViewControl, 
         data_manager: DataManager, 
         control_manager: ControlManager, 
@@ -60,8 +60,8 @@ def updateLayerROI_Suite2pROICuration(
     painter.end()
     view_control.layer_roi.setPixmap(pixmap)
 
-# update layer_roi for Suite2pROITracking
-def updateLayerROI_Suite2pROITracking(
+# update layer_roi for OpticROITracking
+def updateLayerROI_OpticROITracking(
         view_control: ViewControl, 
         data_manager: DataManager, 
         control_manager: ControlManager, 
@@ -100,8 +100,8 @@ def updateLayerROI_Suite2pROITracking(
     resetZoomView(view_control.q_view, view_control.q_scene.sceneRect())
     view_control.layer_roi.setPixmap(pixmap)
 
-# update layer_roi for MicrogliaTracking
-def updateLayerROI_MicrogliaTracking(
+# update layer_roi for OpticRawTracking
+def updateLayerROI_OpticRawTracking(
         view_control: ViewControl, 
         data_manager: DataManager, 
         control_manager: ControlManager, 
@@ -367,10 +367,14 @@ def drawROIPairsOnlyDisplay(
             roiId_pairs = table_control_pri.getMatchedROIPairs(table_control_sec)
             # all ROI pairs
             for roiId_pri, roiId_sec in roiId_pairs:
-                coords_pri = data_manager.getDictROICoords(app_key_pri)[roiId_pri]["med"]
+                # The line endpoints must match how the ROIs are actually drawn:
+                # when show_reg_im_roi is on, pri ROIs are rendered at their REGISTERED centers
+                # (updateLayerROI_OpticROITracking), so the pri endpoint must use registered med too.
                 if view_control.show_reg_im_roi:
+                    coords_pri = data_manager.getDictROICoordsRegistered(app_key_pri)[roiId_pri]["med"]
                     coords_sec = data_manager.getDictROICoordsRegistered(app_key_sec)[roiId_sec]["med"]
                 else:
+                    coords_pri = data_manager.getDictROICoords(app_key_pri)[roiId_pri]["med"]
                     coords_sec = data_manager.getDictROICoords(app_key_sec)[roiId_sec]["med"]
                 # show only if both ROIs are displayed
                 if all(dict_roi_display_pri[roiId_pri].values()) and all(dict_roi_display_sec[roiId_sec].values()) and roiId_pri != ROISelectedId:

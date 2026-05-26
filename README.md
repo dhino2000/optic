@@ -4,8 +4,8 @@
 [**OPTIC Documantation**](https://optic-doc.readthedocs.io/en/latest/)
 
 OPTIC consists of four specialized applications:
-### 1. Suite2pROICuration
-<img src="docs/Suite2pROICuration/images/suite2p_roi_curation.png">
+### 1. OpticROICuration
+<img src="docs/OpticROICuration/images/optic_roi_curation.png">
 
 #### Input Format
 - Fall.mat: Suite2p output file containing ROI information  
@@ -17,8 +17,8 @@ OPTIC consists of four specialized applications:
 - Event-aligned trace analysis
 - Real-time ROI selection with trace visualization
 
-### 2. Suite2pROITracking
-<img src="docs/Suite2pROITracking/images/suite2p_roi_tracking.png">
+### 2. OpticROITracking
+<img src="docs/OpticROITracking/images/optic_roi_tracking.png">
 
 #### Input Format
 - Two Fall.mat files from different imaging sessions
@@ -29,8 +29,8 @@ OPTIC consists of four specialized applications:
   - Optimal transport algorithms
 - Visualization of matched ROI pairs
 
-### 3. MicrogliaTracking
-<img src="docs/MicrogliaTracking/images/microglia_tracking.png">
+### 3. OpticRawTracking
+<img src="docs/OpticRawTracking/images/optic_raw_tracking.png">
 
 #### Input Format
 - TIFF stack (dimensions: XYCT)  
@@ -101,38 +101,38 @@ activate optic
 > **Note**: If you want to use Cellpose with GPU acceleration, please set up a CUDA-compatible PyTorch environment according to the [PyTorch official documentation](https://pytorch.org/).
 
 ## How to use
-### Suite2pROICuration
+### OpticROICuration
 1. Open the Anaconda Prompt and switch to the desired environment.  
 `activate optic`
   
-2. Execute the "suite2p_roi_curation.py" script
+2. Execute the "optic_roi_curation.py" script
 
-(ex) `python C:/Users/dhino2000/optic/scripts/suite2p_roi_curation.py`
+(ex) `python C:/Users/dhino2000/optic/scripts/optic_roi_curation.py`
 
 3. Sort and Check ROIs!
-([Suite2pROICuration Tutorial](https://optic-doc.readthedocs.io/en/latest/Suite2pROICuration.html))
+([OpticROICuration Tutorial](https://optic-doc.readthedocs.io/en/latest/OpticROICuration.html))
 
-### Suite2pROITracking
+### OpticROITracking
 1. Open the Anaconda Prompt and switch to the desired environment.  
 `activate optic`
   
-2. Execute the "suite2p_roi_tracking.py" script  
+2. Execute the "optic_roi_tracking.py" script  
 
-(ex) `python C:/Users/dhino2000/optic/scripts/suite2p_roi_tracking.py`
+(ex) `python C:/Users/dhino2000/optic/scripts/optic_roi_tracking.py`
 
 3. Track ROIs!
-([Suite2pROITracking Tutorial](https://optic-doc.readthedocs.io/en/latest/Suite2pROITracking.html))
+([OpticROITracking Tutorial](https://optic-doc.readthedocs.io/en/latest/OpticROITracking.html))
 
-### MicrogliaTracking
+### OpticRawTracking
 1. Open the Anaconda Prompt and switch to the desired environment.  
 `activate optic`
   
-2. Execute the "microglia_tracking.py" script  
+2. Execute the "optic_raw_tracking.py" script  
 
-(ex) `python C:/Users/dhino2000/optic/scripts/microglia_tracking.py`
+(ex) `python C:/Users/dhino2000/optic/scripts/optic_raw_tracking.py`
 
 3. Track ROIs!
-([MicrogliaTracking Tutorial](https://optic-doc.readthedocs.io/en/latest/MicrogliaTracking.html))
+([OpticRawTracking Tutorial](https://optic-doc.readthedocs.io/en/latest/OpticRawTracking.html))
 
 ## Downstream Analysis  
 After analyzing with these applications, some downstream analyses may be required. For guidance on these analyses, please refer to the Jupyter notebooks beginning with **"Chapter"** in the [notebook folder](https://github.com/dhino2000/optic/tree/main/notebook). These notebooks provide step-by-step examples and instructions for some downstream analysis workflows.

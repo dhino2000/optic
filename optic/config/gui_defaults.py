@@ -5,9 +5,9 @@ from .constants import AppKeys, ChannelKeys, ImportPackages
 # GUIに関する定数
 class GuiDefaults:
     """
-    Suite2pROICurationGUI
+    OpticROICurationGUI
     """
-    SUITE2P_ROI_CURATION = {
+    OPTIC_ROI_CURATION = {
         "MIN_PLOT_RANGE": 30,
         "WINDOW_SETTINGS": {
             "INIT_POSITION_X": 100, 
@@ -42,7 +42,7 @@ class GuiDefaults:
         "SCROOLAREA_SETTINGS": {
             "MAX_HEIGHT": 200,
         },
-        "TITLE": "Suite2pROICurationGUI",
+        "TITLE": "OpticROICurationGUI",
         "APP_KEYS": [AppKeys.PRI],
         "CHANNELS": [ChannelKeys.CHAN1, ChannelKeys.CHAN2, ChannelKeys.CHAN3],
         "ROI_THRESHOLDS": {
@@ -131,9 +131,9 @@ class GuiDefaults:
     }
 
     """
-    Suite2pROITrackingGUI
+    OpticROITrackingGUI
     """
-    SUITE2P_ROI_TRACKING = {
+    OPTIC_ROI_TRACKING = {
         "MIN_PLOT_RANGE": 30,
         "WINDOW_SETTINGS": {
             "INIT_POSITION_X": 100, 
@@ -174,7 +174,7 @@ class GuiDefaults:
         "SCROOLAREA_SETTINGS": {
             "MAX_HEIGHT": 200,
         },
-        "TITLE": "Suite2pROITrackingGUI",
+        "TITLE": "OpticROITrackingGUI",
         "APP_KEYS": [AppKeys.PRI, AppKeys.SEC],
         "CHANNELS": [ChannelKeys.CHAN1, ChannelKeys.CHAN2, ChannelKeys.CHAN3],
         "VIEW_SETTINGS": {
@@ -305,9 +305,9 @@ class GuiDefaults:
     }
 
     """
-    MicrogliaTrackingGUI
+    OpticRawTrackingGUI
     """
-    MICROGLIA_TRACKING = {
+    OPTIC_RAW_TRACKING = {
         "MIN_PLOT_RANGE": 30,
         "WINDOW_SETTINGS": {
             "INIT_POSITION_X": 100, 
@@ -331,7 +331,7 @@ class GuiDefaults:
             "WIDTH": 300,
             "HEIGHT": 200,
         },
-        "TITLE": "MicrogliaTrackingGUI",
+        "TITLE": "OpticRawTrackingGUI",
         "APP_KEYS": [AppKeys.PRI, AppKeys.SEC],
         "CHANNELS": [ChannelKeys.CHAN1, ChannelKeys.CHAN2, ChannelKeys.CHAN3],
         "VIEW_SETTINGS": {
@@ -378,6 +378,142 @@ class GuiDefaults:
             ImportPackages.ELASTIX,
             ImportPackages.ROIFILE,
             ImportPackages.CELLPOSE
+        ],
+    }
+
+    """
+    OpticROITrackingMultiGUI  (multi-session, OpticRawTracking 方式)
+    """
+    OPTIC_ROI_TRACKING_MULTI = {
+        "MIN_PLOT_RANGE": 30,
+        "WINDOW_SETTINGS": {
+            "INIT_POSITION_X": 100,
+            "INIT_POSITION_Y": 100,
+            "WIDTH": 1400,
+            "HEIGHT": 200,
+        },
+        "WINDOW_SETTINGS_TABLE_COLUMNS_CONFIG": {
+            "INIT_POSITION_X": 100,
+            "INIT_POSITION_Y": 100,
+            "WIDTH": 800,
+            "HEIGHT": 600,
+        },
+        "WINDOW_SETTINGS_ELASTIX_CONFIG": {
+            "INIT_POSITION_X": 100,
+            "INIT_POSITION_Y": 100,
+            "WIDTH": 1600,
+            "HEIGHT": 900,
+        },
+        "WINDOW_SETTINGS_LOAD_MULTI_FALL": {
+            "INIT_POSITION_X": 100,
+            "INIT_POSITION_Y": 100,
+            "WIDTH": 1000,
+            "HEIGHT": 300,
+        },
+        "WINDOW_SETTINGS_DIALOG": {
+            "INIT_POSITION_X": 100,
+            "INIT_POSITION_Y": 100,
+            "WIDTH": 300,
+            "HEIGHT": 200,
+        },
+        "SCROOLAREA_SETTINGS": {
+            "MAX_HEIGHT": 200,
+        },
+        "TITLE": "OpticROITrackingMultiGUI",
+        "APP_KEYS": [AppKeys.PRI, AppKeys.SEC],
+        "CHANNELS": [ChannelKeys.CHAN1, ChannelKeys.CHAN2, ChannelKeys.CHAN3],
+        "VIEW_SETTINGS": {
+            "DEFAULT_CONTRAST_MIN": 0,
+            "DEFAULT_CONTRAST_MAX": 255,
+        },
+        "ROI_THRESHOLDS": {
+            "npix":         "(50, 200)",
+            "radius":       "(3, 12)",
+            "aspect_ratio": "(0, 1.5)",
+            "compact":      "(0, 1.5)",
+            "skew":         "(1, 100)",
+            "std":          "(0, 100)",
+        },
+        "ROI_VISUAL_SETTINGS": {
+            "COLOR_MIN": 100,
+            "COLOR_MAX": 255,
+            "DEFAULT_ROI_OPACITY": 128,
+            "DEFAULT_HIGHLIGHT_OPACITY": 255,
+        },
+        "ROI_MATCHING_METHOD": ["None", "affine", "bspline"],
+        "TABLE_COLUMNS": {
+            AppKeys.PRI: {
+                "Cell_ID"       : {"order": 0, "type": "id",       "width": 80,  "removable": False, "name_fixed": True,  "editable": False},
+                "Cell_ID_Match" : {"order": 1, "type": "id_match", "width": 80,  "removable": False, "name_fixed": True,  "editable": False},
+                "Neuron"        : {"order": 2, "type": "celltype", "width": 80,  "removable": True,  "default": True},
+                "Astrocyte"     : {"order": 3, "type": "celltype", "width": 80,  "removable": True,  "default": False},
+                "Not_Cell"      : {"order": 4, "type": "celltype", "width": 80,  "removable": False, "name_fixed": True,  "default": False},
+                "Check"         : {"order": 5, "type": "checkbox", "width": 80,  "removable": True,  "default": False},
+                "Tracking"      : {"order": 6, "type": "checkbox", "width": 80,  "removable": True,  "default": False},
+                "Memo"          : {"order": 7, "type": "string",   "width": 200, "removable": True},
+            },
+            AppKeys.SEC: {
+                "Cell_ID"   : {"order": 0, "type": "id",       "width": 80,  "removable": False, "name_fixed": True,  "editable": False},
+                "Neuron"    : {"order": 1, "type": "celltype", "width": 80,  "removable": True,  "default": True},
+                "Astrocyte" : {"order": 2, "type": "celltype", "width": 80,  "removable": True,  "default": False},
+                "Not_Cell"  : {"order": 3, "type": "celltype", "width": 80,  "removable": False, "name_fixed": True,  "default": False},
+                "Check"     : {"order": 4, "type": "checkbox", "width": 80,  "removable": True,  "default": False},
+                "Tracking"  : {"order": 5, "type": "checkbox", "width": 80,  "removable": True,  "default": False},
+                "Memo"      : {"order": 6, "type": "string",   "width": 200, "removable": True},
+            },
+        },
+        "KEY_FUNCTION_MAP": {
+            AppKeys.PRI: {
+                Qt.Key_Up:     ('move', 'up',            1),
+                Qt.Key_Down:   ('move', 'down',          1),
+                Qt.Key_Left:   ('move', 'left',          1),
+                Qt.Key_Right:  ('move', 'right',         1),
+                Qt.Key_Z:      ('toggle', 1),
+                Qt.Key_X:      ('toggle', 2),
+                Qt.Key_C:      ('toggle', 3),
+                Qt.Key_V:      ('toggle', 4),
+                Qt.Key_B:      ('toggle', 5),
+                Qt.Key_N:      ('toggle', 6),
+                Qt.Key_M:      ('toggle', 7),
+                Qt.Key_Comma:  ('toggle', 8),
+                Qt.Key_Period: ('toggle', 9),
+                Qt.Key_Slash:  ('toggle', 10),
+                Qt.Key_H:      ('move', 'selected_type', 1),
+                Qt.Key_Y:      ('move', 'selected_type', -1),
+                Qt.Key_U:      ('move', 'cell_type',     -1),
+                Qt.Key_J:      ('move', 'cell_type',     1),
+                Qt.Key_I:      ('move', 'skip_roi',      -1),
+                Qt.Key_K:      ('move', 'skip_roi',      1),
+                Qt.Key_S:      ('roi_match', 'set',      1),
+            },
+            AppKeys.SEC: {
+                Qt.Key_Up:     ('move', 'up',            1),
+                Qt.Key_Down:   ('move', 'down',          1),
+                Qt.Key_Left:   ('move', 'left',          1),
+                Qt.Key_Right:  ('move', 'right',         1),
+                Qt.Key_Z:      ('toggle', 1),
+                Qt.Key_X:      ('toggle', 2),
+                Qt.Key_C:      ('toggle', 3),
+                Qt.Key_V:      ('toggle', 4),
+                Qt.Key_B:      ('toggle', 5),
+                Qt.Key_N:      ('toggle', 6),
+                Qt.Key_M:      ('toggle', 7),
+                Qt.Key_Comma:  ('toggle', 8),
+                Qt.Key_Period: ('toggle', 9),
+                Qt.Key_Slash:  ('toggle', 10),
+                Qt.Key_H:      ('move', 'selected_type', 1),
+                Qt.Key_Y:      ('move', 'selected_type', -1),
+                Qt.Key_U:      ('move', 'cell_type',     -1),
+                Qt.Key_J:      ('move', 'cell_type',     1),
+                Qt.Key_I:      ('move', 'skip_roi',      -1),
+                Qt.Key_K:      ('move', 'skip_roi',      1),
+                Qt.Key_S:      ('roi_match', 'set',      1),
+            },
+        },
+        "IMPORT_PACKAGES": [
+            ImportPackages.SUITE2P,
+            ImportPackages.OT,
+            ImportPackages.ELASTIX,
         ],
     }
 

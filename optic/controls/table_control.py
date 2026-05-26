@@ -44,6 +44,7 @@ class TableControl:
 
     def setupWidgetROITable(self, app_key: str) -> None:
         from ..gui.table_setup import setupWidgetROITable
+        self.q_table.blockSignals(True)
         self.setLenRow(len(self.data_manager.getStat(self.app_key))) # for Suite2p
         self.q_table, self.groups_celltype = setupWidgetROITable(self.q_table, self.len_row, self.table_columns, key_event_ignore=True)
         self.setKeyPressEvent()
@@ -54,8 +55,9 @@ class TableControl:
         # if celltype columns are ["Neuron", "Astrocyte", "Not_Cell"], set "Neuron" or "Not_Cell" radiobutton
         celltype_pos = [col_name for col_name in self.table_columns.getColumns().keys() if self.table_columns.getColumns()[col_name]["type"] == "celltype"][0] # first celltype except "Not_Cell"
         celltype_neg = [col_name for col_name in self.table_columns.getColumns().keys() if self.table_columns.getColumns()[col_name]["type"] == "celltype"][-1]
-        self.setROICellTypeFromArray(self.data_manager.getDictFall("pri")["iscell"][:,0], celltype_pos, celltype_neg, app_key) # set celltype with "iscell" array
+        self.setROICellTypeFromArray(self.data_manager.getDictFall(app_key)["iscell"][:,0], celltype_pos, celltype_neg, app_key) # set celltype with "iscell" array
         updateROICountDisplay(self.widget_manager, self.config_manager, self.app_key)
+        self.q_table.blockSignals(False)
 
 
     def setupWidgetDynamicTable(self, app_key: str) -> None:
@@ -218,7 +220,7 @@ class TableControl:
             return
         else:
             self.control_manager.setSharedAttr(self.app_key, 'roi_selected_id', roi_id)
-            if self.config_manager.current_app == "SUITE2P_ROI_CURATION" or self.config_manager.current_app == "SUITE2P_ROI_TRACKING":
+            if self.config_manager.current_app == "OPTIC_ROI_CURATION" or self.config_manager.current_app == "OPTIC_ROI_TRACKING":
                 updateROIPropertyDisplay(
                     self.control_manager, 
                     self.data_manager, 
@@ -317,6 +319,8 @@ class TableControl:
     # with table's "celltype" radiobutton change
     def changeRadiobuttonOfTable(self, row: int) -> None:
         dict_roi_display = self.getSharedAttr_DictROIDisplay()
+        if row not in dict_roi_display:
+            return
         # check celltype of changed ROI
         new_cell_type = self.getCurrentCellTypeOfRow(row)
         dict_celltype_visibility = self.getSharedAttr_CelltypeVisibility()
@@ -326,6 +330,8 @@ class TableControl:
     # with table's "checkbox" checkbox change
     def changeCheckboxOfTable(self, row: int) -> None:
         dict_roi_display = self.getSharedAttr_DictROIDisplay()
+        if row not in dict_roi_display:
+            return
         # check checkbox of changed ROI
         dict_checkbox_visibility: Dict[str, bool] = self.getSharedAttr_CheckboxVisibility()
         # get all checkbox states for this row
@@ -442,7 +448,7 @@ class TableControl:
         return states
     
     # toggle "Checkbox" of All ROIs
-    def toggleSelectedROICheckbox(
+    def toggleSelectedROICurationbox(
             self, 
             checkbox: str, 
             toggle: bool,

@@ -27,7 +27,7 @@ def makeLayoutSelectedROISetSameCelltype(widget_manager: WidgetManager, key_butt
     return layout
 
 # Check, Uncheck "checkbox" of Selected ROIs
-def makeLayoutSelectedROICheckboxToggle(widget_manager: WidgetManager, key_button: str, table_columns: TableColumns) -> QVBoxLayout:
+def makeLayoutSelectedROICurationboxToggle(widget_manager: WidgetManager, key_button: str, table_columns: TableColumns) -> QVBoxLayout:
     layout = QVBoxLayout()
 
     list_checkbox = [key for key, value in table_columns.items() if value['type'] == 'checkbox']

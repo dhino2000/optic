@@ -179,7 +179,7 @@ def saveROIManagerZip(
             roiwrite(path_dst, list_roi, mode='w')
             QMessageBox.information(q_window, "File save", f"ROI set zip file saved.")
         except Exception as e:
-            QMessageBox.warning(q_window, "File save failed", f"Error saving ROICheck file: {e}")
+            QMessageBox.warning(q_window, "File save failed", f"Error saving ROICuration file: {e}")
     
 # load imagej ROI Manager zip file
 def loadROIManagerZip(        
@@ -236,8 +236,8 @@ def generateSavePath(
     path_dst = os.path.join(dir_src, name_ext_dst).replace("\\", "/")
     return path_dst
 
-# save table content as ROIcheck.mat
-def saveROICheck(
+# save table content as ROIcuration.mat
+def saveROICuration(
         q_window        : QMainWindow, 
         q_lineedit      : QLineEdit, 
         q_table         : QTableWidget, 
@@ -247,32 +247,32 @@ def saveROICheck(
         local_var       : bool=True
         ) -> None:
     path_src = q_lineedit.text()
-    path_dst = generateSavePath(path_src, prefix="ROIcuration_", remove_strings="Fall_", new_extension=Extension.MAT) # .tif -> ROIcheck_.mat
-    path_dst, is_overwrite = saveFileDialog(q_widget=q_window, file_type=".mat", title="Save ROIcheck mat File", initial_dir=path_dst)
+    path_dst = generateSavePath(path_src, prefix="ROIcuration_", remove_strings="Fall_", new_extension=Extension.MAT) # .tif -> ROIcuration_.mat
+    path_dst, is_overwrite = saveFileDialog(q_widget=q_window, file_type=".mat", title="Save ROIcuration mat File", initial_dir=path_dst)
     
     if path_dst:
         try:
             from ..dialog.user_select import UserSelectDialog
-            from ..preprocessing.preprocessing_table import convertTableDataToDictROICheck, convertDictROICheckToMatROICheck
+            from ..preprocessing.preprocessing_table import convertTableDataToDictROICuration, convertDictROICurationToMatROICuration
             dialog = UserSelectDialog(parent=q_window, gui_defaults=gui_defaults, json_config=json_config)
             if dialog.exec_() == QDialog.Accepted:
                 dialog.getUser()
                 user = dialog.user
             now = f"save_{datetime.datetime.now().strftime('%y%m%d_%H%M%S')}"
             if is_overwrite:
-                mat_roicheck = loadmat(path_dst, simplify_cells=True)
-                dict_roicheck = convertTableDataToDictROICheck(q_table, table_columns, local_var)
-                mat_roicheck = convertDictROICheckToMatROICheck(
-                    dict_roicheck,
-                    mat_roicheck=mat_roicheck,
+                mat_roicuration = loadmat(path_dst, simplify_cells=True)
+                dict_roicuration = convertTableDataToDictROICuration(q_table, table_columns, local_var)
+                mat_roicuration = convertDictROICurationToMatROICuration(
+                    dict_roicuration,
+                    mat_roicuration=mat_roicuration,
                     date=now,
                     user=user,
                     path_fall=path_src,
                     )
             else:
-                dict_roicheck = convertTableDataToDictROICheck(q_table, table_columns, local_var)
-                mat_roicheck = convertDictROICheckToMatROICheck(
-                    dict_roicheck,
+                dict_roicuration = convertTableDataToDictROICuration(q_table, table_columns, local_var)
+                mat_roicuration = convertDictROICurationToMatROICuration(
+                    dict_roicuration,
                     date=now,
                     user=user,
                     n_roi=q_table.rowCount(),
@@ -281,52 +281,53 @@ def saveROICheck(
                 
             # WARNING !!!
             # "savemat" can not save np.array([[1]]) as [1], automatically convert to 1  
-            savemat(path_dst, mat_roicheck)
-            QMessageBox.information(q_window, "File save", f"ROICheck file saved!\nuser: {user}, date: {now}")
+            savemat(path_dst, mat_roicuration)
+            QMessageBox.information(q_window, "File save", f"ROICuration file saved!\nuser: {user}, date: {now}")
         except Exception as e:
-            QMessageBox.warning(q_window, "File save failed", f"Error saving ROICheck file: {e}")
+            QMessageBox.warning(q_window, "File save failed", f"Error saving ROICuration file: {e}")
 
-# load ROIcheck.mat
-def loadROICheck(
+# load ROIcuration.mat
+def loadROICuration(
         q_window        : QMainWindow, 
         q_table         : QTableWidget, 
         gui_defaults    : GuiDefaults,
         table_columns   : TableColumns,
         table_control   : TableControl,
         ) -> Union[Dict[str, Any], None]:
-    path_roicheck = openFileDialog(q_widget=q_window, file_type=".mat", title="Open ROIcheck mat File")
-    if path_roicheck:
+    path_roicuration = openFileDialog(q_widget=q_window, file_type=".mat", title="Open ROIcuration mat File")
+    if path_roicuration:
         try:
-            mat_roicheck = loadmat(path_roicheck, simplify_cells=True)
-            # check number of ROIs between of Fall file and of ROICheck file
-            if table_control.len_row != mat_roicheck["NumberOfROI"]:
+            mat_roicuration = loadmat(path_roicuration, simplify_cells=True)
+            # check number of ROIs between of Fall file and of ROICuration file
+            if table_control.len_row != mat_roicuration["NumberOfROI"]:
                 QMessageBox.warning(
                     q_window, 
                     "File load failed", 
-                    f"Length of data does not match! \nTable: {table_control.len_row}, ROICheck: {mat_roicheck['NumberOfROI']}"
+                    f"Length of data does not match! \nTable: {table_control.len_row}, ROICuration: {mat_roicuration['NumberOfROI']}"
                     )
                 return
 
             from ..dialog.date_select import DateSelectDialog
-            list_date = list(mat_roicheck["manualROIcheck"].keys())
+            list_date = list(mat_roicuration["manualROIcheck"].keys())
             dialog = DateSelectDialog(parent=q_window, gui_defaults=gui_defaults, list_date=list_date)
             if dialog.exec_() == QDialog.Accepted:
                 date = dialog.date
             
             # select saved date
-            dict_roicheck = mat_roicheck["manualROIcheck"][date]
-            dict_roicheck = {k.replace(" ", "_"): v for k, v in dict_roicheck.items()} # this is temporary fix for old ROIcheck files !!!
+            dict_roicuration = mat_roicuration["manualROIcheck"][date]
+            dict_roicuration = {k.replace(" ", "_"): v for k, v in dict_roicuration.items()} # this is temporary fix for old ROIcuration files !!!
 
-            # check table column names
+            # check table column names — ignore reserved metadata keys ("user", "TableColumns")
+            # that are embedded by saveROICuration but are not actual column names.
+            RESERVED_KEYS = {"user", "TableColumns"}
             list_table_columns = list(table_control.table_columns.getColumns().keys())
             list_table_columns.remove("Cell_ID")
-            list_roicuration_columns = list(dict_roicheck.keys())
-            list_roicuration_columns.remove("user")
+            list_roicuration_columns = [k for k in dict_roicuration.keys() if k not in RESERVED_KEYS]
             if not list_table_columns == list_roicuration_columns: # check also order of columns
                 reply = QMessageBox.warning(
-                    q_window, 
-                    "Column names match error", 
-                    f"Column names do not match! \nTable: {list_table_columns} \n ROICheck: {list_roicuration_columns} \n Do you want to load it anyway?",
+                    q_window,
+                    "Column names match error",
+                    f"Column names do not match! \nTable: {list_table_columns} \n ROICuration: {list_roicuration_columns} \n Do you want to load it anyway?",
                     QMessageBox.Yes | QMessageBox.No,
                     )
                 if reply == QMessageBox.No:
@@ -334,15 +335,15 @@ def loadROICheck(
 
             # MATLAB convert [1] to 1
             # so, convert 1 to [1]
-            for key in dict_roicheck.keys():
-                if isinstance(dict_roicheck[key], int):
-                    dict_roicheck[key] = [dict_roicheck[key]]
+            for key in dict_roicuration.keys():
+                if isinstance(dict_roicuration[key], int):
+                    dict_roicuration[key] = [dict_roicuration[key]]
 
-            from ..gui.table_setup import applyDictROICheckToTable
-            applyDictROICheckToTable(q_table, table_columns, dict_roicheck)
-            QMessageBox.information(q_window, "File load", "ROICheck file loaded!")
+            from ..gui.table_setup import applyDictROICurationToTable
+            applyDictROICurationToTable(q_table, table_columns, dict_roicuration)
+            QMessageBox.information(q_window, "File load", "ROICuration file loaded!")
         except Exception as e:
-            QMessageBox.warning(q_window, "File load failed", f"Error loading ROICheck file: {e}")
+            QMessageBox.warning(q_window, "File load failed", f"Error loading ROICuration file: {e}")
 
 # save table content as ROITracking.mat
 def saveROITracking(
@@ -365,7 +366,7 @@ def saveROITracking(
     if path_dst:
         try:
             from ..dialog.user_select import UserSelectDialog
-            from ..preprocessing.preprocessing_table import convertTableDataToDictROICheck, convertTableDataToDictROITracking, convertDictROITrackingToMatROITracking
+            from ..preprocessing.preprocessing_table import convertTableDataToDictROICuration, convertTableDataToDictROITracking, convertDictROITrackingToMatROITracking
             dialog = UserSelectDialog(parent=q_window, gui_defaults=gui_defaults, json_config=json_config)
             if dialog.exec_() == QDialog.Accepted:
                 dialog.getUser()
@@ -374,10 +375,10 @@ def saveROITracking(
             if is_overwrite:
                 mat_roi_tracking = loadmat(path_dst, simplify_cells=True)
                 dict_roi_tracking_pri = convertTableDataToDictROITracking(q_table_pri, q_table_sec, table_column_pri, local_var)
-                dict_roi_check_sec = convertTableDataToDictROICheck(q_table_sec, table_column_sec)
+                dict_roi_curation_sec = convertTableDataToDictROICuration(q_table_sec, table_column_sec)
                 mat_roi_tracking = convertDictROITrackingToMatROITracking(
                     dict_roi_tracking_pri,
-                    dict_roi_check_sec,
+                    dict_roi_curation_sec,
                     mat_roi_tracking=mat_roi_tracking,
                     date=now,
                     user=user,
@@ -386,10 +387,10 @@ def saveROITracking(
                     )
             else:
                 dict_roi_tracking_pri = convertTableDataToDictROITracking(q_table_pri, q_table_sec, table_column_pri, local_var)
-                dict_roi_check_sec = convertTableDataToDictROICheck(q_table_sec, table_column_sec)
+                dict_roi_curation_sec = convertTableDataToDictROICuration(q_table_sec, table_column_sec)
                 mat_roi_tracking = convertDictROITrackingToMatROITracking(
                     dict_roi_tracking_pri,
-                    dict_roi_check_sec,
+                    dict_roi_curation_sec,
                     date=now,
                     user=user,
                     n_roi_pri=q_table_pri.rowCount(),
@@ -421,10 +422,10 @@ def loadROITracking(
             mat_roi_tracking = loadmat(path_roi_tracking, simplify_cells=True)
             # check number of ROIs between of Fall file and of ROI tracking file
             if table_control_pri.len_row != mat_roi_tracking["NumberOfROI_pri"]:
-                QMessageBox.warning(q_window, "File load failed", f"Length of data does not match! \npri Table: {table_control_pri.len_row}, pri ROICheck: {mat_roi_tracking['NumberOfROI_pri']}")
+                QMessageBox.warning(q_window, "File load failed", f"Length of data does not match! \npri Table: {table_control_pri.len_row}, pri ROICuration: {mat_roi_tracking['NumberOfROI_pri']}")
                 return
             if table_control_sec.len_row != mat_roi_tracking["NumberOfROI_sec"]:
-                QMessageBox.warning(q_window, "File load failed", f"Length of data does not match! \nsec Table: {table_control_sec.len_row}, sec ROICheck: {mat_roi_tracking['NumberOfROI_pri']}")
+                QMessageBox.warning(q_window, "File load failed", f"Length of data does not match! \nsec Table: {table_control_sec.len_row}, sec ROICuration: {mat_roi_tracking['NumberOfROI_pri']}")
                 return
 
             from ..dialog.date_select import DateSelectDialog
@@ -435,25 +436,25 @@ def loadROITracking(
             
             # select saved date
             dict_roi_tracking_pri = mat_roi_tracking["ROITracking"][date]["pri"]
-            dict_roi_check_sec = mat_roi_tracking["ROITracking"][date]["sec"]
-            dict_roi_tracking_pri = {k.replace(" ", "_"): v for k, v in dict_roi_tracking_pri.items()} # this is temporary fix for old ROIcheck files !!!
-            dict_roi_check_sec = {k.replace(" ", "_"): v for k, v in dict_roi_check_sec.items()} # this is temporary fix for old ROIcheck files !!!
+            dict_roi_curation_sec = mat_roi_tracking["ROITracking"][date]["sec"]
+            dict_roi_tracking_pri = {k.replace(" ", "_"): v for k, v in dict_roi_tracking_pri.items()} # this is temporary fix for old ROIcuration files !!!
+            dict_roi_curation_sec = {k.replace(" ", "_"): v for k, v in dict_roi_curation_sec.items()} # this is temporary fix for old ROIcuration files !!!
             
             # MATLAB convert [1] to 1
             # so, convert 1 to [1]
             for key in dict_roi_tracking_pri.keys():
                 if isinstance(dict_roi_tracking_pri[key], int):
                     dict_roi_tracking_pri[key] = [dict_roi_tracking_pri[key]]
-            for key in dict_roi_check_sec.keys():
-                if isinstance(dict_roi_check_sec[key], int):
-                    dict_roi_check_sec[key] = [dict_roi_check_sec[key]]
+            for key in dict_roi_curation_sec.keys():
+                if isinstance(dict_roi_curation_sec[key], int):
+                    dict_roi_curation_sec[key] = [dict_roi_curation_sec[key]]
 
-            from ..gui.table_setup import applyDictROICheckToTable, applyDictROITrackingToTable
+            from ..gui.table_setup import applyDictROICurationToTable, applyDictROITrackingToTable
             applyDictROITrackingToTable(q_table_pri, table_column_pri, dict_roi_tracking_pri)
-            applyDictROICheckToTable(q_table_sec, table_column_sec, dict_roi_check_sec)
-            QMessageBox.information(q_window, "File load", "ROICheck file loaded!")
+            applyDictROICurationToTable(q_table_sec, table_column_sec, dict_roi_curation_sec)
+            QMessageBox.information(q_window, "File load", "ROICuration file loaded!")
         except Exception as e:
-            QMessageBox.warning(q_window, "File load failed", f"Error loading ROICheck file: {e}")
+            QMessageBox.warning(q_window, "File load failed", f"Error loading ROICuration file: {e}")
 
 # save registered ROI coordinates and background images
 def saveRegisteredROICoordsAndBGImage(
@@ -500,8 +501,8 @@ def loadRegisteredROICoordsAndBGImage(
 
         QMessageBox.information(q_window, "File load", f"Registered ROI coordinates and BG Image file loaded!")
 
-# save MicrogliaTracking.mat
-def saveMicrogliaTracking(
+# save OpticRawTracking.mat
+def saveOpticRawTracking(
         q_window                    : QMainWindow, 
         q_lineedit                  : QLineEdit, 
         gui_defaults                : GuiDefaults,
@@ -512,34 +513,34 @@ def saveMicrogliaTracking(
         dict_tiff_reg               : Dict[AppKeys, np.ndarray[np.int32]]
         ) -> None:
     path_src = q_lineedit.text()
-    path_dst = generateSavePath(path_src, prefix="Microgliatracking_", remove_strings="Fall_", new_extension=".mat") # .tif -> MicrogliaTracking_.mat
+    path_dst = generateSavePath(path_src, prefix="Microgliatracking_", remove_strings="Fall_", new_extension=".mat") # .tif -> OpticRawTracking_.mat
     path_dst, is_overwrite = saveFileDialog(q_widget=q_window, file_type=".mat", title="Save Microglia tracking mat File", initial_dir=path_dst)
     
     if path_dst:
         try:
             from ..dialog.user_select import UserSelectDialog
-            from ..preprocessing.preprocessing_table import convertDictROIMatchingAndDictROICoordsToMatMicrogliaTracking, convertMatMicrogliaTrackingToDictROIMatchingAndDictROICoords, convertContentsOfDictROIMatchingAndDictROICoordsToArray
+            from ..preprocessing.preprocessing_table import convertDictROIMatchingAndDictROICoordsToMatOpticRawTracking, convertMatOpticRawTrackingToDictROIMatchingAndDictROICoords, convertContentsOfDictROIMatchingAndDictROICoordsToArray
             dialog = UserSelectDialog(parent=q_window, gui_defaults=gui_defaults, json_config=json_config)
             if dialog.exec_() == QDialog.Accepted:
                 dialog.getUser()
                 user = dialog.user
             now = f"save_{datetime.datetime.now().strftime('%y%m%d_%H%M%S')}" # key of struct
             if is_overwrite:
-                mat_microglia_tracking = loadmat(path_dst, simplify_cells=True)
+                mat_optic_raw_tracking = loadmat(path_dst, simplify_cells=True)
 
                 # load ROITracking, ROICoords of all dates
-                for date_ in mat_microglia_tracking["ROI"].keys():
-                    dict_roi_matching_, dict_roi_coords_xyct_, dict_roi_coords_xyct_reg_ = convertMatMicrogliaTrackingToDictROIMatchingAndDictROICoords(mat_microglia_tracking["ROI"][date_])
-                    dict_tiff_reg_ = mat_microglia_tracking["ROI"][date_]["BGImageRegistered"]
+                for date_ in mat_optic_raw_tracking["ROI"].keys():
+                    dict_roi_matching_, dict_roi_coords_xyct_, dict_roi_coords_xyct_reg_ = convertMatOpticRawTrackingToDictROIMatchingAndDictROICoords(mat_optic_raw_tracking["ROI"][date_])
+                    dict_tiff_reg_ = mat_optic_raw_tracking["ROI"][date_]["BGImageRegistered"]
                     # loaded TIF shape is XYCT, so convert to XYCZT
                     from ..preprocessing.preprocessing_tiff import standardizeTIFFStack
                     for app_key in dict_tiff_reg_.keys():
                         dict_tiff_reg_[app_key] = standardizeTIFFStack(dict_tiff_reg_[app_key], "XYCT", "XYCZT")
-                    user_ = mat_microglia_tracking["ROI"][date_]["user"]
+                    user_ = mat_optic_raw_tracking["ROI"][date_]["user"]
                     dict_roi_matching_converted_, arr_roi_coords_xyct_, arr_roi_coords_xyct_reg_ = convertContentsOfDictROIMatchingAndDictROICoordsToArray(
                         dict_roi_matching_, dict_roi_coords_xyct_, dict_roi_coords_xyct_reg_
                     )
-                    mat_microglia_tracking["ROI"][date_] = {
+                    mat_optic_raw_tracking["ROI"][date_] = {
                         "ROITracking": dict_roi_matching_converted_, 
                         "ROICoords": arr_roi_coords_xyct_, 
                         "ROICoordsRegistered": arr_roi_coords_xyct_reg_,
@@ -547,18 +548,18 @@ def saveMicrogliaTracking(
                         "user": user_
                         }
 
-                mat_microglia_tracking = convertDictROIMatchingAndDictROICoordsToMatMicrogliaTracking(
+                mat_optic_raw_tracking = convertDictROIMatchingAndDictROICoordsToMatOpticRawTracking(
                     dict_roi_matching,
                     dict_roi_coords_xyct,
                     dict_roi_coords_xyct_reg,
                     dict_tiff_reg,
-                    mat_microglia_tracking,
+                    mat_optic_raw_tracking,
                     date=now,
                     user=user,
                     path_tif=path_src,
                 )
             else:
-                mat_microglia_tracking = convertDictROIMatchingAndDictROICoordsToMatMicrogliaTracking(
+                mat_optic_raw_tracking = convertDictROIMatchingAndDictROICoordsToMatOpticRawTracking(
                     dict_roi_matching,
                     dict_roi_coords_xyct,
                     dict_roi_coords_xyct_reg,
@@ -568,14 +569,14 @@ def saveMicrogliaTracking(
                     path_tif=path_src,
                 )
             
-            savemat(path_dst, mat_microglia_tracking)
+            savemat(path_dst, mat_optic_raw_tracking)
             QMessageBox.information(q_window, "File save", f"Microglia Tracking file saved!\nuser: {user}, date: {now}")
         except Exception as e:
             raise e
             # QMessageBox.warning(q_window, "File save failed", f"Error saving Microglia Tracking file: {e}")
 
 # load Microgliatracking.mat
-def loadMicrogliaTracking(
+def loadOpticRawTracking(
         q_window        : QMainWindow, 
         gui_defaults    : GuiDefaults,
         ) -> Union[Tuple[Dict[str, Dict[int, List[int] | Dict[int, Dict[int, Optional[int]]]]], Dict[int, Dict[int, Dict[Literal["xpix", "ypix", "med"], np.ndarray[np.int32]]]], Dict[AppKeys, np.ndarray[Tuple[int, int, int, int, int]]]], None]:
@@ -583,19 +584,19 @@ def loadMicrogliaTracking(
     if path_src:
         try:
             from ..dialog.date_select import DateSelectDialog
-            from ..preprocessing.preprocessing_table import convertMatMicrogliaTrackingToDictROIMatchingAndDictROICoords
-            mat_microglia_tracking = loadmat(path_src, simplify_cells=True)
-            mat_microglia_tracking_roi = mat_microglia_tracking["ROI"]
+            from ..preprocessing.preprocessing_table import convertMatOpticRawTrackingToDictROIMatchingAndDictROICoords
+            mat_optic_raw_tracking = loadmat(path_src, simplify_cells=True)
+            mat_optic_raw_tracking_roi = mat_optic_raw_tracking["ROI"]
 
-            list_date = list(mat_microglia_tracking_roi.keys())
+            list_date = list(mat_optic_raw_tracking_roi.keys())
             dialog = DateSelectDialog(parent=q_window, gui_defaults=gui_defaults, list_date=list_date)
             if dialog.exec_() == QDialog.Accepted:
                 date = dialog.date
             
             # select saved date
-            mat_microglia_tracking_roi_date = mat_microglia_tracking_roi[date]
-            dict_roi_matching, dict_roi_coords_xyct, dict_roi_coords_xyct_reg = convertMatMicrogliaTrackingToDictROIMatchingAndDictROICoords(mat_microglia_tracking_roi_date)
-            dict_tiff_reg = mat_microglia_tracking_roi_date["BGImageRegistered"]
+            mat_optic_raw_tracking_roi_date = mat_optic_raw_tracking_roi[date]
+            dict_roi_matching, dict_roi_coords_xyct, dict_roi_coords_xyct_reg = convertMatOpticRawTrackingToDictROIMatchingAndDictROICoords(mat_optic_raw_tracking_roi_date)
+            dict_tiff_reg = mat_optic_raw_tracking_roi_date["BGImageRegistered"]
             # loaded TIF shape is XYCT, so convert to XYCZT
             from ..preprocessing.preprocessing_tiff import standardizeTIFFStack
             for app_key in dict_tiff_reg.keys():
@@ -605,3 +606,89 @@ def loadMicrogliaTracking(
             return dict_roi_matching, dict_roi_coords_xyct, dict_roi_coords_xyct_reg, dict_tiff_reg
         except Exception as e:
             QMessageBox.warning(q_window, "File load failed", f"Error loading Microglia Tracking file: {e}")
+
+
+# ===== Multi-session Suite2p ROI Tracking IO =====
+
+def saveMultiSessionTracking(
+        q_window                    : QMainWindow,
+        q_lineedit                  : QLineEdit,
+        gui_defaults                : GuiDefaults,
+        json_config                 : JsonConfig,
+        dict_roi_matching           : Dict[str, Any],
+        dict_roi_coords_xyct        : Dict[int, Any],
+        dict_roi_coords_xyct_reg    : Dict[int, Any],
+        ) -> None:
+    path_src = q_lineedit.text() if q_lineedit else ""
+    path_dst = generateSavePath(path_src, prefix="MultiSessionTracking_", remove_strings="Fall_", new_extension=".mat")
+    path_dst, is_overwrite = saveFileDialog(q_widget=q_window, file_type=".mat", title="Save Multi-session Tracking mat File", initial_dir=path_dst)
+    if path_dst:
+        try:
+            from ..dialog.user_select import UserSelectDialog
+            from ..preprocessing.preprocessing_table import (
+                convertDictROIMatchingAndDictROICoordsToMatOpticRawTracking,
+                convertMatOpticRawTrackingToDictROIMatchingAndDictROICoords,
+                convertContentsOfDictROIMatchingAndDictROICoordsToArray,
+            )
+            dialog = UserSelectDialog(parent=q_window, gui_defaults=gui_defaults, json_config=json_config)
+            user = ""
+            if dialog.exec_() == QDialog.Accepted:
+                dialog.getUser()
+                user = dialog.user
+            now = f"save_{datetime.datetime.now().strftime('%y%m%d_%H%M%S')}"
+
+            if is_overwrite:
+                mat_data = loadmat(path_dst, simplify_cells=True)
+                # 既存エントリを再変換して保持
+                for date_ in list(mat_data["ROI"].keys()):
+                    d_match, d_coords, d_coords_reg = convertMatOpticRawTrackingToDictROIMatchingAndDictROICoords(mat_data["ROI"][date_])
+                    d_conv, arr_c, arr_cr = convertContentsOfDictROIMatchingAndDictROICoordsToArray(d_match, d_coords, d_coords_reg)
+                    mat_data["ROI"][date_] = {
+                        "ROITracking": d_conv,
+                        "ROICoords": arr_c,
+                        "ROICoordsRegistered": arr_cr,
+                        "user": mat_data["ROI"][date_].get("user", ""),
+                    }
+                mat_data = convertDictROIMatchingAndDictROICoordsToMatOpticRawTracking(
+                    dict_roi_matching, dict_roi_coords_xyct, dict_roi_coords_xyct_reg,
+                    dict_tiff_reg={},   # 画像は保存しない
+                    mat_optic_raw_tracking=mat_data,
+                    date=now, user=user, path_tif=path_src,
+                )
+            else:
+                mat_data = convertDictROIMatchingAndDictROICoordsToMatOpticRawTracking(
+                    dict_roi_matching, dict_roi_coords_xyct, dict_roi_coords_xyct_reg,
+                    dict_tiff_reg={},
+                    date=now, user=user, path_tif=path_src,
+                )
+            savemat(path_dst, mat_data)
+            QMessageBox.information(q_window, "File save", f"Multi-session tracking saved!\nuser: {user}, date: {now}")
+        except Exception as e:
+            QMessageBox.warning(q_window, "File save failed", f"Error: {e}")
+
+
+def loadMultiSessionTracking(
+        q_window     : QMainWindow,
+        gui_defaults : GuiDefaults,
+        ):
+    path_src = openFileDialog(q_widget=q_window, file_type=".mat", title="Open Multi-session Tracking mat File")
+    if not path_src:
+        return None
+    try:
+        from ..dialog.date_select import DateSelectDialog
+        from ..preprocessing.preprocessing_table import convertMatOpticRawTrackingToDictROIMatchingAndDictROICoords
+        mat_data = loadmat(path_src, simplify_cells=True)
+        roi_data = mat_data["ROI"]
+        list_date = list(roi_data.keys())
+        dialog = DateSelectDialog(parent=q_window, gui_defaults=gui_defaults, list_date=list_date)
+        if dialog.exec_() == QDialog.Accepted:
+            date = dialog.date
+        else:
+            return None
+        dict_roi_matching, dict_roi_coords_xyct, dict_roi_coords_xyct_reg = \
+            convertMatOpticRawTrackingToDictROIMatchingAndDictROICoords(roi_data[date])
+        QMessageBox.information(q_window, "File load", "Multi-session tracking file loaded!")
+        return dict_roi_matching, dict_roi_coords_xyct, dict_roi_coords_xyct_reg
+    except Exception as e:
+        QMessageBox.warning(q_window, "File load failed", f"Error: {e}")
+        return None

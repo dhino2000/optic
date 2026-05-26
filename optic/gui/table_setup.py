@@ -22,15 +22,20 @@ def setTableSize(
     if height_max:
         q_table.setMaximumHeight(height_max)
 
-# for Suite2pROICuration, Suite2pROITracking
+# for OpticROICuration, OpticROITracking
 def setupWidgetROITable(
         q_table: QTableWidget, 
         len_row: int, 
         table_columns: TableColumns, 
         key_event_ignore: bool=True
         ):
-    # initialize table
+    # initialize table: clear all existing items and cell widgets
     q_table.clearSelection()
+    for row in range(q_table.rowCount()):
+        for col in range(q_table.columnCount()):
+            q_table.removeCellWidget(row, col)
+    q_table.clearContents()
+    q_table.setRowCount(0)
 
     q_table.setRowCount(len_row)
     # sort columns by order
@@ -78,7 +83,7 @@ def setupWidgetROITable(
 
     return q_table, groups_celltype
 
-# for MicrogliaTracking, empty table
+# for OpticRawTracking, empty table
 def setupWidgetDynamicTable(
         q_table: QTableWidget, 
         table_columns: TableColumns,
@@ -114,19 +119,19 @@ def setupWidgetDynamicTable(
 
     return q_table, groups_celltype
 
-# dict_roicheckの内容をtableに反映
-def applyDictROICheckToTable(
+# dict_roicurationの内容をtableに反映
+def applyDictROICurationToTable(
         q_table: QTableWidget, 
         table_columns: TableColumns, 
-        dict_roicheck: Dict[str, Any]
+        dict_roicuration: Dict[str, Any]
         ):
     row_count = q_table.rowCount()
 
     for col_name, col_info in table_columns.getColumns().items():
         # radio button
         if col_info['type'] == 'celltype':
-            if col_name in dict_roicheck:
-                selected_rows = dict_roicheck[col_name]
+            if col_name in dict_roicuration:
+                selected_rows = dict_roicuration[col_name]
                 for row in range(row_count):
                     radio_button = q_table.cellWidget(row, col_info['order'])
                     if radio_button:
@@ -134,15 +139,22 @@ def applyDictROICheckToTable(
 
         # checkbox or string
         elif col_info['type'] in ['checkbox', 'string']:
-            if col_name in dict_roicheck:
-                data = dict_roicheck[col_name]
+            if col_name in dict_roicuration:
+                data = dict_roicuration[col_name]
                 for row in range(min(row_count, len(data))):
                     item = q_table.item(row, col_info['order'])
                     if item:
+                        cell = data[row]
+                        # cell may be a scalar (loaded from .mat) or a 1-element ndarray/list
+                        # (captured in-memory via convertTableDataToDictROICuration, shape (N, 1)).
+                        if isinstance(cell, np.ndarray):
+                            cell = cell.item() if cell.size == 1 else (cell.flat[0] if cell.size else '')
+                        elif isinstance(cell, (list, tuple)):
+                            cell = cell[0] if len(cell) else ''
                         if col_info['type'] == 'checkbox':
-                            item.setCheckState(Qt.Checked if data[row] else Qt.Unchecked)
+                            item.setCheckState(Qt.Checked if cell else Qt.Unchecked)
                         else:  # string
-                            value = str(data[row])
+                            value = str(cell)
                             if value == '[]' or value == '':
                                 value = ''
                             item.setText(value)
@@ -153,7 +165,7 @@ def applyDictROITrackingToTable(
         table_columns: TableColumns, 
         dict_roi_tracking: Dict[str, Any]
         ):
-    applyDictROICheckToTable(q_table, table_columns, dict_roi_tracking)
+    applyDictROICurationToTable(q_table, table_columns, dict_roi_tracking)
     row_count = q_table.rowCount()
 
     # Cell_ID_Match

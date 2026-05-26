@@ -8,9 +8,9 @@ from ..gui.io_layouts import makeLayoutLoadFileWidget, makeLayoutLoadFileExitHel
 from ..gui.bind_func import bindFuncLoadFileWidget, bindFuncExit
 from ..utils.layout_utils import clearLayout
 
-# load multi Fall.mat for Suite2pROITracking
+# load multi Fall.mat for OpticROITracking
 class LoadMultiFallDialog(QDialog):
-    """Dialog for loading multiple Fall.mat files for Suite2pROITracking.
+    """Dialog for loading multiple Fall.mat files for OpticROITracking.
     args:
         gui_defaults (GuiDefaults): GUI defaults configuration.
         parent (QWidget, optional): Parent widget. Defaults to None.
@@ -45,7 +45,7 @@ class LoadMultiFallDialog(QDialog):
         self.initUI()
 
     def initUI(self):
-        self.setWindowTitle('Suite2pROITracking load multi Fall.mat')
+        self.setWindowTitle('OpticROITracking load multi Fall.mat')
         layout = QVBoxLayout()
         # Label
         layout.addWidget(self.widget_manager.makeWidgetLabel(key="load_fall", label="File Load", font_size=12, bold=True, italic=True, use_global_style=False))
@@ -158,7 +158,8 @@ class LoadMultiFallDialog(QDialog):
     def bindFuncAllWidget(self):
         self.widget_manager.dict_button["add_lineedit"].clicked.connect(self.addSession)
         self.widget_manager.dict_button["remove_lineedit"].clicked.connect(self.removeSession)
+        self.widget_manager.dict_button["load_file"].clicked.connect(self.accept)
         bindFuncExit(
-            q_window=self, 
-            q_button=self.widget_manager.dict_button["exit"], 
+            q_window=self,
+            q_button=self.widget_manager.dict_button["exit"],
         )

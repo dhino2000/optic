@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QTableWidget, QTa
 from PyQt5.QtCore import Qt
 from ..manager.widget_manager import WidgetManager
 from ..manager.init_managers import initManagers
-from ..gui.table_layouts import makeLayoutSelectedROISetSameCelltype, makeLayoutSelectedROICheckboxToggle
+from ..gui.table_layouts import makeLayoutSelectedROISetSameCelltype, makeLayoutSelectedROICurationboxToggle
 from ..gui.base_layouts import makeLayoutComboBoxLabel
 
 # Set ROIs celltype
@@ -66,7 +66,7 @@ class ROICellTypeSetDialog(QDialog):
             key_button=self.app_key, 
             table_columns=self.config_manager.table_columns[self.app_key].getColumns()
         ))
-        layout.addLayout(makeLayoutSelectedROICheckboxToggle(
+        layout.addLayout(makeLayoutSelectedROICurationboxToggle(
             self.widget_manager, 
             key_button=self.app_key, 
             table_columns=self.config_manager.table_columns[self.app_key].getColumns()
@@ -96,13 +96,13 @@ class ROICellTypeSetDialog(QDialog):
                 )
             )
 
-        # Toggle selected ROI checkbox
+        # Toggle selected ROI curationbox
         list_checkbox = [key for key, value in self.table_columns.getColumns().items() if value['type'] == 'checkbox']
         for label, toggle in zip(["check", "uncheck"], [True, False]):
             for checkbox in list_checkbox:
                 button = self.widget_manager.dict_button[f"{self.app_key}_roi_{label}_{checkbox}"]
                 button.clicked.connect(
-                    lambda checked, ck=checkbox, tg=toggle: self.table_control.toggleSelectedROICheckbox(
+                    lambda checked, ck=checkbox, tg=toggle: self.table_control.toggleSelectedROICurationbox(
                         ck,
                         tg,
                         int(self.widget_manager.dict_combobox["set_roi_idx_min"].currentText()),

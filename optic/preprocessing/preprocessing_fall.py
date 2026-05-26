@@ -25,8 +25,8 @@ def convertMatToDictFall(Fall: Dict[str, Any]) -> Dict[str, Any]:
 
     return dict_Fall
 
-# ROICheckのmatを扱いやすいdictに変換
-def convertMatToDictROICheck(mat):
+# ROICurationのmatを扱いやすいdictに変換
+def convertMatToDictROICuration(mat):
     mat_dtype = list(mat[0].dtype.fields)
     dict_ = dict(zip(mat_dtype, list(mat[0][0])))
     return dict_

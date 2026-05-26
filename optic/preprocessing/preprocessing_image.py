@@ -33,8 +33,8 @@ preprocessing for Suite2p Fall.mat
 """
 # get Background Images from Fall.mat
 def getBGImageFromFall(
-        data_manager: DataManager, 
-        app_key: AppKeys, 
+        data_manager: DataManager,
+        app_key: AppKeys,
         dtype: str="uint8"
         ) -> Dict[str, np.ndarray]:
     # get image shape from meanImg
@@ -43,6 +43,20 @@ def getBGImageFromFall(
     base_shape = data_manager.dict_Fall[app_key]["ops"]["meanImg"].shape
     for key_im in BGImageTypeList.FALL:
         img = convertImageDtypeToINT(data_manager.dict_Fall[app_key]["ops"][key_im], dtype=dtype)
+        img = resizeImageShape(img, base_shape)
+        dict_im_bg[key_im] = img
+    return dict_im_bg
+
+def getBGImageFromDictFall(
+        dict_Fall: Dict,
+        dtype: str="uint8"
+        ) -> Dict[str, np.ndarray]:
+    """dict_Fall を直接受け取り背景画像 dict を返す (multi-session 用)"""
+    from ..config.constants import BGImageTypeList
+    dict_im_bg = {}
+    base_shape = dict_Fall["ops"]["meanImg"].shape
+    for key_im in BGImageTypeList.FALL:
+        img = convertImageDtypeToINT(dict_Fall["ops"][key_im], dtype=dtype)
         img = resizeImageShape(img, base_shape)
         dict_im_bg[key_im] = img
     return dict_im_bg
