@@ -4,13 +4,13 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from PyQt5.QtWidgets import QApplication
-from optic.apps.OpticROITracking.app import OpticROITrackingGUI
+from optic.apps.OpticROITracking.app import OpticROITrackingMultiGUI
 from optic.gui.app_style import applyAppStyle
 
 def main():
     app = QApplication(sys.argv) if QApplication.instance() is None else QApplication.instance()
     applyAppStyle(app)
-    gui = OpticROITrackingGUI()
+    gui = OpticROITrackingMultiGUI()
     gui.show()
     sys.exit(app.exec_())
 

@@ -1,1 +1,1 @@
-from .app import OpticROITrackingGUI
+from .app import OpticROITrackingMultiGUI

@@ -144,10 +144,17 @@ def applyDictROICurationToTable(
                 for row in range(min(row_count, len(data))):
                     item = q_table.item(row, col_info['order'])
                     if item:
+                        cell = data[row]
+                        # cell may be a scalar (loaded from .mat) or a 1-element ndarray/list
+                        # (captured in-memory via convertTableDataToDictROICuration, shape (N, 1)).
+                        if isinstance(cell, np.ndarray):
+                            cell = cell.item() if cell.size == 1 else (cell.flat[0] if cell.size else '')
+                        elif isinstance(cell, (list, tuple)):
+                            cell = cell[0] if len(cell) else ''
                         if col_info['type'] == 'checkbox':
-                            item.setCheckState(Qt.Checked if data[row] else Qt.Unchecked)
+                            item.setCheckState(Qt.Checked if cell else Qt.Unchecked)
                         else:  # string
-                            value = str(data[row])
+                            value = str(cell)
                             if value == '[]' or value == '':
                                 value = ''
                             item.setText(value)

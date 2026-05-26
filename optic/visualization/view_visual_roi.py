@@ -367,10 +367,14 @@ def drawROIPairsOnlyDisplay(
             roiId_pairs = table_control_pri.getMatchedROIPairs(table_control_sec)
             # all ROI pairs
             for roiId_pri, roiId_sec in roiId_pairs:
-                coords_pri = data_manager.getDictROICoords(app_key_pri)[roiId_pri]["med"]
+                # The line endpoints must match how the ROIs are actually drawn:
+                # when show_reg_im_roi is on, pri ROIs are rendered at their REGISTERED centers
+                # (updateLayerROI_OpticROITracking), so the pri endpoint must use registered med too.
                 if view_control.show_reg_im_roi:
+                    coords_pri = data_manager.getDictROICoordsRegistered(app_key_pri)[roiId_pri]["med"]
                     coords_sec = data_manager.getDictROICoordsRegistered(app_key_sec)[roiId_sec]["med"]
                 else:
+                    coords_pri = data_manager.getDictROICoords(app_key_pri)[roiId_pri]["med"]
                     coords_sec = data_manager.getDictROICoords(app_key_sec)[roiId_sec]["med"]
                 # show only if both ROIs are displayed
                 if all(dict_roi_display_pri[roiId_pri].values()) and all(dict_roi_display_sec[roiId_sec].values()) and roiId_pri != ROISelectedId:

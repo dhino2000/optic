@@ -574,11 +574,11 @@ class OpticRawTrackingGUI(QMainWindow):
             app_key_sec=self.app_keys[1],
         )
         # Generate master tracking table (graph-based multi-session alignment)
-        def _getMicrogliaSessionLabels():
+        def _getRawTrackingSessionLabels():
             path_tiff = self.widget_manager.dict_lineedit["path_tiff"].text()
             n_t = self.data_manager.getSizeOfT(self.app_keys[0])
             return [f"{path_tiff}:T{t}" for t in range(n_t)]
-        def _getMicrogliaDefaultFilename():
+        def _getRawTrackingDefaultFilename():
             path_tiff = self.widget_manager.dict_lineedit["path_tiff"].text()
             base = os.path.splitext(os.path.basename(path_tiff))[0] if path_tiff else "tracking"
             dir_ = os.path.dirname(path_tiff) if path_tiff else ""
@@ -587,8 +587,8 @@ class OpticRawTrackingGUI(QMainWindow):
             q_button=self.widget_manager.dict_button["master_tracking_run"],
             q_window=self,
             data_manager=self.data_manager,
-            get_session_labels_callback=_getMicrogliaSessionLabels,
-            default_filename_callback=_getMicrogliaDefaultFilename,
+            get_session_labels_callback=_getRawTrackingSessionLabels,
+            default_filename_callback=_getRawTrackingDefaultFilename,
         )
         # run Cellpose
         bindFuncButtonRunCellposeForXYCT(
