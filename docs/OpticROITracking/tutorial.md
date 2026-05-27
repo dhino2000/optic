@@ -1,260 +1,282 @@
-# OpticROITracking Tutorial
+# OpticROITracking
+
 <img src="images/optic_roi_tracking.png">
 
-**OpticROITracking** is an application developed for efficiently ROI tracking between different imaging sessions of the same subject. 
-These ROI correspondence relationships are saved as .mat files to facilitate downstream analysis. 
-Since this application depends on analysis results of [**OpticROICuration**](https://github.com/dhino2000/optic/edit/main/docs/OpticROICuration/tutorial.md), it is recommended to first perform ROI curation.
+**OpticROITracking** tracks corresponding ROIs across two or more imaging sessions of the same subject. The pipeline is:
+
+1. **Image registration** (ITKElastix) to correct session-to-session drift and distortion.
+2. **Optimal-Transport (OT) matching** to identify one-to-one ROI correspondences between registered sessions.
+3. **Graph-theoretic alignment** (NetworkX) to consolidate every pairwise match into a single multi-session **Master Tracking Table** CSV.
+
+OpticROITracking consumes the output of OpticROICuration, so the typical workflow is to **curate first** with [OpticROICuration](../OpticROICuration/tutorial.md) and then track.
 
 ## Workflow
 
-1. **Load Fall.mat**
-2. **Load ROICuration.mat**
-3. [**Image registration**](#image-registration)
-4. [**Auto ROI tracking**](#automatic-roi-matching)
-5. **Check ROI tracking manually**
-6. **Save ROITracking.mat file**
+1. **Load** N Fall.mat files (N ≥ 2) via the File Load dialog — see [File load](#file-load).
+2. *(optional)* **Load** the matching `ROICuration_*.mat` files via *Load ROICuration* to inherit celltype tags.
+3. [**Image Registration**](#image-registration) — align every session to a reference session (or align a specific pair only, or correct manually).
+4. [**ROI Matching**](#automatic-roi-matching) — run automatic OT matching across every session pair, then manually fix any wrong matches in the `Cell_ID_Match` column.
+5. [**Generate Master Tracking Table**](#master-tracking-table) — export the consolidated multi-session CSV.
 
 ## Input
-Before using this application, please prepare **Fall.mat**, and **ROICuration.mat**, the result of ROI curation.  
-- (Required): two **Fall.mat** and two **ROICuration.mat**
+
+| File | Required? | Notes |
+|---|---|---|
+| `Fall.mat` (Suite2p) | ✔ | Two or more sessions of the same subject |
+| `*.hdf5` (CaImAn) | ✔ (alternative) | Same role as `Fall.mat` |
+| `ROICuration_*.mat` | optional | Carries celltype tags from OpticROICuration |
 
 ## Output
-The result of ROI tracking is exported as **ROITracking~.mat**
-- **ROITracking_{name_of_the_primary_Fall_file}.mat**
 
-## Load Fall.mat file
+| File | Content |
+|---|---|
+| `ROItracking_{name_of_primary_Fall}.mat` | Per session-pair tracking result |
+| `master_tracking_{name_of_first_Fall}.csv` | Multi-session consolidated table (one row per ROI identity, one column per session) |
+
+## File load
+
 <img src="images/optic_roi_tracking_file_load.png">
 
+The File Load dialog accepts an arbitrary number of `Fall.mat` files. Use the buttons to manage the list:
 
-**Fall mat file path (Required):**   
+- **Add LineEdit** — appends an empty path field. Type or paste the full path to a `Fall.mat`, or use the per-row *browse* button.
+- **Remove LineEdit** — removes the last (unnecessary) path field.
+- **Load Files** — loads all `Fall.mat` files in the list at once and builds the main UI.
 
-push "browse" button and choose "Fall.mat" file. OpticROITracking needs two Fall.mat, **primary (pri)** and **secondary (sec)**. The "pri" serves as the reference side in ROI tracking. 
-It is used to determine which ROIs in "pri" correspond to which ROIs in "sec". 
+> ⚠️ **Important**
+> - **No blank fields** — every LineEdit must contain a valid `Fall.mat` path before pressing *Load Files*. Empty rows will cause the load to fail.
+> - **Mind the session order** — sessions are stored in the order they appear in the list, and the order determines `t_pri`/`t_sec` (the **primary session must always be younger than the secondary**). Put the earliest imaging session at the top.
+
+After loading, the slider's range becomes `[0, N-1]`, where each value indexes one of the loaded Fall.mat files.
 
 ## Application interface
 
 <img src="images/optic_roi_tracking_legend.png">
 
-**OpticROITracking** consists of two major sections, **primary (pri)** and **secondary (sec)**, and each section consists of two minor sections, **View** and **Table**. 
-About secondary view section and secondary table section, the function is same as that of **OpticROICuration**.  
+The window has two upper panels (**pri** on the left, **sec** on the right), each with a **View** and a **Table** section. The pri panel mirrors OpticROICuration with the addition of a `Cell_ID_Match` column. The bottom panel holds the **Image Registration** and **ROI Matching** controls.
 
-### Pri View Section
+Each panel has its own **T slider** above the View — see [Pri View section](#pri-view-section) for slider semantics.
+
+---
+
+### Pri View section
+
 <table>
-<tr>
-<td width="50%">
+<tr><td width="50%">
 
-- **View**
-  
-  display ROIs of Fall.mat, and the choosed ROI is highlighted. If **Macth_Cell_ID** is filled, white line between pri **Cell_ID** ROI and sec **Macth_Cell_ID** ROI is drawn. The opacity of white line can be changed with the slider of **Image Registration** section.
-  - **Left mouse click** : Choose the closest ROI after passing ROI skip conditions
-  - **Right mouse click** (only **pri** view) : Choose the closest ROI of **sec** view after passing ROI skip conditions
+The pri View shows the pri session's ROIs and, when registration has been run, the registered sec ROIs / image as an overlay. A white line connects each matched (pri, sec) pair, with both endpoints anchored to the **registered** ROI centres so the line stays aligned with what is drawn.
 
-- **ROI property**
-  
-  These explanations are derived from the [Suite2p documentation](https://suite2p.readthedocs.io/en/latest/outputs.html).
-  - **med** : (y,x) center of cell
-  - **npix** : number of pixels in ROI
-  - **npix_soma** : number of pixels in ROI's soma
-  - **radius** : estimated radius of cell from 2D Gaussian fit to mask
-  - **aspect_ratio** : ratio between major and minor axes of a 2D Gaussian fit to mask
-  - **compact** : how compact the ROI is (1 is a disk, >1 means less compact)
-  - **solidity** : unknown, maybe an parameter similar to compact?
-  - **footprint** : spatial extent of an ROI’s functional signal, including pixels not assigned to the ROI; a threshold of 1/5 of the max is used as a threshold, and the average distance of these pixels from the center is defined as the footprint
-  - **skew** : skewness of neuropil-corrected fluorescence trace
-  - **std** : standard deviation of neuropil-corrected fluorescence trace
- 
-- **ROI Display Setting**
-  
-  display all ROIs, none at all or only specific celltype ROIs.
-  
-- **Background Image Display Setting**
-  
-  Suite2p generate four type background images, **meanImg**, **meanImgE**, **max_proj**, and **Vcorr**. you can switch between those images.
+**T slider**
 
-- **Skip ROIs with choosing**
-  
-  When choosing ROIs, for example, if all **Neuron** ROIs have already been sorted and you want to concentrate on sorting only **Astrocyte** and **Not_Cell**, you can skip ROIs that are sorted to be **Neuron**. Similarly, it is possible to set skipping for other cell types.
+Moving the slider above the View **changes the session index** displayed in that panel. The slider's range matches the number of Fall.mat files loaded.
 
-- **Image Contrast**
-  
-  - **Green** : Background image (**meanImg**, **meanImgE**, **max_proj**, and **Vcorr**) contrast of primary imaging channel.
-  - **Red** : Background image (**meanImg**) contrast of seconday imaging channel. If the Fall.mat dosen't have secondary channel imaging data, this is meaningless. 
-  - **Blue** : Secondary ROIs. Only ROIs of the celltype set in **ROI Display Setting** will be displayed.   
+> Like OpticRawTracking, **the primary session is always younger than the secondary**. The two sliders are linked: if you push pri past sec, sec is automatically bumped forward (and vice versa) so that `t_pri < t_sec` always holds.
 
-- **ROI Opacity**  
-  Opacity of all and the selected ROI can be changed with the sliders.
+**Mouse**
 
-</td>
-<td width="50%">
+- **Left click**: select the closest pri ROI (after skip filters)
+- **Right click**: select the closest sec ROI shown in the overlay
+- **Middle drag**: pan
+- **Ctrl + wheel**: zoom in/out
+- **R**: reset zoom
+
+> Zoom and pan are preserved across other operations (table refresh, slider moves). Press **R** to restore auto-fit.
+
+The remaining controls (ROI properties / Display Setting / Background image / Skip ROI / contrast / opacity) match the [OpticROICuration View section](../OpticROICuration/tutorial.md#view-section).
+
+**Channel meanings here**
+
+| Channel | Content |
+|---|---|
+| Green | pri background |
+| Red | sec background, *overlaid* onto pri view |
+| Blue | sec ROI image, *overlaid* onto pri view |
+
+</td><td width="50%">
 
 <img src="images/optic_roi_tracking_view_pri.png">
 
-</td>
-</tr>
-</table>
+</td></tr></table>
 
-### Pri Table Section
+---
+
+### Pri Table section
+
 <table>
-<tr>
-<td width="50%">
+<tr><td width="50%">
 
-- **Cell_ID_Match**
-  
-  The table has additionaly column, **Cell_ID_Match**, the secondary ROI ID matched to the primary ROI ID.   
-  Although ROI curation is possible in also this application, creating ROICuration files using OpticROICuration is recommended for its more comprehensive functionality.  
+The pri table is identical to the OpticROICuration table plus one extra column:
 
-  > ⚠️ **WARNING:**  
-  > Before load ROICuration, please match the table columns with the table columns of the ROIcuration file.  
-  > ex) NG: app; ["Cell_ID", "Cell_ID_Match", "Neuron", "Not_Cell", "Check"], ROICuration; ["Cell_ID", "Cell_ID_Match", "Astrocyte", "Not_Cell", "Check"]  
+- **Cell_ID_Match** — the sec ROI ID matched to this pri ROI. Empty if there is no match. Edit by clicking the cell; the value must be an integer within the valid sec ROI range.
 
-  Cell_ID_Match is initially blank, but a number is filled, a white line is drawn on the **View**. 
-  This indicates which **sec** ROI matches to the **pri** ROI.   
-  This number must be a integer value between 0 and the maximum ROI number in sec. 
-  Since you typically would like to know the matching relationships of only neurons, you don't need to fill in all the blanks.   
+  When you fill in a Cell_ID_Match, a white line is drawn on the View connecting the two ROIs.
 
-- **one-to-one ROI matching**
-  
-  Also, the matching should basically be **one-to-one**, and you should avoid having one pri ROI matches to multiple sec ROIs, or vice versa.
+  > **Tip:** you usually only need to fill in matches for the cell types of interest (e.g. only neurons). Leave the rest blank.
 
-</td>
-<td width="50%">
-  
+**One-to-one matching** — avoid pri-to-many or many-to-sec ambiguities. The automatic OT step enforces one-to-one by construction; only manual edits can break it.
+
+> ⚠️ **Column compatibility with ROICuration files**
+> Before loading a `ROICuration_*.mat`, make sure the pri/sec tables use the *same celltype/checkbox columns* as the curation file (minus `Cell_ID_Match`, which is pri-only).
+> Use **Table Columns Config** — pri and sec are kept in sync automatically (sec inherits everything except `Cell_ID_Match`).
+
+</td><td width="50%">
+
 <img src="images/optic_roi_tracking_table_pri.png">
 
-</td>
-</tr>
-</table>
+</td></tr></table>
+
+#### Persistent edits across session switches
+
+Moving the T sliders rebuilds the pri / sec tables. The following state is preserved automatically:
+
+- **Celltype / checkbox / memo edits** — captured per session before you leave, restored when you come back.
+- **`Cell_ID_Match` edits** — synced to `dict_roi_matching` before any rebuild.
+- **Display Cells filter** — the side-panel "show only Neuron" toggle survives session switches.
+
+This means you can navigate freely between sessions, edit matches in one pair, and have everything in place when you return.
+
+---
 
 ### Image Registration
+
 <table>
-<tr>
-<td width="50%">
+<tr><td width="50%">
 
-**Image registration** supports **manual** ROI matching. 
-While the ROI arrangement pattern is basically similar between the sessions from the same subject, image drifting noise makes ROI matching process difficult. 
-In this section, image registration using [**ITKElastix**](https://github.com/InsightSoftwareConsortium/ITKElastix) is available. 
-It performs registration from **sec (moving)** to **pri (fixed)** based on the background image, and applies the obtained transformation to the ROIs as well, enabling more efficient ROI matching by overlaying pri ROIs and sec ROIs.
+OpticROITracking uses [ITKElastix](https://github.com/InsightSoftwareConsortium/ITKElastix) to align sessions. Three transformation models are available, from rigid (fastest, minimal deformation) to B-spline (slowest, handles local distortion).
 
-This application has three types of image transformation, **Rigid**, **Affine**, and **B-Spline**.  
-- **Performance comparison of image transformations**
-<table>
-  <tr>
-    <td></td>
-    <td> <b>Rigid </td>
-    <td> <b>Affine </td>
-    <td> <b>B-Spline </td>
-  </tr>
-  <tr>
-    <td> <b>Computation Speed </td>
-    <td> 0.5 ~ 1 (sec/image) </td>
-    <td> 1 ~ 2 (sec/image) </td>
-    <td> 2 ~ 4 (sec/image) </td>
-  </tr>
-  <tr>
-    <td> <b>Degrees of Freedom </td>
-    <td> Moderate </td>
-    <td> Good </td>
-    <td> Excellent </td>
-  </tr>
-  <tr>
-    <td> <b>Shape Preservation </td>
-    <td> Excellent </td>
-    <td> Good </td>
-    <td> Moderate </td>
-  </tr>
-  <tr>
-    <td> <b>Robustness </td>
-    <td> Good </td>
-    <td> Good </td>
-    <td> Good </td>
-  </tr>
-  <tr>
-    <td> <b>Local Deformation Handling </td>
-    <td> Poor </td>
-    <td> Poor </td>
-    <td> Excellent </td>
-  </tr>
-  <tr>
-    <td> <b>Motion Correction </td>
-    <td> Poor </td>
-    <td> Moderate </td>
-    <td> Excellent </td>
-  </tr>
-  <tr>
-    <td> <b>Registration Accuracy </td>
-    <td> Moderate </td>
-    <td> Good </td>
-    <td> Excellent </td>
-  </tr>
-</table>
+| | Rigid | Affine | B-spline |
+|---|---|---|---|
+| Computation speed | 0.5 – 1 s/image | 1 – 2 s/image | 2 – 4 s/image |
+| Degrees of freedom | Moderate | Good | Excellent |
+| Shape preservation | Excellent | Good | Moderate |
+| Robustness | Good | Good | Good |
+| Local deformation handling | Poor | Poor | Excellent |
+| Motion correction | Poor | Moderate | Excellent |
+| Registration accuracy | Moderate | Good | Excellent |
 
-First, set the **Elastix method**, and then set the **reference channel** (if the Fall is extracted from single-channel imaging, leave it as is). 
-The configuration for the Elastix transformation method can be customized with **Elastix Config**. 
-Click **Run Elastix** and wait for a while until the image registration is complete. 
-You can monitor the progress on Anaconda Prompt.
+**B-spline notes** — the OPTIC default tunes the `Metric1Weight` parameter to 100.0, which trades off accuracy against shape distortion of individual ROIs. Because B-spline can deform ROIs nonlinearly, OpticROITracking uses the transformed ROI centres only for cross-session matching and keeps the original ROI parameters (npix, skew, …) untouched in downstream files.
 
-</td>
-<td width="50%">
-  
+**Registration modes**
+
+OpticROITracking supports three complementary registration modes:
+
+- **All sessions against one reference** — pick a *reference session*; every loaded session is warped onto that session's coordinate frame. Recommended as the default; required for the [Master Tracking Table](#master-tracking-table).
+- **Single session pair** — register only the currently displayed `(t_pri, t_sec)` pair. Useful for testing parameters before running on all sessions.
+- **Manual registration** — bypass Elastix and apply a user-specified affine transform. Useful when the automatic registration fails (typically due to high inter-session drift or low contrast).
+
+  | Parameter | Meaning |
+  |---|---|
+  | **Center (x, y)** | Rotation centre (in pixel coordinates) |
+  | **Shift X, Y** | Translation in pixels |
+  | **Radian** | Rotation angle in radians (360° = 2π) |
+
+  Tweak the values, click **Run Manual Registration**, and the sec image / ROIs are transformed accordingly. Iterate until the overlay looks correct.
+
+**Run (automatic)**
+
+1. Pick **Elastix method** (`None` / rigid / affine / B-spline).
+2. Pick **reference channel** (channel 0 by default; pick channel 1 for dual-channel imaging when channel 1 is more stable).
+3. Pick **reference session** in the *All sessions* mode.
+4. Optionally open **Elastix Config** for fine-grained tuning (max iterations, sampling density, penalty weights, …).
+5. Click **Run Elastix** and watch progress in the Anaconda Prompt.
+
+**Save / Load registration result**
+
+Registration results (transformed ROIs + background images) can be **saved** to a `.mat` file and **reloaded** later. This lets you re-open a session set and skip the Elastix run — useful because B-spline can take a few minutes per session.
+
+</td><td width="50%">
+
 <img src="images/optic_roi_tracking_image_registration.png">
 
-- **Elastix Image Registration Config Window**
+**Elastix config window**
+
 <img src="images/optic_roi_tracking_elastix_config.png">
 
-</td>
-</tr>
-</table>
+</td></tr></table>
 
-### Automatic ROI Matching
+---
+
+### Automatic ROI matching
+
 <table>
-<tr>
-<td width="50%">
+<tr><td width="50%">
 
-Automatic ROI matching is also available. 
-The number of ROI pairs with ROI matching often exceeds 100, manual ROI matching is time-consuming and labor-intensive even with the assistance of image registration. 
-This automatic ROI matching function can significantly reduce the time and effort. 
-Furthermore, combining it with manual corrections enables highly efficient and accurate ROI tracking.   
-This section provides the tutorial of automatic ROI matching with [optimal transport](https://github.com/PythonOT/POT). 
-The typical ROI tracking workflow involves first performing ROI classification with [OpticROICuration](https://github.com/dhino2000/optic/edit/main/docs/OpticROICuration/tutorial.md), then applying automatic ROI matching for specific cell types, and finally making manual adjustments to ensure matching accuracy. 
-Image registration support can be utilized when necessary to improve the matching results.
+Automatic matching uses [Optimal Transport](https://github.com/PythonOT/POT) on the ROI centroids. The algorithm finds the assignment that minimises total transport cost (Euclidean distance) between pri and sec centroid sets, then prunes the result to one-to-one matches.
 
-- **Parameters for Optimal Transport**
-  - **Loss**
-    
-    This application has four optimal transport loss function options: **WD(Wasserstein Distance)-shape**, **WD-distance**, **GWD(Gromov-Wasserstein Distance)**, and [**FGWD(Fused Gromov-Wasserstein Distance)**](https://github.com/tvayer/FGW/tree/master). The WD-distance exponent controls the distance weighting during matching; higher values discourage long-distance matching by penalizing distant pairs more heavily.
-    The FGWD alpha parameter balances ROI shape similarity and distance penalty of matching; lower values prioritize distance penalty.
-  - **pruning ROI matching**
-    
-    While optimal transport initially makes multi-to-multi ROIs matching, the algorithm applies a two-step pruning process to derive one-to-one ROI matching suitable for ROI tracking.
-    First, **minimum transport value pruning algorithm** eliminates ROI pairs where the transport value is less than the threshold, **"Min transport threshold"**.
-    Then, from the remaining pairs, the ROI pair with the highest transport value is choosed.
-    Subsequently, through **maximum transport cost pruning algorithm**, if the transport cost of the pair exceeds **"Max cost threshold"**, the pri ROI is considered to not have matched ROI of sec.
+**Parameters**
 
-- **ROI Matching Test Window**
-  
-  The **ROI Matching Test** provides a visual preview of optmial transport patterns between pri and sec ROIs.  
-  - **Red dots** : the centers of pri ROIs  
-  - **Blue dots** : the centers of sec ROIs  
-  - **Green lines** : ROI matching between pri and sec.
-    
-  The transport plan with optimal transport is represented as a (source samples) × (destination samples) matrix, therefore the initial optimal transport result is exported as multi-to-multi ROI matching.
-  Users can enable the "Plot Transport Plan" option to visualize this complete transport matrix before pruning.
+| Parameter | Meaning |
+|---|---|
+| **OT method** | `OT_partial` (recommended) / `OT` / `OT_partial_entropic` / `OT_partial_lagrange`. Partial variants allow some ROIs to remain unmatched. |
+| **Partial OT mass `m`** | Fraction of total mass to transport (0–1). OPTIC's default is **0.99** — 1 % of ROIs are treated as outliers and left unmatched. |
+| **OT distance exponent `p`** | Minkowski distance exponent (default 2 = Euclidean). |
+| **Min transport threshold** | Drop transport entries below this weight (default 1e-5). |
+| **Max distance threshold (px)** | Pri/sec centroid pairs farther apart than this are treated as biologically implausible and assigned a prohibitive cost. Tune to your imaging resolution (default 10 px). |
 
-- **Save, Load ROI Tracking result**
-  
-  The ROI matching results are saved as **ROITracking.mat** files, each file contains tracking data between two imaging sessions.
-  For tracking across three or more sessions, you need to create ROITracking files for each session pair.
-  For downstream analysis using these tracking results, please refer to the provided [Jupyter notebooks](https://github.com/dhino2000/optic).
+**Pruning** — after OT, two clean-up steps enforce one-to-one matching:
 
-</td>
-<td width="50%">
-  
+1. **Reference selection** — whichever side has fewer ROIs is used as the reference; each reference ROI matches at most one ROI on the other side.
+2. **Conflict resolution** — when multiple candidates exist for the same reference ROI, keep the lowest-cost (closest) pair only.
+
+**Run modes**
+
+- **Run OT** — match only the currently displayed `(t_pri, t_sec)` pair.
+- **Run OT for all session pairs** — iterate over every `(t_pri, t_sec)` combination. Required before [Generate Master Tracking Table](#master-tracking-table).
+
+The matched ROIs are written to the pri table's `Cell_ID_Match` column and stored internally for graph-based alignment.
+
+**Save / Load tracking**
+
+- `ROItracking_*.mat` — per session-pair data; useful as a backup or for sharing intermediate results.
+- For the consolidated multi-session export, use the [Master Tracking Table](#master-tracking-table) below.
+
+</td><td width="50%">
+
 <img src="images/optic_roi_tracking_roi_matching.png">
 
-- **ROI Matching Test Window**
-<img src="images/optic_roi_tracking_roi_matching_test.png">
+</td></tr></table>
 
-</td>
-</tr>
-</table>
+---
 
+## Master Tracking Table
+
+The **Master Tracking Table** consolidates pairwise OT matches from every session into a single CSV where each row is one ROI identity and each column is one session. Click **Generate master tracking table** in the ROI Matching panel after running OT for all session pairs.
+
+### Algorithm — graph-based alignment
+
+The pairwise OT step produces N(N − 1)/2 match dictionaries. To merge them into consistent multi-session identities, OpticROITracking constructs an undirected graph (NetworkX):
+
+- **Node**: `(session_label, roi_id)` — one per ROI in every session
+- **Edge**: drawn between two nodes if those ROIs were matched in any pairwise OT result
+
+Connected components are then classified:
+
+| Subgraph shape | Meaning | Kept? |
+|---|---|---|
+| Single isolated node | ROI seen only in one session | ✔ (one-session entry) |
+| Complete graph (every node connected to every other) | ROI identity is consistent across all involved sessions | ✔ |
+| Incomplete graph | Conflicting pairwise matches (identity-switch or false positive) | ✗ Dropped |
+
+Only complete subgraphs are emitted to the CSV, guaranteeing that **every reported ROI identity is supported by *every* pairwise comparison**.
+
+### Output CSV
+
+<img src="images/optic_roi_tracking_master_tracking_table.png">
+
+- **Filename**: `master_tracking_{first_fall_basename}.csv` by default (you can change it in the save dialog).
+- **Columns**: one per session — labelled with the **full path of each `Fall.mat`** so multi-session datasets stay unambiguous.
+- **Rows**: one per ROI identity.
+- **Cells**: the ROI ID in that session, or `-1` if the ROI is absent in that session.
+
+> **Cell-type filter**
+> Only ROIs whose celltype is currently turned **ON** in the side-panel *ROI Display Celltypes* are exported. For example, with only *Neuron* enabled, the CSV will contain only Neuron-classified ROIs across all sessions. To export multiple celltypes, enable them in *ROI Display Celltypes* before clicking *Generate master tracking table*.
+
+After saving, the console prints:
+
+```
+[master_tracking_table] complete subgraphs: 84, incomplete subgraphs: 3, ratio_complete: 0.9655
+[master_tracking_table] incomplete subgraphs (excluded from CSV):
+  [('/path/sess_A.mat', 12), ('/path/sess_B.mat', 21), ('/path/sess_C.mat', 30)]
+```
+
+Use the listed incomplete subgraphs as a checklist for manual repair: jump to the corresponding session pair, fix the bad match in `Cell_ID_Match`, and re-export.
