@@ -10,7 +10,6 @@ OPTIC bundles three specialized GUI applications that plug into existing pipelin
 | [OpticROITracking](OpticROITracking/tutorial.md) | Track ROIs across imaging sessions via image registration + Optimal Transport. Multi-session mode supports graph-based alignment and master tracking table export. | Multiple `Fall.mat` / `*.hdf5` |
 | [OpticRawTracking](OpticRawTracking/tutorial.md) | Generalized ROI tracking on raw TIFF stacks. Integrates Cellpose for ROI extraction and ImageJ for bidirectional ROI exchange. | XYCT TIFF stack |
 
-For installation and a quick start, see the [project README](https://github.com/dhino2000/optic/blob/main/README.md).
 
 ```{toctree}
 :maxdepth: 2
@@ -31,8 +30,10 @@ installation
 references
 ```
 
+<!--
 ## Citation
 
 If you use OPTIC in your work, please cite:
 
 > Fukatsu, N., Tanisumi, Y., Cheung, D., Saito, Y., Hashimoto, A., Takahashi, N., Takeda, I., Inoue, M., & Wake, H. *OPTIC: A Rapid and Efficient Semi-automated Toolbox for Multicellular Calcium Imaging Analysis.*
+-->
