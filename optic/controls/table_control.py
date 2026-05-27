@@ -220,11 +220,15 @@ class TableControl:
             return
         else:
             self.control_manager.setSharedAttr(self.app_key, 'roi_selected_id', roi_id)
-            if self.config_manager.current_app == "OPTIC_ROI_CURATION" or self.config_manager.current_app == "OPTIC_ROI_TRACKING":
+            if self.config_manager.current_app in (
+                "OPTIC_ROI_CURATION",
+                "OPTIC_ROI_TRACKING",
+                "OPTIC_ROI_TRACKING_MULTI",
+            ):
                 updateROIPropertyDisplay(
-                    self.control_manager, 
-                    self.data_manager, 
-                    self.widget_manager, 
+                    self.control_manager,
+                    self.data_manager,
+                    self.widget_manager,
                     self.app_key,
                     load_caiman=self.data_manager.dict_data_dtype[self.app_key]==Extension.HDF5
                 )

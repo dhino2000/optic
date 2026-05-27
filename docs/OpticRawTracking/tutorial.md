@@ -1,286 +1,294 @@
-# OpticRawTracking Tutorial
+# OpticRawTracking
+
 <img src="images/optic_raw_tracking.png">
 
-**Microglia Tracking** is a specialized tool developed for detecting microglial ROIs from XYCT image stacks and analyzing their dynamics through time-series tracking. 
-This tool implements **Cellpose** for high-precision ROI detection and offers seamless integration with **ImageJ**, enabling comprehensive downstream analyses of microglial dynamics.
+**OpticRawTracking** is a generalised ROI tracker that works directly on raw XYCT TIFF stacks — no Suite2p / CaImAn pre-processing required. It bundles:
+
+- **Cellpose**-based ROI extraction (with optional manual draw / edit)
+- **ITKElastix** image registration across time points
+- **Optimal-Transport** ROI matching (same engine as OpticROITracking)
+- **Graph-theoretic Master Tracking Table** export across all time points
+- **ImageJ** ROI Manager interop
+
+The name "Raw" reflects that the input is the raw image stack, not a pre-segmented ROI set. The original use case (and default workflow) is microglial dynamics in dual-channel (microglia + vessel) imaging, but the pipeline works for any XYCT data.
 
 ## Workflow
 
-1. **Load Microglia XYCT stack tif file**
-2. [**Image registration**](#image-registration)
-3. [**Draw ROIs, Extract ROIs with Cellpose**](#view-section)
-4. [**Auto ROI tracking**](#automatic-roi-matching)
-5. **Check ROI tracking manually**
-6. **Save OpticRawTracking.mat file**
+1. **Load** an XYCT TIFF stack (≥ 2 time points).
+2. [**Extract ROIs**](#roi-extraction-and-editing) — either run [Cellpose](#cellpose) per time point, draw / edit manually, or import a ROI zip from ImageJ.
+3. [**Image registration**](#image-registration) — align every time point to a reference T.
+4. [**Automatic ROI matching**](#automatic-roi-matching) — OT match between time-point pairs.
+5. **Manual touch-ups** in the `Cell_ID_Match` column.
+6. **Save** `OpticRawTracking_*.mat`, and/or [**generate the Master Tracking Table**](#master-tracking-table) CSV.
 
 ## Input
-The input tif stack file format should be **XYCT**, and the number of channel have to be less than 3. If you have XYZCT tif stack, please convert to XYCT with z-axis projection.  
-- (Required): **XYCT tif stack** 
+
+| File | Required? | Notes |
+|---|---|---|
+| XYCT TIFF stack | ✔ | At least 2 time points; ≤ 3 channels. If you have XYZCT data, do a Z-projection first. |
+| Cellpose `*_seg.npy` | optional | Skip the in-GUI Cellpose run by importing pre-computed masks |
+| ImageJ ROI zip | optional | Use ROIs drawn in ImageJ as the starting point |
 
 ## Output
-The result of ROI tracking is exported as **OpticRawTracking~.mat**
-- **OpticRawTracking_{name_of_the_tif_file}.mat**
 
-## Load Fall.mat file
+| File | Content |
+|---|---|
+| `OpticRawTracking_{tiff_name}.mat` | Per-T ROI coordinates, per-pair matching, registration result |
+| `master_tracking_{tiff_name}.csv` | Consolidated multi-T tracking table (see [Master Tracking Table](#master-tracking-table)) |
+| `*.zip` (ImageJ ROIs) | Optional export to ImageJ ROI Manager |
+
+## File load
+
 <img src="images/optic_raw_tracking_load.png">
 
-
-**tiff stack (XYCT) file path (Required):**   
-
-push "browse" button and choose microglia tif file. The number of the file's frame must be 2 or more. 
+Click **browse** and pick the XYCT TIFF. The slider on each panel becomes a **T (time-point) slider** after loading.
 
 ## Application interface
 
 <img src="images/optic_raw_tracking_captioned.png">
 
-**OpticRawTracking** consists of two major sections, **primary (pri)** and **secondary (sec)**, and each section consists of two minor sections, **View** and **Table**. 
-The primary (pri) and secondary (sec) sections have different functionalities and display distinct content.    
+The window has two upper panels (**pri** / **sec**) — each showing the same TIFF at a different time point — and a bottom control panel for registration, ROI matching, and Cellpose. T sliders constrain `t_pri < t_sec`, so the two panels always compare an earlier and a later frame.
 
-### View Section
+---
+
+### View section
+
 <table>
-<tr>
-<td width="50%">
+<tr><td width="50%">
 
-- **View**
-  
-  display ROIs of the table and the choosed ROI is highlighted. If **Macth_Cell_ID** is filled, white line between pri **Cell_ID** ROI and sec **Macth_Cell_ID** ROI is drawn. The opacity of white line can be changed with **Opacity of ROI pair** slider.    
-  - **Left mouse click** : Choose the closest ROI
-  - **Right mouse click** (only pri view) : Choose the closest ROI of sec view
-  - **ctrl + mouse wheel** : Zoom in/out
-  - **Middle mouse drag** : Pan
-  - **R** : Reset view zoom
+The View displays the TIFF channel(s) at the current T plus any ROIs from the table. A white line connects each matched (pri, sec) ROI pair.
 
-- **T slider**
-  Switch time point. The time point of the pri is always earlier than that of sec.
-  
-- **Image Contrast**
-  
-  - **Green** : Background image contrast of primary channel. (ex): microglia  
-  - **Red** : Background image contrast of seconday channel. (ex): vessel  
-  - **Blue** : Secondary ROIs.     
+**Mouse**
 
-- **ROI Opacity**  
-  Opacity of all and the selected ROI can be changed with the sliders.
+- **Left click**: select the closest ROI
+- **Right click** (pri view): select the closest ROI in the sec view
+- **Middle drag**: pan
+- **Ctrl + wheel**: zoom in/out
+- **R**: reset zoom
 
------------------------------------------------------------------------------------
+**T slider** — change the displayed time point. `t_pri < t_sec` is enforced by the linkage.
 
-- **ROI edit mode**  
-  ROIs can be added, removed, and edited.  
-  - **Add ROI**: Add a new ROI. You can draw the ROI on the View with **mouse drag**, and register it as a new ROI with press the **space key**.  
-  - **Remove ROI**: Remove the selected ROI.
-  - **Edit ROI**: Edit the selected ROI.  
-  - **Pen Radius**: Adjust the pen size.  
-  - **ROI Opacity**: Opacity of the ROI being edited.  
- 
-  - **Key operation**
-    - **Left mouse drag**: Draw ROI
-    - **Right mouse drag**: Erase ROI
-    - **Space key**: Exit ROI edit mode  
+**Channels**
 
-</td>
-<td width="50%">
+| Channel | Typical content (microglia example) |
+|---|---|
+| Green | Primary structural / functional channel (e.g. microglia GFP) |
+| Red | Secondary channel (e.g. blood vessels with Texas Red dextran) |
+| Blue | Sec-side ROI image, overlaid into the pri view |
+
+**ROI opacity** — sliders for the all-ROI layer and the selected ROI's highlight.
+
+</td><td width="50%">
 
 <img src="images/optic_raw_tracking_view.png">
 
------------------------------------------------------------------------------------
+</td></tr></table>
+
+#### ROI extraction and editing
+
+OpticRawTracking provides three ways to populate the per-T ROI table:
+
+1. **Cellpose** — automatic segmentation (see [Cellpose](#cellpose) below).
+2. **Manual draw / edit** — see the *ROI edit mode* controls below.
+3. **Import ImageJ ROI zip** — use the **ROI Manager** section's *Load ROI* button.
+
+**ROI edit mode**
+
+- **Add ROI** — left-drag to paint the new ROI in the view; press **Space** to commit it as a new ROI row.
+- **Remove ROI** — deletes the currently selected ROI. The corresponding Cell_ID_Match entries on other T planes are cleared too.
+- **Edit ROI** — modify the selected ROI's footprint.
+  - Left-drag: paint
+  - Right-drag: erase
+  - Space: exit edit mode
+- **Pen Radius** — pen size for paint / erase.
+- **ROI Opacity** — opacity of the ROI under editing.
 
 <img src="movies/optic_raw_tracking_roi_edit.gif">
 
-</td>
-</tr>
-</table>
+---
 
-### Automatic ROI Extraction with Cellpose
+### Table section
+
 <table>
-<tr>
-<td width="50%">
+<tr><td width="50%">
 
-c
+The table is initially empty. Rows are added by:
 
-</td>
-<td width="50%">
+- Drawing ROIs in *Add ROI* mode, or
+- Running Cellpose, or
+- Loading a Cellpose `*_seg.npy` or ImageJ ROI zip
 
-</td>
-</tr>
-</table>
+ROI data is stored **per T plane** — the table updates whenever you move the T slider.
 
-### Table Section
-<table>
-<tr>
-<td width="50%">
+**Cell_ID_Match** (pri table only)
 
-- **Cell_ID**
-  The table is initially empty when the TIFF stack is loaded. Cell_ID is added either by using the "Add ROI" to manually draw ROIs or by loading the **seg.npy** file generated by Cellpose.
-The ROIs are stored for each t plane, and the content of the table updates accordingly when the T slider is adjusted.
-  
-- **Cell_ID_Match**
-  
-  **Pri** table has additionaly column, **Cell_ID_Match**, the secondary ROI ID matched to the primary ROI ID.   
+The sec ROI ID matched to this pri ROI. Same semantics as in [OpticROITracking](../OpticROITracking/tutorial.md):
 
-  Cell_ID_Match is initially blank, but when a number is filled, a white line is drawn on the **View**.
-  This indicates which **sec** ROI matches to the **pri** ROI.
-  This number must be a integer value between 0 and the maximum ROI number in sec.
-  When the ROI is removed with "Remove ROI", all **Cell_ID_Match** of the ROI are also removed.
+- Empty when no match exists
+- Filling in a number draws a white line on the View connecting the two ROIs
+- Must be an integer within the sec table's ROI ID range
+- Removing an ROI also clears its Cell_ID_Match entry across all pairs
 
-- **one-to-one ROI matching**
-  
-  Also, the matching should basically be **one-to-one**, and you should avoid having one pri ROI matches to multiple sec ROIs, or vice versa.
+**One-to-one matching** is recommended.
 
-</td>
-<td width="50%">
-  
+</td><td width="50%">
+
 <img src="images/optic_raw_tracking_table.png">
 
-</td>
-</tr>
-</table>
+</td></tr></table>
+
+#### Persistence across T navigation
+
+Moving the T slider rebuilds the tables. The following state is preserved:
+
+- Manual `Cell_ID_Match` edits — synced before any rebuild
+- Display Cells filter — re-applied after rebuild
+- View zoom / pan — preserved per Ctrl+wheel zoom (press **R** to re-fit)
+
+---
+
+### Cellpose
+
+<table>
+<tr><td width="50%">
+
+Automatic ROI extraction with [Cellpose](https://github.com/MouseLand/cellpose). Recommended workflow:
+
+1. Pick the **T plane** to segment (you can repeat for each T, or batch later).
+2. Pick the **channel** containing the cells of interest (e.g. green for microglia).
+3. Pick a **Cellpose model** (`cyto3`, `nuclei`, `livecell`, …) and an optional **restore** model (Cellpose 3 denoising / deblur).
+4. Set the **diameter** (in pixels) — leave at 0 to auto-estimate.
+5. Click **Run Cellpose**. The result is written into the per-T ROI table.
+
+**Save / Load mask** — store / restore the Cellpose `seg.npy` for the current T. This is the same format Cellpose itself uses, so segmentations can round-trip between OpticRawTracking and the standalone Cellpose GUI.
+
+> 💡 **GPU acceleration** — install a CUDA-compatible PyTorch build (see the README) and Cellpose will use your GPU automatically.
+
+</td><td width="50%">
+
+<!-- placeholder for cellpose screenshot -->
+
+</td></tr></table>
+
+---
 
 ### Image Registration
+
 <table>
-<tr>
-<td width="50%">
+<tr><td width="50%">
 
-**Image registration** supports **manual** ROI matching. 
-While the ROI arrangement pattern is basically similar between the sessions from the same subject, image drifting noise makes ROI matching process difficult. 
-In this section, image registration using [**ITKElastix**](https://github.com/InsightSoftwareConsortium/ITKElastix) is available. 
-It performs registration from **sec (moving)** to **pri (fixed)** based on the background image, and applies the obtained transformation to the ROIs as well, enabling more efficient ROI matching by overlaying pri ROIs and sec ROIs.
+OpticRawTracking aligns every time point to a single reference time using [ITKElastix](https://github.com/InsightSoftwareConsortium/ITKElastix), and applies the resulting transform to both the image and the per-T ROIs.
 
-This application has three types of image transformation, **Rigid**, **Affine**, and **B-Spline**.  
-- **Performance comparison of image transformations**
-<table>
-  <tr>
-    <td></td>
-    <td> <b>Rigid </td>
-    <td> <b>Affine </td>
-    <td> <b>B-Spline </td>
-  </tr>
-  <tr>
-    <td> <b>Computation Speed </td>
-    <td> 0.5 ~ 1 (sec/image) </td>
-    <td> 1 ~ 2 (sec/image) </td>
-    <td> 2 ~ 4 (sec/image) </td>
-  </tr>
-  <tr>
-    <td> <b>Degrees of Freedom </td>
-    <td> Moderate </td>
-    <td> Good </td>
-    <td> Excellent </td>
-  </tr>
-  <tr>
-    <td> <b>Shape Preservation </td>
-    <td> Excellent </td>
-    <td> Good </td>
-    <td> Moderate </td>
-  </tr>
-  <tr>
-    <td> <b>Robustness </td>
-    <td> Good </td>
-    <td> Good </td>
-    <td> Good </td>
-  </tr>
-  <tr>
-    <td> <b>Local Deformation Handling </td>
-    <td> Poor </td>
-    <td> Poor </td>
-    <td> Excellent </td>
-  </tr>
-  <tr>
-    <td> <b>Motion Correction </td>
-    <td> Poor </td>
-    <td> Moderate </td>
-    <td> Excellent </td>
-  </tr>
-  <tr>
-    <td> <b>Registration Accuracy </td>
-    <td> Moderate </td>
-    <td> Good </td>
-    <td> Excellent </td>
-  </tr>
-</table>
+| | Rigid | Affine | B-spline |
+|---|---|---|---|
+| Computation speed | 0.5 – 1 s/image | 1 – 2 s/image | 2 – 4 s/image |
+| Degrees of freedom | Moderate | Good | Excellent |
+| Shape preservation | Excellent | Good | Moderate |
+| Robustness | Good | Good | Good |
+| Local deformation handling | Poor | Poor | Excellent |
+| Motion correction | Poor | Moderate | Excellent |
+| Registration accuracy | Moderate | Good | Excellent |
 
-First, set the **Elastix method**, and then set the **reference channel** (if the Fall is extracted from single-channel imaging, leave it as is). 
-The configuration for the Elastix transformation method can be customized with **Elastix Config**. 
-Click **Run Elastix** and wait for a while until the image registration is complete. 
-You can monitor the progress on Anaconda Prompt.
+**Reference channel** — pick the channel that contains the most **stable, low-motility** structures.
 
-</td>
-<td width="50%">
-  
+> For microglia + vessel imaging, **vessels are more stable** than the highly motile microglia, so the **red (vessel) channel** is usually the better registration reference. OpticRawTracking will then apply the resulting transform to the microglia channel.
+> In situations where only the microglia channel is available, microglia-channel registration also works (validated in the OPTIC paper, Fig 6).
+
+**Run**
+
+1. Pick **Elastix method** (rigid / affine / B-spline).
+2. Pick **reference channel** and **reference T plane**.
+3. Optionally open **Elastix Config** for fine-grained tuning.
+4. Click **Run Elastix**.
+5. *(Optional)* **Export registered TIFF** — writes the warped stack to disk for downstream analysis outside OpticRawTracking.
+
+</td><td width="50%">
+
 <img src="images/optic_raw_tracking_image_registration.png">
 
-- **Elastix Image Registration Config Window**
-<img src="images/optic_roi_tracking_elastix_config.png">
+**Elastix config window**
 
-</td>
-</tr>
-</table>
+<img src="../OpticROITracking/images/optic_roi_tracking_elastix_config.png">
 
-### Automatic ROI Matching
+</td></tr></table>
+
+---
+
+### Automatic ROI matching
+
 <table>
-<tr>
-<td width="50%">
+<tr><td width="50%">
 
-Automatic ROI matching is also available. 
-The number of ROI pairs with ROI matching often exceeds 100, manual ROI matching is time-consuming and labor-intensive even with the assistance of image registration. 
-This automatic ROI matching function can significantly reduce the time and effort. 
-Furthermore, combining it with manual corrections enables highly efficient and accurate ROI tracking.   
-This section provides the tutorial of automatic ROI matching with [optimal transport](https://github.com/PythonOT/POT). 
-The typical ROI tracking workflow involves first performing ROI classification with [OpticROICuration](https://github.com/dhino2000/optic/edit/main/docs/OpticROICuration/tutorial.md), then applying automatic ROI matching for specific cell types, and finally making manual adjustments to ensure matching accuracy. 
-Image registration support can be utilized when necessary to improve the matching results.
+Identical engine to [OpticROITracking](../OpticROITracking/tutorial.md#automatic-roi-matching). Operates on per-T ROI centroids:
 
-- **Parameters for Optimal Transport**
-  - **Loss**
-    
-    This application has four optimal transport loss function options: **WD(Wasserstein Distance)-shape**, **WD-distance**, **GWD(Gromov-Wasserstein Distance)**, and [**FGWD(Fused Gromov-Wasserstein Distance)**](https://github.com/tvayer/FGW/tree/master). The WD-distance exponent controls the distance weighting during matching; higher values discourage long-distance matching by penalizing distant pairs more heavily.
-    The FGWD alpha parameter balances ROI shape similarity and distance penalty of matching; lower values prioritize distance penalty.
-  - **pruning ROI matching**
-    
-    While optimal transport initially makes multi-to-multi ROIs matching, the algorithm applies a two-step pruning process to derive one-to-one ROI matching suitable for ROI tracking.
-    First, **minimum transport value pruning algorithm** eliminates ROI pairs where the transport value is less than the threshold, **"Min transport threshold"**.
-    Then, from the remaining pairs, the ROI pair with the highest transport value is choosed.
-    Subsequently, through **maximum transport cost pruning algorithm**, if the transport cost of the pair exceeds **"Max cost threshold"**, the pri ROI is considered to not have matched ROI of sec.
+| Parameter | Meaning |
+|---|---|
+| **OT method** | `OT_partial` (recommended) / `OT` / `OT_partial_entropic` / `OT_partial_lagrange` |
+| **Partial OT mass `m`** | Fraction of mass transported (default 0.99; 1 % outlier budget) |
+| **OT distance exponent `p`** | Minkowski exponent (default 2 = Euclidean) |
+| **Min transport threshold** | Drop transport entries below this weight |
+| **Max distance threshold (px)** | Pairs farther than this are treated as biologically implausible. For microglia at 0.32 µm/pixel, OPTIC's default is **20 px**; for 0.64 µm/pixel use 40 px. |
 
-- **ROI Matching Test Window**
-  
-  The **ROI Matching Test** provides a visual preview of optmial transport patterns between pri and sec ROIs.  
-  - **Red dots** : the centers of pri ROIs  
-  - **Blue dots** : the centers of sec ROIs  
-  - **Green lines** : ROI matching between pri and sec.
-    
-  The transport plan with optimal transport is represented as a (source samples) × (destination samples) matrix, therefore the initial optimal transport result is exported as multi-to-multi ROI matching.
-  Users can enable the "Plot Transport Plan" option to visualize this complete transport matrix before pruning.
+**Run modes**
 
-- **Save, Load ROI Tracking result**
-  
-  The ROI matching results are saved as **ROITracking.mat** files, each file contains tracking data between two imaging sessions.
-  For tracking across three or more sessions, you need to create ROITracking files for each session pair.
-  For downstream analysis using these tracking results, please refer to the provided [Jupyter notebooks](https://github.com/dhino2000/optic).
+- **Run Optimal Transport** — match the currently displayed `(t_pri, t_sec)` pair only.
+- **Run Optimal Transport for all t-planes** — iterate over every `(t_pri, t_sec)` combination.
 
-</td>
-<td width="50%">
-  
+After OT, the pri table's `Cell_ID_Match` column is filled in, white lines are drawn on the View, and the result is persisted internally for the [Master Tracking Table](#master-tracking-table).
+
+**Save / Load tracking** — `OpticRawTracking_*.mat` for single-pair / per-pair data.
+
+</td><td width="50%">
+
 <img src="images/optic_raw_tracking_optimal_transport.png">
 
-- **ROI Matching Test Window**
-<img src="images/optic_roi_tracking_roi_matching_test.png">
+</td></tr></table>
 
-</td>
-</tr>
-</table>
+---
 
-### ROI Manager
-<table>
-<tr>
-<td width="50%">
+## Master Tracking Table
 
-- **Save/Load ROI**
+After running OT for all t-planes, click **Generate master tracking table** to export a single CSV consolidating ROI identities across every time point.
 
-- **Save/Load Mask**
-  The exported mask file from Cellpose, seg.npy can be loaded and exported.
-  The cellpose mask file have to be generated with **Zstack mode**.
+### How it works
 
-</td>
-<td width="50%">
+The algorithm is identical to [OpticROITracking](../OpticROITracking/tutorial.md#master-tracking-table):
 
-</td>
-</tr>
+1. Build an undirected graph with `(time_point, roi_id)` nodes and edges from pairwise OT matches.
+2. Classify connected components: only **complete subgraphs** (every node connected to every other) survive.
+3. Emit one row per consistent ROI identity, one column per time point.
+
+### Output CSV
+
+- Default filename: `master_tracking_{tiff_basename}.csv`
+- Column labels: `{tiff_path}:T{t}` — TIFF path with the T index appended, e.g. `…/microglia_stack.tif:T0`
+- Cells: per-T ROI ID, or `-1` if the ROI is absent at that T
+
+After saving, the console reports the count of complete vs incomplete subgraphs and lists the incomplete ones so you can fix them manually:
+
+```
+[master_tracking_table] complete subgraphs: 137, incomplete subgraphs: 5, ratio_complete: 0.9648
+[master_tracking_table] incomplete subgraphs (excluded from CSV):
+  [('/.../stack.tif:T0', 11), ('/.../stack.tif:T2', 4)]
+  ...
+```
+
+---
+
+## ROI Manager (ImageJ interop)
+
+OpticRawTracking can read and write ImageJ ROI Manager `*.zip` files using the [roifile](https://pypi.org/project/roifile/) library. The naming convention is
+
+```
+M{3-digit cell ID}_S{2-digit session number}
+```
+
+For example `M042_S03` is the same cell as `M042_S04`, observed at session 3 vs session 4. This convention makes ROIs round-trip cleanly between OpticRawTracking and ImageJ for visual inspection, while preserving longitudinal correspondences.
+
+**Save / Load**
+
+- **Save ROI** — exports the current ROIs (across all T) as `*.zip`.
+- **Save ROI (registered)** — exports the registered ROI coordinates (post Elastix transform).
+- **Load ROI** — imports ROIs from a `*.zip`. Existing T-plane entries are merged according to the `M`/`S` naming convention.
+
+> Duplicate `M`/`S` combinations are disallowed to keep cell identities unambiguous.

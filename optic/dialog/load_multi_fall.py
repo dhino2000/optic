@@ -84,7 +84,7 @@ class LoadMultiFallDialog(QDialog):
     # Make layout for load, exit, help, load ROI tracking buttons
     def makeLayoutComponentLoadExitHelpButtons(self) -> QHBoxLayout:
         layout_button_load_exit_help = makeLayoutLoadFileExitHelp(self.widget_manager)
-        layout_button_load_exit_help.addWidget(self.widget_manager.makeWidgetButton(key="load_roi_tracking", label="Load ROI Tracking"))
+        # layout_button_load_exit_help.addWidget(self.widget_manager.makeWidgetButton(key="load_roi_tracking", label="Load ROI Tracking"))
         return layout_button_load_exit_help
     
     """

@@ -1,90 +1,102 @@
 # OPTIC
-## OPTIC(OPtimized Toolbox for Image-based Cellular analysis)
+## OPTIC (OPtimized Toolbox for Image-based Cellular analysis)
 
-[**OPTIC Documantation**](https://optic-doc.readthedocs.io/en/latest/)
+[**OPTIC Documentation**](https://optic-doc.readthedocs.io/en/latest/)
 
-OPTIC consists of four specialized applications:
+OPTIC consists of three specialized applications:
+
 ### 1. OpticROICuration
 <img src="docs/OpticROICuration/images/optic_roi_curation.png">
 
 #### Input Format
-- Fall.mat: Suite2p output file containing ROI information  
-- Reference tiff image (optional)  
-- Event npy file (optional): for stimulus timing analysis  
+- Fall.mat: Suite2p output file containing ROI information
+- CaImAn HDF5 (alternative): same role as Fall.mat
+- Reference TIFF image (optional)
+- Event npy file (optional): for stimulus timing analysis
+
 #### Features
 - Efficient ROI classification (Neurons, Noise, etc.)
-- Supports multiple cell types (Astrocytes, Microglia)
+- Supports multiple cell types (Astrocytes, Axonal bouton, …)
 - Event-aligned trace analysis
 - Real-time ROI selection with trace visualization
+- Customizable table columns
 
 ### 2. OpticROITracking
 <img src="docs/OpticROITracking/images/optic_roi_tracking.png">
 
 #### Input Format
-- Two Fall.mat files from different imaging sessions
+- Two or more Fall.mat files from different imaging sessions
+- (alternative) CaImAn HDF5 files
+
 #### Features
-- Manual ROI tracking between sessions
-- Automated tracking assistance:
-  - Image registration (Elastix)
-  - Optimal transport algorithms
-- Visualization of matched ROI pairs
+- Manual and automated ROI tracking between sessions
+- Pairwise mode (2 sessions) **and multi-session mode (N ≥ 3)**
+- Image registration (ITKElastix: Rigid / Affine / B-spline)
+- Optimal Transport-based one-to-one ROI matching
+- Visualization of matched ROI pairs with registration-aware white lines
+- **Master Tracking Table** export — graph-theoretic consolidation of pairwise matches into a single multi-session CSV
 
 ### 3. OpticRawTracking
 <img src="docs/OpticRawTracking/images/optic_raw_tracking.png">
 
 #### Input Format
-- TIFF stack (dimensions: XYCT)  
-X, Y: spatial dimensions  
-C: channels for multichannel imaging  
-T: time points for time-lapse imaging  
+- TIFF stack (dimensions: XYCT)
+  - X, Y: spatial dimensions
+  - C: channels for multichannel imaging
+  - T: time points for time-lapse imaging
+
 #### Features
-- CellPose integration for Microglia ROI detection
-- Time-series ROI tracking
-- Migration distance calculation
-- Path trajectory analysis
+- Cellpose integration for ROI detection (Microglia, Neurons, ...)
+- Manual ROI drawing / editing
+- **ImageJ ROI Manager** interop (`.zip` round-trip)
+- Time-series ROI tracking with image registration + Optimal Transport
+- **Master Tracking Table** export across all time points
 
 ## Installation
 
 ### Requirements
 - OS: Windows 11
 - Python: 3.10
-- CPU: > 24 cores
-- RAM: > 128 GB
+- CPU: ≥ 24 cores
+- RAM: ≥ 128 GB
 
 ### Installation
+
 1. Install [Anaconda](https://www.anaconda.com/download/success)
 
-- Install Anaconda distribution and prepare Python environment
+- Install Anaconda distribution and prepare Python environment.
 
-2. Install optic package
+2. Install OPTIC package
 
 <img src="images/download_zip.png">
 
-- Click on the "Download ZIP" button and extract the contents of the downloaded file
+- Click on the "Download ZIP" button and extract the contents of the downloaded file.
 - Move the extracted folder to the appropriate directory.
 
-(ex) "C:/Users/dhino2000/optic"
+(ex) `C:/Users/dhino2000/optic`
 
 3. Environment settings
 
 Choose one of the following methods (a or b) to set up the environment:
 
 #### a) Create with yaml file
-- Open "Anaconda Prompt" and move to OPTIC directory
-```bash
-cd {optic_directory}
-```
-- Create OPTIC environment with the following command:
-```bash
-conda env create -f optic.yml
-```
+
+- Open "Anaconda Prompt" and move to the OPTIC directory:
+  ```bash
+  cd {optic_directory}
+  ```
+- Create the OPTIC environment with:
+  ```bash
+  conda env create -f optic.yml
+  ```
 
 #### b) Manual package installation
+
 - Open "Anaconda Prompt" and create a new environment:
-```bash
-conda create -n optic python=3.10
-activate optic
-```
+  ```bash
+  conda create -n optic python=3.10
+  activate optic
+  ```
 - Install the required packages:
 
 | Package | Version |
@@ -96,95 +108,126 @@ activate optic
 | pot | 0.9.6 |
 | scikit-image | 0.25.2 |
 | cellpose[gui] | 3.1.0 |
+| networkx | ≥ 3.4 |
+| pandas | ≥ 2.0 |
 
 > **Note**: If you want to use Cellpose with GPU acceleration, please set up a CUDA-compatible PyTorch environment according to the [PyTorch official documentation](https://pytorch.org/).
 
 ## How to use
 ### OpticROICuration
-1. Open the Anaconda Prompt and switch to the desired environment.  
-`activate optic`
-  
-2. Execute the "optic_roi_curation.py" script
 
-(ex) `python C:/Users/dhino2000/optic/scripts/optic_roi_curation.py`
-
-3. Sort and Check ROIs!
-([OpticROICuration Tutorial](https://optic-doc.readthedocs.io/en/latest/OpticROICuration.html))
+1. Open Anaconda Prompt and activate the environment:
+   ```bash
+   activate optic
+   ```
+2. Execute the `optic_roi_curation.py` script:
+   ```bash
+   python C:/Users/dhino2000/optic/scripts/optic_roi_curation.py
+   ```
+3. Sort and check ROIs!
+   ([OpticROICuration Tutorial](https://optic-doc.readthedocs.io/en/latest/OpticROICuration/tutorial.html))
 
 ### OpticROITracking
-1. Open the Anaconda Prompt and switch to the desired environment.  
-`activate optic`
-  
-2. Execute the "optic_roi_tracking.py" script  
 
-(ex) `python C:/Users/dhino2000/optic/scripts/optic_roi_tracking.py`
-
-3. Track ROIs!
-([OpticROITracking Tutorial](https://optic-doc.readthedocs.io/en/latest/OpticROITracking.html))
+1. Open Anaconda Prompt and activate the environment:
+   ```bash
+   activate optic
+   ```
+2. Execute the `optic_roi_tracking.py` script:
+   ```bash
+   python C:/Users/dhino2000/optic/scripts/optic_roi_tracking.py
+   ```
+3. Track ROIs across sessions, and optionally export the master tracking table!
+   ([OpticROITracking Tutorial](https://optic-doc.readthedocs.io/en/latest/OpticROITracking/tutorial.html))
 
 ### OpticRawTracking
-1. Open the Anaconda Prompt and switch to the desired environment.  
-`activate optic`
-  
-2. Execute the "optic_raw_tracking.py" script  
 
-(ex) `python C:/Users/dhino2000/optic/scripts/optic_raw_tracking.py`
+1. Open Anaconda Prompt and activate the environment:
+   ```bash
+   activate optic
+   ```
+2. Execute the `optic_raw_tracking.py` script:
+   ```bash
+   python C:/Users/dhino2000/optic/scripts/optic_raw_tracking.py
+   ```
+3. Extract, track, and export ROIs from your XYCT TIFF stack!
+   ([OpticRawTracking Tutorial](https://optic-doc.readthedocs.io/en/latest/OpticRawTracking/tutorial.html))
 
-3. Track ROIs!
-([OpticRawTracking Tutorial](https://optic-doc.readthedocs.io/en/latest/OpticRawTracking.html))
-
-## Downstream Analysis  
+<!--
+## Downstream Analysis
 After analyzing with these applications, some downstream analyses may be required. For guidance on these analyses, please refer to the Jupyter notebooks beginning with **"Chapter"** in the [notebook folder](https://github.com/dhino2000/optic/tree/main/notebook). These notebooks provide step-by-step examples and instructions for some downstream analysis workflows.
+
+
+## Citation
+
+If you use OPTIC in your work, please cite:
+
+> Fukatsu, N., Tanisumi, Y., Cheung, D., Saito, Y., Hashimoto, A., Takahashi, N., Takeda, I., Inoue, M., & Wake, H. *OPTIC: A Rapid and Efficient Semi-automated Toolbox for Multicellular Calcium Imaging Analysis.*
+
+-->
 
 ## Dependencies and External Libraries
 
-This project includes the following external libraries:
+This project includes / depends on the following external libraries:
 
 ### Suite2p
 
-- Original Repository: https://github.com/MouseLand/suite2p
+- Original Repository: <https://github.com/MouseLand/suite2p>
 
 ```bibtex
 @article {Pachitariu061507,
-	author = {Pachitariu, Marius and Stringer, Carsen and Dipoppa, Mario and Schr{\"o}der, Sylvia and Rossi, L. Federico and Dalgleish, Henry and Carandini, Matteo and Harris, Kenneth D.},
-	title = {Suite2p: beyond 10,000 neurons with standard two-photon microscopy},
-	elocation-id = {061507},
-	year = {2017},
-	doi = {10.1101/061507},
-	publisher = {Cold Spring Harbor Laboratory},
-	abstract = {Two-photon microscopy of calcium-dependent sensors has enabled unprecedented recordings from vast populations of neurons. While the sensors and microscopes have matured over several generations of development, computational methods to process the resulting movies remain inefficient and can give results that are hard to interpret. Here we introduce Suite2p: a fast, accurate and complete pipeline that registers raw movies, detects active cells, extracts their calcium traces and infers their spike times. Suite2p runs on standard workstations, operates faster than real time, and recovers ~2 times more cells than the previous state-of-the-art method. Its low computational load allows routine detection of ~10,000 cells simultaneously with standard two-photon resonant-scanning microscopes. Recordings at this scale promise to reveal the fine structure of activity in large populations of neurons or large populations of subcellular structures such as synaptic boutons.},
-	URL = {https://www.biorxiv.org/content/early/2017/07/20/061507},
-	eprint = {https://www.biorxiv.org/content/early/2017/07/20/061507.full.pdf},
-	journal = {bioRxiv}
+    author = {Pachitariu, Marius and Stringer, Carsen and Dipoppa, Mario and Schr{\"o}der, Sylvia and Rossi, L. Federico and Dalgleish, Henry and Carandini, Matteo and Harris, Kenneth D.},
+    title = {Suite2p: beyond 10,000 neurons with standard two-photon microscopy},
+    elocation-id = {061507},
+    year = {2017},
+    doi = {10.1101/061507},
+    publisher = {Cold Spring Harbor Laboratory},
+    URL = {https://www.biorxiv.org/content/early/2017/07/20/061507},
+    journal = {bioRxiv}
+}
+```
+
+### CaImAn
+
+- Original Repository: <https://github.com/flatironinstitute/CaImAn>
+
+```bibtex
+@article{giovannucci2019caiman,
+  title   = {CaImAn an open source tool for scalable calcium imaging data analysis},
+  author  = {Giovannucci, Andrea and Friedrich, Johannes and Gunn, Pat and Kalfon, J{\'e}r{\'e}mie and Brown, Brandon L and Koay, Sue Ann and Taxidis, Jiannis and Najafi, Farzaneh and Gauthier, Jeffrey L and Zhou, Pengcheng and Khakh, Baljit S and Tank, David W and Chklovskii, Dmitri B and Pnevmatikakis, Eftychios A},
+  journal = {eLife},
+  volume  = {8},
+  pages   = {e38173},
+  year    = {2019},
+  doi     = {10.7554/eLife.38173},
+  url     = {https://elifesciences.org/articles/38173}
 }
 ```
 
 ### Cellpose
 
-- Original Repository: https://github.com/MouseLand/cellpose
+- Original Repository: <https://github.com/MouseLand/cellpose>
 
 ```bibtex
 @article {Stringer2024.02.10.579780,
-	author = {Stringer, Carsen and Pachitariu, Marius},
-	title = {Cellpose3: one-click image restoration for improved cellular segmentation},
-	elocation-id = {2024.02.10.579780},
-	year = {2024},
-	doi = {10.1101/2024.02.10.579780},
-	publisher = {Cold Spring Harbor Laboratory},
-	abstract = {Generalist methods for cellular segmentation have good out-of-the-box performance on a variety of image types. However, existing methods struggle for images that are degraded by noise, blurred or undersampled, all of which are common in microscopy. We focused the development of Cellpose3 on addressing these cases, and here we demonstrate substantial out-of-the-box gains in segmentation and image quality for noisy, blurry or undersampled images. Unlike previous approaches, which train models to restore pixel values, we trained Cellpose3 to output images that are well-segmented by a generalist segmentation model, while maintaining perceptual similarity to the target images. Furthermore, we trained the restoration models on a large, varied collection of datasets, thus ensuring good generalization to user images. We provide these tools as {\textquotedblleft}one-click{\textquotedblright} buttons inside the graphical interface of Cellpose as well as in the Cellpose API.Competing Interest StatementThe authors have declared no competing interest.},
-	URL = {https://www.biorxiv.org/content/early/2024/02/25/2024.02.10.579780},
-	eprint = {https://www.biorxiv.org/content/early/2024/02/25/2024.02.10.579780.full.pdf},
-	journal = {bioRxiv}
+    author = {Stringer, Carsen and Pachitariu, Marius},
+    title = {Cellpose3: one-click image restoration for improved cellular segmentation},
+    elocation-id = {2024.02.10.579780},
+    year = {2024},
+    doi = {10.1101/2024.02.10.579780},
+    publisher = {Cold Spring Harbor Laboratory},
+    URL = {https://www.biorxiv.org/content/early/2024/02/25/2024.02.10.579780},
+    journal = {bioRxiv}
 }
 ```
 
 ### ITKElastix
 
-- Original Repository: https://github.com/InsightSoftwareConsortium/ITKElastix
+- Original Repository: <https://github.com/InsightSoftwareConsortium/ITKElastix>
 
 ### POT (Python Optimal Transport)
 
-- Original Repository: https://github.com/PythonOT/POT
+- Original Repository: <https://github.com/PythonOT/POT>
 
 ```bibtex
 @article{flamary2021pot,
@@ -199,48 +242,30 @@ This project includes the following external libraries:
 }
 ```
 
-### FGW (Fused Gromov-Wasserstein)
+### NetworkX
 
-- Original Repository: https://github.com/tvayer/FGW
+- Original Repository: <https://github.com/networkx/networkx>
 
-```bibtex
-@InProceedings{vay2019fgw,
-  title      =    {Optimal Transport for structured data with application on graphs},
-  author     =    {Titouan, Vayer and Courty, Nicolas and Tavenard, Romain and Laetitia, Chapel and Flamary, R{\'e}mi},
-  booktitle  =    {Proceedings of the 36th International Conference on Machine Learning},
-  pages      =    {6275--6284},
-  year       =    {2019},
-  editor     =    {Chaudhuri, Kamalika and Salakhutdinov, Ruslan},
-  volume     =    {97},
-  series     =    {Proceedings of Machine Learning Research},
-  address    =    {Long Beach, California, USA},
-  month      =    {09--15 Jun},
-  publisher  =    {PMLR},
-  pdf        =    {http://proceedings.mlr.press/v97/titouan19a/titouan19a.pdf},
-  url        =    {http://proceedings.mlr.press/v97/titouan19a.html}
-}
-```
 
 ## References
 [1] Marius Pachitariu, Carsen Stringer, Mario Dipoppa, Sylvia Schröder, L. Federico Rossi, Henry Dalgleish, Matteo Carandini, Kenneth D. Harris. "Suite2p: beyond 10,000 neurons with standard two-photon microscopy", bioRxiv, 2016.
 
-[2] Stringer, C., Wang, T., Michaelos, M., & Pachitariu, M. (2021). Cellpose: a generalist algorithm for cellular segmentation. Nature methods, 18(1), 100-106.
+[2] Giovannucci, A., Friedrich, J., Gunn, P., Kalfon, J., Brown, B.L., Koay, S.A., Taxidis, J., Najafi, F., Gauthier, J.L., Zhou, P. (2019). CaImAn an open source tool for scalable calcium imaging data analysis. eLife 8, e38173.
 
-[3] Pachitariu, M. & Stringer, C. (2022). Cellpose 2.0: how to train your own model. Nature methods, 1-8.
+[3] Stringer, C., Wang, T., Michaelos, M., & Pachitariu, M. (2021). Cellpose: a generalist algorithm for cellular segmentation. Nature methods, 18(1), 100-106.
 
-[4] Stringer, C. & Pachitariu, M. (2024). Cellpose3: one-click image restoration for improved segmentation. bioRxiv.
+[4] Pachitariu, M. & Stringer, C. (2022). Cellpose 2.0: how to train your own model. Nature methods, 1-8.
 
-[5] S. Klein, M. Staring, K. Murphy, M.A. Viergever, J.P.W. Pluim, "elastix: a toolbox for intensity based medical image registration", IEEE Transactions on Medical Imaging, vol. 29, no. 1, pp. 196 - 205, January 2010.
+[5] Stringer, C. & Pachitariu, M. (2024). Cellpose3: one-click image restoration for improved segmentation. bioRxiv.
 
-[6] D.P. Shamonin, E.E. Bron, B.P.F. Lelieveldt, M. Smits, S. Klein and M. Staring, "Fast Parallel Image Registration on CPU and GPU for Diagnostic Classification of Alzheimer's Disease", Frontiers in Neuroinformatics, vol. 7, no. 50, pp. 1-15, January 2014.
+[6] S. Klein, M. Staring, K. Murphy, M.A. Viergever, J.P.W. Pluim, "elastix: a toolbox for intensity based medical image registration", IEEE Transactions on Medical Imaging, vol. 29, no. 1, pp. 196 - 205, January 2010.
 
-[7] Kasper Marstal, Floris Berendsen, Marius Staring and Stefajkn Klein, "SimpleElastix: A user-friendly, multi-lingual library for medical image registration", International Workshop on Biomedical Image Registration (WBIR), Las Vegas, Nevada, USA, 2016.
+[7] D.P. Shamonin, E.E. Bron, B.P.F. Lelieveldt, M. Smits, S. Klein and M. Staring, "Fast Parallel Image Registration on CPU and GPU for Diagnostic Classification of Alzheimer's Disease", Frontiers in Neuroinformatics, vol. 7, no. 50, pp. 1-15, January 2014.
 
-[8] K. Ntatsis, N. Dekker, V. Valk, T. Birdsong, D. Zukić, S. Klein, M Staring, M McCormick, "itk-elastix: Medical image registration in Python", Proceedings of the 22nd Python in Science Conference, pp. 101 - 105, 2023, https://doi.org/10.25080/gerudo-f2bc6f59-00d.
+[8] Kasper Marstal, Floris Berendsen, Marius Staring and Stefan Klein, "SimpleElastix: A user-friendly, multi-lingual library for medical image registration", International Workshop on Biomedical Image Registration (WBIR), Las Vegas, Nevada, USA, 2016.
 
-[9] Rémi Flamary, Nicolas Courty, Alexandre Gramfort, Mokhtar Z. Alaya, Aurélie Boisbunon, Stanislas Chambon, Laetitia Chapel, Adrien Corenflos, Kilian Fatras, Nemo Fournier, Léo Gautheron, Nathalie T.H. Gayraud, Hicham Janati, Alain Rakotomamonjy, Ievgen Redko, Antoine Rolet, Antony Schutz, Vivien Seguy, Danica J. Sutherland, Romain Tavenard, Alexander Tong, Titouan Vayer, POT Python Optimal Transport library, Journal of Machine Learning Research, 22(78):1−8, 2021.
+[9] K. Ntatsis, N. Dekker, V. Valk, T. Birdsong, D. Zukić, S. Klein, M. Staring, M. McCormick, "itk-elastix: Medical image registration in Python", Proceedings of the 22nd Python in Science Conference, pp. 101 - 105, 2023.
 
-[10] Titouan Vayer, Laetitia Chapel, Rémi Flamary, Romain Tavenard, Nicolas Courty, Optimal Transport for structured data with application on graphs, Proceedings of the 36th International Conference on Machine Learning, pp.6275-6284, PMLR 97, 2019.
+[10] Rémi Flamary, Nicolas Courty et al., POT Python Optimal Transport library, Journal of Machine Learning Research, 22(78):1−8, 2021.
 
-
-
+[11] Hagberg, A.A., Schult, D.A., & Swart, P.J. (2008). Exploring network structure, dynamics, and function using NetworkX. Proceedings of the 7th Python in Science Conference (SciPy2008), pp. 11–15.
