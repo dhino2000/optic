@@ -1,7 +1,7 @@
 # OPTIC
 ## OPTIC (OPtimized Toolbox for Image-based Cellular analysis)
 
-[**OPTIC Documentation**](https://optic-doc.readthedocs.io/en/latest/)
+[**OPTIC Documentation**](https://optic.readthedocs.io/en/latest/)
 
 OPTIC consists of three specialized applications:
 
