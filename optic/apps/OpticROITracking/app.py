@@ -3,6 +3,8 @@ import sys
 from functools import partial
 from itertools import combinations
 
+import numpy as np
+
 dir_notebook = os.path.dirname(os.path.abspath("__file__"))
 dir_parent = os.path.dirname(dir_notebook)
 if not dir_parent in sys.path:
@@ -307,6 +309,129 @@ class OpticROITrackingMultiGUI(QMainWindow):
         if dict_checkbox_visibility:
             tc.updateROIDisplayWithCheckbox(dict_checkbox_visibility)
 
+    def _getDisplayedROIIdsForSession(self, app_key: str, t_plane: int) -> list:
+        """ROI ids of session `t_plane` that pass this panel's ROI Display / Checkbox
+        filter.
+
+        The panel-local dict_roi_display is keyed only by the ROI ids of the session
+        currently shown in the panel, so applying it to a different session would
+        silently drop every ROI whose id doesn't exist in the shown session (e.g. the
+        high-id / bottom-of-table ROIs when another session has more ROIs). This
+        resolves the filter for ANY session, so 'all session pairs' matching includes
+        exactly the ROIs the user would see if they navigated to each session."""
+        all_roi_ids = list(self.data_manager.dict_roi_coords_xyct.get(t_plane, {}).keys())
+        current_t = self.control_manager.view_controls[app_key].getPlaneT()
+
+        # Session currently shown in this panel: the live display dict is authoritative
+        # (it reflects any uncommitted celltype/checkbox edits).
+        if t_plane == current_t:
+            dict_roi_display = self.control_manager.getSharedAttr(app_key, 'dict_roi_display')
+            if not dict_roi_display:
+                return all_roi_ids
+            return [rid for rid in all_roi_ids
+                    if rid in dict_roi_display and all(dict_roi_display[rid].values())]
+
+        # Any other session: reconstruct per-ROI celltype/checkbox state, then apply the
+        # panel's global ROI Display (celltype) / Checkbox visibility settings.
+        celltype_visibility = self.control_manager.getSharedAttr(app_key, 'celltype_visibility') or {}
+        checkbox_visibility = self.control_manager.getSharedAttr(app_key, 'checkbox_visibility') or {}
+        roi_celltype, roi_checkbox = self._getSessionRawStates(app_key, t_plane)
+
+        any_celltype_shown = any(celltype_visibility.values())
+        any_checkbox_shown = any(checkbox_visibility.values())
+        displayed = []
+        for rid in all_roi_ids:
+            # celltype filter: keep only ROIs whose celltype is currently toggled on
+            if any_celltype_shown and not celltype_visibility.get(roi_celltype.get(rid), False):
+                continue
+            # checkbox filter: keep only ROIs checked for every enabled checkbox column
+            if any_checkbox_shown:
+                states = roi_checkbox.get(rid, {})
+                if any(shown and not states.get(cb, False) for cb, shown in checkbox_visibility.items()):
+                    continue
+            displayed.append(rid)
+        return displayed
+
+    def _getSessionRawStates(self, app_key: str, t_plane: int):
+        """Return (roi_celltype, roi_checkbox) for session `t_plane`:
+            roi_celltype: {roi_id: celltype_name}
+            roi_checkbox: {roi_id: {checkbox_name: bool}}
+        Source priority: live table of whichever panel currently shows the session,
+        then a curation snapshot (this panel's, then the other panel's), then the
+        session's iscell-derived defaults."""
+        columns = self.config_manager.table_columns[app_key].getColumns()
+        celltype_cols = [c for c, i in columns.items() if i['type'] == 'celltype']
+        checkbox_cols = [c for c, i in columns.items() if i['type'] == 'checkbox']
+        roi_ids = list(self.data_manager.dict_roi_coords_xyct.get(t_plane, {}).keys())
+
+        # 1) A panel that currently shows this session has authoritative live state.
+        for key in self.app_keys:
+            if self.control_manager.view_controls[key].getPlaneT() == t_plane:
+                tc = self.control_manager.table_controls[key]
+                return self._readRawStatesFromTable(tc, celltype_cols, checkbox_cols)
+
+        # 2) A curation snapshot captured when the user last left this session
+        #    (prefer this panel's, fall back to the other panel's).
+        dict_curation = self._curation_cache.get(app_key, {}).get(t_plane)
+        if dict_curation is None:
+            for key in self.app_keys:
+                dict_curation = self._curation_cache.get(key, {}).get(t_plane)
+                if dict_curation is not None:
+                    break
+        if dict_curation is not None:
+            # celltype columns store the row indices (== roi ids) that are checked.
+            row_to_celltype = {}
+            for c in celltype_cols:
+                arr = dict_curation.get(c)
+                if arr is None:
+                    continue
+                for entry in np.asarray(arr).reshape(-1):
+                    row_to_celltype[int(entry)] = c
+            roi_celltype, roi_checkbox = {}, {}
+            for rid in roi_ids:
+                roi_celltype[rid] = row_to_celltype.get(rid)
+                states = {}
+                for c in checkbox_cols:
+                    arr = dict_curation.get(c)
+                    default = bool(columns[c].get('default', False))
+                    if arr is not None and rid < len(arr):
+                        val = np.asarray(arr[rid]).reshape(-1)
+                        states[c] = bool(val[0]) if val.size else default
+                    else:
+                        states[c] = default
+                roi_checkbox[rid] = states
+            return roi_celltype, roi_checkbox
+
+        # 3) Defaults: celltype from iscell (positive -> first celltype, else last),
+        #    checkboxes at their column defaults.
+        iscell = self.data_manager.getDictFallXYCT(t_plane).get("iscell")
+        celltype_pos = celltype_cols[0] if celltype_cols else None
+        celltype_neg = celltype_cols[-1] if celltype_cols else None
+        checkbox_default = {c: bool(columns[c].get('default', False)) for c in checkbox_cols}
+        roi_celltype, roi_checkbox = {}, {}
+        for rid in roi_ids:
+            is_pos = True
+            if iscell is not None and rid < len(iscell):
+                is_pos = bool(iscell[rid, 0])
+            roi_celltype[rid] = celltype_pos if is_pos else celltype_neg
+            roi_checkbox[rid] = dict(checkbox_default)
+        return roi_celltype, roi_checkbox
+
+    def _readRawStatesFromTable(self, table_control, celltype_cols: list, checkbox_cols: list):
+        """Read live per-ROI celltype/checkbox state straight from a table widget."""
+        roi_celltype, roi_checkbox = {}, {}
+        for row in range(table_control.len_row):
+            try:
+                rid = table_control.getCellIdFromRow(row)
+            except (AttributeError, ValueError):
+                continue
+            if rid is None:
+                continue
+            roi_celltype[rid] = table_control.getCurrentCellTypeOfRow(row)
+            states = table_control.getCheckboxStatesOfRow(row)
+            roi_checkbox[rid] = {c: bool(states.get(c, False)) for c in checkbox_cols}
+        return roi_celltype, roi_checkbox
+
     def _syncIdMatchToDict(self) -> None:
         """Push the pri table's current Cell_ID_Match column values into dict_roi_matching
         for the pair the table currently displays (tracked via self._displayed_pair).
@@ -587,9 +712,6 @@ class OpticROITrackingMultiGUI(QMainWindow):
             "ot_method",
             "ot_run",
             "ot_clear",
-        ))
-        layout.addWidget(self.widget_manager.makeWidgetButton(
-            "ot_run_all_tplanes", "Run OT for all session pairs"
         ))
         layout.addLayout(makeLayoutROITrackingIO(
             self.widget_manager,
@@ -953,17 +1075,20 @@ class OpticROITrackingMultiGUI(QMainWindow):
             data_manager=self.data_manager,
             control_manager=self.control_manager,
         )
-        # OT ROI matching (current session pair + all session pairs)
+        # OT ROI matching. The single Run button's dialog offers both "current pair"
+        # and "all session pairs"; the per-session display callback ensures every pair
+        # matches only the ROIs checked/visible in that session (not just the shown one).
         bindFuncButtonRunROIMatchingForXYCT(
             q_widget=self,
             q_button_run=self.widget_manager.dict_button["ot_run"],
-            q_button_run_all_tplanes=self.widget_manager.dict_button["ot_run_all_tplanes"],
+            q_button_run_all_tplanes=None,
             widget_manager=self.widget_manager,
             data_manager=self.data_manager,
             control_manager=self.control_manager,
             app_key_pri=self.app_keys[0],
             app_key_sec=self.app_keys[1],
             use_dynamic_table=False,
+            get_displayed_roi_ids_callback=self._getDisplayedROIIdsForSession,
         )
         # Clear ROI matching result
         bindFuncButtonClearROIMatching(
@@ -973,7 +1098,7 @@ class OpticROITrackingMultiGUI(QMainWindow):
             app_key_pri=self.app_keys[0],
             app_key_sec=self.app_keys[1],
         )
-        # Cell_ID_Match column edit �� update dict_roi_matching and view
+        # Cell_ID_Match column edit -> update dict_roi_matching and view
         bindFuncIDMatchOfTableChanged(
             table_control=self.control_manager.table_controls[self.app_keys[0]],
             view_control=self.control_manager.view_controls[self.app_keys[0]],
