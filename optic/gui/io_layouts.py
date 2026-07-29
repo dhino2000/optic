@@ -34,6 +34,19 @@ def makeLayoutROICurationIO(
         layout.addWidget(widget_manager.makeWidgetButton(key=key, label=label))
     return layout
 
+# CSV export (per-ROI celltype, celltype-filtered trace)
+def makeLayoutCSVExport(
+        widget_manager: WidgetManager,
+        key_button_celltype: str,
+        key_button_trace: str,
+        )-> QHBoxLayout:
+    layout = QHBoxLayout()
+    list_key = [key_button_celltype, key_button_trace]
+    list_label = ["Export Celltype CSV", "Export Trace CSV"]
+    for key, label in zip(list_key, list_label):
+        layout.addWidget(widget_manager.makeWidgetButton(key=key, label=label))
+    return layout
+
 # ROI Tracking IO
 def makeLayoutROITrackingIO(
         widget_manager: WidgetManager,

@@ -20,7 +20,7 @@ from optic.gui.canvas_layouts import (
     makeLayoutCanvasTracePlot, makeLayoutLightPlotMode, makeLayoutMinimumPlotRange, makeLayoutEventFilePlotProperty
 )
 from optic.gui.slider_layouts import makeLayoutContrastSlider, makeLayoutOpacitySlider
-from optic.gui.io_layouts import makeLayoutLoadFileWidget, makeLayoutLoadFileExitHelp, makeLayoutROICurationIO
+from optic.gui.io_layouts import makeLayoutLoadFileWidget, makeLayoutLoadFileExitHelp, makeLayoutROICurationIO, makeLayoutCSVExport
 from optic.gui.info_layouts import makeLayoutROIProperty
 from optic.gui.table_layouts import makeLayoutTableROICountLabel, makeLayoutROIFilterThreshold, makeLayoutROIFilterButton
 from optic.gui.view_layouts import (
@@ -35,7 +35,8 @@ from optic.gui.bind_func import (
     bindFuncRadiobuttonOfTableChanged, bindFuncCheckboxOfTableChanged, bindFuncOpacitySlider, 
     bindFuncHighlightOpacitySlider, bindFuncBackgroundContrastSlider, bindFuncBackgroundVisibilityCheckbox, 
     bindFuncCheckBoxDisplayROIContours, bindFuncViewEvents, bindFuncCanvasMouseEvent, bindFuncButtonEventfileIO, 
-    bindFuncCheckboxEventfilePlotProperty, bindFuncHelp, bindFuncROICurationIO, bindFuncTraceDisplayCheckbox
+    bindFuncCheckboxEventfilePlotProperty, bindFuncHelp, bindFuncROICurationIO, bindFuncTraceDisplayCheckbox,
+    bindFuncCSVExport
 )
 from optic.utils.layout_utils import clearLayout
 
@@ -320,9 +321,14 @@ class OpticROICurationGUI(QMainWindow):
         layout.addWidget(self.widget_manager.makeWidgetButton(key=f"{self.app_key_pri}_config_table", label="Table Columns Config"))
         layout.addWidget(self.widget_manager.makeWidgetButton(key=f"{self.app_key_pri}_roi_celltype_set", label="Set ROI Celltype"))
         layout.addLayout(makeLayoutROICurationIO(
-            self.widget_manager, 
+            self.widget_manager,
             key_button_save=f"roicuration_save_{self.app_key_pri}",
             key_button_load=f"roicuration_load_{self.app_key_pri}",
+        ))
+        layout.addLayout(makeLayoutCSVExport(
+            self.widget_manager,
+            key_button_celltype=f"csv_export_celltype_{self.app_key_pri}",
+            key_button_trace=f"csv_export_trace_{self.app_key_pri}",
         ))
         return layout
     
@@ -462,6 +468,17 @@ class OpticROICurationGUI(QMainWindow):
             control_manager=self.control_manager,
             app_key=self.app_key_pri,
             local_var=False
+        )
+        # CSV export (per-ROI celltype, celltype-filtered trace)
+        bindFuncCSVExport(
+            q_button_celltype=self.widget_manager.dict_button[f"csv_export_celltype_{self.app_key_pri}"],
+            q_button_trace=self.widget_manager.dict_button[f"csv_export_trace_{self.app_key_pri}"],
+            q_window=self,
+            q_lineedit=self.widget_manager.dict_lineedit[f"path_fall_{self.app_key_pri}"],
+            q_table=self.widget_manager.dict_table[f"{self.app_key_pri}"],
+            config_manager=self.config_manager,
+            data_manager=self.data_manager,
+            app_key=self.app_key_pri,
         )
         # Table Column Config
         self.widget_manager.dict_button[f"{self.app_key_pri}_config_table"].clicked.connect(

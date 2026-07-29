@@ -232,6 +232,32 @@ def bindFuncROICurationIO(
     q_button_save.clicked.connect(lambda: saveROICuration(q_window, q_lineedit, q_table, gui_defaults, table_columns, json_config, local_var))
     q_button_load.clicked.connect(lambda: _loadROICuration())
 
+# -> io_layouts.makeLayoutCSVExport
+def bindFuncCSVExport(
+    q_button_celltype: 'QPushButton',
+    q_button_trace: 'QPushButton',
+    q_window: 'QWidget',
+    q_lineedit: 'QLineEdit',
+    q_table: 'QTableWidget',
+    config_manager: 'ConfigManager',
+    data_manager: 'DataManager',
+    app_key: str,
+) -> None:
+    from ..io.data_io import saveROICelltypeCSV, saveROITraceCSV
+
+    gui_defaults = config_manager.gui_defaults
+    # table_columns is looked up on click, not captured here: TableColumnConfigDialog can
+    # replace the TableColumns object between binding and export.
+    q_button_celltype.clicked.connect(
+        lambda: saveROICelltypeCSV(q_window, q_lineedit, q_table, config_manager.table_columns[app_key])
+    )
+    q_button_trace.clicked.connect(
+        lambda: saveROITraceCSV(
+            q_window, q_lineedit, q_table, gui_defaults,
+            config_manager.table_columns[app_key], data_manager, app_key
+        )
+    )
+
 # -> io_layouts.makeLayoutROITrackingIO
 def bindFuncROITrackingIO(
     q_button_save: 'QPushButton', 
