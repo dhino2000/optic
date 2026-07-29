@@ -13,6 +13,7 @@ class Extension:
     PNG = ".png"
     PDF = ".pdf"
     JSON = ".json"
+    CSV = ".csv"
 
 # File filters for QFileDialog
 FILE_FILTERS = {
@@ -24,6 +25,7 @@ FILE_FILTERS = {
     ".png": "PNG Files (*.png)",
     ".pdf": "PDF Files (*.pdf)",
     ".json": "JSON Files (*.json)",
+    ".csv": "CSV Files (*.csv)",
 }
 
 # BackGroungImage Type

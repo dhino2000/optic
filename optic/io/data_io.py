@@ -345,6 +345,90 @@ def loadROICuration(
         except Exception as e:
             QMessageBox.warning(q_window, "File load failed", f"Error loading ROICuration file: {e}")
 
+# save per-ROI celltype (and the rest of the curation table) as CSV
+def saveROICelltypeCSV(
+        q_window        : QMainWindow,
+        q_lineedit      : QLineEdit,
+        q_table         : QTableWidget,
+        table_columns   : TableColumns,
+        ) -> None:
+    path_src = q_lineedit.text()
+    path_dst = generateSavePath(path_src, prefix="ROIcelltype_", remove_strings="Fall_", new_extension=Extension.CSV)
+    path_dst, is_overwrite = saveFileDialog(q_widget=q_window, file_type=Extension.CSV, title="Save ROI celltype CSV File", initial_dir=path_dst)
+
+    if path_dst:
+        try:
+            from ..preprocessing.preprocessing_csv import buildDataFrameROICelltype
+            df_celltype = buildDataFrameROICelltype(q_table, table_columns)
+            df_celltype.to_csv(path_dst, index=False)
+            QMessageBox.information(q_window, "File save", f"ROI celltype CSV saved!\n{len(df_celltype)} ROIs -> {path_dst}")
+        except Exception as e:
+            QMessageBox.warning(q_window, "File save failed", f"Error saving ROI celltype CSV: {e}")
+
+# save trace data of the ROIs of the selected celltype(s) as CSV
+# rows = frames, columns = ROIs
+def saveROITraceCSV(
+        q_window        : QMainWindow,
+        q_lineedit      : QLineEdit,
+        q_table         : QTableWidget,
+        gui_defaults    : GuiDefaults,
+        table_columns   : TableColumns,
+        data_manager    : DataManager,
+        app_key         : AppKeys,
+        ) -> None:
+    from ..config.constants import TraceDisplayKeys
+    from ..dialog.trace_csv_export import TraceCSVExportDialog
+    from ..preprocessing.preprocessing_csv import getROIIdsOfCelltype, buildDataFrameTrace
+
+    n_channels = data_manager.getNChannels(app_key)
+    list_celltype = [
+        col_name for col_name, col_info in table_columns.getColumns().items()
+        if col_info["type"] == "celltype"
+    ]
+    list_trace_key = TraceDisplayKeys.getTraceKeys(data_manager.getDataType(app_key), n_channels) or []
+    if not list_celltype or not list_trace_key:
+        QMessageBox.warning(q_window, "File save failed", "No celltype column or no trace available for this data type.")
+        return
+
+    dialog = TraceCSVExportDialog(q_window, gui_defaults, list_celltype, list_trace_key)
+    if dialog.exec_() != QDialog.Accepted:
+        return
+    list_celltype_selected = dialog.list_celltype_selected
+    trace_key = dialog.trace_key
+
+    list_roi_id = getROIIdsOfCelltype(q_table, table_columns, list_celltype_selected)
+    if not list_roi_id:
+        QMessageBox.warning(q_window, "File save failed", f"No ROI of celltype {list_celltype_selected}.")
+        return
+
+    path_src = q_lineedit.text()
+    path_dst = generateSavePath(
+        path_src,
+        prefix=f"{trace_key}_{'_'.join(list_celltype_selected)}_",
+        remove_strings="Fall_",
+        new_extension=Extension.CSV
+    )
+    path_dst, is_overwrite = saveFileDialog(q_widget=q_window, file_type=Extension.CSV, title="Save trace CSV File", initial_dir=path_dst)
+
+    if path_dst:
+        try:
+            traces = data_manager.getTraces(app_key, n_channels)[trace_key]
+            try:
+                fs = data_manager.getFs(app_key)
+            except (KeyError, TypeError): # "fs" is not always present (e.g. CaImAn HDF5)
+                fs = None
+            df_trace = buildDataFrameTrace(traces, list_roi_id, fs)
+            df_trace.to_csv(path_dst, index=False)
+            n_roi_written = len([col for col in df_trace.columns if col.startswith("ROI_")])
+            QMessageBox.information(
+                q_window,
+                "File save",
+                f"Trace CSV saved!\ntrace: {trace_key}, celltype: {', '.join(list_celltype_selected)}\n"
+                f"{n_roi_written} ROIs x {len(df_trace)} frames -> {path_dst}"
+            )
+        except Exception as e:
+            QMessageBox.warning(q_window, "File save failed", f"Error saving trace CSV: {e}")
+
 # save table content as ROITracking.mat
 def saveROITracking(
         q_window         : QMainWindow, 

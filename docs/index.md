@@ -27,4 +27,3 @@ OpticRawTracking/tutorial
 
 installation
 references
-```

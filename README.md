@@ -1,7 +1,7 @@
 # OPTIC
 ## OPTIC (OPtimized Toolbox for Image-based Cellular analysis)
 
-[**OPTIC Documentation**](https://optic-doc.readthedocs.io/en/latest/)
+[**OPTIC Documentation**](https://optic.readthedocs.io/en/latest/)
 
 OPTIC consists of three specialized applications:
 
@@ -111,6 +111,7 @@ Choose one of the following methods (a or b) to set up the environment:
 | networkx | ≥ 3.4 |
 | pandas | ≥ 2.0 |
 
+> **Note**: If you want to use HDF5 files analyzed with CaImAn, please install CaImAn according to the [CaImAn official documentation](https://caiman.readthedocs.io/en/latest/Installation.html).  
 > **Note**: If you want to use Cellpose with GPU acceleration, please set up a CUDA-compatible PyTorch environment according to the [PyTorch official documentation](https://pytorch.org/).
 
 ## How to use
@@ -125,7 +126,7 @@ Choose one of the following methods (a or b) to set up the environment:
    python C:/Users/dhino2000/optic/scripts/optic_roi_curation.py
    ```
 3. Sort and check ROIs!
-   ([OpticROICuration Tutorial](https://optic-doc.readthedocs.io/en/latest/OpticROICuration/tutorial.html))
+   ([OpticROICuration Tutorial](https://optic.readthedocs.io/en/latest/OpticROICuration/tutorial.html))
 
 ### OpticROITracking
 
@@ -138,7 +139,7 @@ Choose one of the following methods (a or b) to set up the environment:
    python C:/Users/dhino2000/optic/scripts/optic_roi_tracking.py
    ```
 3. Track ROIs across sessions, and optionally export the master tracking table!
-   ([OpticROITracking Tutorial](https://optic-doc.readthedocs.io/en/latest/OpticROITracking/tutorial.html))
+   ([OpticROITracking Tutorial](https://optic.readthedocs.io/en/latest/OpticROITracking/tutorial.html))
 
 ### OpticRawTracking
 
@@ -151,7 +152,7 @@ Choose one of the following methods (a or b) to set up the environment:
    python C:/Users/dhino2000/optic/scripts/optic_raw_tracking.py
    ```
 3. Extract, track, and export ROIs from your XYCT TIFF stack!
-   ([OpticRawTracking Tutorial](https://optic-doc.readthedocs.io/en/latest/OpticRawTracking/tutorial.html))
+   ([OpticRawTracking Tutorial](https://optic.readthedocs.io/en/latest/OpticRawTracking/tutorial.html))
 
 <!--
 ## Downstream Analysis

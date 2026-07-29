@@ -232,6 +232,32 @@ def bindFuncROICurationIO(
     q_button_save.clicked.connect(lambda: saveROICuration(q_window, q_lineedit, q_table, gui_defaults, table_columns, json_config, local_var))
     q_button_load.clicked.connect(lambda: _loadROICuration())
 
+# -> io_layouts.makeLayoutCSVExport
+def bindFuncCSVExport(
+    q_button_celltype: 'QPushButton',
+    q_button_trace: 'QPushButton',
+    q_window: 'QWidget',
+    q_lineedit: 'QLineEdit',
+    q_table: 'QTableWidget',
+    config_manager: 'ConfigManager',
+    data_manager: 'DataManager',
+    app_key: str,
+) -> None:
+    from ..io.data_io import saveROICelltypeCSV, saveROITraceCSV
+
+    gui_defaults = config_manager.gui_defaults
+    # table_columns is looked up on click, not captured here: TableColumnConfigDialog can
+    # replace the TableColumns object between binding and export.
+    q_button_celltype.clicked.connect(
+        lambda: saveROICelltypeCSV(q_window, q_lineedit, q_table, config_manager.table_columns[app_key])
+    )
+    q_button_trace.clicked.connect(
+        lambda: saveROITraceCSV(
+            q_window, q_lineedit, q_table, gui_defaults,
+            config_manager.table_columns[app_key], data_manager, app_key
+        )
+    )
+
 # -> io_layouts.makeLayoutROITrackingIO
 def bindFuncROITrackingIO(
     q_button_save: 'QPushButton', 
@@ -1139,22 +1165,37 @@ def bindFuncButtonRunROIMatchingForXYCT(
     app_key_pri: str,
     app_key_sec: str,
     use_dynamic_table: bool = True,
+    get_displayed_roi_ids_callback: 'Callable[[str, int], List[int]]' = None,
 ):
     from ..processing.optimal_transport import calculateROIMatching
     from ..utils.dialog_utils import showConfirmationDialog
 
     def _getDisplayedROIIds(app_key: str, t_plane: int) -> List[int]:
-        """Get ROI IDs that are currently displayed (pass dict_roi_display filter)."""
+        """Get ROI IDs that are currently displayed (pass dict_roi_display filter).
+
+        NOTE: dict_roi_display only describes the session currently shown in the
+        panel, so this is only correct for that session. For multi-session apps,
+        pass get_displayed_roi_ids_callback to resolve the filter per session."""
         all_roi_ids = list(data_manager.dict_roi_coords_xyct.get(t_plane, {}).keys())
         dict_roi_display = control_manager.getSharedAttr(app_key, 'dict_roi_display')
         if dict_roi_display is None:
             return all_roi_ids
         return [roi_id for roi_id in all_roi_ids if roi_id in dict_roi_display and all(dict_roi_display[roi_id].values())]
 
+    def _displayedIds(app_key: str, t_plane: int) -> List[int]:
+        """Per-session displayed ROI ids. Uses the app-provided callback when given
+        (OpticROITracking supplies one that resolves the ROI Display / Checkbox filter
+        for ANY session, not just the one currently shown in the panel); otherwise
+        falls back to the panel-local dict_roi_display."""
+        if get_displayed_roi_ids_callback is not None:
+            return get_displayed_roi_ids_callback(app_key, t_plane)
+        return _getDisplayedROIIds(app_key, t_plane)
+
     def _ROIMatching(widget_manager: WidgetManager, data_manager: DataManager, view_control_pri: ViewControl, t_plane_pri: int, t_plane_sec: int):
-        # Filter to only displayed ROIs
-        displayed_ids_pri = _getDisplayedROIIds(app_key_pri, t_plane_pri)
-        displayed_ids_sec = _getDisplayedROIIds(app_key_sec, t_plane_sec)
+        # Filter to only displayed (checked) ROIs. Resolved per session so this is
+        # correct for every pair in the all-pairs loop, not just the shown pair.
+        displayed_ids_pri = _displayedIds(app_key_pri, t_plane_pri)
+        displayed_ids_sec = _displayedIds(app_key_sec, t_plane_sec)
 
         if len(displayed_ids_pri) == 0 or len(displayed_ids_sec) == 0:
             print(f"  session {t_plane_pri}-{t_plane_sec}: no displayed ROIs, skip")
@@ -1270,7 +1311,10 @@ def bindFuncButtonRunROIMatchingForXYCT(
         view_control_pri.updateView()
         QMessageBox.information(q_widget, "ROI Matching Finish", "ROI Matching Finished!")
     q_button_run.clicked.connect(_runROIMatching)
-    q_button_run_all_tplanes.clicked.connect(_runROIMatchingAllTPlanes)
+    # The dedicated "all session pairs" button is optional: the main Run button's
+    # dialog already offers an "All session pairs" choice, so apps may omit it.
+    if q_button_run_all_tplanes is not None:
+        q_button_run_all_tplanes.clicked.connect(_runROIMatchingAllTPlanes)
 
 # clear ROI Matching
 def bindFuncButtonClearROIMatching(
