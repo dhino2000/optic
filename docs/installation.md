@@ -36,7 +36,7 @@ conda activate optic
 ### b) Manual package installation
 
 ```bash
-conda create -n optic python=3.10
+conda create -n optic python=3.10 --override-channels -c defaults
 conda activate optic
 ```
 
@@ -46,13 +46,21 @@ Then install the required packages:
 |---|---|
 | PyQt5 | 5.15.11 |
 | numpy | 1.26.4 |
-| itk-elastix | 0.23.0 |
+| itk | 5.4.6 |
+| itk-elastix | 0.25.3 |
 | matplotlib | 3.10.8 |
 | pot | 0.9.6 |
 | scikit-image | 0.25.2 |
 | cellpose[gui] | 3.1.0 |
 | networkx | ≥ 3.4 |
 | pandas | ≥ 2.0 |
+
+## Windows Smart App Control
+
+On Windows 11 with Smart App Control enabled, unsigned binaries can fail to load with `ImportError: DLL load failed ... An Application Control policy has blocked this file` (アプリケーション制御ポリシーによってこのファイルがブロックされました). To avoid this:
+
+- Install Python from Anaconda's `defaults` channel (its binaries are code-signed), not conda-forge. Both `optic.yml` and the manual command above do this.
+- Keep itk 5.4.6 / itk-elastix 0.25.3. ITK wheels are unsigned, and this is the build verified to run elastix under Smart App Control.
 
 ## GPU acceleration (Cellpose)
 

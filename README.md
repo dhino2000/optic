@@ -94,7 +94,7 @@ Choose one of the following methods (a or b) to set up the environment:
 
 - Open "Anaconda Prompt" and create a new environment:
   ```bash
-  conda create -n optic python=3.10
+  conda create -n optic python=3.10 --override-channels -c defaults
   activate optic
   ```
 - Install the required packages:
@@ -103,7 +103,8 @@ Choose one of the following methods (a or b) to set up the environment:
 |---|---|
 | PyQt5 | 5.15.11 |
 | numpy | 1.26.4 |
-| itk-elastix | 0.23.0 |
+| itk | 5.4.6 |
+| itk-elastix | 0.25.3 |
 | matplotlib | 3.10.8 |
 | pot | 0.9.6 |
 | scikit-image | 0.25.2 |
@@ -112,7 +113,8 @@ Choose one of the following methods (a or b) to set up the environment:
 | pandas | ≥ 2.0 |
 
 > **Note**: If you want to use HDF5 files analyzed with CaImAn, please install CaImAn according to the [CaImAn official documentation](https://caiman.readthedocs.io/en/latest/Installation.html).  
-> **Note**: If you want to use Cellpose with GPU acceleration, please set up a CUDA-compatible PyTorch environment according to the [PyTorch official documentation](https://pytorch.org/).
+> **Note**: If you want to use Cellpose with GPU acceleration, please set up a CUDA-compatible PyTorch environment according to the [PyTorch official documentation](https://pytorch.org/).  
+> **Note**: On Windows 11 with **Smart App Control** enabled, unsigned binaries can fail to load with `ImportError: DLL load failed ... An Application Control policy has blocked this file` (アプリケーション制御ポリシーによってこのファイルがブロックされました). Install Python from Anaconda's `defaults` channel (its binaries are code-signed), not conda-forge, and keep itk 5.4.6 / itk-elastix 0.25.3, the ITK build verified to run elastix under Smart App Control.
 
 ## How to use
 ### OpticROICuration
